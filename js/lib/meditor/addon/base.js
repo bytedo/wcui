@@ -31,7 +31,7 @@ define(['lib/layer/base'], function(){
         h1: function(elem, vm){
             var offset = yua(elem).offset(),
                 wrap = ME.selection(vm.$editor, true) || '在此输入文本',
-                h1Obj = layer.open({
+                h1ID = layer.open({
                     type: 7,
                     menubar: false,
                     shadeClose: true,
@@ -39,10 +39,10 @@ define(['lib/layer/base'], function(){
                     $insert: function(level){
                         wrap = wrap.replace(/^#{1,6} /, '')
                         wrap = ME.repeat('#', level) + ' ' + wrap
-                        ME.insert(vm.$editor, wrap)
-                        layer.close(h1Obj)
+                        ME.insert(vm.$editor, wrap, true)
+                        layer.close(h1ID)
                     },
-                    offset: [offset.top + 37 - document.body.scrollTop, 'auto', 'auto', offset.left - document.body.scrollLeft],
+                    offset: [offset.top + 37 - document.documentElement.scrollTop, 'auto', 'auto', offset.left - document.documentElement.scrollLeft],
                     content: '<ul class="do-meditor-h1 do-fn-noselect meditor-font">'
                         + '<li :click="$insert(1)" class="h1">一级标题</li>'
                         + '<li :click="$insert(2)" class="h2">二级标题</li>'
@@ -57,7 +57,7 @@ define(['lib/layer/base'], function(){
             var wrap = ME.selection(vm.$editor) || '在此输入文本'
             wrap = '> ' + wrap
 
-            ME.insert(vm.$editor, wrap)
+            ME.insert(vm.$editor, wrap, true)
         },
         bold: function(elem, vm){
             var wrap = ME.selection(vm.$editor) || '在此输入文本',
@@ -65,7 +65,7 @@ define(['lib/layer/base'], function(){
 
             wrap = wrap === wraped ? ('**' + wrap + '**') : wraped
 
-            ME.insert(vm.$editor, wrap)
+            ME.insert(vm.$editor, wrap, true)
         },
         italic: function(elem, vm){
             var wrap = ME.selection(vm.$editor) || '在此输入文本',
@@ -73,7 +73,7 @@ define(['lib/layer/base'], function(){
 
             wrap = wrap === wraped ? ('_' + wrap + '_') : wraped
 
-            ME.insert(vm.$editor, wrap)
+            ME.insert(vm.$editor, wrap, true)
         },
         through: function(elem, vm){
             var wrap = ME.selection(vm.$editor) || '在此输入文本',
@@ -81,22 +81,22 @@ define(['lib/layer/base'], function(){
 
             wrap = wrap === wraped ? ('~~' + wrap + '~~') : wraped
 
-            ME.insert(vm.$editor, wrap)
+            ME.insert(vm.$editor, wrap, true)
         },
         unordered: function(elem, vm){
             var wrap = ME.selection(vm.$editor) || '在此输入文本'
             wrap = '* ' + wrap
 
-            ME.insert(vm.$editor, wrap)
+            ME.insert(vm.$editor, wrap, false)
         },
         ordered: function(elem, vm){
             var wrap = ME.selection(vm.$editor) || '在此输入文本'
             wrap = '1. ' + wrap
 
-            ME.insert(vm.$editor, wrap)
+            ME.insert(vm.$editor, wrap, false)
         },
         hr: function(elem, vm){
-            ME.insert(vm.$editor, '\n\n---\n\n')
+            ME.insert(vm.$editor, '\n\n---\n\n', false)
         },
         link: function(elem, vm){
             var offset = yua(elem).offset(),
@@ -118,10 +118,10 @@ define(['lib/layer/base'], function(){
                             + lvm.link
                             + (lvm.linkTarget === 1 ? ' "target=_blank"' : '')
                             + ')'
-                        ME.insert(vm.$editor, val)
+                        ME.insert(vm.$editor, val, false)
                         layer.close(layid)
                     },
-                    offset: [offset.top + 37 - document.body.scrollTop, 'auto', 'auto', offset.left - document.body.scrollLeft],
+                    offset: [offset.top + 37 - document.documentElement.scrollTop, 'auto', 'auto', offset.left - document.documentElement.scrollLeft],
                     content: '<div class="do-meditor-common meditor-font">'
                         + '<section><span class="label">链接文字</span>'
                             + '<input class="input" :duplex="linkName" />'
@@ -140,7 +140,7 @@ define(['lib/layer/base'], function(){
                 })
         },
         time: function(elem, vm){
-            ME.insert(vm.$editor, new Date().format())
+            ME.insert(vm.$editor, new Date().format(), false)
         },
         face: function(elem, vm){
             var offset = yua(elem).offset(),
@@ -151,12 +151,12 @@ define(['lib/layer/base'], function(){
                     fixed: true,
                     shadeClose: true,
                     arr: getOrderArr(36),
-                    offset: [offset.top + 37 - document.body.scrollTop, 'auto', 'auto', offset.left - document.body.scrollLeft],
+                    offset: [offset.top + 37 - document.documentElement.scrollTop, 'auto', 'auto', offset.left - document.documentElement.scrollLeft],
                     content: '<ul class="do-meditor-face">'
                         + '<li class="item" :repeat="arr" ><img :attr-src="ME.path + \'/addon/face/\' + el + \'.gif\'" :click="$insert(this.src)" /></li>'
                         + '</ul>',
                     $insert: function(src){
-                        ME.insert(vm.$editor, '![](' + src + ')')
+                        ME.insert(vm.$editor, '![](' + src + ')', false)
                         layer.close(layid)
                     }
                 })
@@ -168,7 +168,7 @@ define(['lib/layer/base'], function(){
                 title: '0行 x 0列',
                 fixed: true,
                 shadeClose: true,
-                offset: [offset.top + 37 - document.body.scrollTop, 'auto', 'auto', offset.left - document.body.scrollLeft],
+                offset: [offset.top + 37 - document.documentElement.scrollTop, 'auto', 'auto', offset.left - document.documentElement.scrollLeft],
                 matrix: objArr(10).map(function(){return objArr(10)}),
                 content: '<ul class="do-meditor-table">'
                     + '<li :repeat="matrix"><span :repeat-o="el" :class="{active: o.v}" :data="{x: $index, y: $outer.$index}"></span></li>'
@@ -212,7 +212,7 @@ define(['lib/layer/base'], function(){
                             var val = '\n\n' + ME.repeat('| 表头 ', x) + '|\n'
                                     + ME.repeat('| -- ', x) + '|\n'
                                     + ME.repeat(ME.repeat('| ', x) + '|\n', y)
-                            ME.insert(vm.$editor, val)
+                            ME.insert(vm.$editor, val, false)
                             layer.close(id)
                         }
                     })
@@ -236,10 +236,10 @@ define(['lib/layer/base'], function(){
                         }
                         var val = '![' + lvm.imgAlt + '](' + lvm.img + ')'
 
-                        ME.insert(vm.$editor, val)
+                        ME.insert(vm.$editor, val, false)
                         layer.close(layid)
                     },
-                    offset: [offset.top + 37 - document.body.scrollTop, 'auto', 'auto', offset.left - document.body.scrollLeft],
+                    offset: [offset.top + 37 - document.documentElement.scrollTop, 'auto', 'auto', offset.left - document.documentElement.scrollLeft],
                     content: '<div class="do-meditor-common meditor-font">'
                         + '<section><span class="label">图片描述</span>'
                             + '<input class="input" :duplex="imgAlt" />'
@@ -254,12 +254,12 @@ define(['lib/layer/base'], function(){
                 })
         },
         file: function(elem, vm){
-            this.link(elem, vm)
+            this.link(elem, vm, false)
         },
         inlinecode: function(elem, vm){
             var wrap = ME.selection(vm.$editor) || '在此输入文本'
             wrap = '`' + wrap + '`'
-            ME.insert(vm.$editor, wrap)
+            ME.insert(vm.$editor, wrap, true)
         },
         blockcode: function(elem, vm){
             var layid = layer.open({
@@ -307,7 +307,7 @@ define(['lib/layer/base'], function(){
                         var lvm = yua.vmodels[layid]
                         var val = '\n```' + lvm.lang + '\n' + (lvm.code || '//在此输入代码') + '\n```\n'
 
-                        ME.insert(vm.$editor, val)
+                        ME.insert(vm.$editor, val, false)
                         layer.close(layid)
                     },
                     content: '<div class="do-meditor-codeblock meditor-font">'
@@ -340,7 +340,7 @@ define(['lib/layer/base'], function(){
             layer.open({
                 type: 7,
                 title: '关于编辑器',
-                offset: [offset.top + 37 - document.body.scrollTop],
+                offset: [offset.top + 37 - document.documentElement.scrollTop],
                 content: '<div class="do-meditor-about meditor-font">'
                     + '<pre>'
                     + ' __  __ _____    _ _ _\n'             

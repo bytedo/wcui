@@ -314,7 +314,7 @@ define([
                 menubar: false,
                 shade: false,
                 fixed: true,
-                offset: [offset.top + 37 - document.body.scrollTop],
+                offset: [offset.top + 37 - document.documentElement.scrollTop],
                 tab: 2,
                 attach: '',
                 attachAlt: '',
@@ -355,10 +355,10 @@ define([
                 },
                 $confirm: function(){
                     var lvm = yua.vmodels[layid]
-                    if(!lvm.img || !lvm.imgAlt){
+                    if(!lvm.attach || !lvm.attachAlt){
                         return layer.alert('描述和地址不能为空')
                     }
-                    var val = '![' + lvm.imgAlt + '](' + lvm.img + ')'
+                    var val = '![' + lvm.attachAlt + '](' + lvm.attach + ')'
 
                     ME.insert(vm.$editor, val)
                     lvm.no()

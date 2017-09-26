@@ -799,7 +799,7 @@ function Renderer(options) {
 }
 
 Renderer.prototype.code = function(code, lang, escaped) {
-    code = code.replace(/&lt;script&gt;/g, '<script>')
+    code = code.replace(/&lt;script([^&]*?)&gt;/g, '<script$1>')
             .replace(/&lt;\/script&gt;/g, '</script>')
     if (this.options.highlight) {
         var out = this.options.highlight(code, lang);

@@ -7,7 +7,7 @@
 
 "use strict";
 
-var log = console.log;
+
 define([
     'yua',
     'lib/prism/base',
@@ -264,7 +264,6 @@ define([
                     }
                     return li.join('\n')
                 })
-                log(match)
                 return '\n' + match.trim()
             })
         }
@@ -353,6 +352,21 @@ define([
                         console.log('%c没有对应的插件%c[%s]', 'color:#f00;', '',name)
                     }
                 }
+
+                vm.$paste = function(ev){
+                    ev.preventDefault()
+                    var txt = ev.clipboardData.getData('text/plain').trim(),
+                        html = ev.clipboardData.getData('text/html').trim();
+
+                    html = html2md(html)
+                    
+                    if(html){
+                        ME.insert(this, html)
+                    }else if(txt) {
+                        ME.insert(this, txt)
+                    }
+                    vm.plainTxt = this.value
+                }
             },
             $ready: function(vm){
                 vm.$editor = document.querySelector('#' + vm.$id)
@@ -390,22 +404,10 @@ define([
                 //编辑器成功加载的回调
                 vm.$onSuccess(ME.get(), vm)
             },
-            $paste: function(ev){
-                var txt = ev.clipboardData.getData('text/plain').trim(),
-                    html = ev.clipboardData.getData('text/html').trim();
-
-                html = html2md(html)
-                
-                if(html){
-                    ME.insert(this, html)
-                }else if(txt) {
-                    ME.insert(this, txt)
-                }
-                ev.preventDefault()
-            },
+            $paste: yua.noop,
             $compile: function(){
                 var txt = this.plainTxt.trim()
-                txt = txt.replace(/<script>/g, '&lt;script&gt;')
+                txt = txt.replace(/<script([^>]*?)>/g, '&lt;script$1&gt;')
                     .replace(/<\/script>/g, '&lt;/script&gt;')
                 
                 //只解析,不渲染
