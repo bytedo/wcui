@@ -6,15 +6,8 @@
 
 define(["yua", "text!./main.htm", "css!./main"], function(yua, tpl){
 
-    /**
-     * [获取当前幻灯片元素宽度]
-     */
-    function getWidth(){
-
-        var dom = document.querySelector('.do-sliders')
-        var width = window.getComputedStyle ? window.getComputedStyle(dom).width : dom.offsetWidth + 'px'
-        return width
-    }
+    var dom
+    function getWidth(){}
 
     /**
      * [根据当前幻灯片索引获取填充底下按钮数据]
@@ -23,21 +16,22 @@ define(["yua", "text!./main.htm", "css!./main"], function(yua, tpl){
      */
     function getBtnList(vm){
         var currWidth = vm.currWidth.slice(0, -2)
-        vm.maxNum = Math.floor(currWidth / 160)
+        vm.maxNum = Math.ceil(currWidth / 160)
         var curr = vm.curr + 1
+        let res = []
         if(!vm.preview)
-            return vm.sliderList
+            res = vm.sliderList
 
         if(vm.maxNum >= vm.sliderList.length){
-            return vm.sliderList
+            res = vm.sliderList
         }else{
             if(curr > vm.maxNum){
-                return vm.sliderList.slice(curr - vm.maxNum, curr)
+                res = vm.sliderList.slice(curr - vm.maxNum, curr)
             }else if(curr <= vm.maxNum){
-                return vm.sliderList.slice(0, vm.maxNum)
+                res = vm.sliderList.slice(0, vm.maxNum)
             }
         }
-        return vm.sliderList
+        return res
     }
 
     /**
@@ -46,7 +40,7 @@ define(["yua", "text!./main.htm", "css!./main"], function(yua, tpl){
      * @return {[type]}    [description]
      */
     function autoSlide(vm){
-        vm.auto = setTimeout(function(){
+        vm.timer = setTimeout(function(){
             vm.$go(1)
             autoSlide(vm)
         }, vm.time)
@@ -76,7 +70,7 @@ define(["yua", "text!./main.htm", "css!./main"], function(yua, tpl){
 
             vm.$stopSlide = function(){
                 if(vm.autoSlide){
-                    clearTimeout(vm.auto)
+                    clearTimeout(vm.timer)
                 }
             }
 
@@ -86,7 +80,8 @@ define(["yua", "text!./main.htm", "css!./main"], function(yua, tpl){
             }
 
             vm.$setSliderList = function(list){
-                vm.sliderList = list
+                vm.sliderBtnList.removeAll()
+                vm.sliderList.pushArray(list)
             }
 
             vm.$watch('curr', function(val, old) {
@@ -95,9 +90,11 @@ define(["yua", "text!./main.htm", "css!./main"], function(yua, tpl){
                 if(vm.currWidth.indexOf('px') > -1)
                     width = vm.currWidth.slice(0, vm.currWidth.indexOf('px'))
 
-                vm.transform = 'transform: translate(' + (-width * val) + 'px, 0);'
-                if(vm.preview)
-                    vm.sliderBtnList = getBtnList(vm)
+                vm.transform = 'translate(' + (-width * val) + 'px, 0)'
+                if(vm.preview && vm.maxNum < vm.sliderList.length){
+                    vm.sliderBtnList.removeAll()
+                    vm.sliderBtnList.pushArray(getBtnList(vm))
+                }
             })
 
             window.addEventListener('resize', function(){
@@ -106,32 +103,49 @@ define(["yua", "text!./main.htm", "css!./main"], function(yua, tpl){
                 if(vm.currWidth.indexOf('px') > -1)
                     width = vm.currWidth.slice(0, vm.currWidth.indexOf('px'))
 
-                vm.transform = 'transform: translate(' + (-width * vm.curr) + 'px, 0);'
-                if(vm.preview)
-                    vm.sliderBtnList = getBtnList(vm)
+                vm.transform = 'translate(' + (-width * vm.curr) + 'px, 0)'
+                if(vm.preview && vm.maxNum < vm.sliderList.length){
+                    yua.log(vm.maxNum , vm.sliderList.length)
+                    vm.sliderBtnList.removeAll()
+                    vm.sliderBtnList.pushArray(getBtnList(vm))
+                }
             }, false)
 
             vm.$onSuccess(vm)
         },
         $ready: function(vm){
+            dom = document.querySelector('.do-sliders')
+
+            /**
+             * [获取当前幻灯片元素宽度]
+             */
+            getWidth = function(){
+
+                return window.getComputedStyle ? window.getComputedStyle(dom).width : dom.offsetWidth + 'px'
+            }
+
             vm.currWidth = getWidth()
             if(vm.autoSlide)
                 autoSlide(vm)
 
-            if(vm.preview)
-                vm.sliderBtnList = getBtnList(vm)
+            if(vm.preview){
+                vm.sliderBtnList.removeAll()
+                vm.sliderBtnList.pushArray(getBtnList(vm))
+            }
+            yua.log(vm)
         },
         currWidth: 0,
         transform: '',
         curr: 0,
         sliderBtnList: [],
-        maxNum: '',
-        auto: '',
+        maxNum: 0,
+        timer: yua.noop,
 
         sliderList: [],
         autoSlide: '',
         time: 3000,
         preview: true,
+        skin: 'skin-0',
 
         $onSuccess: yua.noop,
         $setSliderList: yua.noop,
@@ -141,6 +155,6 @@ define(["yua", "text!./main.htm", "css!./main"], function(yua, tpl){
         $go: yua.noop,
     })
 
-    yua.scan()
+    yua.scan(dom)
 
 })
