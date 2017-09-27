@@ -7,7 +7,13 @@
         sliderList: [{src: '', link: '', title: '', titleStyle: ''}],       //src: 图片地址; link: 点击链接; title: 幻灯片标题(可以是文本或html); titleStyle: 标题样式
         autoSlide: boolean,     //true: 自动轮播; false: 停止轮播
         time: int,     //轮播间隔时间
-        preview: boolean   //是否有预览图
+        preview: boolean   //是否缩略有图
+        skin: 'skin-2',     //4种,默认0(0,1,2,3)
+        $onSuccess: function(vm){
+            slider = vm
+        },           //初始化回调
+        vm.$setSliderList(list),         //赋值数据给幻灯片数组
+        vm.$setSliderType(type)         //type改变幻灯片动画效果,目前有1: 滑动;2: 渐进渐出
     }
 
 ```
@@ -31,11 +37,15 @@ name属性可以设定组件的$id值，方便各模块之间进行通讯
         var vm = yua({
             $id: "test",
             sliderOpts: {
-                sliderList: [{src: '', link: '', title: '', titleStyle: ''}],
+                sliderList: [{src: '', link: '', title: '', elm: ''}],
                 autoSlide: false,
                 time: 0,
                 preview: true
-
+                skin: 'skin-2',
+                $onSuccess: function(vm){
+                    slider = vm
+                    slider.$setSliderList(list)
+                }
             }
         })
 
