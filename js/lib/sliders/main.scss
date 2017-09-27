@@ -10,18 +10,17 @@
  // @import "../../../css/reset.scss";
 
 .do-sliders {position: relative;height: 100%;width: 100%;
-
-    .slider-content{height: 75%;position: relative;
+    .slider-content{height: 80%;position: relative;
 
         .container {position: relative;height: 100%;overflow: hidden;
-            .box {height: 100%;width: 100%;transition: .4s;
-                a {position:relative;display: inline-block;height: 100%;vertical-align: middle;
+            .box {position: relative;height: 100%;width: 100%;transition: .4s;
+                a {position:relative;display: inline-block;height: 100%;vertical-align: middle;transition: .4s;
                     img {width: 100%;height: 100%;object-fit: cover;}
                     .title-class {position: absolute;width: 30%;min-height: 30px;line-height: 30px;left: 0;bottom: 15%;right: 0;margin: auto;text-align: center;font-size: 25px;}
                     .elm{height: 100%;width: 100%;background: #333;}
                     .default-elm{width: 100%;height: 100%;}
                 }
-
+                .fadeType{position: absolute;left: 0;top: 0;width: 100%;}
             }
         }
 
@@ -34,14 +33,15 @@
     }
 
 
-    .slider-preview-btn {position: relative;bottom: -5%;height: 20%;width: 100%;margin: 0 auto;text-align: center;overflow: hidden;
+    .slider-preview-btn {position: relative;bottom: -5%;height: 15%;width: 100%;margin: 0 auto;text-align: center;overflow: hidden;
 
         span {display: inline-block;width: 10px;height: 10px;margin: 20px 5px;border-radius: 100%;background: rgba(255,255,255,0.8);cursor: pointer;transition: .5s;}
         span:hover{background:nth($cg, 1);}
         .no-preview-act{background:nth($cg, 3);}
 
+        .btn-group{height: 100%;}
 
-        .btn-img{display: inline-block;position: relative;width: 150px;height: 100%;margin: 0 5px;transition: .4s;cursor: pointer;
+        .btn-img{display: inline-block;position: relative;width: 80px;height: 100%;margin: 0 5px;transition: .4s;cursor: pointer;
             img {position: relative;width: 100%;height: 100%;object-fit: cover;transition: .4s;z-index: 2;}
             .preview-act{transform: scale(.95)}
         }
@@ -64,7 +64,7 @@
     &.skin-2 .slider-btn:hover{color: nth($cg, 1)}
     &.skin-3 .slider-btn:hover{color: nth($cb, 1)}
 
-    &.skin-0 .btn-img .btn-background{background: #fff}
+    &.skin-0 .btn-img .btn-background{background: rgba(0,0,0,0.5)}
     &.skin-1 .btn-img .btn-background{background: nth($cr, 1)}
     &.skin-2 .btn-img .btn-background{background: nth($cg, 1)}
     &.skin-3 .btn-img .btn-background{background: nth($cb, 1)}
@@ -74,6 +74,8 @@
     &.skin-2 .default-elm{background: nth($cg, 1)}
     &.skin-3 .default-elm{background: nth($cb, 1)}
 
+    .h-80{height: 80%;}
+    .h-100{height: 100%;}
 }
 
 

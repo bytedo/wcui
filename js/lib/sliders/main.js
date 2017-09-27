@@ -16,7 +16,7 @@ define(["yua", "text!./main.htm", "css!./main"], function(yua, tpl){
      */
     function getBtnList(vm){
         var currWidth = vm.currWidth.slice(0, -2)
-        vm.maxNum = Math.ceil(currWidth / 160)
+        vm.maxNum = Math.floor(currWidth / 130)
         var curr = vm.curr + 1
         let res = []
         if(!vm.preview)
@@ -84,13 +84,18 @@ define(["yua", "text!./main.htm", "css!./main"], function(yua, tpl){
                 vm.sliderList.pushArray(list)
             }
 
+            vm.$setSliderType = function(type){
+                vm.sliderType = type
+                yua.log(vm.sliderType)
+            }
+
             vm.$watch('curr', function(val, old) {
                 vm.currWidth = getWidth()
                 var width
                 if(vm.currWidth.indexOf('px') > -1)
                     width = vm.currWidth.slice(0, vm.currWidth.indexOf('px'))
 
-                vm.transform = 'translate(' + (-width * val) + 'px, 0)'
+                vm.animation = 'translate(' + (-width * val) + 'px, 0)'
                 if(vm.preview && vm.maxNum < vm.sliderList.length){
                     vm.sliderBtnList.removeAll()
                     vm.sliderBtnList.pushArray(getBtnList(vm))
@@ -103,7 +108,7 @@ define(["yua", "text!./main.htm", "css!./main"], function(yua, tpl){
                 if(vm.currWidth.indexOf('px') > -1)
                     width = vm.currWidth.slice(0, vm.currWidth.indexOf('px'))
 
-                vm.transform = 'translate(' + (-width * vm.curr) + 'px, 0)'
+                vm.animation = 'translate(' + (-width * vm.curr) + 'px, 0)'
                 if(vm.preview && vm.maxNum < vm.sliderList.length){
                     yua.log(vm.maxNum , vm.sliderList.length)
                     vm.sliderBtnList.removeAll()
@@ -135,11 +140,12 @@ define(["yua", "text!./main.htm", "css!./main"], function(yua, tpl){
             yua.log(vm)
         },
         currWidth: 0,
-        transform: '',
+        animation: '',
         curr: 0,
         sliderBtnList: [],
         maxNum: 0,
         timer: yua.noop,
+        sliderType: 1,
 
         sliderList: [],
         autoSlide: '',
@@ -149,6 +155,7 @@ define(["yua", "text!./main.htm", "css!./main"], function(yua, tpl){
 
         $onSuccess: yua.noop,
         $setSliderList: yua.noop,
+        $setSliderType: yua.noop,
         $jump: yua.noop,
         $stopSlide: yua.noop,
         $startSlide: yua.noop,
