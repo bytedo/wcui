@@ -141,7 +141,7 @@ define([
                         return vm.$htmlTxt
                     },
                     setVal: function(txt){
-                        vm.plainTxt = txt
+                        vm.plainTxt = txt || ''
                     },
                     show: function(){
                         vm.editorVisible = true
@@ -295,7 +295,7 @@ define([
         function tool(name){
             name = (name + '').trim().toLowerCase()
             name = '|' === name ? 'pipe' : name
-            return '<span title="' + ME.toolbar[name] + '" class="edicon icon-' + name+ '" '
+            return '<span title="' + ME.toolbar[name] + '" class="icon-' + name+ '" '
                 + (name !== 'pipe' ? (':click="$onToolbarClick(\'' + name + '\')"') : '')
                 + '></span>'
         }
@@ -303,14 +303,13 @@ define([
 
 
         yua.component('meditor', {
-            $template: '<div class="do-meditor meditor-font" '
-                + ':visible="editorVisible" '
-                + ':class="{fullscreen: fullscreen, preview: preview}">'
-                + '<div class="tool-bar do-fn-noselect">{toolbar}</div>'
+            $template: '<div class="do-meditor do-meditor-font" :visible="editorVisible"'
+                + ' :class="{fullscreen: fullscreen, preview: preview}">'
+                + '<div class="tool-bar do-ui-font do-fn-noselect">{toolbar}</div>'
                 + '<div class="editor-body">'
                     + '<textarea spellcheck="false" :duplex="plainTxt" :attr="{disabled: disabled}" :on-paste="$paste($event)" id="{uuid}"></textarea>'
                 + '</div>'
-                + '<content class="md-preview" :visible="preview" :html="htmlTxt"></content>'
+                + '<content class="md-preview do-marked-theme" :visible="preview" :html="htmlTxt"></content>'
             + '</div>',
             $$template: function(txt){
                 

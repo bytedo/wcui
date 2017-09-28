@@ -201,10 +201,10 @@
 }
 
 /* 提醒文本 */
-.do-ui-warn,.do-ui-mark {display:inline-block;position:relative;min-height:50px;margin:10px 0;padding:8px 8px 8px 50px;border:1px solid nth($co, 1);border-radius:10px;background:#fffbed;color:nth($co, 3);word-break: break-all;
+.do-ui-warn,.do-ui-mark {display:inline-block;position:relative;min-height:40px;margin:5px 0;padding:5px 8px 5px 50px;border:1px solid nth($co, 1);border-radius:5px;background:#fffbed;color:nth($co, 3);word-break: break-all;
     
     p {margin:0!important;}
-    &::before {position:absolute;left:8px;top:0;font:30px/1.5 "ui font";color:nth($cr, 1);content:"\e6f6";}
+    &::before {position:absolute;left:15px;top:5px;font:20px/1.5 "ui font";color:nth($cr, 1);content:"\e6f6";}
 }
 .do-ui-mark {border-color:nth($ct, 2);color:nth($ct, 3);background:#edfbf8;
 

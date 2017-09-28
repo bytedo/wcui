@@ -43,7 +43,7 @@ define(['lib/layer/base'], function(){
                         layer.close(h1ID)
                     },
                     offset: [offset.top + 37 - ME.doc.scrollTop(), 'auto', 'auto', offset.left - ME.doc.scrollLeft()],
-                    content: '<ul class="do-meditor-h1 do-fn-noselect meditor-font">'
+                    content: '<ul class="do-meditor-h1 do-fn-noselect do-meditor-font">'
                         + '<li :click="$insert(1)" class="h1">一级标题</li>'
                         + '<li :click="$insert(2)" class="h2">二级标题</li>'
                         + '<li :click="$insert(3)" class="h3">三级标题</li>'
@@ -122,12 +122,12 @@ define(['lib/layer/base'], function(){
                         layer.close(layid)
                     },
                     offset: [offset.top + 37 - ME.doc.scrollTop(), 'auto', 'auto', offset.left - ME.doc.scrollLeft()],
-                    content: '<div class="do-meditor-common meditor-font">'
-                        + '<section><span class="label">链接文字</span>'
-                            + '<input class="input" :duplex="linkName" />'
+                    content: '<div class="do-meditor-common do-meditor-font">'
+                        + '<section class="input"><span class="label">链接文字</span>'
+                            + '<input class="txt" :duplex="linkName" />'
                         + '</section>'
-                        + '<section><span class="label">链接地址</span>'
-                            + '<input class="input" :duplex="link"/>'
+                        + '<section class="input"><span class="label">链接地址</span>'
+                            + '<input class="txt" :duplex="link"/>'
                         + '</section>'
                         + '<section>'
                             + '<label><input name="link" type="radio" class="radio" :duplex-number="linkTarget" value="1"/> 新窗口打开</label>'
@@ -240,12 +240,12 @@ define(['lib/layer/base'], function(){
                         layer.close(layid)
                     },
                     offset: [offset.top + 37 - ME.doc.scrollTop(), 'auto', 'auto', offset.left - ME.doc.scrollLeft()],
-                    content: '<div class="do-meditor-common meditor-font">'
-                        + '<section><span class="label">图片描述</span>'
-                            + '<input class="input" :duplex="imgAlt" />'
+                    content: '<div class="do-meditor-common do-meditor-font">'
+                        + '<section class="input"><span class="label">图片描述</span>'
+                            + '<input class="txt" :duplex="imgAlt" />'
                         + '</section>'
-                        + '<section><span class="label">图片地址</span>'
-                            + '<input class="input" :duplex="img"/>'
+                        + '<section class="input"><span class="label">图片地址</span>'
+                            + '<input class="txt" :duplex="img"/>'
                         + '</section>'
                         + '<section>'
                             + '<a href="javascript:;" class="submit" :click="$confirm">确定</a>'
@@ -310,7 +310,7 @@ define(['lib/layer/base'], function(){
                         ME.insert(vm.$editor, val, false)
                         layer.close(layid)
                     },
-                    content: '<div class="do-meditor-codeblock meditor-font">'
+                    content: '<div class="do-meditor-codeblock do-meditor-font">'
                         + '<section><span class="label">语言类型</span>'
                             + '<select :duplex="lang">'
                                 + '<option :repeat="$lang" :attr-value="el.id">{{el.name || el.id}}</option>'
@@ -341,7 +341,7 @@ define(['lib/layer/base'], function(){
                 type: 7,
                 title: '关于编辑器',
                 offset: [offset.top + 37 - ME.doc.scrollTop()],
-                content: '<div class="do-meditor-about meditor-font">'
+                content: '<div class="do-meditor-about do-meditor-font">'
                     + '<pre>'
                     + ' __  __ _____    _ _ _\n'             
                     + '|  \\/  | ____|__| (_) |_ ___  _ __\n' 
