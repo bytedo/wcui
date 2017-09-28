@@ -16,13 +16,19 @@
     &.large {min-width:150px;height:50px;padding:0 13px;line-height:50px;font-size:18px;}
     &.radius-3 {border-radius:3px;}
     &.radius-5 {border-radius:5px;}
-
+    
+    &.teal {border:0;background:nth($ct, 1);color:#fff;}
+    &.teal:hover {background:nth($ct, 2);}
+    &.teal:active {background:nth($ct, 3);}
     &.green {border:0;background:nth($cg, 1);color:#fff;}
     &.green:hover {background:nth($cg, 2);}
     &.green:active {background:nth($cg, 3);}
     &.blue {border:0;background:nth($cb, 1);color:#fff;}
     &.blue:hover {background:nth($cb, 2);}
     &.blue:active {background:nth($cb, 3);}
+    &.purple {border:0;background:nth($cpp, 1);color:#fff;}
+    &.purple:hover {background:nth($cpp, 2);}
+    &.purple:active {background:nth($cpp, 3);}
     &.red {border:0;background:nth($cr, 1);color:#fff;}
     &.red:hover {background:nth($cr, 2);}
     &.red:active {background:nth($cr, 3);}
@@ -81,7 +87,7 @@
     &.radius-3 {border-radius:3px;}
     &.radius-5 {border-radius:5px;}
     
-    &:focus,&:hover {border-color:nth($cg, 1);color:nth($cg, 1);}
+    &:focus,&:hover {border-color:nth($ct, 1);}
     &.alert {border-color:nth($cr, 1);color:nth($cr, 1);
         input {color:nth($cr, 1);}
     }
@@ -109,7 +115,7 @@
     &.radius-3 {border-radius:3px;}
     &.radius-5 {border-radius:5px;}
 
-    &:focus {border-color:nth($cg, 1);}
+    &:focus {border-color:nth($ct, 1);}
     &.alert {border-color:nth($cr, 1);color:nth($cr, 1)}
     &.disabled {border-color:transparent;background:nth($cp, 1);color:nth($cp, 3)}
 }
@@ -133,8 +139,14 @@
     &.green >input:checked {background:nth($cg, 2);
         &::after {background:nth($cg, 3);}
     }
+    &.teal >input:checked {background:nth($cg, 2);
+        &::after {background:nth($ct, 3);}
+    }
     &.blue >input:checked {background:nth($cb, 2);
         &::after {background:nth($cb, 3);}
+    }
+    &.purple >input:checked {background:nth($cb, 2);
+        &::after {background:nth($cpp, 3);}
     }
     &.red >input:checked {background:nth($cr, 2);
         &::after {background:nth($cr, 3);}
@@ -154,6 +166,8 @@
         &:disabled {border-color:nth($cp, 3);color:nth($cp, 3);}
     }
     &.green >input {color:nth($cg, 1)!important;border-color:nth($cg, 1)}
+    &.teal >input {color:nth($ct, 1)!important;border-color:nth($ct, 1)}
+    &.purple >input {color:nth($cpp, 1)!important;border-color:nth($cpp, 1)}
     &.blue >input {color:nth($cb, 1)!important;border-color:nth($cb, 1)}
     &.red >input {color:nth($cr, 1)!important;border-color:nth($cr, 1)}
     &.orange >input {color:nth($co, 1)!important;border-color:nth($co, 1)}
@@ -169,6 +183,8 @@
         }
         
         &.green {border-color:nth($cg, 1);background:nth($cg, 1);color:#fff;}
+        &.teal {border-color:nth($ct, 1);background:nth($ct, 1);color:#fff;}
+        &.purple {border-color:nth($cpp, 1);background:nth($cpp, 1);color:#fff;}
         &.blue {border-color:nth($cb, 1);background:nth($cb, 1);color:#fff;}
         &.red {border-color:nth($cr, 1);background:nth($cr, 1);color:#fff;}
         &.orange {border-color:nth($co, 1);background:nth($co, 1);color:#fff;}
@@ -190,7 +206,7 @@
     p {margin:0!important;}
     &::before {position:absolute;left:8px;top:0;font:30px/1.5 "ui font";color:nth($cr, 1);content:"\e6f6";}
 }
-.do-ui-mark {border-color:nth($cg, 2);color:nth($cg, 3);background:#edfbf8;
+.do-ui-mark {border-color:nth($ct, 2);color:nth($ct, 3);background:#edfbf8;
 
-    &::before {color:nth($cg, 3);content:"\e657";}
+    &::before {color:nth($ct, 3);content:"\e657";}
 }
