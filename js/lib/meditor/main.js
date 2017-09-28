@@ -152,7 +152,8 @@ define([
                 }
             }
             return null
-        }
+        },
+        doc: yua(document)
     }
     //获取真实的引用路径,避免因为不同的目录结构导致加载失败的情况
     for(var i in yua.modules){

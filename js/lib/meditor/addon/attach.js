@@ -314,7 +314,7 @@ define([
                 menubar: false,
                 shade: false,
                 fixed: true,
-                offset: [offset.top + 37 - document.documentElement.scrollTop],
+                offset: [offset.top + 37 - ME.doc.scrollTop()],
                 tab: 2,
                 attach: '',
                 attachAlt: '',

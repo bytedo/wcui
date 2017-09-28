@@ -42,7 +42,7 @@ define(['lib/layer/base'], function(){
                         ME.insert(vm.$editor, wrap, true)
                         layer.close(h1ID)
                     },
-                    offset: [offset.top + 37 - document.documentElement.scrollTop, 'auto', 'auto', offset.left - document.documentElement.scrollLeft],
+                    offset: [offset.top + 37 - ME.doc.scrollTop(), 'auto', 'auto', offset.left - ME.doc.scrollLeft()],
                     content: '<ul class="do-meditor-h1 do-fn-noselect meditor-font">'
                         + '<li :click="$insert(1)" class="h1">一级标题</li>'
                         + '<li :click="$insert(2)" class="h2">二级标题</li>'
@@ -121,7 +121,7 @@ define(['lib/layer/base'], function(){
                         ME.insert(vm.$editor, val, false)
                         layer.close(layid)
                     },
-                    offset: [offset.top + 37 - document.documentElement.scrollTop, 'auto', 'auto', offset.left - document.documentElement.scrollLeft],
+                    offset: [offset.top + 37 - ME.doc.scrollTop(), 'auto', 'auto', offset.left - ME.doc.scrollLeft()],
                     content: '<div class="do-meditor-common meditor-font">'
                         + '<section><span class="label">链接文字</span>'
                             + '<input class="input" :duplex="linkName" />'
@@ -151,7 +151,7 @@ define(['lib/layer/base'], function(){
                     fixed: true,
                     shadeClose: true,
                     arr: getOrderArr(36),
-                    offset: [offset.top + 37 - document.documentElement.scrollTop, 'auto', 'auto', offset.left - document.documentElement.scrollLeft],
+                    offset: [offset.top + 37 - ME.doc.scrollTop(), 'auto', 'auto', offset.left - ME.doc.scrollLeft()],
                     content: '<ul class="do-meditor-face">'
                         + '<li class="item" :repeat="arr" ><img :attr-src="ME.path + \'/addon/face/\' + el + \'.gif\'" :click="$insert(this.src)" /></li>'
                         + '</ul>',
@@ -168,7 +168,7 @@ define(['lib/layer/base'], function(){
                 title: '0行 x 0列',
                 fixed: true,
                 shadeClose: true,
-                offset: [offset.top + 37 - document.documentElement.scrollTop, 'auto', 'auto', offset.left - document.documentElement.scrollLeft],
+                offset: [offset.top + 37 - ME.doc.scrollTop(), 'auto', 'auto', offset.left - ME.doc.scrollLeft()],
                 matrix: objArr(10).map(function(){return objArr(10)}),
                 content: '<ul class="do-meditor-table">'
                     + '<li :repeat="matrix"><span :repeat-o="el" :class="{active: o.v}" :data="{x: $index, y: $outer.$index}"></span></li>'
@@ -239,7 +239,7 @@ define(['lib/layer/base'], function(){
                         ME.insert(vm.$editor, val, false)
                         layer.close(layid)
                     },
-                    offset: [offset.top + 37 - document.documentElement.scrollTop, 'auto', 'auto', offset.left - document.documentElement.scrollLeft],
+                    offset: [offset.top + 37 - ME.doc.scrollTop(), 'auto', 'auto', offset.left - ME.doc.scrollLeft()],
                     content: '<div class="do-meditor-common meditor-font">'
                         + '<section><span class="label">图片描述</span>'
                             + '<input class="input" :duplex="imgAlt" />'
@@ -340,7 +340,7 @@ define(['lib/layer/base'], function(){
             layer.open({
                 type: 7,
                 title: '关于编辑器',
-                offset: [offset.top + 37 - document.documentElement.scrollTop],
+                offset: [offset.top + 37 - ME.doc.scrollTop()],
                 content: '<div class="do-meditor-about meditor-font">'
                     + '<pre>'
                     + ' __  __ _____    _ _ _\n'             

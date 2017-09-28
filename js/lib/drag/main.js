@@ -97,8 +97,8 @@ define(['yua'], function(){
                 dy = cst[5]
 
                 //滚动条的偏移
-                bst = document.documentElement.scrollTop
-                bsl = document.documentElement.scrollLeft
+                bst = $doc.scrollTop()
+                bsl = $doc.scrollLeft()
 
                 // 计算元素的offset值, 需要修正
                 ox = offset.left - dx - bsl

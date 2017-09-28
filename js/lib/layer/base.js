@@ -28,7 +28,7 @@ define(['yua', 'lib/drag/main', 'css!./skin/def'], function(yua){
             shadeClose: false, //遮罩点击关闭弹窗
             radius: '0px', //弹窗圆角半径
             area: ['auto', 'auto'],
-            title: '', //弹窗主标题(在工具栏上的)
+            title: '提示', //弹窗主标题(在工具栏上的)
             menubar: true, //是否显示菜单栏
             content: '', // 弹窗的内容
             fixed: false, //是否固定不可拖拽
