@@ -22,7 +22,7 @@ define([
     })
 
     var editorVM = []
-    yua.ui.meditor = '0.0.1'
+    yua.ui.meditor = '1.0.0'
     //存放编辑器公共静态资源
     window.ME = {
         version: yua.ui.meditor,
@@ -225,7 +225,10 @@ define([
         return new RegExp(exp, 'gi')
     }
     function html2md(str){
-        str = decodeURIComponent(str).replace(/\t/g, '    ').replace(/<meta [^>]*>/, '')
+        try{
+            str = decodeURIComponent(str)
+        }catch(err){}
+        str = str.replace(/\t/g, '    ').replace(/<meta [^>]*>/, '')
 
         for(var i in elems){
             var cb = elems[i],
@@ -306,9 +309,7 @@ define([
             $template: '<div class="do-meditor do-meditor-font" :visible="editorVisible"'
                 + ' :class="{fullscreen: fullscreen, preview: preview}">'
                 + '<div class="tool-bar do-ui-font do-fn-noselect">{toolbar}</div>'
-                + '<div class="editor-body">'
-                    + '<textarea spellcheck="false" :duplex="plainTxt" :attr="{disabled: disabled}" :on-paste="$paste($event)" id="{uuid}"></textarea>'
-                + '</div>'
+                + '<textarea class="editor-body" spellcheck="false" :duplex="plainTxt" :attr="{disabled: disabled}" :on-paste="$paste($event)"></textarea>'
                 + '<content class="md-preview do-marked-theme" :visible="preview" :html="htmlTxt"></content>'
             + '</div>',
             $$template: function(txt){
@@ -335,7 +336,6 @@ define([
                 return base
             },
             $init: function(vm){
-
                 vm.$watch('plainTxt', function(val){
                     vm.$compile()
                     //只有开启实时预览,才会赋值给htmlTxt
@@ -368,8 +368,9 @@ define([
                     vm.plainTxt = this.value
                 }
             },
-            $ready: function(vm){
-                vm.$editor = document.querySelector('#' + vm.$id)
+            $ready: function(vm, elem){
+
+                vm.$editor = elem.children[1]
                 
                 editorVM.push(vm)
                 //自动加载额外的插件
@@ -407,9 +408,11 @@ define([
             $paste: yua.noop,
             $compile: function(){
                 var txt = this.plainTxt.trim()
-                txt = txt.replace(/<script([^>]*?)>/g, '&lt;script$1&gt;')
-                    .replace(/<\/script>/g, '&lt;/script&gt;')
-                
+
+                if(this.$safelyCompile){
+                    txt = txt.replace(/<script([^>]*?)>/g, '&lt;script$1&gt;')
+                        .replace(/<\/script>/g, '&lt;/script&gt;')
+                }
                 //只解析,不渲染
                 this.$htmlTxt = marked(txt)
             },
@@ -417,6 +420,7 @@ define([
             $onSuccess: yua.noop,
             $onUpdate: yua.noop,
             $onFullscreen: yua.noop,
+            $safelyCompile: true,
             disabled: false, //禁用编辑器
             fullscreen: false, //是否全屏
             preview: false, //是否显示预览

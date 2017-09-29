@@ -109,11 +109,9 @@
 
 
 /* select框 */
-.do-ui-select {display:inline-block;min-height:30px;padding:0 25px 0 5px;border:1px solid nth($cp, 3);background:#fff url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABUAAAAQCAMAAADOBMQXAAAAFVBMVEUAAAD///8wMDAwMDAyMjIzMzMyMjLeZPLMAAAAB3RSTlMAABAwkLDARx1RgwAAAD9JREFUeAGlz0UChFAAgFB+3v/GMwZ2K8u3g7DXI40s6zWnuaXaK7IYVVlElUV14lQik8opw6SyiCqLXB9/0D/ZNQE+FhzMpgAAAABJRU5ErkJggg==) no-repeat right 6px;color:nth($cgr, 1);outline:none;-webkit-appearance:none;-moz-appearance: none;@include ts;
+.do-ui-select {display:inline-block;min-height:30px;padding:0 30px 0 10px;border:0;border-bottom:1px solid #e7e7e7;background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAMCAMAAABV0m3JAAAADFBMVEUAAAD///+Pj4+JiYkxcGihAAAABHRSTlMAABBwqVQF9wAAADNJREFUeNqlzjEOACAMw8DQ/v/PSE5FFhaEx5usdekBuzRVH0RtCqJYELUFrVjQigX/5jdvzgDh9izlMQAAAABJRU5ErkJggg==) no-repeat right 8px;color:nth($cgr, 1);outline:none;-webkit-appearance:none;-moz-appearance: none;@include ts;
 
     &::-ms-expand {display:none;}
-    &.radius-3 {border-radius:3px;}
-    &.radius-5 {border-radius:5px;}
 
     &:focus {border-color:nth($ct, 1);}
     &.alert {border-color:nth($cr, 1);color:nth($cr, 1)}

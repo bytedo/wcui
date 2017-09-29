@@ -257,8 +257,10 @@ define(['lib/layer/base'], function(){
             this.link(elem, vm, false)
         },
         inlinecode: function(elem, vm){
-            var wrap = ME.selection(vm.$editor) || '在此输入文本'
-            wrap = '`' + wrap + '`'
+            var wrap = ME.selection(vm.$editor) || '在此输入文本',
+                wraped = trim(wrap, '`');
+
+            wrap = wrap === wraped ? ('`' + wrap + '`') : wraped
             ME.insert(vm.$editor, wrap, true)
         },
         blockcode: function(elem, vm){
@@ -311,7 +313,7 @@ define(['lib/layer/base'], function(){
                         layer.close(layid)
                     },
                     content: '<div class="do-meditor-codeblock do-meditor-font">'
-                        + '<section><span class="label">语言类型</span>'
+                        + '<section class="do-fn-cl"><span class="label">语言类型</span>'
                             + '<select :duplex="lang">'
                                 + '<option :repeat="$lang" :attr-value="el.id">{{el.name || el.id}}</option>'
                             + '</select>'
@@ -319,7 +321,7 @@ define(['lib/layer/base'], function(){
                         + '<section>'
                             + '<textarea :duplex="code" placeholder="在这里输入/粘贴代码"></textarea>'
                         + '</section>'
-                        + '<section>'
+                        + '<section class="do-fn-cl">'
                             + '<a href="javascript:;" class="submit" :click="$confirm">确定</a>'
                         + '</section>'
                         + '</div>'
