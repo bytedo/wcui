@@ -6,7 +6,7 @@
 
 define(["yua", "text!./main.htm", "css!./main"], function(yua, tpl){
 
-    var dom
+    var dom;
     function getWidth(){}
 
     /**
