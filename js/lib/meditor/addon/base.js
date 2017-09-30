@@ -42,8 +42,8 @@ define(['lib/layer/base'], function(){
                         ME.insert(vm.$editor, wrap, true)
                         layer.close(h1ID)
                     },
-                    offset: [offset.top + 37 - document.documentElement.scrollTop, 'auto', 'auto', offset.left - document.documentElement.scrollLeft],
-                    content: '<ul class="do-meditor-h1 do-fn-noselect meditor-font">'
+                    offset: [offset.top + 37 - ME.doc.scrollTop(), 'auto', 'auto', offset.left - ME.doc.scrollLeft()],
+                    content: '<ul class="do-meditor-h1 do-fn-noselect do-meditor-font">'
                         + '<li :click="$insert(1)" class="h1">一级标题</li>'
                         + '<li :click="$insert(2)" class="h2">二级标题</li>'
                         + '<li :click="$insert(3)" class="h3">三级标题</li>'
@@ -121,13 +121,13 @@ define(['lib/layer/base'], function(){
                         ME.insert(vm.$editor, val, false)
                         layer.close(layid)
                     },
-                    offset: [offset.top + 37 - document.documentElement.scrollTop, 'auto', 'auto', offset.left - document.documentElement.scrollLeft],
-                    content: '<div class="do-meditor-common meditor-font">'
-                        + '<section><span class="label">链接文字</span>'
-                            + '<input class="input" :duplex="linkName" />'
+                    offset: [offset.top + 37 - ME.doc.scrollTop(), 'auto', 'auto', offset.left - ME.doc.scrollLeft()],
+                    content: '<div class="do-meditor-common do-meditor-font">'
+                        + '<section class="input"><span class="label">链接文字</span>'
+                            + '<input class="txt" :duplex="linkName" />'
                         + '</section>'
-                        + '<section><span class="label">链接地址</span>'
-                            + '<input class="input" :duplex="link"/>'
+                        + '<section class="input"><span class="label">链接地址</span>'
+                            + '<input class="txt" :duplex="link"/>'
                         + '</section>'
                         + '<section>'
                             + '<label><input name="link" type="radio" class="radio" :duplex-number="linkTarget" value="1"/> 新窗口打开</label>'
@@ -151,7 +151,7 @@ define(['lib/layer/base'], function(){
                     fixed: true,
                     shadeClose: true,
                     arr: getOrderArr(36),
-                    offset: [offset.top + 37 - document.documentElement.scrollTop, 'auto', 'auto', offset.left - document.documentElement.scrollLeft],
+                    offset: [offset.top + 37 - ME.doc.scrollTop(), 'auto', 'auto', offset.left - ME.doc.scrollLeft()],
                     content: '<ul class="do-meditor-face">'
                         + '<li class="item" :repeat="arr" ><img :attr-src="ME.path + \'/addon/face/\' + el + \'.gif\'" :click="$insert(this.src)" /></li>'
                         + '</ul>',
@@ -168,7 +168,7 @@ define(['lib/layer/base'], function(){
                 title: '0行 x 0列',
                 fixed: true,
                 shadeClose: true,
-                offset: [offset.top + 37 - document.documentElement.scrollTop, 'auto', 'auto', offset.left - document.documentElement.scrollLeft],
+                offset: [offset.top + 37 - ME.doc.scrollTop(), 'auto', 'auto', offset.left - ME.doc.scrollLeft()],
                 matrix: objArr(10).map(function(){return objArr(10)}),
                 content: '<ul class="do-meditor-table">'
                     + '<li :repeat="matrix"><span :repeat-o="el" :class="{active: o.v}" :data="{x: $index, y: $outer.$index}"></span></li>'
@@ -239,13 +239,13 @@ define(['lib/layer/base'], function(){
                         ME.insert(vm.$editor, val, false)
                         layer.close(layid)
                     },
-                    offset: [offset.top + 37 - document.documentElement.scrollTop, 'auto', 'auto', offset.left - document.documentElement.scrollLeft],
-                    content: '<div class="do-meditor-common meditor-font">'
-                        + '<section><span class="label">图片描述</span>'
-                            + '<input class="input" :duplex="imgAlt" />'
+                    offset: [offset.top + 37 - ME.doc.scrollTop(), 'auto', 'auto', offset.left - ME.doc.scrollLeft()],
+                    content: '<div class="do-meditor-common do-meditor-font">'
+                        + '<section class="input"><span class="label">图片描述</span>'
+                            + '<input class="txt" :duplex="imgAlt" />'
                         + '</section>'
-                        + '<section><span class="label">图片地址</span>'
-                            + '<input class="input" :duplex="img"/>'
+                        + '<section class="input"><span class="label">图片地址</span>'
+                            + '<input class="txt" :duplex="img"/>'
                         + '</section>'
                         + '<section>'
                             + '<a href="javascript:;" class="submit" :click="$confirm">确定</a>'
@@ -257,8 +257,10 @@ define(['lib/layer/base'], function(){
             this.link(elem, vm, false)
         },
         inlinecode: function(elem, vm){
-            var wrap = ME.selection(vm.$editor) || '在此输入文本'
-            wrap = '`' + wrap + '`'
+            var wrap = ME.selection(vm.$editor) || '在此输入文本',
+                wraped = trim(wrap, '`');
+
+            wrap = wrap === wraped ? ('`' + wrap + '`') : wraped
             ME.insert(vm.$editor, wrap, true)
         },
         blockcode: function(elem, vm){
@@ -310,8 +312,8 @@ define(['lib/layer/base'], function(){
                         ME.insert(vm.$editor, val, false)
                         layer.close(layid)
                     },
-                    content: '<div class="do-meditor-codeblock meditor-font">'
-                        + '<section><span class="label">语言类型</span>'
+                    content: '<div class="do-meditor-codeblock do-meditor-font">'
+                        + '<section class="do-fn-cl"><span class="label">语言类型</span>'
                             + '<select :duplex="lang">'
                                 + '<option :repeat="$lang" :attr-value="el.id">{{el.name || el.id}}</option>'
                             + '</select>'
@@ -319,7 +321,7 @@ define(['lib/layer/base'], function(){
                         + '<section>'
                             + '<textarea :duplex="code" placeholder="在这里输入/粘贴代码"></textarea>'
                         + '</section>'
-                        + '<section>'
+                        + '<section class="do-fn-cl">'
                             + '<a href="javascript:;" class="submit" :click="$confirm">确定</a>'
                         + '</section>'
                         + '</div>'
@@ -340,8 +342,8 @@ define(['lib/layer/base'], function(){
             layer.open({
                 type: 7,
                 title: '关于编辑器',
-                offset: [offset.top + 37 - document.documentElement.scrollTop],
-                content: '<div class="do-meditor-about meditor-font">'
+                offset: [offset.top + 37 - ME.doc.scrollTop()],
+                content: '<div class="do-meditor-about do-meditor-font">'
                     + '<pre>'
                     + ' __  __ _____    _ _ _\n'             
                     + '|  \\/  | ____|__| (_) |_ ___  _ __\n' 

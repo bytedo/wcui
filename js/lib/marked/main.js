@@ -19,7 +19,7 @@ var block = {
     nptable: noop,
     lheading: /^([^\n]+)\n *(=|-){2,} *(?:\n+|$)/,
     blockquote: /^( *>[^\n]+(\n(?!def)[^\n]+)*\n*)+/,
-    mark: /^( *;;;([\!]?)[^\n]+(\n(?!def)[^\n]+)*\n*)+/,
+    mark: /^ *;;;([\!]?) ([^\n]+)/,
     task: /^ *- *\[([ x]?)\] *([^\n]*)/,
     list: /^( *)(bull) [\s\S]+?(?:hr|def|\n{2,}(?! )(?!\1bull )\n*|\s*$)/,
     html: /^ *(?:comment *(?:\n|\s*$)|closed *(?:\n{2,}|\s*$)|closing *(?:\n{2,}|\s*$))/,
@@ -44,9 +44,7 @@ block.list = replace(block.list)
 block.blockquote = replace(block.blockquote)
     ('def', block.def)
     ();
-block.mark = replace(block.mark)
-('def', block.def)
-();
+
 
 block._tag = '(?!(?:'
     + 'a|em|strong|small|s|cite|q|dfn|abbr|data|time|code'
@@ -289,9 +287,11 @@ Lexer.prototype.token = function(src, top, bq) {
             src = src.substring(cap[0].length);
 
             this.tokens.push({
-                type: 'mark_start'
+                type: 'mark',
+                mark: cap[1] === '!',
+                text: cap[2]
             });
-            var sign = cap[2] === '!'
+/*            var sign = cap[2] === '!'
             cap = cap[0].replace(/^ *;;;[\!]? ?/gm, '');
 
             this.token(cap, top, true);
@@ -299,7 +299,7 @@ Lexer.prototype.token = function(src, top, bq) {
             this.tokens.push({
                 type: 'mark_end',
                 mark: sign
-            });
+            });*/
 
             continue;
         }
@@ -849,10 +849,10 @@ Renderer.prototype.code = function(code, lang, escaped) {
 };
 
 Renderer.prototype.blockquote = function(quote) {
-    return '<blockquote>\n' + quote + '</blockquote>\n';
+    return '<blockquote class="md-quote">\n' + quote + '</blockquote>\n';
 };
 Renderer.prototype.mark = function(mark, t) {
-    return '<mark class="' + (t ? 'do-ui-warn' : 'do-ui-mark') + '">\n' + mark + '</mark>\n';
+    return '<section><mark class="' + (t ? 'md-warn' : 'md-mark') + '">\n' + mark + '</mark></section>\n';
 };
 
 Renderer.prototype.task = function(task, t) {
@@ -868,7 +868,7 @@ Renderer.prototype.heading = function(text, level, raw) {
     raw = text.replace(/<[^>]+>|<\/[^>]+>/g, '')
     return '<h'
         + level
-        + ' class="md-hd" id="'
+        + ' class="md-head" id="'
         + raw
         + '"><a href="#'
         + raw
@@ -1120,13 +1120,8 @@ Parser.prototype.tok = function() {
 
             return this.renderer.blockquote(body);
         }
-        case 'mark_start': {
-            var body = '';
-
-            while (this.next().type !== 'mark_end') {
-                body += this.tok();
-            }
-            return this.renderer.mark(body, this.token.mark);
+        case 'mark': {
+            return this.renderer.mark(this.token.text, this.token.mark);
         }
         case 'task': {
             return this.renderer.task(this.token.text, this.token.mark)
@@ -1374,7 +1369,7 @@ this.marked = marked;
 if (typeof module !== 'undefined' && typeof exports === 'object') {
     module.exports = marked;
 } else if (typeof define === 'function' && define.amd) {
-    define(function() { return marked; });
+    define(['css!./theme'], function() { return marked; });
 }
 
 }).call(function() {

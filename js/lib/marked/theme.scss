@@ -1,0 +1,60 @@
+@charset "UTF-8";
+/**
+ * 
+ * @authors yutent (yutent@doui.cc)
+ * @date    2017-09-29 00:05:45
+ * @version $Id$
+ */
+@import "../../../css/var.scss";
+
+.do-marked-theme {position:relative;
+
+    .md-head {position:relative;margin:15px 0;padding-left:30px;font-weight:normal;font-size:17px;}
+    h1.md-head {padding-left:0;}
+    .md-head a {position:relative;display:inline-block;padding:0 8px;background:#fff;color:#454545}
+    .md-head a:hover {text-decoration:none;}
+    h1.md-head a {padding-left:0;color:#000;}
+    h2.md-head a {color:#000;}
+
+    h1.md-head {margin:0 0 30px;font-size:25px;}
+    h2.md-head {margin:20px 0;font-size:23px;}
+    h3.md-head {margin:20px 0 15px;font-size:20px;}
+    h1:after {display:block;width:100%;content:" ";border-bottom:1px solid #ddd;}
+    h2:before,
+    h3:before,
+    h4:before,
+    h5:before,
+    h6:before {display:block;position:absolute;left:0;top:50%;width:100%;content:" ";border-bottom:1px solid #ddd;}
+
+    a {text-decoration:none;}
+    a:hover {text-decoration:underline;}
+    p {margin:15px 0;}
+    blockquote.md-quote {margin:10px 0;padding:5px 10px;border-left:5px solid #6bb294;background:#f7f7f7}
+    blockquote.md-quote p {margin:0;}
+    /* 提醒文本 */
+    .md-warn,.md-mark {display:inline-block;position:relative;min-height:40px;margin:5px 0;padding:5px 8px 5px 50px;border:1px solid nth($co, 1);border-radius:5px;background:#fffbed;color:nth($co, 3);word-break: break-all;
+    
+        p {margin:0!important;}
+        &::before {position:absolute;left:15px;top:5px;font:20px/1.5 "ui font";color:nth($cr, 1);content:"\e6f6";}
+    }
+    .md-mark {border-color:nth($ct, 2);color:nth($ct, 3);background:#edfbf8;
+
+        &::before {color:nth($ct, 3);content:"\e657";}
+    }
+    table {width:100%;
+        thead tr {height:45px;line-height:45px;background:#f7f7f7}
+        thead th {padding:0 8px;border:0;}
+        tbody tr {height:43px;line-height:42px;@include ts(all, .3s);
+            &:hover {background:#ecf6fd}
+        }
+        tbody td {padding:0 8px;border-bottom:1px solid #e9e9e9}
+    }
+
+    hr {margin:30px 0;border-bottom:0;}
+    ol {margin-left:2em;list-style:decimal outside none;}
+    ul {margin-left:2em;list-style:disc outside none;}
+    li ol {margin-left:2em;}
+    li ul {margin-left:2em;list-style-type: circle;}
+    li ol ul,
+    li ul ul {list-style-type: square;}
+}

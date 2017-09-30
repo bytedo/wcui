@@ -186,48 +186,46 @@ define([
             file: []
         },
         fixCont = function(){
-            return '<div class="do-meditor-attach meditor-font">'
-                + '<dl class="attach-wrap">'
-                    + '<dt class="tab-box" :drag="do-layer" data-limit="window">'
-                        + '<span class="item" :class="active:tab === 1" :click="$switch(1)">' + lang[openType][0] +'</span>'
-                        + '<span class="item" :class="active:tab === 2" :click="$switch(2)">本地上传</span>'
-                        + '<span class="item" :class="active:tab === 3" :click="$switch(3)">' + lang[openType][1] + '</span>'
-                        + '<a href="javascript:;" :click="no" class="action-close def-font"></a>'
-                    + '</dt>'
-                    + '<dt class="cont-box">'
-                        + '<div class="remote" :visible="tab === 1">'
-                            + '<section class="section"><span class="label">'+ lang[openType][2] + '</span>'
-                                + '<input class="input" :duplex="attachAlt" />'
-                            + '</section>'
-                            + '<section class="section"><span class="label">'+ lang[openType][3] + '</span>'
-                                + '<input class="input" :duplex="attach" />'
-                            + '</section>'
-                            + '<section class="section">'
-                                + '<a href="javascript:;" class="submit" :click="$confirm">确定</a>'
-                            + '</section>'
-                        + '</div>'
-                        + '<div class="local" :visible="tab === 2">'
-                            + '<div class="select-file"><input id="meditor-attch" multiple :change="$change" type="file" class="hide" /><span class="file" :click="$select">选择文件</span><span class="tips">(上传大小限制:单文件最大'
-                                + (ME.maxSize/1048576).toFixed(2)
-                                + 'MB)</span></div>'
-                            + '<ul class="upload-box">'
-                                + '<li class="tr thead"><span class="td name">文件名</span><span class="td progress">上传进度</span><span class="td option">操作</span></li>'
-                                + '<li class="tr" :repeat="uploadFile">'
-                                    + '<span class="td name" :text="el.name"></span>'
-                                    + '<span class="td progress" :html="el.progress"></span>'
-                                    + '<span class="td option"><a href="javascript:;" :click="$insert(el)">插入</a></span>'
-                                + '</li>'
-                            + '</ul>'
-                        + '</div>'
-                        + '<ul class="manager" :visible="tab === 3">'
-                            + '<li class="item" :repeat="attachList" :click="$insert(el)">'
-                                + '<span class="thumb" :html="el.thumb"></span>'
-                                + '<p class="name" :attr-title="el.name" :text="el.name"></p>'
+            return '<dl class="do-meditor-attach do-meditor-font">'
+                + '<dt class="tab-box" :drag="do-layer" data-limit="window">'
+                    + '<span class="item" :class="active:tab === 1" :click="$switch(1)">' + lang[openType][0] +'</span>'
+                    + '<span class="item" :class="active:tab === 2" :click="$switch(2)">本地上传</span>'
+                    + '<span class="item" :class="active:tab === 3" :click="$switch(3)">' + lang[openType][1] + '</span>'
+                    + '<a href="javascript:;" :click="no" class="action-close do-ui-font"></a>'
+                + '</dt>'
+                + '<dt class="cont-box">'
+                    + '<div class="remote" :visible="tab === 1">'
+                        + '<section class="section do-fn-cl input"><span class="label">'+ lang[openType][2] + '</span>'
+                            + '<input class="txt" :duplex="attachAlt" />'
+                        + '</section>'
+                        + '<section class="section do-fn-cl input"><span class="label">'+ lang[openType][3] + '</span>'
+                            + '<input class="txt" :duplex="attach" />'
+                        + '</section>'
+                        + '<section class="section do-fn-cl">'
+                            + '<a href="javascript:;" class="submit" :click="$confirm">确定</a>'
+                        + '</section>'
+                    + '</div>'
+                    + '<div class="local" :visible="tab === 2">'
+                        + '<div class="select-file"><input id="meditor-attch" multiple :change="$change" type="file" class="hide" /><span class="file" :click="$select">选择文件</span><span class="tips">(上传大小限制:单文件最大 '
+                            + ((ME.maxSize/1048576).toFixed(2) - 0)
+                            + 'MB)</span></div>'
+                        + '<ul class="upload-box">'
+                            + '<li class="tr thead"><span class="td name">文件名</span><span class="td progress">上传进度</span><span class="td option">操作</span></li>'
+                            + '<li class="tr" :repeat="uploadFile">'
+                                + '<span class="td name" :text="el.name"></span>'
+                                + '<span class="td progress" :html="el.progress"></span>'
+                                + '<span class="td option"><a href="javascript:;" :click="$insert(el)">插入</a></span>'
                             + '</li>'
                         + '</ul>'
-                    + '</dt>'
-                + '</dl>'
-            + '</div>'
+                    + '</div>'
+                    + '<ul class="manager" :visible="tab === 3">'
+                        + '<li class="item" :repeat="attachList" :click="$insert(el)">'
+                            + '<span class="thumb" :html="el.thumb"></span>'
+                            + '<p class="name" :attr-title="el.name" :text="el.name"></p>'
+                        + '</li>'
+                    + '</ul>'
+                + '</dt>'
+            + '</dl>'
         };
 
     /**
@@ -243,7 +241,7 @@ define([
                 vm.uploadFile.push({name: it.name, progress: '<span class="red">0%(失败,不允许的文件类型)</span>', url: ''})
                 continue
             }
-            if(it.size > ME.maxSize){
+            if(ME.maxSize > 0 && it.size > ME.maxSize){
                 vm.uploadFile.push({name: it.name, progress: '<span class="red">0%(文件体积过大)</span>', url: ''})
                 continue
             }
@@ -314,7 +312,7 @@ define([
                 menubar: false,
                 shade: false,
                 fixed: true,
-                offset: [offset.top + 37 - document.documentElement.scrollTop],
+                offset: [offset.top + 37 - ME.doc.scrollTop()],
                 tab: 2,
                 attach: '',
                 attachAlt: '',
@@ -332,7 +330,7 @@ define([
                             getAttach(vm, function(json){
                                 if(json){
                                     cache[openType] = json.data.list.map(function(it){
-                                        it.thumb = openType === 'image' ? '<img src="' + it.url + '"/>' : '<em class="attac-icon">&#xe603;</em>'
+                                        it.thumb = openType === 'image' ? '<img src="' + it.url + '"/>' : '<em class="attach-icon">&#xe73e;</em>'
                                         return it
                                     })
                                     lvm.attachList = json.data.list

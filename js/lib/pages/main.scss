@@ -67,10 +67,20 @@
     &.skin-2.green a.curr,
     &.green a.normal:active {background:nth($cg, 3)}
 
+    &.teal a.normal {background:nth($ct, 1);color: #fff;}
+    &.teal a.normal:hover {background:nth($ct, 2)}
+    &.skin-2.teal a.curr,
+    &.teal a.normal:active {background:nth($ct, 3)}
+
     &.blue a.normal {background:nth($cb, 1);color: #fff;}
     &.blue a.normal:hover {background:nth($cb, 2)}
     &.skin-2.blue a.curr,
     &.blue a.normal:active {background:nth($cb, 3)}
+
+    &.purple a.normal {background:nth($cpp, 1);color: #fff;}
+    &.purple a.normal:hover {background:nth($cpp, 2)}
+    &.skin-2.purple a.curr,
+    &.purple a.normal:active {background:nth($cpp, 3)}
 
 }
 

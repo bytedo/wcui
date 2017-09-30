@@ -1,9 +1,11 @@
-$cg: #1abc9c #48c9b0 #16a085;
-$cb: #3498db #5dade2 #2c81ba;
-$cr: #e74c3c #ec7063 #c54133;
-$co: #f39c12 #fbbb56 #e67e22;
+$ct: #1abc9c #48c9b0 #16a085;
+$cg: #4caf50 #81c784 #388e3c;
+$cpp: #651fff #7c4dff #6200ea;
+$cb: #2196f3 #64b5f6 #1976d2;
+$cr: #ff5722 #ff7043 #e64a19;
+$co: #ff9800 #ffa726 #f57c00;
 $cp: #e7e8eb #ecf0f1 #bdc3c7;
-$cgr: #34495e #5d6d7e #2c3e50;
+$cgr: #546e7a #607d8b #37474f;
 
 @mixin ts($c: all, $t: .1s, $m: ease-in-out){
     transition:$c $t $m;
