@@ -2,3 +2,5 @@
 *.min.css
 index.html
 .vscode
+dist.sublime-project
+dist.sublime-workspace

@@ -7,16 +7,19 @@
 define(["yua", "text!./main.htm", "css!./main"], function(yua, tpl){
 
     var dom;
-    function getWidth(){}
+    var sliderNum = 0;
+    var skin = ['skin-0','skin-1','skin-2','skin-3']
 
     /**
      * [根据当前幻灯片索引获取填充底下按钮数据]
      * @param  {Object} vm [vm对象]
      * @return {[Array]}    [填充到按钮的数据]
      */
-    function getBtnList(vm){
-        var currWidth = vm.currWidth.slice(0, -2)
-        vm.maxNum = Math.floor(currWidth / 130)
+    function getBtnList(vm, el){
+        if(el){
+            dom = el
+        }
+        vm.maxNum = Math.floor(dom.offsetWidth / 90)
         var curr = vm.curr + 1
         let res = []
         if(!vm.preview)
@@ -43,7 +46,7 @@ define(["yua", "text!./main.htm", "css!./main"], function(yua, tpl){
         vm.timer = setTimeout(function(){
             vm.$go(1)
             autoSlide(vm)
-        }, vm.time)
+        }, vm.time <= 0 ? 3000 : vm.time)
     }
 
     return yua.component("sliders", {
@@ -84,60 +87,53 @@ define(["yua", "text!./main.htm", "css!./main"], function(yua, tpl){
                 vm.sliderList.pushArray(list)
             }
 
-            vm.$setSliderType = function(type){
-                vm.sliderType = type
-                yua.log(vm.sliderType)
-            }
-
-            vm.$watch('curr', function(val, old) {
-                vm.currWidth = getWidth()
-                var width
-                if(vm.currWidth.indexOf('px') > -1)
-                    width = vm.currWidth.slice(0, vm.currWidth.indexOf('px'))
-
-                vm.animation = 'translate(' + (-width * val) + 'px, 0)'
-                if(vm.preview && vm.maxNum < vm.sliderList.length){
-                    vm.sliderBtnList.removeAll()
-                    vm.sliderBtnList.pushArray(getBtnList(vm))
-                }
-            })
-
-            window.addEventListener('resize', function(){
-                vm.currWidth = getWidth()
-                var width
-                if(vm.currWidth.indexOf('px') > -1)
-                    width = vm.currWidth.slice(0, vm.currWidth.indexOf('px'))
-
-                vm.animation = 'translate(' + (-width * vm.curr) + 'px, 0)'
-                if(vm.preview && vm.maxNum < vm.sliderList.length){
-                    yua.log(vm.maxNum , vm.sliderList.length)
-                    vm.sliderBtnList.removeAll()
-                    vm.sliderBtnList.pushArray(getBtnList(vm))
-                }
-            }, false)
-
             vm.$onSuccess(vm)
         },
-        $ready: function(vm){
-            dom = document.querySelector('.do-sliders')
-
-            /**
-             * [获取当前幻灯片元素宽度]
-             */
-            getWidth = function(){
-
-                return window.getComputedStyle ? window.getComputedStyle(dom).width : dom.offsetWidth + 'px'
-            }
-
-            vm.currWidth = getWidth()
+        $ready: function(vm, el){
+            vm.skin = skin[vm.skin]
+            vm.currWidth = (100 / vm.sliderList.length)
             if(vm.autoSlide)
                 autoSlide(vm)
 
             if(vm.preview){
                 vm.sliderBtnList.removeAll()
-                vm.sliderBtnList.pushArray(getBtnList(vm))
+                vm.sliderBtnList.pushArray(getBtnList(vm, el))
             }
-            yua.log(vm)
+
+            vm.$watch('curr', function(val, old) {
+
+                vm.animation = vm.sliderType > 2 ? 'translate(0, ' + (-vm.currWidth * val) + '%)' : 'translate(' + (-vm.currWidth * val) + '%, 0)'
+                if(vm.preview && vm.maxNum < vm.sliderList.length){
+                    vm.sliderBtnList.removeAll()
+                    vm.sliderBtnList.pushArray(getBtnList(vm, el))
+                }
+            })
+
+            window.addEventListener('resize', function(){
+
+                vm.animation = vm.sliderType > 2 ? 'translate(0, ' + (-vm.currWidth * vm.curr) + '%)' : 'translate(' + (-vm.currWidth * vm.curr) + '%, 0)'
+                if(vm.preview && vm.maxNum < vm.sliderList.length){
+                    vm.sliderBtnList.removeAll()
+                    vm.sliderBtnList.pushArray(getBtnList(vm, el))
+                }
+            }, false)
+
+            if(vm.sliderType >= 3){
+                var now = 0
+                var mouseWheelEv = /Firefox/i.test(navigator.userAgent) ? "DOMMouseScroll": "mousewheel"
+                var direction = /Firefox/i.test(navigator.userAgent) ? "detail": "deltaY"
+                window.addEventListener(mouseWheelEv, function(ev){
+                    if(Date.now() - now > 500 || now == 0){
+
+                        if(ev[direction] > 0){
+                            vm.$go(1)
+                        }else{
+                            vm.$go(-1)
+                        }
+                        now = Date.now()
+                    }
+                }, false)
+            }
         },
         currWidth: 0,
         animation: '',
@@ -150,12 +146,12 @@ define(["yua", "text!./main.htm", "css!./main"], function(yua, tpl){
         sliderList: [],
         autoSlide: '',
         time: 3000,
-        preview: true,
-        skin: 'skin-0',
+        preview: false,
+        skin: 0,
+        fullScreen: false,
 
         $onSuccess: yua.noop,
         $setSliderList: yua.noop,
-        $setSliderType: yua.noop,
         $jump: yua.noop,
         $stopSlide: yua.noop,
         $startSlide: yua.noop,

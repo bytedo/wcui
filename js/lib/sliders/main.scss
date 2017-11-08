@@ -10,17 +10,20 @@
  // @import "../../../css/reset.scss";
 
 .do-sliders {position: relative;height: 100%;width: 100%;
-    .slider-content{height: 80%;position: relative;
+    .skin{height: 100%}
+    &.fullscreen{position: absolute;width: 100%;height: 100%;left: 0;top: 0;}
+    .slider-content{position: relative;
 
         .container {position: relative;height: 100%;overflow: hidden;
             .box {position: relative;height: 100%;width: 100%;transition: .4s;
-                a {position:relative;display: inline-block;height: 100%;vertical-align: middle;transition: .4s;
+                .page {position:relative;display: inline-block;height: 100%;vertical-align: middle;
                     img {width: 100%;height: 100%;object-fit: cover;}
                     .title-class {position: absolute;width: 30%;min-height: 30px;line-height: 30px;left: 0;bottom: 15%;right: 0;margin: auto;text-align: center;font-size: 25px;}
                     .elm{height: 100%;width: 100%;background: #333;}
                     .default-elm{width: 100%;height: 100%;}
+                    .default-btn{width: 100%;height: 100%;}
                 }
-                .fadeType{position: absolute;left: 0;top: 0;width: 100%;}
+                .fadeType{position: absolute;left: 0;top: 0;width: 100%;transition: .4s;}
             }
         }
 
@@ -32,10 +35,9 @@
         // .slider-btn:nth-of-type(2):hover{animation: right-to-left .3s;}
     }
 
+    .slider-preview-btn {position: absolute;bottom: 2%;height: 12%;width: 100%;margin: 0 auto;text-align: center;overflow: hidden;
 
-    .slider-preview-btn {position: relative;bottom: -5%;height: 15%;width: 100%;margin: 0 auto;text-align: center;overflow: hidden;
-
-        span {display: inline-block;width: 10px;height: 10px;margin: 20px 5px;border-radius: 100%;background: rgba(255,255,255,0.8);cursor: pointer;transition: .5s;}
+        span {display: inline-block;width: 10px;height: 10px;margin: 0 5px;border-radius: 100%;background: rgba(255,255,255,0.8);cursor: pointer;transition: .5s;}
         span:hover{background:nth($cg, 1);}
         .no-preview-act{background:nth($cg, 3);}
 
@@ -45,36 +47,52 @@
             img {position: relative;width: 100%;height: 100%;object-fit: cover;transition: .4s;z-index: 2;}
             .preview-act{transform: scale(.95)}
         }
-        .btn-img .btn-background {content: '';position: absolute;left: 0;top: 0;width: 100%;height: 100%;opacity: 0;transition: .8s;z-index: 1;}
-        .btn-img.act .btn-background {opacity: 1;}
+        .btn-img:after {content: '';position: absolute;left: 0;top: 0;width: 100%;height: 100%;opacity: 0;transition: .8s;z-index: 1;}
+        .btn-img.act:after {opacity: 1;}
     }
+    .slider-preview-btn-vertical{right: 10px;bottom: 50%;width: 20px;height: auto;text-align: center;transform: translate(0, 50%);}
 
-    &.skin-0 .title-class{color: #fff}
-    &.skin-1 .title-class{color: nth($cr, 3)}
-    &.skin-2 .title-class{color: nth($cg, 3)}
-    &.skin-3 .title-class{color: nth($cb, 3)}
+    .skin-0 .title-class{color: #e0e0e0}
+    .skin-1 .title-class{color: nth($cr, 3)}
+    .skin-2 .title-class{color: nth($cg, 3)}
+    .skin-3 .title-class{color: nth($cb, 3)}
 
-    &.skin-0 .slider-btn{color: rgba(255,255,255,.6)}
-    &.skin-1 .slider-btn{color: nth($cr, 3)}
-    &.skin-2 .slider-btn{color: nth($cg, 3)}
-    &.skin-3 .slider-btn{color: nth($cb, 3)}
+    .skin-0 .slider-btn{color: rgba(255,255,255,.6)}
+    .skin-1 .slider-btn{color: nth($cr, 3)}
+    .skin-2 .slider-btn{color: nth($cg, 3)}
+    .skin-3 .slider-btn{color: nth($cb, 3)}
 
-    &.skin-0 .slider-btn:hover{color: #fff}
-    &.skin-1 .slider-btn:hover{color: nth($cr, 1)}
-    &.skin-2 .slider-btn:hover{color: nth($cg, 1)}
-    &.skin-3 .slider-btn:hover{color: nth($cb, 1)}
+    .skin-0 .slider-btn:hover{color: #e0e0e0}
+    .skin-1 .slider-btn:hover{color: nth($cr, 1)}
+    .skin-2 .slider-btn:hover{color: nth($cg, 1)}
+    .skin-3 .slider-btn:hover{color: nth($cb, 1)}
 
-    &.skin-0 .btn-img .btn-background{background: rgba(0,0,0,0.5)}
-    &.skin-1 .btn-img .btn-background{background: nth($cr, 1)}
-    &.skin-2 .btn-img .btn-background{background: nth($cg, 1)}
-    &.skin-3 .btn-img .btn-background{background: nth($cb, 1)}
+    .skin-0 .btn-img:after{background: rgba(0,0,0,0.5)}
+    .skin-1 .btn-img:after{background: nth($cr, 1)}
+    .skin-2 .btn-img:after{background: nth($cg, 1)}
+    .skin-3 .btn-img:after{background: nth($cb, 1)}
 
-    &.skin-0 .default-elm{background: #fff}
-    &.skin-1 .default-elm{background: nth($cr, 1)}
-    &.skin-2 .default-elm{background: nth($cg, 1)}
-    &.skin-3 .default-elm{background: nth($cb, 1)}
+    .skin-0 .default-elm{background: #e0e0e0}
+    .skin-1 .default-elm{background: nth($cr, 1)}
+    .skin-2 .default-elm{background: nth($cg, 1)}
+    .skin-3 .default-elm{background: nth($cb, 1)}
 
-    .h-80{height: 80%;}
+    .skin-0 .default-btn{background: #e0e0e0}
+    .skin-1 .default-btn{background: nth($cr, 1)}
+    .skin-2 .default-btn{background: nth($cg, 1)}
+    .skin-3 .default-btn{background: nth($cb, 1)}
+
+    .skin-0 .no-preview-act{background: rgba(0,0,0,.6)}
+    .skin-1 .no-preview-act{background: nth($cr, 3)}
+    .skin-2 .no-preview-act{background: nth($cg, 3)}
+    .skin-3 .no-preview-act{background: nth($cb, 3)}
+
+    .skin-0 .slider-preview-btn span:hover{background: rgba(0,0,0,.6)}
+    .skin-1 .slider-preview-btn span:hover{background: nth($cr, 3)}
+    .skin-2 .slider-preview-btn span:hover{background: nth($cg, 3)}
+    .skin-3 .slider-preview-btn span:hover{background: nth($cb, 3)}
+
+    .h-83{height: 83%;}
     .h-100{height: 100%;}
 }
 

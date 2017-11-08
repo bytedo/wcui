@@ -1,64 +1,95 @@
-<div class="do-sliders" :class="{{skin}}">
-	12
-    <div class="slider-content" :class="{'h-100': !preview}" :class="{'h-80': preview}" :if="sliderList.length" :mouseenter="$stopSlide()" :mouseleave="$startSlide()">
-        <a class="do-ui-font slider-btn" href="javascript:;"
-            :click="$go(-1)">&#xe8ed</a>
+<div class="do-sliders" :class="{fullscreen: fullScreen}">
+    <div class="skin" :class="{{skin}}">
 
-        <div class="container">
-            <div class="box"
-                :if="sliderType == 1"
-                :css="{width: sliderList.length * 100 + '%', transform: animation}">
-                <a  target="_blank"
-                    :repeat="sliderList"
-                    :css="{width: currWidth}"
-                    :attr="{href: el.link || 'javascript:;'}">
-                    <img :if="el.src && el.src != ''" :attr-src="el.src">
-                    <div class="default-elm" :class="{elm: !el.elm && !el.src, 'preview-act': curr === $index ||  (curr >= maxNum && $index == maxNum - 1)}" :if="!el.src" :html="el.elm ? el.elm : ''"></div>
-                    <p :if="el.title"
-                        :html="el.title"
-                        class="title-class"></p>
-                </a>
+        <div class="slider-content" :class="{'h-83': preview && !fullScreen, 'h-100': !preview || fullScreen}" :if="sliderList.length" :mouseenter="$stopSlide()" :mouseleave="$startSlide()">
+            <a class="do-ui-font slider-btn" href="javascript:;"
+                :if="sliderType < 3"
+                :click="$go(-1)">&#xe8ed</a>
+
+            <div class="container">
+                <div class="box"
+                    :if="sliderType == 1"
+                    :css="{width: sliderList.length * 100 + '%', transform: animation}">
+                    <a class="page" target="_blank"
+                        :repeat="sliderList"
+                        :css="{width: currWidth + '%'}"
+                        :attr="{href: el.link || 'javascript:;'}">
+                        <img :if="el.src && el.src != ''" :attr-src="el.src">
+                        <p :if="el.title"
+                            :html="el.title"
+                            class="title-class"></p>
+                    </a>
+                </div>
+                <div class="box"
+                    :if="sliderType == 2">
+                    <a  target="_blank"
+                        class="page fadeType"
+                        :repeat="sliderList"
+                        :css="{opacity: curr != $index ? 0 : 1}"
+                        :attr="{href: el.link || 'javascript:;'}">
+                        <img :if="el.src && el.src != ''" :attr-src="el.src">
+
+                        <p :if="el.title"
+                            :html="el.title"
+                            class="title-class"></p>
+                    </a>
+                </div>
+                <div class="box"
+                    :if="sliderType == 3"
+                    :css="{height: sliderList.length * 100 + '%', transform: animation}">
+                    <a class="page" target="_blank"
+                        :repeat="sliderList"
+                        :css="{width: '100%', height: (100 / sliderList.length) + '%'}"
+                        :attr="{href: el.link || 'javascript:;'}">
+                        <img :if="el.src && el.src != ''" :attr-src="el.src">
+                        <p :if="el.title"
+                            :html="el.title"
+                            class="title-class"></p>
+                    </a>
+                </div>
+                <div class="box"
+                    :if="sliderType == 4">
+                    <a target="_blank"
+                        class="page fadeType"
+                        :repeat="sliderList"
+                        :css="{opacity: curr != $index ? 0 : 1}"
+                        :attr="{href: el.link || 'javascript:;'}">
+                        <img :if="el.src && el.src != ''" :attr-src="el.src">
+                        {{el.elm | html}}
+                        <p :if="el.title"
+                            :html="el.title"
+                            class="title-class"></p>
+                    </a>
+                </div>
             </div>
-            <div class="box"
-                :if="sliderType == 2">
-                <a  target="_blank"
-                    class="fadeType"
-                    :repeat="sliderList"
-                    :css="{opacity: curr != $index ? 0 : 1}"
-                    :attr="{href: el.link || 'javascript:;'}">
-                    <img :if="el.src && el.src != ''" :attr-src="el.src">
-                    <div class="default-elm" :class="{elm: !el.elm && !el.src, 'preview-act': curr === $index ||  (curr >= maxNum && $index == maxNum - 1)}" :if="!el.src" :html="el.elm ? el.elm : ''"></div>
-                    <p :if="el.title"
-                        :html="el.title"
-                        class="title-class"></p>
-                </a>
-            </div>
+
+            <a class="do-ui-font slider-btn" href="javascript:;"
+                :if="sliderType < 3"
+                :click="$go(1)">&#xe8eb</a>
         </div>
 
-        <a class="do-ui-font slider-btn" href="javascript:;"
-            :click="$go(1)">&#xe8eb</a>
-    </div>
 
+        <div class="slider-preview-btn"
+            :class="{'slider-preview-btn-vertical': sliderType > 2}"
+            :css="{padding: !preview && sliderType < 3 ? '2%' : ''}" >
+            <span href="javascript:;"
+                :if="!preview || fullScreen"
+                :class="{'no-preview-act': curr === $index}"
+                :repeat="sliderList"
+                :click="$jump($index)">
+            </span>
 
-    <div class="slider-preview-btn"
-        :css="{bottom: preview ? '-5%' : '15%'}" >
-        <span :if="!preview"
-            href="javascript:;"
-            :class="{'no-preview-act': curr === $index}"
-            :repeat="sliderList"
-            :click="$jump($index)">
-        </span>
-
-        <a class="btn-img" href="javascript:;"
-            :if="preview"
-            :class="{act: curr === $index || (curr >= maxNum && $index == maxNum - 1)}"
-            :click="$jump($index)"
-            :repeat="sliderBtnList">
-            <img
-                :class="{'preview-act': curr === $index ||  (curr >= maxNum && $index == maxNum - 1)}"
-                :if="el.src && el.src != ''"
-                :attr-src="el.src" />
-            <div class="btn-background"></div>
-        </a>
+            <a class="btn-img" href="javascript:;"
+                :if="preview && !fullScreen"
+                :class="{act: curr === $index || (curr >= maxNum && $index == maxNum - 1), 'default-btn': !el.src}"
+                :click="$jump($index)"
+                :repeat="sliderBtnList">
+                <img
+                    :class="{'preview-act': curr === $index ||  (curr >= maxNum && $index == maxNum - 1)}"
+                    :if="el.src && el.src != ''"
+                    :attr-src="el.src" />
+                <div class="btn-background" ms-if="el.src"></div>
+            </a>
+        </div>
     </div>
 </div>
