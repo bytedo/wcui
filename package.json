@@ -1,0 +1,26 @@
+{
+  "name": "doui-yua",
+  "version": "0.0.1",
+  "description": "基于yua框架的doUI组件库。支持IE10+,及现代浏览器。",
+  "main": "dist/",
+  "scripts": {
+    "start": "node ./build.dev.js",
+    "build": "node ./build.prod.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yutent/doui.git"
+  },
+  "keywords": ["doui", "yua"],
+  "author": "yutent",
+  "license": "MIT",
+  "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-plugin-transform-es2015-modules-umd": "^6.24.1",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-minify": "^0.2.0",
+    "chokidar": "^1.7.0",
+    "iofs": "^1.0.2",
+    "node-sass": "^4.7.2"
+  }
+}
