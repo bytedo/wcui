@@ -60,7 +60,9 @@ chokidar.watch(path.join(sourceDir, 'font/')).on('all', (act, file) => {
 chokidar.watch(path.resolve(sourceDir, 'css/')).on('all', (act, file) => {
   if (act === 'add' || act === 'change') {
     if (/\.scss$/.test(file)) {
-      let output = file.replace('src/css/', 'dist/css/')
+      let output = file
+        .replace('src/css/', 'dist/css/')
+        .replace('.scss', '.css')
 
       compileCss(file, output)
     }
