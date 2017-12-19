@@ -18,8 +18,15 @@ const cssOpt = {
 }
 
 const compileJs = (entry, output) => {
+  if (/touch\.patch/.test(entry)) {
+    return
+  }
   let t1 = Date.now()
-  const { code } = babel.transformFileSync(entry, jsOpt)
+  let tmpOpt = jsOpt
+  if (/anot/.test(entry)) {
+    tmpOpt = Object.assign({}, jsOpt, { plugins: [] })
+  }
+  const { code } = babel.transformFileSync(entry, tmpOpt)
   log('编译JS: %s, 耗时 %d ms', entry, Date.now() - t1)
   fs.echo(code, output)
 }
@@ -90,4 +97,3 @@ jsFiles.forEach(file => {
       }
   }
 })
-

@@ -6342,4 +6342,4 @@ yua.noConflict = function(deep) {
 
 window.yua = yua
 
-export default yua
+

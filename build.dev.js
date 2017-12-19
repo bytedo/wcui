@@ -19,10 +19,19 @@ const cssOpt = {
 }
 
 const compileJs = (entry, output) => {
+  if (/touch\.patch/.test(entry)) {
+    return
+  }
   let t1 = Date.now()
-  const { code } = babel.transformFileSync(entry, jsOpt)
+  if (/anot/.test(entry)) {
+    setTimeout(() => {
+      fs.cp(entry, output)
+    }, 100)
+  } else {
+    const { code } = babel.transformFileSync(entry, jsOpt)
+    fs.echo(code, output)
+  }
   log('编译JS: %s, 耗时 %d ms', entry, Date.now() - t1)
-  fs.echo(code, output)
 }
 
 const compileCss = (entry, output) => {
