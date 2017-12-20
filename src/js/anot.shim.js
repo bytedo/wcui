@@ -172,31 +172,22 @@
       : typeof obj
   }
 
-  Anot.PropsTypes = {
-    isString: function(val) {
-      function aa() {
-        return Anot.type(val) === 'string'
-      }
-      aa.type = 'PropsTypes'
+  Anot.PropsTypes = function(type) {
+    this.type = 'PropsTypes'
+    this.checkType = type
+  }
 
-      return aa()
+  Anot.PropsTypes.prototype = {
+    toString: function() {
+      return ''
     },
-    isNumber: function(val) {
-      this.type = 'PropsTypes'
-      return Anot.type(val) === 'number'
-    },
-    isArray: function(val) {
-      this.type = 'PropsTypes'
-      return Anot.type(val) === 'array'
-    },
-    isObject: function(val) {
-      this.type = 'PropsTypes'
-      return Anot.type(val) === 'object'
-    },
-    isFunction: function(val) {
-      this.type = 'PropsTypes'
-      return Anot.type(val) === 'function'
+    check: function(val) {
+      return Anot.type(val) === this.checkType
     }
+  }
+
+  Anot.PropsTypes.isString = function() {
+    return new this('string')
   }
 
   /*判定是否是一个朴素的javascript对象（Object），不是DOM对象，不是BOM对象，不是自定义类的实例*/
@@ -218,7 +209,23 @@
       }
       vm = modelFactory(Object.assign({ props: {} }, source))
       vm.$id = $id
-      return (VMODELS[$id] = vm)
+      VMODELS[$id] = vm
+
+      var $elem = document.querySelector('[anot=' + vm.$id + ']')
+      if ($elem) {
+        if ($elem === DOC.body) {
+          scanTag($elem, [])
+        } else {
+          var $parent = null
+          while (($parent = $elem.parentNode)) {
+            if ($parent.anotctrl) {
+              scanTag($elem.parentNode, [VMODELS[$parent.anotctrl]])
+              break
+            }
+          }
+        }
+      }
+      return vm
     } else {
       this[0] = this.element = source
     }
@@ -1342,13 +1349,13 @@
     var simple = []
     var $skipArray = {}
     // 提取 source中的配置项, 并删除相应字段
-    var data = source.data
+    var state = source.state
     var computed = source.computed
     var methods = source.methods
     var props = source.props
     var watches = source.watch
 
-    delete source.data
+    delete source.state
     delete source.computed
     delete source.methods
     delete source.props
@@ -1360,14 +1367,14 @@
     }
 
     // 基础数据
-    if (data) {
+    if (state) {
       if (source.$id) {
         // 直接删除名为props的 字段, 对于主VM对象, props将作为保留关键字
         // 下面的计算属性,方法等, 作同样的逻辑处理
-        delete data.props
+        delete state.props
       }
-      for (name in data) {
-        var value = data[name]
+      for (name in state) {
+        var value = state[name]
         if (!$$skipArray[name]) {
           hasOwn[name] = true
         }
@@ -1442,7 +1449,7 @@
       }
     }
 
-    Object.assign(source, data, methods)
+    Object.assign(source, state, methods)
 
     accessors['$model'] = $modelDescriptor
     $vmodel = Object.defineProperties($vmodel, accessors, source)
@@ -1456,7 +1463,7 @@
     /* jshint ignore:start */
     // hideProperty($vmodel, '$ups', null)
     hideProperty($vmodel, '$id', 'anonymous')
-    // hideProperty($vmodel, '$up', old ? old.$up : null)
+    hideProperty($vmodel, '$up', old ? old.$up : null)
     hideProperty($vmodel, '$track', Object.keys(hasOwn))
     hideProperty($vmodel, '$active', false)
     hideProperty($vmodel, '$pathname', old ? old.$pathname : '')
@@ -1483,7 +1490,7 @@
     //必须设置了$active,$events
     simple.forEach(function(name) {
       var oldVal = old && old[name]
-      var val = ($vmodel[name] = data[name])
+      var val = ($vmodel[name] = state[name])
       if (val && typeof val === 'object') {
         val.$up = $vmodel
         val.$pathname = name
@@ -1581,7 +1588,7 @@
         old.$active = false
       }
       return observeObject(
-        { data: obj },
+        { state: obj },
         {
           old: old,
           watch: watch
@@ -1608,7 +1615,7 @@
 
       array._ = observeObject(
         {
-          data: { length: NaN }
+          state: { length: NaN }
         },
         {
           watch: true
@@ -2950,12 +2957,6 @@
    *                           扫描系统                                 *
    **********************************************************************/
 
-  Anot.scan = function(elem, vmodel) {
-    elem = elem || root
-    var vmodels = vmodel ? [].concat(vmodel) : []
-    scanTag(elem, vmodels)
-  }
-
   //http://www.w3.org/TR/html5/syntax.html#void-elements
   var stopScan = oneObject(
     'area,base,basefont,br,col,command,embed,hr,img,input,link,meta,param,source,track,wbr,noscript,script,style,textarea'.toUpperCase()
@@ -2974,11 +2975,7 @@
   }
 
   function createSignalTower(elem, vmodel) {
-    var id = elem.getAttribute('anotctrl') || vmodel.$id
-    elem.setAttribute('anotctrl', id)
-    if (vmodel.$events) {
-      vmodel.$events.expr = elem.tagName + '[anotctrl="' + id + '"]'
-    }
+    elem.anotctrl = elem.anotctrl || vmodel.$id
   }
 
   function getBindingCallback(elem, name, vmodels) {
@@ -3216,7 +3213,6 @@
     //--> :if-loop(110) --> :attr(970) ...--> :each(1400)-->:with(1500)--〉:duplex(2000)垫后
     var skip = elem.getAttribute('skip')
     node = elem.getAttributeNode('anot')
-
     var vm = vmodels.concat()
     if (typeof skip === 'string') {
       return
@@ -3233,21 +3229,44 @@
       elem.removeAttribute(node.name) //removeAttributeNode不会刷新xx[anot]样式规则
       createSignalTower(elem, newVmodel)
       hideProperty(newVmodel, '$elem', elem)
-      log(attrs)
-      attrs.forEach(function(attr, i) {
-        log(attr, /^:/.test(attr.name), newVmodel.props)
-        if (/^:/.test(attr.name)) {
-          var name = attr.name.replace(':', '')
-          var value = parseExpr(attr.value, vmodels, {}).apply(0, vmodels)
-
-          if (newVmodel.props[name].call(Anot.PropsTypes, value)) {
-            newVmodel.props[name] = value
-          } else {
-            Anot.error('props「' + name + '」类型错误!' + value)
+      if (vmodels.length) {
+        attrs.forEach(function(attr, i) {
+          if (/^:/.test(attr.name)) {
+            var name = attr.name.replace(':', '')
+            var value = null
+            if (Anot.directives[name]) {
+              return
+            }
+            try {
+              value = parseExpr(attr.value, vmodels, {}).apply(0, vmodels)
+              elem.removeAttribute(attr.name)
+            } catch (error) {
+              log(
+                'Props parse faild on (%s[class=%s]),',
+                elem.nodeName,
+                elem.className,
+                attr,
+                error + ''
+              )
+            }
+            if (!value) {
+              return
+            }
+            if (
+              newVmodel.props[name] &&
+              newVmodel.props[name].type === 'PropsTypes'
+            ) {
+              if (newVmodel.props[name].check(value)) {
+                newVmodel.props[name] = value
+              } else {
+                Anot.error('props「' + name + '」类型错误!' + value, TypeError)
+              }
+            } else {
+              newVmodel.props[name] = value
+            }
           }
-        }
-      })
-      // newVmodel.props.aaa = 8999
+        })
+      }
     }
     scanAttr(elem, vm) //扫描特性节点
 
@@ -3702,7 +3721,7 @@
   })
 
   //这几个指令都可以使用插值表达式，如:src="aaa/{{b}}/{{c}}.html"
-  'title,alt,src,value,css,include,href,data'.replace(rword, function(name) {
+  'css,include,data'.replace(rword, function(name) {
     directives[name] = attrDir
   })
 
@@ -5424,7 +5443,7 @@
     }
     force[itemName] = 1
     var proxy = modelFactory(
-      { data: source },
+      { state: source },
       {
         force: force
       }
@@ -5456,9 +5475,12 @@
       $index: 1
     }
     force[itemName] = 1
-    var proxy = modelFactory(source, {
-      force: force
-    })
+    var proxy = modelFactory(
+      { state: source },
+      {
+        force: force
+      }
+    )
     proxy.$id = generateID('$proxy$with')
     return proxy
   }
@@ -6438,7 +6460,7 @@
     loader: true
   })
   Anot.ready(function() {
-    Anot.scan(DOC.body)
+    scanTag(DOC.body, [])
   })
 
   if (typeof define === 'function' && define.amd) {
