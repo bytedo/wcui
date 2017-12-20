@@ -3080,11 +3080,6 @@
             if (events[type]) {
               param = type
               type = 'on'
-            } else if (obsoleteAttrs[type]) {
-              param = type
-              type = 'attr'
-              name = ':' + type + '-' + param
-              log('warning!请改用' + name + '代替' + attr.name + '!')
             }
             if (directives[type]) {
               var newValue = value.replace(roneTime, '')
@@ -3232,14 +3227,32 @@
       if (vmodels.length) {
         attrs.forEach(function(attr, i) {
           if (/^:/.test(attr.name)) {
-            var name = attr.name.replace(':', '')
+            var name = attr.name.match(rmsAttr)[1]
             var value = null
-            if (Anot.directives[name]) {
+            if (!name || Anot.directives[name]) {
               return
             }
             try {
               value = parseExpr(attr.value, vmodels, {}).apply(0, vmodels)
               elem.removeAttribute(attr.name)
+              if (!value) {
+                return
+              }
+              if (
+                newVmodel.props[name] &&
+                newVmodel.props[name].type === 'PropsTypes'
+              ) {
+                if (newVmodel.props[name].check(value)) {
+                  newVmodel.props[name] = value
+                } else {
+                  Anot.error(
+                    'props「' + name + '」类型错误!' + value,
+                    TypeError
+                  )
+                }
+              } else {
+                newVmodel.props[name] = value
+              }
             } catch (error) {
               log(
                 'Props parse faild on (%s[class=%s]),',
@@ -3248,21 +3261,6 @@
                 attr,
                 error + ''
               )
-            }
-            if (!value) {
-              return
-            }
-            if (
-              newVmodel.props[name] &&
-              newVmodel.props[name].type === 'PropsTypes'
-            ) {
-              if (newVmodel.props[name].check(value)) {
-                newVmodel.props[name] = value
-              } else {
-                Anot.error('props「' + name + '」类型错误!' + value, TypeError)
-              }
-            } else {
-              newVmodel.props[name] = value
             }
           }
         })
