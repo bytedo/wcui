@@ -4,5 +4,6 @@ index.html
 .vscode
 node_modules/
 dist/
-dist.sublime-project
-dist.sublime-workspace
+*.sublime-project
+*.sublime-workspace
+package-lock.json
