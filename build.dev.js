@@ -6,6 +6,7 @@ const babel = require('babel-core')
 const scss = require('node-sass')
 const chokidar = require('chokidar')
 const log = console.log
+const chalk = require('chalk')
 
 const sourceDir = path.resolve(__dirname, 'src')
 const buildDir = path.resolve(__dirname, 'dist')
@@ -28,24 +29,44 @@ const compileJs = (entry, output) => {
       fs.cp(entry, output)
     }, 100)
   } else {
-    const { code } = babel.transformFileSync(entry, jsOpt)
-    fs.echo(code, output)
+    try {
+      const { code } = babel.transformFileSync(entry, jsOpt)
+      fs.echo(code, output)
+    } catch (err) {
+      return log(err)
+    }
   }
-  log('编译JS: %s, 耗时 %d ms', entry, Date.now() - t1)
+  log(
+    '编译JS: %s, 耗时 %s ms',
+    chalk.green(entry),
+    chalk.yellow(Date.now() - t1)
+  )
 }
 
 const compileCss = (entry, output) => {
-  let t1 = Date.now()
-  const { css } = scss.renderSync({ ...cssOpt, file: entry })
-  log('编译scss: %s, 耗时 %d ms', entry, Date.now() - t1)
-  fs.echo(css, output)
+  try {
+    let t1 = Date.now()
+    const { css } = scss.renderSync({ ...cssOpt, file: entry })
+    log(
+      '编译scss: %s, 耗时 %s ms',
+      chalk.green(entry),
+      chalk.yellow(Date.now() - t1)
+    )
+    fs.echo(css, output)
+  } catch (err) {
+    log(err)
+  }
 }
 
 const compileHtm = (entry, output) => {
   let t1 = Date.now()
   let htm = fs.cat(entry).toString('utf8')
   htm = htm.replace(/[\r\n\t]+/g, ' ').replace(/\s{2,}/g, ' ')
-  log('压缩HTML: %s, 耗时 %d ms', entry, Date.now() - t1)
+  log(
+    '压缩HTML: %s, 耗时 %s ms',
+    chalk.green(entry),
+    chalk.yellow(Date.now() - t1)
+  )
   fs.echo(htm, output)
 }
 
@@ -102,5 +123,5 @@ chokidar
     }
   })
   .on('ready', () => {
-    log('预处理完成,监听文件变化中,请勿关闭本窗口...')
+    log(chalk.red('预处理完成,监听文件变化中,请勿关闭本窗口...'))
   })

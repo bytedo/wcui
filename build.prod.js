@@ -5,6 +5,7 @@ const path = require('path')
 const babel = require('babel-core')
 const scss = require('node-sass')
 const log = console.log
+const chalk = require('chalk')
 
 const sourceDir = path.resolve(__dirname, 'src')
 const buildDir = path.resolve(__dirname, 'dist')
@@ -27,14 +28,22 @@ const compileJs = (entry, output) => {
     tmpOpt = Object.assign({}, jsOpt, { plugins: [] })
   }
   const { code } = babel.transformFileSync(entry, tmpOpt)
-  log('编译JS: %s, 耗时 %d ms', entry, Date.now() - t1)
+  log(
+    '编译JS: %s, 耗时 %s ms',
+    chalk.green(entry),
+    chalk.yellow(Date.now() - t1)
+  )
   fs.echo(code, output)
 }
 
 const compileCss = (entry, output) => {
   let t1 = Date.now()
   const { css } = scss.renderSync({ ...cssOpt, file: entry })
-  log('编译scss: %s, 耗时 %d ms', entry, Date.now() - t1)
+  log(
+    '编译scss: %s, 耗时 %s ms',
+    chalk.green(entry),
+    chalk.yellow(Date.now() - t1)
+  )
   fs.echo(css, output)
 }
 
@@ -42,7 +51,11 @@ const compileHtm = (entry, output) => {
   let t1 = Date.now()
   let htm = fs.cat(entry).toString('utf8')
   htm = htm.replace(/[\r\n\t]+/g, ' ').replace(/\s{2,}/g, ' ')
-  log('压缩HTML: %s, 耗时 %d ms', entry, Date.now() - t1)
+  log(
+    '压缩HTML: %s, 耗时 %s ms',
+    chalk.green(entry),
+    chalk.yellow(Date.now() - t1)
+  )
   fs.echo(htm, output)
 }
 
@@ -56,7 +69,7 @@ const cssFiles = fs.ls('./src/css/', true)
 
 if (fs.isdir(buildDir)) {
   fs.rm(buildDir, true)
-  log('清除旧目录 dist/')
+  log(chalk.cyan('清除旧目录 dist/'))
 }
 
 // 字体文件直接复制

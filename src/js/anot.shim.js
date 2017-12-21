@@ -24,7 +24,11 @@
   /*********************************************************************
    *                    全局变量及方法                                   *
    **********************************************************************/
-
+  var bindingID = 1024
+  var IEVersion = 0
+  if (window.VBArray) {
+    IEVersion = document.documentMode || (window.XMLHttpRequest ? 7 : 6)
+  }
   var expose = generateID()
   //http://stackoverflow.com/questions/7290086/javascript-use-strict-and-nicks-find-global-function
   var DOC = window.document
@@ -82,11 +86,6 @@
     '[object Promise]': 'promise',
     '[object Generator]': 'generator',
     '[object GeneratorFunction]': 'generatorfunction'
-  }
-  var bindingID = 1024
-  var IEVersion = 0
-  if (window.VBArray) {
-    IEVersion = document.documentMode || (window.XMLHttpRequest ? 7 : 6)
   }
 
   function noop() {}
@@ -188,6 +187,26 @@
 
   Anot.PropsTypes.isString = function() {
     return new this('string')
+  }
+
+  Anot.PropsTypes.isNumber = function() {
+    return new this('number')
+  }
+
+  Anot.PropsTypes.isFunction = function() {
+    return new this('function')
+  }
+
+  Anot.PropsTypes.isArray = function() {
+    return new this('array')
+  }
+
+  Anot.PropsTypes.isObject = function() {
+    return new this('object')
+  }
+
+  Anot.PropsTypes.isBoolean = function() {
+    return new this('boolean')
   }
 
   /*判定是否是一个朴素的javascript对象（Object），不是DOM对象，不是BOM对象，不是自定义类的实例*/
@@ -3394,15 +3413,14 @@
   var componentQueue = []
   var widgetList = []
   var componentHooks = {
-    $construct: function() {
-      return Anot.mix.apply(null, arguments)
+    construct: function(props, next) {
+      next(props)
     },
-    $ready: noop,
-    $init: noop,
-    $dispose: noop,
-    $container: null,
-    $childReady: noop,
-    $$template: function(str) {
+    componentWillMount: noop,
+    componentDidMount: noop,
+    childComponentDidMount: noop,
+    componentWillUnmount: noop,
+    render: function(str) {
       return str
     }
   }
@@ -3416,6 +3434,7 @@
       if (name === obj.name) {
         componentQueue.splice(i, 1)
         i--
+        // (obj, Anot.components[name], obj.element, obj.name)
         ;(function(host, hooks, elem, widget) {
           //如果elem已从Document里移除,直接返回
           if (!Anot.contains(DOC, elem) || elem.msResolved) {
@@ -3424,74 +3443,59 @@
           }
 
           var dependencies = 1
-          var global = componentHooks
+          var globalHooks = componentHooks
 
           //===========收集各种配置=======
-          if (elem.getAttribute(':attr-identifier')) {
+          if (elem.getAttribute(':attr-uuid')) {
             //如果还没有解析完,就延迟一下 #1155
             return
           }
-          var elemOpts = getOptionsFromTag(elem, host.vmodels)
-          var vmOpts = getOptionsFromVM(
-            host.vmodels,
-            elemOpts.config || host.name
-          )
-          var $id = elemOpts.$id || elemOpts.identifier || generateID(widget)
-          delete elemOpts.config
-          delete elemOpts.$id
-          delete elemOpts.identifier
-          var componentDefinition = {
-            $up: host.vmodels[0],
-            $ups: host.vmodels
-          }
+          var props = getOptionsFromTag(elem, host.vmodels)
+          var vmOpts = getOptionsFromVM(host.vmodels, props.config)
+          var $id = props.uuid || generateID(widget)
+          var componentDefinition = {}
 
-          Anot.mix(true, componentDefinition, hooks)
-
-          componentDefinition = Anot.components[name].$construct.call(
-            elem,
-            componentDefinition,
-            vmOpts,
-            elemOpts
-          )
+          props = Object.assign({}, vmOpts, props)
+          vmOpts = void 0
+          delete props.config
+          delete props.uuid
+          hooks.construct.call(elem, props, function next(val) {
+            Object.assign(hooks.props, val)
+            Object.assign(componentDefinition, hooks)
+          })
 
           componentDefinition.$refs = {}
           componentDefinition.$id = $id
 
           //==========构建VM=========
-          var keepContainer = componentDefinition.$container
-          var keepTemplate = componentDefinition.$template
-          delete componentDefinition.$up
-          delete componentDefinition.$ups
-          delete componentDefinition.$slot
-          delete componentDefinition.$replace
-          delete componentDefinition.$container
-          delete componentDefinition.$construct
+          var {
+            componentWillMount,
+            componentDidMount,
+            childComponentDidMount,
+            componentWillUnmount,
+            render
+          } = componentDefinition
 
-          var vmodel = Anot(componentDefinition) || {}
-          vmodel.$ups = host.vmodels
-          vmodel.$up = host.vmodels[0]
+          delete componentDefinition.construct
+          delete componentDefinition.componentWillMount
+          delete componentDefinition.componentDidMount
+          delete componentDefinition.childComponentDidMount
+          delete componentDefinition.componentWillUnmount
+
+          var vmodel = Anot(componentDefinition)
+
           elem.msResolved = 1 //防止二进扫描此元素
-          vmodel.$init(vmodel, elem)
-          global.$init(vmodel, elem)
-          var nodes = elem.childNodes
 
-          if (vmodel.$$template) {
+          componentWillMount.call(vmodel)
+          globalHooks.componentWillMount.call(null, vmodel)
+
+          if (!elem.content.firstElementChild) {
             Anot.clearHTML(elem)
-            elem.innerHTML = vmodel.$$template(keepTemplate)
+            elem.innerHTML = render()
           }
 
           // 组件所使用的标签是temlate,所以必须要要用子元素替换掉
-          var child = elem.content.firstChild
-
-          if (!child || serialize.call(child) === '[object Text]') {
-            var tmpDom = document.createElement('div')
-            if (child) {
-              tmpDom.appendChild(child)
-            }
-            child = tmpDom
-            tmpDom = null
-          }
-
+          var child = elem.content.firstElementChild
           elem.parentNode.replaceChild(child, elem)
 
           child.msResolved = 1
@@ -3503,40 +3507,39 @@
           if (className) {
             Anot(elem).addClass(className)
           }
-          //指定了组件的容器的话,则把组件节点转过去
-          if (keepContainer) {
-            keepContainer.appendChild(elem)
-          }
+
+          hideProperty(vmodel, '$elem', elem)
+
           Anot.fireDom(elem, 'datasetchanged', {
             vm: vmodel,
             childReady: 1
           })
           var children = 0
-          var removeFn = Anot.bind(elem, 'datasetchanged', function(e) {
-            if (e.childReady) {
-              dependencies += e.childReady
-              if (vmodel !== e.vm) {
-                vmodel.$refs[e.vm.$id] = e.vm
-                if (e.childReady === -1) {
+          var removeFn = Anot.bind(elem, 'datasetchanged', function(ev) {
+            if (ev.childReady) {
+              dependencies += ev.childReady
+              if (vmodel !== ev.vm) {
+                vmodel.$refs[ev.vm.$id] = ev.vm
+                if (ev.childReady === -1) {
                   children++
-                  vmodel.$childReady(vmodel, elem, e)
+                  childComponentDidMount.call(vmodel, elem, ev)
                 }
-                e.stopPropagation()
+                ev.stopPropagation()
               }
             }
             if (dependencies === 0) {
-              var id1 = setTimeout(function() {
-                clearTimeout(id1)
-
-                vmodel.$ready(vmodel, elem, host.vmodels)
-                global.$ready(vmodel, elem, host.vmodels)
+              var timer = setTimeout(function() {
+                clearTimeout(timer)
+                componentDidMount.call(vmodel)
+                globalHooks.componentDidMount(null, vmodel)
               }, children ? Math.max(children * 17, 100) : 17)
+
               Anot.unbind(elem, 'datasetchanged', removeFn)
               //==================
               host.rollback = function() {
                 try {
-                  vmodel.$dispose(vmodel, elem)
-                  global.$dispose(vmodel, elem)
+                  componentWillUnmount.call(vmodel)
+                  globalHooks.componentWillUnmount.call(null, vmodel)
                 } catch (e) {}
                 delete Anot.vmodels[vmodel.$id]
               }
@@ -3548,7 +3551,7 @@
               }
             }
           })
-          scanTag(elem, [vmodel].concat(host.vmodels))
+          scanTag(elem, [vmodel])
           Anot.vmodels[vmodel.$id] = vmodel
           if (!elem.childNodes.length) {
             Anot.fireDom(elem, 'datasetchanged', {
@@ -6456,9 +6459,6 @@
 
   Anot.config({
     loader: true
-  })
-  Anot.ready(function() {
-    scanTag(DOC.body, [])
   })
 
   if (typeof define === 'function' && define.amd) {

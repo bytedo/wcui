@@ -1,139 +1,151 @@
-"use strict";
-define(["yua","text!./main.htm", "css!./main"], function(yua, tpl) {
+'use strict'
+import 'Anot'
+import tpl from 'text!./main.htm'
+import 'css!./main.css'
 
-    yua.ui.pages = '1.0.0'
-    var colors = {plain: 1, green: 1, blue: 1, red: 1, orange: 1, grey: 1},
-        themes = ['skin-1 ', 'skin-2 '];
-    //计算页码列表
-    function calculate(vm){
-        if (vm.total < 2)
-            return vm.pageList.clear();
+Anot.ui.pages = '1.0.0'
+var colors = { plain: 1, green: 1, blue: 1, red: 1, orange: 1, grey: 1 },
+  themes = ['skin-1 ', 'skin-2 ']
+//计算页码列表
+function calculate({ currPage, maxPageShow, totalPages }) {
+  let arr = []
+  let midPage =
+    currPage < maxPageShow / 2
+      ? maxPageShow - currPage
+      : Math.floor(maxPageShow / 2)
 
-        var arr = [],
-            mid = vm.curr < vm.max / 2 ? vm.max - vm.curr : Math.floor(vm.max / 2);
-
-        if(vm.curr - mid > 1){
-            arr.push('...')
-        }
-        for (var i = vm.curr - mid; i < vm.curr + mid + 1 && i <= vm.total; i++){
-            if(i > 0){
-                arr.push(i)
-            }
-        }
-        if(vm.curr + mid < vm.total){
-            arr.push('...')
-        }
-        vm.pageList.clear()
-        vm.pageList.pushArray(arr)
+  if (currPage - midPage > 1) {
+    arr.push('...')
+  }
+  for (
+    var i = currPage - midPage;
+    i < currPage + midPage + 1 && i <= totalPages;
+    i++
+  ) {
+    if (i > 0) {
+      arr.push(i)
     }
+  }
+  if (currPage + midPage < totalPages) {
+    arr.push('...')
+  }
+  return arr
+}
 
-    function update(pid, vm) {
-        if(pid < 1){
-            pid = vm.input = 1
-        }
-        if(pid > vm.total){
-            pid = vm.input = vm.total
-        }
-        if(pid !== vm.curr){
-            vm.curr = vm.input = pid
-            vm.$onJump(pid)
-        }
+function update(pid, vm) {
+  if (pid < 1) {
+    pid = vm.input = 1
+  }
+  if (pid > vm.total) {
+    pid = vm.input = vm.total
+  }
+  if (pid !== vm.curr) {
+    vm.curr = vm.input = pid
+    vm.$onJump(pid)
+  }
+}
+
+export default Anot.component('pages', {
+  construct: function(props, next) {
+    // console.log(props, this)
+    next(props)
+  },
+  render: function() {
+    return tpl
+  },
+  componentWillMount: function(vm) {
+    if (this.totalPages < 2) {
+      return
     }
+    const { currPage, totalPages, props } = this
+    this.pageList.clear()
+    this.pageList.pushArray(
+      calculate({ currPage, totalPages, maxPageShow: props.maxPageShow })
+    )
+  },
+  componentDidMount: function() {
+    this.props.onSuccess(this)
+  },
+  state: {
+    currPage: 1,
+    totalItems: 100,
+    perPage: 20,
+    inputJump: !1,
+    simpleMode: !1,
+    inputPage: 1,
+    pageList: []
+  },
+  computed: {
+    totalPages: function() {
+      return Math.ceil(this.totalItems / this.perPage)
+    }
+  },
+  props: {
+    url: 'javascript:;',
+    btns: {
+      prev: '<<',
+      next: '>>',
+      home: '首页',
+      end: '末页'
+    },
+    maxPageShow: 5,
+    theme: 'skin-2 red',
+    onPageChange: Anot.noop,
+    onSuccess: Anot.noop
+  },
+  watch: {
+    curr: function(val, old) {
+      val = val >>> 0 || 1
+      old = old >>> 0
+      if (val !== old) {
+        calculate(vm)
+      }
+    },
+    total: function(val, old) {
+      val = val >>> 0 || 1
+      old = old >>> 0
+      if (val !== old) {
+        calculate(vm)
+      }
+    }
+  },
+  methods: {
+    $setUrl: function(val) {
+      if (
+        !this.props.url ||
+        '...' === val ||
+        this.curr === val ||
+        val > this.total ||
+        1 > val
+      ) {
+        return 'javascript:;'
+      } else {
+        return this.props.url.replace('{id}', val)
+      }
+    },
+    $jump: function(ev, val) {
+      if ('...' !== val) {
+        var link = this.getAttribute('href') || this.getAttribute('xlink:href')
 
-    return yua.component('pages', {
-        $template: tpl,
-        $construct: function(a, b, c){
-            yua.mix(a, b, c)
-            a.theme = themes[a.theme>>0]
-            if(!a.theme){
-                a.theme = themes[0]
-            }
-            if(a.color && colors[a.color]){
-                a.theme += a.color
-            }else{
-                a.theme += 'plain'
-            }
-            delete a.color
-            return a
-        },
-        $init: function(vm) {
-
-            calculate(vm)
-
-            vm.$setUrl = function(val) {
-                if(!vm.url
-                    || '...' === val
-                    || vm.curr === val
-                    || val > vm.total
-                    || 1 > val) {
-
-                    return 'javascript:;'
-                }else{
-                    return vm.url.replace('{id}', val)
-                }
-            }
-            vm.$forceReset = function(){
-                vm.curr = 1
-                calculate(vm)
-            }
-
-            vm.$jump = function(ev, val) {
-                if ('...' !== val) {
-                    var link = this.getAttribute('href') || this.getAttribute('xlink:href')
-
-                    if (val !== void 0){
-                        if('javascript:;' !== link){
-                            location.href = link
-                        }
-                        var pid = val >> 0;
-                        update(pid, vm)
-                    } else {
-                        vm.input = vm.input >>> 0 || 1;
-                        if(13 == ev.keyCode){
-                            update(vm.input, vm)
-                        }
-                    }
-                }
-            }
-            vm.$watch('curr', function(val, old) {
-                val = (val >>> 0) || 1
-                old = old >>> 0
-                if(val !== old){
-                    calculate(vm)
-                }
-            })
-
-            vm.$watch('total', function(val, old) {
-                val = (val >>> 0) || 1
-                old = old >>> 0
-                if(val !== old){
-                    calculate(vm)
-                }
-            })
-        },
-        $ready: function(vm){
-            vm.$onSuccess(vm)
-        },
-        curr: 1,
-        total: 1,
-        max: 5,
-        url: "javascript:;",
-        inputJump: !1,
-        simpleMode: !1,
-        input: 1,
-        pageList: [],
-        btns: {
-            prev: "<<",
-            next: ">>",
-            home: "首页",
-            end: "末页"
-        },
-        theme: '',
-        $skipArray: ['max', 'btns', 'url', 'theme'],
-        $setUrl: yua.noop,
-        $jump: yua.noop,
-        $onJump: yua.noop,
-        $onSuccess: yua.noop,
-        $forceReset: yua.noop,
-    })
-});
+        if (val !== void 0) {
+          if ('javascript:;' !== link) {
+            location.href = link
+          }
+          var pid = val >> 0
+          update(pid, this)
+        } else {
+          this.input = this.input >>> 0 || 1
+          if (13 == ev.keyCode) {
+            update(this.input, this)
+          }
+        }
+      }
+    },
+    $onJump: Anot.noop,
+    $onSuccess: Anot.noop,
+    $forceReset: function() {
+      this.curr = 1
+      calculate(this)
+    }
+  }
+})
