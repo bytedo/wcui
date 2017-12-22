@@ -9,78 +9,87 @@
 @import "../../../css/var.scss";
 
 
-.do-pages {height:auto;text-align:center;font-size:13px;
+.do-pages {height:auto;text-align:center;font-size:13px;color: nth($cgr, 1);
     
-    a {display:inline-block;width:auto;min-width:40px;height:40px;line-height:40px;color: nth($cgr, 1);text-decoration:none;cursor:pointer;}
-    a.curr, a.disabled {cursor:default;}
+  a {display:inline-block;width:auto;min-width:40px;height:40px;line-height:40px;color: nth($cgr, 1);text-decoration:none;cursor:pointer;}
+  a.curr, a.disabled {cursor:default;}
+  
+  &.skin-1 {width:100%;
+
+    a.normal,
+    a.disabled,
+    a.curr {padding:0 10px;margin:0 3px;}
     
-    &.skin-1 {width:100%;
-
-        a.normal,
-        a.disabled,
-        a.curr {padding:0 10px;margin:0 3px;}
-        
-        a.curr {font-weight:bold;font-size:15px;}
-        a.disabled {min-width:0;padding:0}
-
-        .input-box,
-        .input-box span,
-        .input-box input {display:inline-block}
-        .input-box input {width:25px;height:20px;padding:0 3px;background:#fff;border:1px solid #ddd}
-        .input-box a.normal{height:30px;line-height:30px;}
+    a.curr {font-weight:bold;font-size:15px;}
+    a.disabled {min-width:0;padding:0;background:none;color:nth($cgr, 1);
+      &:hover,&:active {background:none;}
     }
 
+    .input-box,
+    .input-box span,
+    .input-box input {display:inline-block;}
+    .input-box input {width:30px;height:30px;padding:0 3px;background:#fff;border:1px solid #ddd;text-align:center;}
+  }
 
-    &.skin-2 {float:right;width:auto;
-        
-        a.normal,
-        a.disabled,
-        a.curr {float:left;margin:0;padding:0 5px;color:#fff;}
+  &.skin-2 {float:right;width:auto;
+      
+      a.normal,
+      a.disabled,
+      a.curr {float:left;margin:0;padding:0 5px;color:#fff;}
 
-        a.disabled {display:none;}
-        
-        .input-box {display:none;}
+      a.disabled {display:none;}
+      
+      .input-box {display:none;}
+  }
+
+  &.plain a.normal {background:nth($cp, 1);color:nth($cgr, 1);}
+  &.plain a.normal:hover {background:nth($cp, 2)}
+  &.skin-2.plain a.curr,
+  &.plain a.normal:active {background:nth($cp, 3)}
+
+  &.grey a.normal {background:nth($cgr, 1);color: #fff;}
+  &.grey a.normal:hover {background:nth($cgr, 2)}
+  &.skin-2.grey a.curr,
+  &.grey a.normal:active {background:nth($cgr, 3)}
+
+  &.red a.normal {background:nth($cr, 1);color: #fff;}
+  &.red a.normal:hover {background:nth($cr, 2)}
+  &.skin-2.red a.curr,
+  &.red a.normal:active {background:nth($cr, 3)}
+
+  &.orange a.normal {background:nth($co, 1);color: #fff;}
+  &.orange a.normal:hover {background:nth($co, 2)}
+  &.skin-2.orange a.curr,
+  &.orange a.normal:active {background:nth($co, 3)}
+
+  &.green a.normal {background:nth($cg, 1);color: #fff;}
+  &.green a.normal:hover {background:nth($cg, 2)}
+  &.skin-2.green a.curr,
+  &.green a.normal:active {background:nth($cg, 3)}
+
+  &.teal a.normal {background:nth($ct, 1);color: #fff;}
+  &.teal a.normal:hover {background:nth($ct, 2)}
+  &.skin-2.teal a.curr,
+  &.teal a.normal:active {background:nth($ct, 3)}
+
+  &.blue a.normal {background:nth($cb, 1);color: #fff;}
+  &.blue a.normal:hover {background:nth($cb, 2)}
+  &.skin-2.blue a.curr,
+  &.blue a.normal:active {background:nth($cb, 3)}
+
+  &.purple a.normal {background:nth($cpp, 1);color: #fff;}
+  &.purple a.normal:hover {background:nth($cpp, 2)}
+  &.skin-2.purple a.curr,
+  &.purple a.normal:active {background:nth($cpp, 3)}
+
+  
+
+  &.skin-1 {
+    a.disabled {background:none;color:nth($cgr, 1);
+      &:hover,&:active {background:none;}
     }
-
-    &.plain a.normal {background:nth($cp, 1)}
-    &.plain a.normal:hover {background:nth($cp, 2)}
-    &.skin-2.plain a.curr,
-    &.plain a.normal:active {background:nth($cp, 3)}
-
-    &.grey a.normal {background:nth($cgr, 1);color: #fff;}
-    &.grey a.normal:hover {background:nth($cgr, 2)}
-    &.skin-2.grey a.curr,
-    &.grey a.normal:active {background:nth($cgr, 3)}
-
-    &.red a.normal {background:nth($cr, 1);color: #fff;}
-    &.red a.normal:hover {background:nth($cr, 2)}
-    &.skin-2.red a.curr,
-    &.red a.normal:active {background:nth($cr, 3)}
-
-    &.orange a.normal {background:nth($co, 1);color: #fff;}
-    &.orange a.normal:hover {background:nth($co, 2)}
-    &.skin-2.orange a.curr,
-    &.orange a.normal:active {background:nth($co, 3)}
-
-    &.green a.normal {background:nth($cg, 1);color: #fff;}
-    &.green a.normal:hover {background:nth($cg, 2)}
-    &.skin-2.green a.curr,
-    &.green a.normal:active {background:nth($cg, 3)}
-
-    &.teal a.normal {background:nth($ct, 1);color: #fff;}
-    &.teal a.normal:hover {background:nth($ct, 2)}
-    &.skin-2.teal a.curr,
-    &.teal a.normal:active {background:nth($ct, 3)}
-
-    &.blue a.normal {background:nth($cb, 1);color: #fff;}
-    &.blue a.normal:hover {background:nth($cb, 2)}
-    &.skin-2.blue a.curr,
-    &.blue a.normal:active {background:nth($cb, 3)}
-
-    &.purple a.normal {background:nth($cpp, 1);color: #fff;}
-    &.purple a.normal:hover {background:nth($cpp, 2)}
-    &.skin-2.purple a.curr,
-    &.purple a.normal:active {background:nth($cpp, 3)}
+  }
+  
 
 }
 

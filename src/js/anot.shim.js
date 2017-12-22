@@ -1363,7 +1363,7 @@
     var oldAccessors = (old && old.$accessors) || nullObject
     var $vmodel = new Component() //要返回的对象, 它在IE6-8下可能被偷龙转凤
     var accessors = {} //监控属性
-    var hasOwn = { props: !!source.$id }
+    var hasOwn = {}
     var skip = []
     var simple = []
     var $skipArray = {}
@@ -1463,6 +1463,7 @@
 
     if (props) {
       hideProperty($vmodel, 'props', {})
+      hasOwn.props = !!source.$id
       for (var name in props) {
         $vmodel.props[name] = props[name]
       }
@@ -2789,20 +2790,18 @@
     var ret = [],
       prefix = ' = ' + name + '.'
     for (var i = vars.length, prop; (prop = vars[--i]); ) {
-      var arr = prop.split('.'),
-        a
+      var arr = prop.split('.')
       var first = arr[0]
-      while ((a = arr.shift())) {
-        if (vmodel.hasOwnProperty(a)) {
-          ret.push(first + prefix + first)
-          binding.observers.push({
-            v: vmodel,
-            p: prop
-          })
-          vars.splice(i, 1)
-        } else {
-          break
-        }
+
+      if (vmodel.hasOwnProperty(first)) {
+        // log(first, prop, prefix, vmodel)
+        ret.push(first + prefix + first)
+        binding.observers.push({
+          v: vmodel,
+          p: prop,
+          type: Anot.type(vmodel[first])
+        })
+        vars.splice(i, 1)
       }
     }
     return ret
@@ -2860,6 +2859,7 @@
       }) +
       expr +
       dataType
+    // log(expr, '---------------', assigns)
     var getter = evaluatorPool.get(exprId) //直接从缓存，免得重复生成
     if (getter) {
       if (dataType === 'duplex') {
@@ -2869,6 +2869,7 @@
       return (binding.getter = getter)
     }
 
+    // expr的字段不可枚举时,补上一个随机变量, 避免抛出异常
     if (!assigns.length) {
       assigns.push('fix' + expose)
     }
@@ -2896,9 +2897,9 @@
     if (dataType === 'on') {
       //事件绑定
       if (expr.indexOf('(') === -1) {
-        expr += '.call(this, $event)'
+        expr += '.call(' + names[names.length - 1] + ', $event)'
       } else {
-        expr = expr.replace('(', '.call(this,')
+        expr = expr.replace('(', '.call(' + names[names.length - 1] + ', ')
       }
       names.push('$event')
       expr = '\nreturn ' + expr + ';' //IE全家 Function("return ")出错，需要Function("return ;")
@@ -2907,11 +2908,33 @@
       var footer = expr.slice(lastIndex)
       expr = header + '\n' + footer
     } else {
+      // 对于非事件绑定的方法, 同样绑定到vm上
+      binding.observers.forEach(function(it) {
+        if (it.type === 'function') {
+          // log(it, expr)
+          let reg = new RegExp(it.p + '\\(([^)]*)\\)', 'g')
+          expr = expr.replace(reg, function(s, m) {
+            m = m.trim()
+            return (
+              it.p +
+              '.call(' +
+              names[names.length - 1] +
+              (m ? ', ' + m : '') +
+              ')'
+            )
+          })
+        }
+      })
       expr = '\nreturn ' + expr + ';' //IE全家 Function("return ")出错，需要Function("return ;")
     }
     /* jshint ignore:start */
     getter = scpCompile(
-      names.concat("'use strict';\nvar " + assigns.join(',\n') + expr)
+      names.concat(
+        "'use strict';\ntry{\nvar " +
+          assigns.join(',\n') +
+          expr +
+          '\n}catch(e){log(e)}'
+      )
     )
     /* jshint ignore:end */
 
@@ -3990,18 +4013,11 @@
 
       binding.param.replace(rw20g, function(name) {
         if (rduplexType.test(elem.type) && rduplexParam.test(name)) {
-          if (name === 'radio') log(':duplex-radio已经更名为:duplex-checked')
           name = 'checked'
           binding.isChecked = true
           binding.xtype = 'radio'
         }
-        if (name === 'bool') {
-          name = 'boolean'
-          log(':duplex-bool已经更名为:duplex-boolean')
-        } else if (name === 'text') {
-          name = 'string'
-          log(':duplex-text已经更名为:duplex-string')
-        }
+
         if (casting[name]) {
           hasCast = true
         }
@@ -5159,8 +5175,9 @@
         keyOrId = track[i] //array为随机数, object 为keyName
         var proxy = retain[keyOrId]
         if (!proxy) {
+          // log(this)
           proxy = getProxyVM(this)
-          proxy.$up = null
+          proxy.$up = this.vmodels[0]
           if (xtype === 'array') {
             action = 'add'
             proxy.$id = keyOrId

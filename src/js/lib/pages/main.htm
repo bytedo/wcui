@@ -1,33 +1,32 @@
-<div class="do-pages do-fn-noselect" :class="{{props.theme}}">
+<div class="do-pages do-fn-noselect" :class="{{props.className}}">
     <a class="normal"
-        :if="currPage > 1 && !simpleMode"
-        :attr="{href: $setUrl(1)}"
+        :if="currPage > 1 && !props.simpleMode"
+        :attr="{href: parseUrl(1)}"
         :text="props.btns.home"
-        :click="$jump($event, 1)"></a>
+        :click="setPage(1, $event)"></a>
     <a class="normal"
         :if="currPage > 1"
-        :attr="{href: $setUrl(currPage - 1)}"
+        :attr="{href: parseUrl(currPage - 1)}"
         :text="props.btns.prev"
-        :click="$jump($event, currPage - 1)"></a>
-    <a :if-loop="!simpleMode || currPage === el"
+        :click="setPage(currPage - 1, $event)"></a>
+    <a :if-loop="!props.simpleMode || currPage === el"
         :repeat="pageList"
-        :attr="{href: $setUrl(el)}"
-        :class="{normal: currPage !== el && '...' !== el, disabled: '...' === el, curr: currPage === el}"
+        :attr="{href: parseUrl(el)}"
+        :class="{normal: currPage !== el, disabled: '...' === el, curr: currPage === el}"
         :text="el"
-        :click="$jump($event, el)"></a>
+        :click="setPage(el, $event)"></a>
     <a class="normal"
         :if="currPage < totalPages"
-        :attr="{href: $setUrl(currPage + 1)}"
-        :click="$jump($event, currPage + 1)">{{props.btns.next}}</a>
+        :attr="{href: parseUrl(currPage + 1)}"
+        :click="setPage(currPage + 1, $event)">{{props.btns.next}}</a>
     <a class="normal"
-        :if="currPage < totalPages && !simpleMode"
-        :attr="{href: $setUrl(totalPages)}"
-        :click="$jump($event, totalPages)">{{props.btns.end}}</a>
+        :if="currPage < totalPages && !props.simpleMode"
+        :attr="{href: parseUrl(totalPages)}"
+        :click="setPage(totalPages, $event)">{{props.btns.end}}</a>
 
-    <div class="input-box" :if="inputJump && !simpleMode">
-        <span>共{{totalPages}}页 {{totalItems}}条，跳转到第</span>
-        <input type="text" :duplex-number="inputPage" :keyup="$jump($event)">
+    <div class="input-box" :if="!props.simpleMode">
+        <span>共 {{totalPages}} 页 {{totalItems}} 条，前往</span>
+        <input type="text" :duplex="inputPage" :keyup="setPage(null, $event)">
         <span>页</span>
-        <a class="normal" :attr="{href: $setUrl(input)}" :click="$jump($event, input)">确定</a>
     </div>
 </div>

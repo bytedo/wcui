@@ -4,56 +4,58 @@ import tpl from 'text!./main.htm'
 import 'css!./main.css'
 
 Anot.ui.pages = '1.0.0'
-var colors = { plain: 1, green: 1, blue: 1, red: 1, orange: 1, grey: 1 },
-  themes = ['skin-1 ', 'skin-2 ']
 //计算页码列表
 function calculate({ currPage, maxPageShow, totalPages }) {
   let arr = []
-  let midPage =
+  let fixNum = 0
+  let halfPage =
     currPage < maxPageShow / 2
       ? maxPageShow - currPage
       : Math.floor(maxPageShow / 2)
 
-  if (currPage - midPage > 1) {
+  if (currPage - halfPage > 1) {
     arr.push('...')
   }
+  if (totalPages - currPage < halfPage) {
+    fixNum = halfPage - totalPages + currPage
+  }
   for (
-    var i = currPage - midPage;
-    i < currPage + midPage + 1 && i <= totalPages;
+    let i = currPage - halfPage - fixNum;
+    i < currPage + halfPage + 1 && i <= totalPages;
     i++
   ) {
     if (i > 0) {
       arr.push(i)
     }
   }
-  if (currPage + midPage < totalPages) {
+  if (currPage + halfPage < totalPages) {
     arr.push('...')
   }
   return arr
 }
-
-function update(pid, vm) {
-  if (pid < 1) {
-    pid = vm.input = 1
-  }
-  if (pid > vm.total) {
-    pid = vm.input = vm.total
-  }
-  if (pid !== vm.curr) {
-    vm.curr = vm.input = pid
-    vm.$onJump(pid)
-  }
+// 更新组件
+function update(currPage, vm) {
+  const { totalPages, props } = vm
+  vm.pageList.clear()
+  vm.pageList.pushArray(
+    calculate({ currPage, totalPages, maxPageShow: props.maxPageShow })
+  )
+  vm.currPage = vm.inputPage = currPage
+  vm.props.onPageChange.call(null, currPage)
 }
 
 export default Anot.component('pages', {
   construct: function(props, next) {
-    // console.log(props, this)
+    props.className =
+      'skin-' + (props.theme || 1) + ' ' + (props.color || 'plain')
+    delete props.theme
+    delete props.color
     next(props)
   },
   render: function() {
     return tpl
   },
-  componentWillMount: function(vm) {
+  componentWillMount: function() {
     if (this.totalPages < 2) {
       return
     }
@@ -64,24 +66,23 @@ export default Anot.component('pages', {
     )
   },
   componentDidMount: function() {
-    this.props.onSuccess(this)
+    this.props.onSuccess.call(null, this)
   },
   state: {
     currPage: 1,
-    totalItems: 100,
-    perPage: 20,
-    inputJump: !1,
-    simpleMode: !1,
+    totalItems: 1000,
+    pageSize: 20,
+
     inputPage: 1,
     pageList: []
   },
   computed: {
     totalPages: function() {
-      return Math.ceil(this.totalItems / this.perPage)
+      return Math.ceil(this.totalItems / this.pageSize)
     }
   },
   props: {
-    url: 'javascript:;',
+    url: null,
     btns: {
       prev: '<<',
       next: '>>',
@@ -89,63 +90,58 @@ export default Anot.component('pages', {
       end: '末页'
     },
     maxPageShow: 5,
-    theme: 'skin-2 red',
+    className: '',
+    simpleMode: !1,
     onPageChange: Anot.noop,
     onSuccess: Anot.noop
   },
-  watch: {
-    curr: function(val, old) {
-      val = val >>> 0 || 1
-      old = old >>> 0
-      if (val !== old) {
-        calculate(vm)
-      }
-    },
-    total: function(val, old) {
-      val = val >>> 0 || 1
-      old = old >>> 0
-      if (val !== old) {
-        calculate(vm)
-      }
-    }
-  },
   methods: {
-    $setUrl: function(val) {
-      if (
-        !this.props.url ||
-        '...' === val ||
-        this.curr === val ||
-        val > this.total ||
-        1 > val
-      ) {
+    // 格式化页码的URL
+    parseUrl: function(val) {
+      val = val >>> 0
+      if (val < 1 || !this.props.url || this.currPage === val) {
         return 'javascript:;'
-      } else {
-        return this.props.url.replace('{id}', val)
       }
+      return this.props.url.replace('{id}', val)
     },
-    $jump: function(ev, val) {
-      if ('...' !== val) {
-        var link = this.getAttribute('href') || this.getAttribute('xlink:href')
+    // 设置页码
+    setPage: function(val, ev) {
+      if (this.currPage === val) {
+        return
+      }
+      let elem = (ev && ev.target) || null
+      if (val && elem) {
+        if (val && val !== '...') {
+          let link =
+            (elem && elem.getAttribute('href')) ||
+            elem.getAttribute('xlink:href')
 
-        if (val !== void 0) {
           if ('javascript:;' !== link) {
             location.href = link
+          } else {
+            val = val >> 0
+            update(val, this)
           }
-          var pid = val >> 0
-          update(pid, this)
+        }
+      } else {
+        if (val === null) {
+          this.inputPage = this.inputPage >>> 0 || 1
+          if (ev && ev.keyCode === 13) {
+            update(this.inputPage, this)
+          }
         } else {
-          this.input = this.input >>> 0 || 1
-          if (13 == ev.keyCode) {
-            update(this.input, this)
-          }
+          val = val >>> 0
+          update(val, this)
         }
       }
     },
-    $onJump: Anot.noop,
-    $onSuccess: Anot.noop,
-    $forceReset: function() {
-      this.curr = 1
-      calculate(this)
+    setPageSize: function(num) {
+      this.pageSize = +num
+      update(1, this)
+    },
+    setTotalItems: function(num) {
+      this.totalItems = +num
+      update(1, this)
     }
   }
 })
