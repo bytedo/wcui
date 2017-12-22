@@ -1,7 +1,7 @@
 {
   "name": "doui-yua",
   "version": "0.0.1",
-  "description": "基于yua框架的doUI组件库。支持IE10+,及现代浏览器。",
+  "description": "基于Anot框架的doUI组件库。支持IE10+,及现代浏览器。",
   "main": "dist/",
   "scripts": {
     "start": "node ./build.dev.js",
@@ -11,10 +11,7 @@
     "type": "git",
     "url": "git+https://github.com/yutent/doui.git"
   },
-  "keywords": [
-    "doui",
-    "yua"
-  ],
+  "keywords": ["doui", "yua"],
   "author": "yutent",
   "license": "MIT",
   "devDependencies": {
