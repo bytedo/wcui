@@ -11,7 +11,7 @@ const sourceDir = path.resolve(__dirname, 'src')
 const buildDir = path.resolve(__dirname, 'dist')
 const jsOpt = {
   presets: ['es2015', 'minify'],
-  plugins: ['transform-es2015-modules-umd']
+  plugins: ['transform-es2015-modules-amd']
 }
 const cssOpt = {
   includePaths: ['src/css/'],

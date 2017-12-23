@@ -1,7 +1,6 @@
 'use strict'
-import 'Anot'
-import tpl from 'text!./main.htm'
-import 'css!./main.css'
+import tpl from './main.htm'
+import './main.scss'
 
 Anot.ui.pages = '1.0.0'
 //计算页码列表

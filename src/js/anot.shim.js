@@ -5800,33 +5800,25 @@
     var factorys = [] //放置define方法的factory函数
     var rjsext = /\.js$/i
     function makeRequest(name, config) {
-      //1. 去掉资源前缀
-      var res = 'js'
-      name = name.replace(/^(\w+)\!/, function(a, b) {
-        res = b
-        return ''
-      })
-      if (res === 'ready') {
-        log('ready!已经被废弃，请使用domReady!')
-        res = 'domReady'
-      }
-      //2. 去掉querystring, hash
+      //1. 去掉querystring, hash
       var query = ''
-      name = name.replace(rquery, function(a) {
-        query = a
+      name = name.replace(rquery, function(match) {
+        query = match
         return ''
       })
-      //3. 去掉扩展名
-      var suffix = '.' + res
-      var ext = /js|css/.test(suffix) ? suffix : ''
-      name = name.replace(/\.[a-z0-9]+$/g, function(a) {
-        if (a === suffix) {
-          ext = a
-          return ''
-        } else {
-          return a
-        }
+
+      //2. 去掉扩展名
+      var ext = '.js' //默认拓展名
+      var res = 'js' // 默认资源类型
+      var suffix = ['.js', '.css']
+      var cssfix = /\.(scss|sass|less)$/
+      name = name.replace(/\.[a-z0-9]+$/g, function(match) {
+        match = match.replace(cssfix, '.css')
+        ext = match
+        res = suffix.indexOf(match) > -1 ? match.slice(1) : 'text'
+        return ''
       })
+
       //补上协议, 避免引入依赖时判断不正确
       if (/^\/\//.test(name)) {
         name = location.protocol + name
@@ -5992,6 +5984,7 @@
         delete factory.require //释放内存
         innerRequire.apply(null, args) //0,1,2 --> 1,2,0
       }
+
       //根据标准,所有遵循W3C标准的浏览器,script标签会按标签的出现顺序执行。
       //老的浏览器中，加载也是按顺序的：一个文件下载完成后，才开始下载下一个文件。
       //较新的浏览器中（IE8+ 、FireFox3.5+ 、Chrome4+ 、Safari4+），为了减小请求时间以优化体验，

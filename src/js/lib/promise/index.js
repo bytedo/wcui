@@ -96,6 +96,18 @@ _Promise.race = function(arr) {
 
 _Promise.defer = defer
 
+_Promise.resolve = function(val) {
+  var obj = this.defer()
+  obj.resolve(val)
+  return obj.promise
+}
+
+_Promise.reject = function(val) {
+  var obj = this.defer()
+  obj.reject(val)
+  return obj.promise
+}
+
 // -----------------------------------------------------------
 
 function _yes(val) {
