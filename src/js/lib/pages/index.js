@@ -12,6 +12,9 @@ function calculate({ currPage, maxPageShow, totalPages }) {
       ? maxPageShow - currPage
       : Math.floor(maxPageShow / 2)
 
+  if (totalPages < 2) {
+    return arr
+  }
   if (currPage - halfPage > 1) {
     arr.push('...')
   }
@@ -35,12 +38,15 @@ function calculate({ currPage, maxPageShow, totalPages }) {
 // 更新组件
 function update(currPage, vm) {
   const { totalPages, props } = vm
+  vm.currPage = vm.inputPage = currPage
+  vm.props.onPageChange.call(null, currPage)
+  if (totalPages < 2) {
+    return
+  }
   vm.pageList.clear()
   vm.pageList.pushArray(
     calculate({ currPage, totalPages, maxPageShow: props.maxPageShow })
   )
-  vm.currPage = vm.inputPage = currPage
-  vm.props.onPageChange.call(null, currPage)
 }
 
 export default Anot.component('pages', {
@@ -55,9 +61,6 @@ export default Anot.component('pages', {
     return tpl
   },
   componentWillMount: function() {
-    if (this.totalPages < 2) {
-      return
-    }
     const { currPage, totalPages, props } = this
     this.pageList.clear()
     this.pageList.pushArray(
@@ -69,9 +72,8 @@ export default Anot.component('pages', {
   },
   state: {
     currPage: 1,
-    totalItems: 1000,
+    totalItems: 1,
     pageSize: 20,
-
     inputPage: 1,
     pageList: []
   },
@@ -80,6 +82,7 @@ export default Anot.component('pages', {
       return Math.ceil(this.totalItems / this.pageSize)
     }
   },
+  skip: ['currPage', 'totalItems', 'pageSize'],
   props: {
     url: null,
     btns: {
@@ -124,9 +127,18 @@ export default Anot.component('pages', {
         }
       } else {
         if (val === null) {
-          this.inputPage = this.inputPage >>> 0 || 1
+          let { inputPage, totalPages, currPage } = this
+          inputPage = inputPage >>> 0
+
           if (ev && ev.keyCode === 13) {
-            update(this.inputPage, this)
+            if (inputPage < 1 || currPage === inputPage) {
+              return (this.inputPage = currPage)
+            }
+            if (inputPage > totalPages) {
+              inputPage = totalPages
+            }
+            this.inputPage = inputPage
+            update(inputPage, this)
           }
         } else {
           val = val >>> 0
@@ -139,6 +151,7 @@ export default Anot.component('pages', {
       update(1, this)
     },
     setTotalItems: function(num) {
+      console.log(this, num)
       this.totalItems = +num
       update(1, this)
     }
