@@ -50,12 +50,12 @@ function update(currPage, vm) {
 }
 
 export default Anot.component('pages', {
-  construct: function(props, next) {
+  construct: function(props, state, next) {
     props.className =
       'skin-' + (props.theme || 1) + ' ' + (props.color || 'plain')
     delete props.theme
     delete props.color
-    next(props)
+    next(props, state)
   },
   render: function() {
     return tpl

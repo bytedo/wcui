@@ -6,7 +6,7 @@
  */
 
 'use strict'
-import 'lib/promise/index'
+import 'promise/index'
 import Format from './lib/format'
 
 var _request = function(url, protocol) {

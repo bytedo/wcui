@@ -3287,10 +3287,7 @@
                 if (newVmodel.props[name].check(value)) {
                   newVmodel.props[name] = value
                 } else {
-                  Anot.error(
-                    'props「' + name + '」类型错误!' + value,
-                    TypeError
-                  )
+                  Anot.error('props「' + name + '」类型错误!', TypeError)
                 }
               } else {
                 newVmodel.props[name] = value
@@ -3436,8 +3433,8 @@
   var componentQueue = []
   var widgetList = []
   var componentHooks = {
-    construct: function(props, next) {
-      next(props)
+    construct: function(props, state, next) {
+      next(props, state)
     },
     componentWillMount: noop,
     componentDidMount: noop,
@@ -3480,14 +3477,27 @@
 
           props = Object.assign({}, vmOpts, props)
           vmOpts = void 0
+          // log(props)
+          for (var i in props) {
+            if (props[i] === '__fn__') {
+              props[i] = elem[i]
+              delete elem[i]
+            }
+          }
+
           delete props.config
           delete props.uuid
-          hooks.construct.call(elem, props, function next(val) {
-            Object.assign(hooks.props, val)
+          delete props.name
+
+          hooks.props = hooks.props || {}
+          hooks.state = hooks.state || {}
+
+          hooks.construct.call(elem, props, {}, function next(props, state) {
+            Object.assign(hooks.props, props)
+            Object.assign(hooks.state, state)
             Object.assign(componentDefinition, hooks)
           })
 
-          componentDefinition.$refs = {}
           componentDefinition.$id = $id
 
           //==========构建VM=========
@@ -3506,6 +3516,7 @@
           delete componentDefinition.componentWillUnmount
 
           var vmodel = Anot(componentDefinition)
+          vmodel.$refs = {}
 
           elem.msResolved = 1 //防止二进扫描此元素
 
@@ -3689,9 +3700,13 @@
       var obj = val
 
       if (typeof obj === 'object' && obj !== null) {
-        if (!Anot.isPlainObject(obj)) obj = obj.$model
+        if (!Anot.isPlainObject(obj)) {
+          obj = obj.$model
+        }
       } else {
-        if (!this.param) return
+        if (!this.param) {
+          return
+        }
 
         obj = {}
         obj[this.param] = val
@@ -3718,7 +3733,9 @@
         } else {
           var k = i
           //古董IE下，部分属性名字要进行映射
-          if (!W3C && propMap[k]) k = propMap[k]
+          if (!W3C && propMap[k]) {
+            k = propMap[k]
+          }
 
           if (typeof elem[boolMap[k]] === 'boolean') {
             //布尔属性必须使用el.xxx = true|false方式设值
@@ -3737,6 +3754,13 @@
           if (isInnate) {
             elem[k] = obj[i]
           } else {
+            if (typeof obj[i] === 'object') {
+              obj[i] = JSON.stringify(obj[i])
+            } else if (typeof obj[i] === 'function') {
+              var ck = Anot.filters.camelize(k)
+              elem[ck] = obj[i]
+              obj[i] = '__fn__'
+            }
             elem.setAttribute(k, obj[i])
           }
         }
