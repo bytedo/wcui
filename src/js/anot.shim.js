@@ -3723,16 +3723,22 @@
           if (!W3C && propMap[k]) {
             k = propMap[k]
           }
+          if (obj[i] === false || obj[i] === null || obj[i] === undefined) {
+            obj[i] = ''
+          }
 
           if (typeof elem[boolMap[k]] === 'boolean') {
             //布尔属性必须使用el.xxx = true|false方式设值
             elem[boolMap[k]] = !!obj[i]
 
             //如果为false, IE全系列下相当于setAttribute(xxx, ''),会影响到样式,需要进一步处理
-            if (!obj[i]) obj[i] = !!obj[i]
+            if (!obj[i]) {
+              obj[i] = !!obj[i]
+            }
+            if (obj[i] === false) {
+              return elem.removeAttribute(k)
+            }
           }
-          if (obj[i] === false || obj[i] === null || obj[i] === undefined)
-            return elem.removeAttribute(k)
 
           //SVG只能使用setAttribute(xxx, yyy), VML只能使用elem.xxx = yyy ,HTML的固有属性必须elem.xxx = yyy
           var isInnate = rsvg.test(elem)

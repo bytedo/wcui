@@ -44,6 +44,7 @@ export default Anot.component('tree', {
         <em class="ui-font" :click="toggle(el)"></em>
         <span
           class="checkbox ui-font"
+          :if="multiCheck"
           :class="{checked: el.checked}"
           :click="onChecked(el)"></span>
         <span
@@ -53,13 +54,14 @@ export default Anot.component('tree', {
         <template
           name="tree"
           :attr="{
+            'multi-check': multiCheck,
             list: el[props.children],
             onSelected: props.onSelected,
             onChecked: onChecked,
             id: props.id,
             label: props.label,
             parent: props.parent,
-            children: props.children
+            children: props.children,
           }"></template>
       </li>
     </ul>
@@ -72,8 +74,10 @@ export default Anot.component('tree', {
     props.parent = props.parent || 'parent'
     props.children = props.children || 'children'
     state.list = format(props.list || [], props)
+    state.multiCheck = !!props.multiCheck
     delete props.list
     delete props.theme
+    delete props.multiCheck
   },
   componentDidMount: function() {
     if (typeof this.props.onCreated === 'function') {
@@ -82,16 +86,17 @@ export default Anot.component('tree', {
   },
   state: {
     list: [],
+    multiCheck: false,
     currItem: -1,
     checked: {}
   },
   skip: ['checked'],
   props: {
     className: '',
-    id: 'id',
-    label: 'label',
-    parent: 'parent',
-    children: 'children',
+    id: '',
+    label: '',
+    parent: '',
+    children: '',
     onCreated: Anot.PropsTypes.isFunction(),
     onSelected: Anot.PropsTypes.isFunction(),
     onChecked: Anot.PropsTypes.isFunction()
