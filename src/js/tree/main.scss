@@ -16,7 +16,7 @@
   li {overflow:hidden; white-space:nowrap; text-overflow:ellipsis}
 
   li ul {display:none;margin-left:20px;}
-  li.open ul {display:block;}
+  li.open>ul {display:block;}
 
   li em,
   li span {display:inline-block;cursor:pointer;color:nth($cgr, 2);}
@@ -24,7 +24,7 @@
   li span:hover {color:nth($cgr, 2);}
   li span.active {color:nth($cgr, 3);font-weight:bold;}
   li span.checkbox {float:left;position:relative;width:14px;height:14px;margin:7px 5px 7px 0;border:1px solid nth($cgr, 1);border-radius:3px;
-    
+
     &::after {display:block;width:12px;height:12px;line-height:12px;}
     &.checked::after {content:"\e60f";}
   }

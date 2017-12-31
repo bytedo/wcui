@@ -56,10 +56,10 @@ export default Anot.component('tree', {
             list: el[props.children],
             onSelected: props.onSelected,
             onChecked: onChecked,
-            id: 'id',
-            label: 'label',
-            parent: 'parent',
-            children: 'children'
+            id: props.id,
+            label: props.label,
+            parent: props.parent,
+            children: props.children
           }"></template>
       </li>
     </ul>
