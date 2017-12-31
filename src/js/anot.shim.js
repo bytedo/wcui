@@ -3082,17 +3082,19 @@
   }
 
   var rnoCollect = /^(:\S+|data-\S+|on[a-z]+|id|style|class)$/
-  var ronattr = /^on\-[\w-]+$/
+  var ronattr = '__fn__'
   function getOptionsFromTag(elem, vmodels) {
     var attributes = elem.attributes
     var ret = {}
     for (var i = 0, attr; (attr = attributes[i++]); ) {
       var name = attr.name
       if (attr.specified && !rnoCollect.test(name)) {
-        var camelizeName = camelize(attr.name)
-        if (/^on\-[\w-]+$/.test(name)) {
-          ret[camelizeName] = getBindingCallback(elem, name, vmodels)
+        if (name.indexOf(ronattr) === 0) {
+          name = attr.value.slice(6)
+          ret[name] = elem[attr.value]
+          delete elem[attr.value]
         } else {
+          var camelizeName = camelize(name)
           ret[camelizeName] = parseData(attr.value)
         }
       }
@@ -3471,34 +3473,19 @@
             return
           }
           var props = getOptionsFromTag(elem, host.vmodels)
-          var vmOpts = getOptionsFromVM(host.vmodels, props.config)
           var $id = props.uuid || generateID(widget)
-          var componentDefinition = {}
 
-          props = Object.assign({}, vmOpts, props)
-          vmOpts = void 0
-          // log(props)
-          for (var i in props) {
-            if (props[i] === '__fn__') {
-              props[i] = elem[i]
-              delete elem[i]
-            }
-          }
-
-          delete props.config
           delete props.uuid
           delete props.name
 
           hooks.props = hooks.props || {}
           hooks.state = hooks.state || {}
 
-          hooks.construct.call(elem, props, {}, function next(props, state) {
-            Object.assign(hooks.props, props)
-            Object.assign(hooks.state, state)
-            Object.assign(componentDefinition, hooks)
-          })
+          Object.assign(hooks.props, props)
 
-          componentDefinition.$id = $id
+          hooks.construct.call(elem, hooks.props, hooks.state)
+
+          hooks.$id = $id
 
           //==========构建VM=========
           var {
@@ -3507,15 +3494,15 @@
             childComponentDidMount,
             componentWillUnmount,
             render
-          } = componentDefinition
+          } = hooks
 
-          delete componentDefinition.construct
-          delete componentDefinition.componentWillMount
-          delete componentDefinition.componentDidMount
-          delete componentDefinition.childComponentDidMount
-          delete componentDefinition.componentWillUnmount
+          delete hooks.construct
+          delete hooks.componentWillMount
+          delete hooks.componentDidMount
+          delete hooks.childComponentDidMount
+          delete hooks.componentWillUnmount
 
-          var vmodel = Anot(componentDefinition)
+          var vmodel = Anot(hooks)
           vmodel.$refs = {}
 
           elem.msResolved = 1 //防止二进扫描此元素
@@ -3525,18 +3512,30 @@
 
           if (!elem.content.firstElementChild) {
             Anot.clearHTML(elem)
-            elem.innerHTML = render()
+            var html = render.call(vmodel) || ''
+
+            html = html.replace(/<\w+[^>]*>/g, function(m, s) {
+              return m.replace(/[\n\t\s]{1,}/g, ' ')
+            })
+
+            elem.innerHTML = html
           }
 
           // 组件所使用的标签是temlate,所以必须要要用子元素替换掉
           var child = elem.content.firstElementChild
-          elem.parentNode.replaceChild(child, elem)
+          var nullComponent = DOC.createComment('empty component')
+          elem.parentNode.replaceChild(child || nullComponent, elem)
+
+          // 空组件直接跳出
+          if (!child) {
+            return
+          }
 
           child.msResolved = 1
           var cssText = elem.style.cssText
           var className = elem.className
           elem = host.element = child
-          elem.style.cssText += ';' + cssText
+          elem.style && (elem.style.cssText += ';' + cssText)
 
           if (className) {
             Anot(elem).addClass(className)
@@ -3554,9 +3553,10 @@
               dependencies += ev.childReady
               if (vmodel !== ev.vm) {
                 vmodel.$refs[ev.vm.$id] = ev.vm
+                ev.vm.$up = vmodel
                 if (ev.childReady === -1) {
                   children++
-                  childComponentDidMount.call(vmodel, elem, ev)
+                  childComponentDidMount.call(vmodel, ev.vm)
                 }
                 ev.stopPropagation()
               }
@@ -3601,22 +3601,9 @@
               })
             }, 17)
           }
-        })(obj, Anot.components[name], obj.element, obj.name) // jshint ignore:line
+        })(obj, toJson(Anot.components[name]), obj.element, obj.name) // jshint ignore:line
       }
     }
-  }
-
-  function getOptionsFromVM(vmodels, pre) {
-    if (pre) {
-      for (var i = 0, v; (v = vmodels[i++]); ) {
-        if (v.hasOwnProperty(pre) && typeof v[pre] === 'object') {
-          var vmOptions = v[pre]
-          return vmOptions.$model || vmOptions
-          break
-        }
-      }
-    }
-    return {}
   }
 
   function isWidget(el) {
@@ -3726,7 +3713,7 @@
           //chrome v37- 下embed标签动态设置的src，无法发起请求
           if (window.chrome && elem.tagName === 'EMBED') {
             var parent = elem.parentNode
-            var com = document.createComment(':src')
+            var com = DOC.createComment(':src')
             parent.replaceChild(com, elem)
             parent.replaceChild(elem, com)
           }
@@ -3757,9 +3744,9 @@
             if (typeof obj[i] === 'object') {
               obj[i] = JSON.stringify(obj[i])
             } else if (typeof obj[i] === 'function') {
-              var ck = Anot.filters.camelize(k)
-              elem[ck] = obj[i]
-              obj[i] = '__fn__'
+              k = '__fn__' + camelize(k)
+              elem[k] = obj[i]
+              obj[i] = k
             }
             elem.setAttribute(k, obj[i])
           }

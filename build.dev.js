@@ -23,51 +23,40 @@ const compileJs = (entry, output) => {
   if (/touch\.patch/.test(entry)) {
     return
   }
-  let t1 = Date.now()
-  if (/anot/.test(entry)) {
-    setTimeout(() => {
+  setTimeout(() => {
+    if (/anot/.test(entry)) {
       fs.cp(entry, output)
-    }, 100)
-  } else {
-    try {
-      const { code } = babel.transformFileSync(entry, jsOpt)
-      fs.echo(code, output)
-    } catch (err) {
-      return log(err)
+    } else {
+      try {
+        const { code } = babel.transformFileSync(entry, jsOpt)
+        fs.echo(code, output)
+      } catch (err) {
+        return log(err)
+      }
     }
-  }
-  log(
-    '编译JS: %s, 耗时 %s ms',
-    chalk.green(entry),
-    chalk.yellow(Date.now() - t1)
-  )
+  }, 100)
+  log('编译JS: %s', chalk.green(entry))
 }
 
 const compileCss = (entry, output) => {
-  try {
-    let t1 = Date.now()
-    const { css } = scss.renderSync({ ...cssOpt, file: entry })
-    log(
-      '编译scss: %s, 耗时 %s ms',
-      chalk.green(entry),
-      chalk.yellow(Date.now() - t1)
-    )
-    fs.echo(css, output)
-  } catch (err) {
-    log(err)
-  }
+  setTimeout(() => {
+    try {
+      const { css } = scss.renderSync({ ...cssOpt, file: entry })
+      fs.echo(css, output)
+    } catch (err) {
+      log(err)
+    }
+  }, 100)
+  log('编译scss: %s', chalk.green(entry))
 }
 
 const compileHtm = (entry, output) => {
-  let t1 = Date.now()
-  let htm = fs.cat(entry).toString('utf8')
-  htm = htm.replace(/[\r\n\t]+/g, ' ').replace(/\s{2,}/g, ' ')
-  log(
-    '压缩HTML: %s, 耗时 %s ms',
-    chalk.green(entry),
-    chalk.yellow(Date.now() - t1)
-  )
-  fs.echo(htm, output)
+  setTimeout(() => {
+    let htm = fs.cat(entry).toString('utf8')
+    htm = htm.replace(/[\r\n\t]+/g, ' ').replace(/\s{2,}/g, ' ')
+    fs.echo(htm, output)
+  }, 100)
+  log('压缩HTML: %s', chalk.green(entry))
 }
 
 /*=======================================================*/

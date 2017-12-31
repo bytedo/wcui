@@ -12,141 +12,135 @@ import './main.scss'
 //储存版本信息
 Anot.ui.tree = '1.0.0'
 
-var box = '<ul>{li}</ul>',
-  ul = '<ul :class="{open: {it}.open}">{li}</ul>',
-  li =
-    '<li :class="{open: {it}.open, dir: {it}.children}">' +
-    '<em :click="toggle({it})"></em>' +
-    '<span :click="$select({it})" :class="{active: {it}.id === currItem}" :text="{it}.name"></span>' +
-    '{child}</li>'
-var keyPath = {}
-
-function repeat(arr, name) {
-  var html = ''
-  arr.forEach(function(it, i) {
-    var from = name + '[' + i + ']',
-      child = ''
-    html += li.replace(/\{it\}/g, from)
-
-    if (it.children) {
-      child += repeat(it.children, from + '.children')
-      child = ul.replace('{li}', child).replace('{it}', from)
-    }
-    html = html.replace(/\{child\}/, child)
-  })
-
-  return html
-}
-
-function format(arr) {
-  var tmp = {},
-    farr = []
+function format(arr, { id, parent, label, children }) {
+  let tmp = {}
+  let farr = []
   arr.sort(function(a, b) {
     return a.pid === b.pid ? a.sort - b.sort : a.pid - b.pid
   })
   arr.forEach(function(it) {
-    tmp[it.id] = it
-    keyPath[it.id] = ''
-    var parentItem = tmp[it.pid]
+    it.checked = !!it.checked
+    it.open = !!it.open
+    tmp[it[id]] = it
+    var parentItem = tmp[it[parent]]
 
     if (!parentItem) {
-      return farr.push(tmp[it.id])
+      return farr.push(tmp[it[id]])
     }
-    keyPath[it.id] += keyPath[parentItem.id] + parentItem.id + ','
-    parentItem.open = !!parentItem.open
-    parentItem.children = parentItem.children || []
-    parentItem.children.push(it)
+    parentItem[children] = parentItem[children] || []
+    parentItem[children].push(it)
   })
   return farr
 }
 
 export default Anot.component('tree', {
   render: function() {
-    // return '<div class="do-tree" :class="{{props.className}}" :html="treeHTML"></div>'
+    if (!this.list.size()) {
+      return null
+    }
     return `
     <ul class="do-tree" :class="{{props.className}}" :if="list.size()">
-      <li :repeat="list" :class="{open: el.open, dir: el.children}">
-        <em :click="toggle(el)"></em>
-        <span :click="select(el)" :class="{active: el.id === currItem}" :text="el.name"></span>
-        <template name="tree" :attr="{list: el.children}"></template>
+      <li :repeat="list" :class="{open: el.open, dir: el[props.children]}">
+        <em class="ui-font" :click="toggle(el)"></em>
+        <span
+          class="checkbox ui-font"
+          :class="{checked: el.checked}"
+          :click="onChecked(el)"></span>
+        <span
+          :click="onSelected(el)"
+          :class="{active: el[props.id] === currItem}"
+          :text="el[props.label]"></span>
+        <template
+          name="tree"
+          :attr="{
+            list: el[props.children],
+            onSelected: props.onSelected,
+            onChecked: onChecked,
+            id: 'id',
+            label: 'label',
+            parent: 'parent',
+            children: 'children'
+          }"></template>
       </li>
     </ul>
     `
   },
-  construct: function(props, state, next) {
+  construct: function(props, state) {
     props.className = 'skin-' + (props.theme || 'def')
-    state.list = format(props.list || [])
-
+    props.id = props.id || 'id'
+    props.label = props.label || 'label'
+    props.parent = props.parent || 'parent'
+    props.children = props.children || 'children'
+    state.list = format(props.list || [], props)
     delete props.list
     delete props.theme
-    next(props, state)
-  },
-  componentWillMount: function() {
-    // this.$reset(this.props.arr)
   },
   componentDidMount: function() {
-    if (typeof this.props.created === 'function') {
-      this.props.created.call(null, this)
+    if (typeof this.props.onCreated === 'function') {
+      this.props.onCreated.call(null, this)
     }
   },
   state: {
-    treeHTML: '',
     list: [],
-    currItem: -1
+    currItem: -1,
+    checked: {}
   },
+  skip: ['checked'],
   props: {
     className: '',
-    created: Anot.PropsTypes.isFunction(),
-    componentWillMount: Anot.PropsTypes.isFunction()
+    id: 'id',
+    label: 'label',
+    parent: 'parent',
+    children: 'children',
+    onCreated: Anot.PropsTypes.isFunction(),
+    onSelected: Anot.PropsTypes.isFunction(),
+    onChecked: Anot.PropsTypes.isFunction()
   },
   methods: {
     toggle: function(obj) {
       obj.open = !obj.open
     },
-    select: function(obj) {
-      this.currItem = obj.id
-      console.log(obj, this.props.componentWillMount)
-      if (typeof this.props.componentWillMount === 'function') {
-        this.props.componentWillMount(obj)
+    onChecked: function(el, childChecked) {
+      let item = null
+      let arr = []
+      let { id, onChecked } = this.props
+
+      if (!childChecked) {
+        el.checked = !el.checked
+        item = el.$model
+        this.checked[item[id]] = el.checked ? item : null
+      } else {
+        item = el
+        Object.assign(this.checked, childChecked)
       }
-    },
-    $update: function(id, obj) {
-      var path = keyPath[id],
-        tmpid = null,
-        tmpobj = null
 
-      path += id
-      path = path.split(',')
-
-      while ((tmpid = +path.shift())) {
-        if (!tmpobj) {
-          tmpobj = this.treeArr
-        } else {
-          tmpobj = tmpobj.children
-        }
-
-        for (var i = 0, it; (it = tmpobj[i++]); ) {
-          if (it.id === tmpid) {
-            tmpobj = it
-            break
+      if (!this.$up) {
+        for (let i in this.checked) {
+          if (!this.checked[i]) {
+            delete this.checked[i]
+          } else {
+            arr.push(this.checked[i])
           }
         }
+      } else {
+        arr = this.checked
       }
-      for (var j in obj) {
-        tmpobj[j] = obj[j]
+
+      if (typeof onChecked === 'function') {
+        onChecked.call(this.$up, item, arr)
       }
     },
-    $reset: function(arr) {
-      this.treeArr.clear()
-      this.treeHTML = ''
-
-      this.treeArr.pushArray(format(arr))
-      this.currItem = -1
-      console.log(this.treeArr)
-      /*      var tpl = repeat(this.treeArr.$model, 'treeArr')
-      Anot.nextTick(() => {
-        this.treeHTML = box.replace('{li}', tpl)
-      })*/
+    onSelected: function(el) {
+      let { id, onSelected } = this.props
+      this.currItem = el[id]
+      if (typeof onSelected === 'function') {
+        onSelected(el.$model)
+      }
+    },
+    reset: function(arr) {
+      this.checked = {}
+      this.list.clear()
+      this.list.pushArray(format(arr || []))
     }
   }
 })

@@ -1,5 +1,5 @@
 'use strict'
-import tpl from './main.htm'
+
 import './main.scss'
 
 Anot.ui.pages = '1.0.0'
@@ -50,15 +50,46 @@ function update(currPage, vm) {
 }
 
 export default Anot.component('pages', {
-  construct: function(props, state, next) {
+  construct: function(props, state) {
     props.className =
       'skin-' + (props.theme || 1) + ' ' + (props.color || 'plain')
     delete props.theme
     delete props.color
-    next(props, state)
   },
   render: function() {
-    return tpl
+    return `
+    <div class="do-pages do-fn-noselect" :class="{{props.className}}">
+      <a class="normal"
+        :if="currPage > 1 && !props.simpleMode"
+        :attr="{href: parseUrl(1)}"
+        :text="props.btns.home"
+        :click="setPage(1, $event)"></a>
+      <a class="normal"
+        :if="currPage > 1"
+        :attr="{href: parseUrl(currPage - 1)}"
+        :text="props.btns.prev"
+        :click="setPage(currPage - 1, $event)"></a>
+      <a :if-loop="!props.simpleMode || currPage === el"
+        :repeat="pageList"
+        :attr="{href: parseUrl(el)}"
+        :class="{normal: currPage !== el, disabled: '...' === el, curr: currPage === el}"
+        :text="el"
+        :click="setPage(el, $event)"></a>
+      <a class="normal"
+        :if="currPage < totalPages"
+        :attr="{href: parseUrl(currPage + 1)}"
+        :click="setPage(currPage + 1, $event)">{{props.btns.next}}</a>
+      <a class="normal"
+        :if="currPage < totalPages && !props.simpleMode"
+        :attr="{href: parseUrl(totalPages)}"
+        :click="setPage(totalPages, $event)">{{props.btns.end}}</a>
+
+      <div class="input-box" :if="!props.simpleMode">
+        <span>共 {{totalPages}} 页 {{totalItems}} 条，前往</span>
+        <input type="text" :duplex="inputPage" :keyup="setPage(null, $event)">
+        <span>页</span>
+      </div>
+    </div>`
   },
   componentWillMount: function() {
     const { currPage, totalPages, props } = this
@@ -68,7 +99,9 @@ export default Anot.component('pages', {
     )
   },
   componentDidMount: function() {
-    this.props.onSuccess.call(null, this)
+    if (typeof this.props.onCreated === 'function') {
+      this.props.onCreated.call(null, this)
+    }
   },
   state: {
     currPage: 1,
@@ -95,7 +128,7 @@ export default Anot.component('pages', {
     className: '',
     simpleMode: !1,
     onPageChange: Anot.noop,
-    onSuccess: Anot.noop
+    onCreated: Anot.noop
   },
   methods: {
     // 格式化页码的URL
