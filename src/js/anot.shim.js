@@ -3435,15 +3435,13 @@
   var componentQueue = []
   var widgetList = []
   var componentHooks = {
-    construct: function(props, state, next) {
-      next(props, state)
-    },
+    construct: noop,
     componentWillMount: noop,
     componentDidMount: noop,
     childComponentDidMount: noop,
     componentWillUnmount: noop,
-    render: function(str) {
-      return str
+    render: function() {
+      return null
     }
   }
 

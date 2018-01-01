@@ -37,16 +37,13 @@ function calculate({ currPage, maxPageShow, totalPages }) {
 }
 // 更新组件
 function update(currPage, vm) {
-  const { totalPages, props } = vm
+  const { totalPages, props: { maxPageShow } } = vm
   vm.currPage = vm.inputPage = currPage
   vm.props.onPageChange.call(null, currPage)
-  if (totalPages < 2) {
-    return
-  }
   vm.pageList.clear()
-  vm.pageList.pushArray(
-    calculate({ currPage, totalPages, maxPageShow: props.maxPageShow })
-  )
+  if (totalPages > 1) {
+    vm.pageList.pushArray(calculate({ currPage, totalPages, maxPageShow }))
+  }
 }
 
 export default Anot.component('pages', {
@@ -84,7 +81,7 @@ export default Anot.component('pages', {
         :attr="{href: parseUrl(totalPages)}"
         :click="setPage(totalPages, $event)">{{props.btns.end}}</a>
 
-      <div class="input-box" :if="!props.simpleMode">
+      <div class="input-box" :if="!props.simpleMode && totalPages > 1">
         <span>共 {{totalPages}} 页 {{totalItems}} 条，前往</span>
         <input type="text" :duplex="inputPage" :keyup="setPage(null, $event)">
         <span>页</span>
@@ -115,7 +112,6 @@ export default Anot.component('pages', {
       return Math.ceil(this.totalItems / this.pageSize)
     }
   },
-  skip: ['currPage', 'totalItems', 'pageSize'],
   props: {
     url: null,
     btns: {
@@ -184,7 +180,6 @@ export default Anot.component('pages', {
       update(1, this)
     },
     setTotalItems: function(num) {
-      console.log(this, num)
       this.totalItems = +num
       update(1, this)
     }
