@@ -141,7 +141,7 @@
     }
 
     if (tickObserver) {
-      var node = document.createTextNode('any')
+      var node = document.createTextNode('anot')
       new tickObserver(callback).observe(node, { characterData: true }) // jshint ignore:line
       var bool = false
       return function(fn) {
@@ -460,7 +460,7 @@
       value: function() {
         var thisYear = this.getFullYear(),
           that = new Date(thisYear, 0, 1),
-          firstDay = that.getDay(),
+          firstDay = that.getDay() || 1,
           numsOfToday = (this - that) / 86400000
         return Math.ceil((numsOfToday + firstDay) / 7)
       },
@@ -4182,7 +4182,7 @@
       if (!this.init) {
         for (var i in Anot.vmodels) {
           var v = Anot.vmodels[i]
-          v.$fire('any-duplex-init', binding)
+          v.$fire('anot-duplex-init', binding)
         }
         var cpipe = binding.pipe || (binding.pipe = pipe)
         cpipe(null, binding, 'init')
@@ -4265,17 +4265,7 @@
         if (-val === -number) {
           return number
         }
-        var arr = /strong|medium|weak/.exec(
-          binding.element.getAttribute('data-duplex-number')
-        ) || ['medium']
-        switch (arr[0]) {
-          case 'strong':
-            return 0
-          case 'medium':
-            return val === '' ? '' : 0
-          case 'weak':
-            return val
-        }
+        return 0
       },
       set: fixNull
     }

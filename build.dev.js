@@ -1,15 +1,22 @@
 #! /usr/bin/env node
 
+const log = console.log
 const fs = require('iofs')
 const path = require('path')
 const babel = require('babel-core')
 const scss = require('node-sass')
 const chokidar = require('chokidar')
-const log = console.log
+const postcss = require('postcss')
+const autoprefixer = require('autoprefixer')
 const chalk = require('chalk')
 
 const sourceDir = path.resolve(__dirname, 'src')
 const buildDir = path.resolve(__dirname, 'dist')
+const prefixer = postcss().use(
+  autoprefixer({
+    browsers: ['ie > 9', 'iOS > 8', 'Android >= 4.4', 'ff > 38', 'Chrome > 38']
+  })
+)
 const jsOpt = {
   presets: ['es2015'],
   plugins: ['transform-es2015-modules-amd']
@@ -42,7 +49,9 @@ const compileCss = (entry, output) => {
   setTimeout(() => {
     try {
       const { css } = scss.renderSync({ ...cssOpt, file: entry })
-      fs.echo(css, output)
+      prefixer.process(css, { from: '', to: '' }).then(result => {
+        fs.echo(result.css, output)
+      })
     } catch (err) {
       log(err)
     }

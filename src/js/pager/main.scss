@@ -6,9 +6,9 @@
  * @version $Id$
  */
 
-@import "../css/var.scss";
+@import "var.scss";
 
-.do-pages {height:auto;text-align:center;font-size:13px;color: nth($cgr, 1);
+.do-pager {height:auto;text-align:center;font-size:13px;color: nth($cgr, 1);
     
   a {display:inline-block;width:auto;min-width:40px;height:40px;line-height:40px;color: nth($cgr, 1);text-decoration:none;cursor:pointer;}
   a.curr, a.disabled {cursor:default;}

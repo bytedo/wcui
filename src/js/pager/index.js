@@ -2,7 +2,7 @@
 
 import './main.scss'
 
-Anot.ui.pages = '1.0.0'
+Anot.ui.pager = '1.0.0'
 //计算页码列表
 function calculate({ currPage, maxPageShow, totalPages }) {
   let arr = []
@@ -46,7 +46,7 @@ function update(currPage, vm) {
   }
 }
 
-export default Anot.component('pages', {
+export default Anot.component('pager', {
   construct: function(props, state) {
     props.className =
       'skin-' + (props.theme || 1) + ' ' + (props.color || 'plain')
@@ -55,7 +55,7 @@ export default Anot.component('pages', {
   },
   render: function() {
     return `
-    <div class="do-pages do-fn-noselect" :class="{{props.className}}">
+    <div class="do-pager do-fn-noselect" :class="{{props.className}}">
       <a class="normal"
         :if="currPage > 1 && !props.simpleMode"
         :attr="{href: parseUrl(1)}"

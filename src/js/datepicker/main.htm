@@ -1,50 +1,57 @@
-<div class="do-datepicker do-fn-noselect">
-    <input class="date-input"
-        type="text"
-        :duplex="value"
-        :focus="$focus"
-        :click="$cancelBubble"
-        :attr-disabled="disabled">
+<div class="do-datepicker do-fn-noselect" :click="cancelBubble">
+  <input
+    class="date-input"
+    type="text"
+    :duplex="value"
+    :focus="onFocus"
+    :attr-placeholder="props.placeholder || '请选择日期'"
+    :attr-disabled="disabled">
 
-    <dl class="calendar-box"
-        :if="showCalendar"
-        :click="$cancelBubble">
+  <dl
+    class="calendar-box"
+    :if="showCalendar">
 
-        <dt class="title">请选择日期</dt>
-        <dd class="contrl">
-            <a href="javascript:;"
-                :click="$turn(1, -1)"
-                :text="$prevYear"></a>
-            <a href="javascript:;" class="prev-month"
-                :click="$turn(0, -1)" :text="$prevMonth"></a>
-            <a href="javascript:;" class="next-month"
-                :click="$turn(0, 1)" :text="$nextMonth"></a>
-            <a href="javascript:;" class="next-year"
-                :click="$turn(1, 1)" :text="$nextYear"></a>
-            <span :text="calendar.year + '-' + calendar.month"></span>
-        </dd>
-        <dd class="calendar">
-            <section class="week"><span class="td">日</span><span class="td">一</span><span class="td">二</span><span class="td">三</span><span class="td">四</span><span class="td">五</span><span class="td">六</span></section>
-            <section class="list do-fn-cl">
-                <span class="td"
-                    :class="{weeken:el.weeken, disabled: el.disable, selected: el.selected}"
-                    :repeat="calendar.list"
-                    :click="$getDate(el.disable, el.day)"
-                    :text="el.day"></span>
-            </section>
-        </dd>
-        <dd class="time" :if="showTime">
-            <label>
-                <input type="text" :duplex-time="calendar.hour" data-format="hour"> 时
-            </label>
-            <label>
-                <input type="text" :duplex-time="calendar.minute" data-format="minute"> 分
-            </label>
-            <label>
-                <input type="text" :duplex-time="calendar.second" data-format="second"> 秒
-            </label>
-            <a href="javascript:;" class="now" :click="$now">现在</a>
-        </dd>
-        <dd class="tips" :if="tips" :text="tips"></dd>
-    </dl>
+    <dt class="contrl">
+      <a href="javascript:;" class="do-ui-font" :click="turn(1, -1)"></a>
+      <a href="javascript:;" class="do-ui-font prev-month" :click="turn(0, -1)"></a>
+      <a href="javascript:;" class="do-ui-font next-month" :click="turn(0, 1)"></a>
+      <a href="javascript:;" class="do-ui-font next-year" :click="turn(1, 1)"></a>
+      <span title="双击回到今天" :text="calendar.year + '-' + numberFormat(calendar.month)"></span>
+    </dt>
+    <dd class="table">
+      <section class="thead">
+        <span class="td">日</span>
+        <span class="td">一</span>
+        <span class="td">二</span>
+        <span class="td">三</span>
+        <span class="td">四</span>
+        <span class="td">五</span>
+        <span class="td">六</span>
+      </section>
+      <section class="tr do-fn-cl">
+        <span class="td"
+          :class="{weeken:el.weeken, disabled: el.disabled, selected: el.selected}"
+          :repeat="calendar.list"
+          :click="pick(el)"
+          :text="el.day"></span>
+      </section>
+    </dd>
+    <dd class="time" :if="props.showTime">
+      <label>
+        <input type="text" :duplex-number="calendar.hour"> 时
+      </label>
+      <label>
+        <input type="text" :duplex-number="calendar.minute"> 分
+      </label>
+      <label>
+        <input type="text" :duplex-number="calendar.second"> 秒
+      </label>
+      <a href="javascript:;" class="now" :click="now">现在</a>
+    </dd>
+    <dt class="confirm">
+      <a href="javascript:;" :click="close" class="cancel">取消</a>
+      <a href="javascript:;" :click="onConfirm" class="ok">确定</a>
+    </dt>
+    <dd class="tips" :if="tips" :text="tips"></dd>
+  </dl>
 </div>
