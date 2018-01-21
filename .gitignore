@@ -7,5 +7,12 @@ dist/
 *.sublime-project
 *.sublime-workspace
 package-lock.json
+
+
+._*
+
+.Spotlight-V100
+.Trashes
 .DS_Store
-**/.DS_Store
+.AppleDouble
+.LSOverride
