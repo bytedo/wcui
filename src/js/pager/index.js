@@ -39,7 +39,7 @@ function calculate({ currPage, maxPageShow, totalPages }) {
 function update(currPage, vm) {
   const { totalPages, props: { maxPageShow } } = vm
   vm.currPage = vm.inputPage = currPage
-  vm.props.onPageChange.call(null, currPage)
+  vm.props.onPageChange(currPage)
   vm.pageList.clear()
   if (totalPages > 1) {
     vm.pageList.pushArray(calculate({ currPage, totalPages, maxPageShow }))
@@ -97,7 +97,7 @@ export default Anot.component('pager', {
   },
   componentDidMount: function() {
     if (typeof this.props.onCreated === 'function') {
-      this.props.onCreated.call(null, this)
+      this.props.onCreated(this)
     }
   },
   state: {

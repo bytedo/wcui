@@ -1373,6 +1373,7 @@
     var methods = source.methods
     var props = source.props
     var watches = source.watch
+    var mounted = source.mounted
 
     delete source.state
     delete source.computed
@@ -1488,6 +1489,8 @@
     hideProperty($vmodel, '$active', false)
     hideProperty($vmodel, '$pathname', old ? old.$pathname : '')
     hideProperty($vmodel, '$accessors', accessors)
+    hideProperty($vmodel, '$refs', {})
+    hideProperty($vmodel, '$children', [])
     hideProperty($vmodel, 'hasOwnProperty', trackBy)
     if (options.watch) {
       hideProperty($vmodel, '$watch', function() {
@@ -1498,6 +1501,12 @@
           var ee = path.slice(4)
           for (var i in Anot.vmodels) {
             var v = Anot.vmodels[i]
+            v.$fire && v.$fire.apply(v, [ee, a])
+          }
+        } else if (path.indexOf('child!') === 0) {
+          var ee = 'props.' + path.slice(6)
+          for (var i in $vmodel.$children) {
+            var v = $vmodel.$children[i]
             v.$fire && v.$fire.apply(v, [ee, a])
           }
         } else {
@@ -1527,6 +1536,12 @@
     }
 
     $vmodel.$active = true
+    $vmodel.mounted = mounted
+
+    if (old && old.$up) {
+      log(old.$up)
+      old.$up.$children.push($vmodel)
+    }
 
     return $vmodel
   }
@@ -3226,6 +3241,12 @@
                 //确保所有:attr-name扫描完再处理
                 _delay_component(widget)
               }
+            } else {
+              // 非组件才检查 ref属性
+              var ref = isRef(elem)
+              if (ref) {
+                vmodels[0].$refs[ref] = elem
+              }
             }
           }
 
@@ -3311,7 +3332,10 @@
 
     if (newVmodel) {
       setTimeout(function() {
-        newVmodel.$fire(':scan-end', elem)
+        if (typeof newVmodel.mounted === 'function') {
+          newVmodel.mounted()
+        }
+        delete newVmodel.mounted
       })
     }
   }
@@ -3501,7 +3525,7 @@
           delete hooks.componentWillUnmount
 
           var vmodel = Anot(hooks)
-          vmodel.$refs = {}
+          host.vmodels[0].$children.push(vmodel)
 
           elem.msResolved = 1 //防止二进扫描此元素
 
@@ -3550,7 +3574,7 @@
             if (ev.childReady) {
               dependencies += ev.childReady
               if (vmodel !== ev.vm) {
-                vmodel.$refs[ev.vm.$id] = ev.vm
+                vmodel.$children.push(ev.vm)
                 ev.vm.$up = vmodel
                 if (ev.childReady === -1) {
                   children++
@@ -3611,6 +3635,10 @@
       return el.getAttribute('name')
     }
     return null
+  }
+
+  function isRef(el) {
+    return el.hasAttribute('ref') ? el.getAttribute('ref') : null
   }
 
   var bools = [
@@ -3683,6 +3711,7 @@
     update: function(val) {
       var elem = this.element
       var obj = val
+      var vm = this.vmodels[0]
 
       if (typeof obj === 'object' && obj !== null) {
         if (!Anot.isPlainObject(obj)) {
@@ -3749,7 +3778,7 @@
               obj[i] = JSON.stringify(obj[i])
             } else if (typeof obj[i] === 'function') {
               k = '__fn__' + camelize(k)
-              elem[k] = obj[i]
+              elem[k] = obj[i].bind(vm)
               obj[i] = k
             }
             elem.setAttribute(k, obj[i])

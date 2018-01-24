@@ -209,8 +209,9 @@ export default Anot.component('datepicker', {
   },
   componentDidMount: function() {
     if (typeof this.props.onCreated === 'function') {
-      this.props.onCreated.call(null, this)
+      this.props.onCreated(this)
     }
+
     document.addEventListener('click', () => {
       this.close()
     })
