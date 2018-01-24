@@ -3525,6 +3525,7 @@
           delete hooks.componentWillUnmount
 
           var vmodel = Anot(hooks)
+          delete vmodel.mounted
           host.vmodels[0].$children.push(vmodel)
 
           elem.msResolved = 1 //防止二进扫描此元素
