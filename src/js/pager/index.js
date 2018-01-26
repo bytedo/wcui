@@ -4,7 +4,7 @@ import './main.scss'
 
 Anot.ui.pager = '1.0.0'
 //计算页码列表
-function calculate({ currPage, maxPageShow, totalPages }) {
+function calculate({ currPage, maxPageShow, totalPage }) {
   let arr = []
   let fixNum = 0
   let halfPage =
@@ -12,87 +12,135 @@ function calculate({ currPage, maxPageShow, totalPages }) {
       ? maxPageShow - currPage
       : Math.floor(maxPageShow / 2)
 
-  if (totalPages < 2) {
+  if (totalPage < 2) {
     return arr
   }
   if (currPage - halfPage > 1) {
     arr.push('...')
   }
-  if (totalPages - currPage < halfPage) {
-    fixNum = halfPage - totalPages + currPage
+  if (totalPage - currPage < halfPage) {
+    fixNum = halfPage - totalPage + currPage
   }
   for (
     let i = currPage - halfPage - fixNum;
-    i < currPage + halfPage + 1 && i <= totalPages;
+    i < currPage + halfPage + 1 && i <= totalPage;
     i++
   ) {
     if (i > 0) {
       arr.push(i)
     }
   }
-  if (currPage + halfPage < totalPages) {
+  if (currPage + halfPage < totalPage) {
     arr.push('...')
   }
   return arr
 }
 // 更新组件
 function update(currPage, vm) {
-  const { totalPages, props: { maxPageShow } } = vm
+  const { totalPage, props: { maxPageShow } } = vm
   vm.currPage = vm.inputPage = currPage
-  vm.props.onPageChange(currPage)
-  vm.pageList.clear()
-  if (totalPages > 1) {
-    vm.pageList.pushArray(calculate({ currPage, totalPages, maxPageShow }))
+  if (typeof vm.props.onPageChange === 'function') {
+    vm.props.onPageChange(currPage)
   }
+  vm.pageList.clear()
+  if (totalPage > 1) {
+    vm.pageList.pushArray(calculate({ currPage, totalPage, maxPageShow }))
+  }
+}
+
+const tmpls = {
+  home: `<button class="do-ui-font button home"
+    :css="{'border-radius': props.radius}"
+    :attr-disabled="currPage === 1"
+    :data="{to: parseUrl(1)}"
+    :click="setPage(1, $event)"></button>`,
+  end: `<button class="do-ui-font button end"
+    :css="{'border-radius': props.radius}"
+    :attr-disabled="currPage === totalPage"
+    :data="{to: parseUrl(totalPage)}"
+    :click="setPage(totalPage, $event)"></button>`,
+  prev: `<button class="do-ui-font button prev"
+    :css="{'border-radius': props.radius}"
+    :attr-disabled="{disabled: currPage < 2}"
+    :data="{to: parseUrl(currPage - 1)}"
+    :click="setPage(currPage - 1, $event)"></button>`,
+  next: `<button class="do-ui-font button next"
+    :css="{'border-radius': props.radius}"
+    :attr-disabled="{disabled: currPage >= totalPage}"
+    :data="{to: parseUrl(currPage + 1)}"
+    :click="setPage(currPage + 1, $event)"></button>`,
+  pager: `<button class="page"
+    :repeat="pageList"
+    :css="{'border-radius': props.radius}"
+    :attr-disabled="{disabled: '...' === el || currPage === el}"
+    :data="{to: parseUrl(el)}"
+    :class="{disabled: '...' === el, curr: currPage === el}"
+    :text="el"
+    :click="setPage(el, $event)"></button>`,
+  curr: `<button class="page curr" :text="currPage"></button>`,
+  total: `<span class="total-box">共 {{totalPage}} 页 {{totalItems}} 条</span>`,
+  jumper: `<div class="input-box">前往
+      <input type="text" :duplex="inputPage" :keyup="setPage(null, $event)"> 页
+    </div>`
 }
 
 export default Anot.component('pager', {
   construct: function(props, state) {
-    props.className =
-      'skin-' + (props.theme || 1) + ' ' + (props.color || 'plain')
-    delete props.theme
+    props.theme = +props.theme || 1
+    if (props.simpleMode) {
+      props.theme = 1
+    }
+
+    state.classList = state.classList.concat(
+      'skin-' + props.theme,
+      props.color || 'plain',
+      props.size || 'mini'
+    )
+
+    if (props.total) {
+      state.totalItems = +props.total
+    }
+    if (props.pageSize) {
+      state.pageSize = +props.pageSize
+    }
+
+    if (!props.layout) {
+      props.layout = 'total,home,prev,pager,next,end,jumper'
+    }
+
+    if (props.theme === 2) {
+      props.radius = null
+    }
+
+    delete props.total
+    delete props.pageSize
     delete props.color
+    delete props.size
   },
   render: function() {
+    let { layout, theme, simpleMode } = this.props
+    if (simpleMode) {
+      layout = ['prev', 'curr', 'next']
+    } else {
+      layout = layout.replace(/\s/g, '')
+      if (theme === 2) {
+        layout = layout.replace(/total|jumper/g, '')
+      }
+      layout = layout.split(',')
+    }
+    layout = layout.map(it => tmpls[it] || '')
     return `
-    <div class="do-pager do-fn-noselect" :class="{{props.className}}">
-      <a class="normal"
-        :if="currPage > 1 && !props.simpleMode"
-        :attr="{href: parseUrl(1)}"
-        :text="props.btns.home"
-        :click="setPage(1, $event)"></a>
-      <a class="normal"
-        :if="currPage > 1"
-        :attr="{href: parseUrl(currPage - 1)}"
-        :text="props.btns.prev"
-        :click="setPage(currPage - 1, $event)"></a>
-      <a :if-loop="!props.simpleMode || currPage === el"
-        :repeat="pageList"
-        :attr="{href: parseUrl(el)}"
-        :class="{normal: currPage !== el, disabled: '...' === el, curr: currPage === el}"
-        :text="el"
-        :click="setPage(el, $event)"></a>
-      <a class="normal"
-        :if="currPage < totalPages"
-        :attr="{href: parseUrl(currPage + 1)}"
-        :click="setPage(currPage + 1, $event)">{{props.btns.next}}</a>
-      <a class="normal"
-        :if="currPage < totalPages && !props.simpleMode"
-        :attr="{href: parseUrl(totalPages)}"
-        :click="setPage(totalPages, $event)">{{props.btns.end}}</a>
-
-      <div class="input-box" :if="!props.simpleMode && totalPages > 1">
-        <span>共 {{totalPages}} 页 {{totalItems}} 条，前往</span>
-        <input type="text" :duplex="inputPage" :keyup="setPage(null, $event)">
-        <span>页</span>
-      </div>
+    <div
+      class="do-pager do-fn-noselect"
+      :class="{{classList.join(' ')}}">
+      ${layout.join('\n')}
     </div>`
   },
   componentWillMount: function() {
-    const { currPage, totalPages, props } = this
+    const { currPage, totalPage, props } = this
     this.pageList.clear()
     this.pageList.pushArray(
-      calculate({ currPage, totalPages, maxPageShow: props.maxPageShow })
+      calculate({ currPage, totalPage, maxPageShow: props.maxPageShow })
     )
   },
   componentDidMount: function() {
@@ -101,6 +149,7 @@ export default Anot.component('pager', {
     }
   },
   state: {
+    classList: [],
     currPage: 1,
     totalItems: 1,
     pageSize: 20,
@@ -108,63 +157,56 @@ export default Anot.component('pager', {
     pageList: []
   },
   computed: {
-    totalPages: function() {
+    totalPage: function() {
       return Math.ceil(this.totalItems / this.pageSize)
     }
   },
   props: {
     url: null,
-    btns: {
-      prev: '<<',
-      next: '>>',
-      home: '首页',
-      end: '末页'
-    },
     maxPageShow: 5,
-    className: '',
     simpleMode: !1,
-    onPageChange: Anot.noop,
-    onCreated: Anot.noop
+    radius: 3,
+    onPageChange: Anot.PropsTypes.isFunction(),
+    onCreated: Anot.PropsTypes.isFunction()
   },
+  skip: ['classList'],
   methods: {
     // 格式化页码的URL
     parseUrl: function(val) {
       val = val >>> 0
       if (val < 1 || !this.props.url || this.currPage === val) {
-        return 'javascript:;'
+        return ''
       }
       return this.props.url.replace('{id}', val)
     },
     // 设置页码
     setPage: function(val, ev) {
-      if (this.currPage === val) {
+      let { inputPage, totalPage, currPage } = this
+      let elem = (ev && ev.target) || null
+      if ((elem && elem.disabled) || currPage === val) {
         return
       }
-      let elem = (ev && ev.target) || null
-      if (val && elem) {
+      if (elem) {
         if (val && val !== '...') {
-          let link =
-            (elem && elem.getAttribute('href')) ||
-            elem.getAttribute('xlink:href')
+          let link = elem.dataset.to
 
-          if ('javascript:;' !== link) {
+          if (link) {
             location.href = link
           } else {
-            val = val >> 0
-            update(val, this)
+            val = val >>> 0
           }
+          update(val, this)
         }
       } else {
         if (val === null) {
-          let { inputPage, totalPages, currPage } = this
           inputPage = inputPage >>> 0
 
           if (ev && ev.keyCode === 13) {
             if (inputPage < 1 || currPage === inputPage) {
               return (this.inputPage = currPage)
             }
-            if (inputPage > totalPages) {
-              inputPage = totalPages
+            if (inputPage > totalPage) {
+              inputPage = totalPage
             }
             this.inputPage = inputPage
             update(inputPage, this)
