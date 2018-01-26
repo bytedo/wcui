@@ -237,10 +237,10 @@ export default Anot.component('datepicker', {
   },
   props: {
     showTime: false, //对话框上显示时间
-    color: 'grey',
+    radius: 3,
     format: '', // 日期显示格式
     onCreated: Anot.PropsTypes.isFunction(),
-    onDateChange: Anot.PropsTypes.isFunction()
+    onDatePicked: Anot.PropsTypes.isFunction()
   },
   skip: ['max', 'min', 'last', 'timer'],
   watch: {
@@ -358,8 +358,8 @@ export default Anot.component('datepicker', {
     onConfirm: function() {
       this.updateTime()
       this.close()
-      if (typeof this.props.onDateChange === 'function') {
-        this.props.onDateChange(this.value, this.last.pick)
+      if (typeof this.props.onDatePicked === 'function') {
+        this.props.onDatePicked(this.value, this.last.pick)
       }
     }
   }

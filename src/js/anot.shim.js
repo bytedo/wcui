@@ -182,6 +182,9 @@
     },
     check: function(val) {
       return Anot.type(val) === this.checkType
+    },
+    call: function() {
+      return this.toString()
     }
   }
 

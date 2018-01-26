@@ -81,7 +81,7 @@ export default Anot.component('tree', {
   },
   componentDidMount: function() {
     if (typeof this.props.onCreated === 'function') {
-      this.props.onCreated.call(null, this)
+      this.props.onCreated(this)
     }
   },
   state: {
@@ -132,7 +132,7 @@ export default Anot.component('tree', {
       }
 
       if (typeof onChecked === 'function') {
-        onChecked.call(this.$up, item, arr)
+        onChecked(item, arr)
       }
     },
     onSelected: function(el) {

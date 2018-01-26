@@ -1,11 +1,16 @@
 <div class="do-datepicker do-fn-noselect" :click="cancelBubble">
-  <input
-    class="date-input"
-    type="text"
-    :duplex="value"
-    :focus="onFocus"
-    :attr-placeholder="props.placeholder || '请选择日期'"
-    :attr-disabled="disabled">
+
+  <label class="date-input">
+    <input
+      class="input"
+      type="text"
+      :duplex="value"
+      :focus="onFocus"
+      :css="{'border-radius': props.radius}"
+      :attr-placeholder="props.placeholder || '请选择日期'"
+      :attr-disabled="disabled">
+    <i class="do-ui-font icon"></i>
+  </label>
 
   <dl
     class="calendar-box"
