@@ -101,7 +101,7 @@
       .cancel {background:nth($cp, 1);}
     }
 
-    dd.tips { position:absolute; z-index:65535; left:25%; top:40%; width:50%; height:30px; line-height:30px; background:rgba(0, 0, 0, 0.7); color:#fff; font-size:12px; text-align:center; }
+    dd.tips { position:absolute; z-index:65535; left:25%; top:40%; width:50%; height:30px; line-height:28px; background:#fffbed;color:nth($co, 3);border:1px solid nth($co, 1);border-radius:5px; font-size:12px; text-align:center; }
   }
 }
 

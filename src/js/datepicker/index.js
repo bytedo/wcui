@@ -315,11 +315,11 @@ export default Anot.component('datepicker', {
   skip: ['max', 'min', 'last', 'timer'],
   watch: {
     tips: function(val) {
-      clearTimeout(this.timer)
       if (!val) {
         return
       }
       this.timer = setTimeout(() => {
+        clearTimeout(this.timer)
         this.tips = ''
       }, 1500)
     },
