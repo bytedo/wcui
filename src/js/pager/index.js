@@ -186,8 +186,8 @@ export default Anot.component('pager', {
       if ((elem && elem.disabled) || currPage === val) {
         return
       }
-      if (elem) {
-        if (val && val !== '...') {
+      if (val && elem) {
+        if (val !== '...') {
           let link = elem.dataset.to
 
           if (link) {

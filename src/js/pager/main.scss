@@ -10,14 +10,14 @@
 
 .do-pager {height:auto;text-align:center;font-size:14px;color: nth($cgr, 1);
 
-  &.mini {line-height:35px;
+  &.mini {line-height:30px;
+    .button,.page {min-width:30px;height:30px}
+  }
+  &.medium {line-height:35px;
     .button,.page {min-width:35px;height:35px}
   }
-  &.medium {line-height:40px;
+  &.large {line-height:40px;
     .button,.page {min-width:40px;height:40px}
-  }
-  &.large {line-height:45px;
-    .button,.page {min-width:45px;height:45px}
   }
     
   .button,.page {display:inline-block;border:0;color: nth($cgr, 1);text-decoration:none;cursor:pointer;vertical-align:top;font-size:14px;font-weight:100;
