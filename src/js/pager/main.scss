@@ -22,10 +22,10 @@
     
   .button,.page {display:inline-block;border:0;color: nth($cgr, 1);text-decoration:none;cursor:pointer;vertical-align:top;font-size:14px;font-weight:100;
     
-    &.home::after {content:"\e652";font-size:18px;}
-    &.prev::after {content:"\e659";font-size:18px;}
-    &.next::after {content:"\e658";font-size:18px;}
-    &.end::after {content:"\e653";font-size:18px;}
+    &.home::after {content:"\e691";font-size:18px;}
+    &.prev::after {content:"\e67c";font-size:18px;}
+    &.next::after {content:"\e66e";font-size:18px;}
+    &.end::after {content:"\e693";font-size:18px;}
   }
 
   

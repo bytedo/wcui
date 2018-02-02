@@ -6,22 +6,28 @@
  * @version $Id$
  */
 
-@import "../../../../css/var.scss";
+@import "var.scss";
 
 
-.do-layer {position:fixed;left:50%;top:50%;z-index:65535;width:auto;height:auto;
+.do-layer {width:auto;height:auto;
 
-    a {text-decoration:none;}
+  &.mask {position:fixed;z-index:65534;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,.3);}
+
+  a {text-decoration:none;}
+
+  .layer-box {position:absolute;left:50%;top:50%;z-index:65535;
+
+    &.scale {transform:scale(1.02);transition:transform .1s linear;}
 
     /* 默认皮肤 */
-    &.skin-def {color:#666;font-size:14px;box-shadow:0 0 10px rgba(0,0,0,.3);
+    &.skin-def {padding:15px 10px;border-radius:3px;color:#666;font-size:14px;box-shadow:0 5px 20px rgba(0,0,0,.3);
         
-        .icon-0::before {content:"\e62e";color:nth($cr, 1);} // question
+        .icon-0::before {content:"\e674";color:nth($cr, 1);} // question
         .icon-1::before {content:"\e610";color:nth($ct, 1);} // get
         .icon-2::before {content:"\e6f8";color:nth($cb, 1);} // happy
         .icon-3::before {content:"\e6fd";color:nth($co, 1);} // sad
         .icon-4::before {content:"\e6f6";color:nth($co, 1);} // warn
-        .icon-5::before {content:"\e630";color:nth($ct, 1);} // face
+        .icon-5::before {content:"\e673";color:nth($ct, 1);} // face
         .icon-6::before {content:"\e636";color:nth($cgr, 1);} // time
         .icon-7::before {content:"\e623";color:nth($co, 1);} // star
         .icon-8::before {content:"\e604";color:nth($cr, 1);} // mute
@@ -29,25 +35,13 @@
 
 
         /* 弹层标题栏 */
-        .layer-title {width:100%;height:43px;padding:0 8px;line-height:43px;background:#f5f5f5;font-size:16px;color:nth($cgr, 1);}
-
-        .action-min,
-        .action-close {position:absolute;display:block;top:12px;width:20px;height:20px;line-height:20px;font-size:14px;text-align:center;cursor:pointer;color:nth($cgr, 2);
-
-            &:hover {color:nth($ct, 1);}
-        }
-        .action-min {right:40px;
-            &::before {content:"\e634"}
-        }
-        .action-close {right:10px;
-            &::before {content:"\e687"}
-        }
+        .layer-title {width:100%;height:43px;padding:0 10px;line-height:43px;font-size:16px;color:nth($cgr, 1);}
 
         /* 弹层主体内容 */
         .layer-content {position:relative;width:100%;height:auto;min-height:50px;padding:10px;
 
             .msg-icon {position:absolute;left:10px;top:10px;width:50px;height:auto;line-height:40px;font-size:35px;text-align:center;}
-            .detail {width:auto;height:100%;margin:auto auto auto 60px;padding:5px 15px;word-break:break-all;word-wrap: break-word;
+            .detail {width:auto;height:100%;margin:auto auto auto 50px;padding:5px 15px;word-break:break-all;word-wrap: break-word;
 
                 .prompt-value {width: 230px;height: 30px;padding: 0 8px;border: 1px solid #ddd;border-radius: 3px;
 
@@ -62,30 +56,34 @@
 
 
         /* 弹层按钮部分 */
-        .layer-btns {width:100%;height:40px;padding:0 5px;line-height:30px;font-size:14px;color:#454545;text-align:right;
+        .layer-ctrl {width:100%;height:40px;padding:5px 0;line-height:30px;font-size:14px;color:#454545;text-align:right;
 
-            a {display:inline-block;width:auto;min-width:60px;height:30px;margin:0 5px;padding:0 10px;color:nth($cgr, 1);text-align:center;background:nth($cp, 1);@include ts();
-                
-                &:hover {background:nth($cp, 2)}
-                &:active {background:nth($cp, 3)}
-            }
+          a {overflow:hidden;position:relative;display:inline-block;width:auto;min-width:60px;height:30px;margin-left:5px;padding:0 10px;color:nth($ct, 1);text-align:center;
+
+          &::before {position:absolute;left:-50%;top:-50%;z-index:-1;display:block;width:200%;height:200%;border-radius:50%;background:nth($cp, 2); content:"";opacity:0;transform: scale(0, .0); transition:opacity 1.3s cubic-bezier(0.23, 1, 0.32, 1),transform 1.3s cubic-bezier(0.23, 1, 0.32, 1);}
+            
+          &:hover {
+            &::before {opacity:1;transform:scale(1, .8);}
+          }
+          &:active {background:nth($cp, 1)}
         }
+      }
 
     }
 
     /* ;alert/confirm/prompt 3类弹层 */
     &.type-1,
     &.type-2,
-    &.type-3 {max-width:600px;min-width:230px;}
+    &.type-3 {max-width:600px;min-width:300px;}
 
 
     /* tips类弹层(type 5) */
     &.type-5 {visibility:hidden;min-width:75px;max-width:600px;line-height:1.5;color:#fff;background:rgba(0,0,0,.5);opacity:0;box-shadow:none;-webkit-transition:opacity .3s ease-in-out;-moz-transition:opacity .3s ease-in-out;transition:opacity .3s ease-in-out;
 
-        &.active {visibility:visible;opacity:1;}
-        i.arrow {position:absolute;left:5px;bottom:-14px;width:0;height:0;border:6px solid transparent;border-top:8px solid rgba(0,0,0,.5);content: ""}
+      &.active {visibility:visible;opacity:1;}
+      i.arrow {position:absolute;left:5px;bottom:-14px;width:0;height:0;border:6px solid transparent;border-top:8px solid rgba(0,0,0,.5);content: ""}
 
-        .layer-content .detail {margin:0;padding:0}
+      .layer-content .detail {margin:0;padding:0}
     }
 
     
@@ -178,9 +176,15 @@
 
     &:active {z-index:65536;}
 
+
+
+  }
+
+  
+
 }
 
-.do-layer-cover {position:fixed;left:0;top:0;z-index:65534;width:100%;height:100%;background:rgba(255,255,255,.05);
+.do-layer-cover {
 
     &.type-6 {background:rgba(0,0,0,.3);}
 }

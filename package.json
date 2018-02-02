@@ -1,5 +1,5 @@
 {
-  "name": "doui-yua",
+  "name": "doui-anot",
   "version": "0.0.1",
   "description": "基于Anot框架的doUI组件库。支持IE10+,及现代浏览器。",
   "main": "index.js",
@@ -13,13 +13,16 @@
   },
   "keywords": [
     "doui",
-    "yua"
+    "Anot"
   ],
   "author": "yutent",
   "license": "MIT",
   "devDependencies": {
     "autoprefixer": "^7.2.5",
     "babel-core": "^6.26.0",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-plugin-transform-decorators-legacy": "^1.3.4",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-minify": "^0.2.0",
     "chalk": "^2.3.0",

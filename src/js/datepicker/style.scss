@@ -42,16 +42,16 @@
         &:active {font-weight:bold;
           &::before {animation:ripple .3s cubic-bezier(0.23, 1, 0.32, 1);}
         }
-        &::after {content:"\e652";}
+        &::after {content:"\e692";}
 
         &.prev-month {left:35px;
-          &::after {content:"\e659"}
+          &::after {content:"\e67c"}
         }
         &.next-month {left:auto; right:35px;
-          &::after {content:"\e658"}
+          &::after {content:"\e66e"}
         }
         &.next-year {left:auto; right:0;
-          &::after {content:"\e653"}
+          &::after {content:"\e694"}
         }
       }
 

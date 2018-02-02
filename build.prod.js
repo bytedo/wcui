@@ -18,7 +18,12 @@ const prefixer = postcss().use(
 )
 const jsOpt = {
   presets: ['es2015', 'minify'],
-  plugins: ['transform-es2015-modules-amd']
+  plugins: [
+    'transform-es2015-modules-amd',
+    'transform-decorators-legacy',
+    'transform-class-properties',
+    'transform-object-rest-spread'
+  ]
 }
 const cssOpt = {
   includePaths: ['src/css/'],

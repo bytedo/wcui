@@ -3297,11 +3297,12 @@
           if (/^:/.test(attr.name)) {
             var name = attr.name.match(rmsAttr)[1]
             var value = null
-            if (!name || Anot.directives[name]) {
+            if (!name || Anot.directives[name] || events[name]) {
               return
             }
             try {
               value = parseExpr(attr.value, vmodels, {}).apply(0, vmodels)
+              value = toJson(value)
               elem.removeAttribute(attr.name)
               if (!value) {
                 return
@@ -4092,7 +4093,7 @@
         elem.addEventListener(type, callback, false)
         var old = binding.rollback
         binding.rollback = function() {
-          elem.anotStter = null
+          elem.anotSetter = null
           Anot.unbind(elem, type, callback)
           old && old()
         }
@@ -4196,7 +4197,7 @@
             elem.msFocus = false
           })
         }
-        elem.anotStter = updateVModel //#765
+        elem.anotSetter = updateVModel //#765
         watchValueInTimer(function() {
           if (root.contains(elem)) {
             if (!elem.msFocus) {
@@ -4346,8 +4347,8 @@
       function newSetter(value) {
         // jshint ignore:line
         setters[this.tagName].call(this, value)
-        if (!this.msFocus && this.anotStter) {
-          this.anotStter()
+        if (!this.msFocus && this.anotSetter) {
+          this.anotSetter()
         }
       }
       var inputProto = HTMLInputElement.prototype
