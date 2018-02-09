@@ -24,7 +24,6 @@ let defconf = {
   maskClose: false, //遮罩点击关闭弹窗
   radius: '0px', //弹窗圆角半径
   area: ['auto', 'auto'],
-  shift: [null, null], // 出现的地方
   title: '提示', //弹窗主标题(在工具栏上的)
   menubar: true, //是否显示菜单栏
   content: '', // 弹窗的内容
@@ -101,9 +100,8 @@ const _layer = {
     if (typeof title === 'function') {
       opt.yes = title
     } else {
-      title += ''
       if (title) {
-        opt.title = title
+        opt.title = title + ''
       }
       if (cb && typeof cb === 'function') {
         opt.yes = cb
@@ -120,9 +118,8 @@ const _layer = {
         opt.no = yescb
       }
     } else {
-      title += ''
       if (title) {
-        opt.title = title
+        opt.title = title + ''
       }
       if (yescb && typeof yescb === 'function') {
         opt.yes = yescb
@@ -177,8 +174,8 @@ const _layer = {
       fixed: true
     })
   },
-  tips: function(msg, elem, conf) {
-    if (!(elem instanceof HTMLElement)) {
+  tips: function(content, container, conf) {
+    if (!(container instanceof HTMLElement)) {
       return Anot.error('tips类型必须指定一个目标容器')
     }
     if (typeof conf !== 'object') {
@@ -197,8 +194,8 @@ const _layer = {
     if (!conf.color) {
       conf.color = '#fff'
     }
-    conf.$elem = elem
-    conf.content = msg
+    conf.container = container
+    conf.content = content
     conf.type = 5
     conf.icon = 0
     conf.fixed = true
@@ -289,7 +286,7 @@ __layer__.prototype = {
         ...conf.state
       },
       props: conf.props,
-      skip: ['area', 'shift', 'skin', 'mask', 'maskClose'],
+      skip: ['area', 'shift', 'skin', 'mask', 'maskClose', 'container'],
       methods: {
         onMaskClick: function() {
           if (this.type < 4 && !this.maskClose) {
@@ -371,7 +368,7 @@ __layer__.prototype = {
     layBox.setAttribute(':click', 'cancelBubble')
 
     //暂时隐藏,避免修正定位时,能看到闪一下
-    layBox.style.cssText =
+    layBox.style.cssText +=
       'visibility:hidden; border-radius:' + state.radius + 'px'
 
     //没有菜单栏, 且未禁止拖拽,则加上可拖拽属性
@@ -380,7 +377,7 @@ __layer__.prototype = {
       layBox.setAttribute('data-limit', 'window')
     }
 
-    //弹窗的宽高
+    // size of layer-content
     var boxcss = ''
     if (state.area[0] !== 'auto') {
       boxcss += 'width: ' + state.area[0] + ';'
@@ -495,35 +492,27 @@ __layer__.prototype = {
     layerDom[$id] = this.create()
 
     delete state.specialMode
-    // if (layerDom[this.init.$id][0]) {
-    //   document.body.appendChild(layerDom[this.init.$id][0])
-    //   //仅在允许点击遮罩时,初始化控制器,减少资源消耗
-    //   if (this.init.shadeClose) {
-    //     Anot(this.cInit)
-    //     // Anot.scan(layerDom[this.init.$id][0])
-    //   }
-    // }
 
     document.body.appendChild(layerDom[$id][0])
     this.vm = Anot(this.init)
-    // Anot.scan(layerDom[this.init.$id][1])
     return this
   },
   show: function() {
-    let { state, $id } = this.init
-    var _this = this
+    let { state, $id, container } = this.init
 
     setTimeout(function() {
       var style = { visibility: '', background: state.background }
       let css = getComputedStyle(layerDom[$id][1])
 
+      // tips类型, 弹层的定位要在指定的容器上
       if (state.type === 5) {
+        // only type[tips] can define `color`
         style.color = state.color
 
-        let $elem = Anot(_this.init.$elem)
-        let ew = $elem.innerWidth()
-        let ol = $elem.offset().left - document.body.scrollLeft
-        let ot = $elem.offset().top - document.body.scrollTop
+        let $container = Anot(container)
+        let ew = $container.innerWidth()
+        let ol = $container.offset().left - document.body.scrollLeft
+        let ot = $container.offset().top - document.body.scrollTop
 
         style.left = ol + ew * 0.7
         style.top = ot - parseInt(css.height) - 8
@@ -551,7 +540,7 @@ __layer__.prototype = {
         }
       }
 
-      Anot(layerDom[_this.init.$id][1]).css(style)
+      Anot(layerDom[$id][1]).css(style)
     }, 4)
 
     // loading类型,回调需要自动触发
