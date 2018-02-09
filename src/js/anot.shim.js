@@ -181,7 +181,8 @@
       return ''
     },
     check: function(val) {
-      return Anot.type(val) === this.checkType
+      this.result = Anot.type(val)
+      return this.result === this.checkType
     },
     call: function() {
       return this.toString()
@@ -3293,7 +3294,8 @@
       createSignalTower(elem, newVmodel)
       hideProperty(newVmodel, '$elem', elem)
       if (vmodels.length) {
-        attrs.forEach(function(attr, i) {
+        var props = {}
+        attrs.forEach(function(attr) {
           if (/^:/.test(attr.name)) {
             var name = attr.name.match(rmsAttr)[1]
             var value = null
@@ -3304,21 +3306,7 @@
               value = parseExpr(attr.value, vmodels, {}).apply(0, vmodels)
               value = toJson(value)
               elem.removeAttribute(attr.name)
-              if (!value) {
-                return
-              }
-              if (
-                newVmodel.props[name] &&
-                newVmodel.props[name].type === 'PropsTypes'
-              ) {
-                if (newVmodel.props[name].check(value)) {
-                  newVmodel.props[name] = value
-                } else {
-                  Anot.error('props「' + name + '」类型错误!', TypeError)
-                }
-              } else {
-                newVmodel.props[name] = value
-              }
+              props[name] = value
             } catch (error) {
               log(
                 'Props parse faild on (%s[class=%s]),',
@@ -3330,6 +3318,28 @@
             }
           }
         })
+        // 一旦设定了 props的类型, 就必须传入正确的值
+        for (var k in newVmodel.props) {
+          if (newVmodel.props[k] && newVmodel.props[k].type === 'PropsTypes') {
+            if (newVmodel.props[k].check(props[k])) {
+              newVmodel.props[k] = props[k]
+              delete props[k]
+            } else {
+              Anot.error(
+                'props.' +
+                  k +
+                  ' needs [' +
+                  newVmodel.props[k].checkType +
+                  '], but [' +
+                  newVmodel.props[k].result +
+                  '] given.',
+                TypeError
+              )
+            }
+          }
+        }
+        Object.assign(newVmodel.props, props)
+        props = undefined
       }
     }
     scanAttr(elem, vm) //扫描特性节点

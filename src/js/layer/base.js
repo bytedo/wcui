@@ -24,6 +24,7 @@ let defconf = {
   maskClose: false, //遮罩点击关闭弹窗
   radius: '0px', //弹窗圆角半径
   area: ['auto', 'auto'],
+  shift: [null, null], // 出现的地方
   title: '提示', //弹窗主标题(在工具栏上的)
   menubar: true, //是否显示菜单栏
   content: '', // 弹窗的内容
@@ -94,34 +95,43 @@ const __layer__ = function(conf) {
 }
 
 const _layer = {
-  alert: function(msg, conf) {
-    if (typeof conf === 'function') {
-      conf = { methods: { yes: conf, no: conf } }
-    } else if (typeof conf === 'object') {
-      conf = conf
+  alert: function(content, title, cb) {
+    let opt = { content, fixed: true, icon: 5 }
+
+    if (typeof title === 'function') {
+      opt.yes = title
     } else {
-      conf = {}
+      title += ''
+      if (title) {
+        opt.title = title
+      }
+      if (cb && typeof cb === 'function') {
+        opt.yes = cb
+      }
     }
-    conf.icon = 5
-    conf.content = msg
-    conf.fixed = true
-    return _layer.open(conf)
+    return _layer.open(opt)
   },
-  confirm: function(msg, yescb, nocb) {
-    var conf = {}
-    if (typeof yescb === 'function') {
-      conf = { yes: yescb }
-    } else if (typeof yescb === 'object') {
-      conf = yescb
+  confirm: function(content, title, yescb, nocb) {
+    let opt = { content, fixed: true, icon: 0, type: 2 }
+
+    if (typeof title === 'function') {
+      opt.yes = title
+      if (typeof yescb === 'function') {
+        opt.no = yescb
+      }
+    } else {
+      title += ''
+      if (title) {
+        opt.title = title
+      }
+      if (yescb && typeof yescb === 'function') {
+        opt.yes = yescb
+      }
+      if (nocb && typeof nocb === 'function') {
+        opt.no = nocb
+      }
     }
-    conf.type = 2
-    conf.icon = 0
-    conf.content = msg
-    if (typeof nocb === 'function') {
-      conf.no = nocb
-    }
-    conf.fixed = true
-    return _layer.open(conf)
+    return _layer.open(opt)
   },
   msg: function(msg, conf) {
     if (typeof conf !== 'object') {
@@ -196,7 +206,7 @@ const _layer = {
     conf.menubar = false
     return _layer.open(conf)
   },
-  prompt: function(msg, yescb) {
+  prompt: function(title, yescb) {
     if (typeof yescb !== 'function') {
       return console.error(
         'argument [callback] requires a function, but ' +
@@ -204,16 +214,16 @@ const _layer = {
           ' given'
       )
     }
-    var conf = {
+    let opt = {
       type: 3,
       prompt: '',
-      title: msg,
+      title,
       content:
         '<input class="prompt-value" data-duplex-focus :class="{alert: !prompt}" :duplex="prompt" />',
       fixed: true,
       yes: yescb
     }
-    return _layer.open(conf)
+    return _layer.open(opt)
   },
   use: function(skin, callback) {
     require(['css!./skin/' + skin], callback)
@@ -279,13 +289,16 @@ __layer__.prototype = {
         ...conf.state
       },
       props: conf.props,
+      skip: ['area', 'shift', 'skin', 'mask', 'maskClose'],
       methods: {
         onMaskClick: function() {
-          if (this.type < 4) {
+          if (this.type < 4 && !this.maskClose) {
             this.$refs.layer.classList.add('scale')
             setTimeout(() => {
               this.$refs.layer.classList.remove('scale')
             }, 100)
+          } else {
+            this.close()
           }
         },
         handleConfirm: function() {
@@ -326,9 +339,8 @@ __layer__.prototype = {
     }
     //base版没有iframe类型
     if (this.init.state.type === 4) {
-      this.icon.state.type = 7
+      this.init.state.type = 7
     }
-    console.log(this.init)
     return this
   },
   create: function() {
@@ -542,10 +554,6 @@ __layer__.prototype = {
       Anot(layerDom[_this.init.$id][1]).css(style)
     }, 4)
 
-    // if (this.init.success && typeof this.init.success === 'function') {
-    //   //弹窗成功的回调
-    //   this.init.success(this.init.$id)
-    // }
     // loading类型,回调需要自动触发
     if (state.type > 3) {
       //大于0自动触发超时关闭
