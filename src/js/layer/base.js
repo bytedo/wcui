@@ -61,7 +61,7 @@ const close = function(id) {
   }
 }
 
-const reapeat = function(str, num) {
+const repeat = function(str, num) {
   var idx = 0,
     result = ''
   while (idx < num) {
@@ -77,15 +77,15 @@ const fixOffset = function(val) {
     return val
   }
 }
-const __layer__ = function(conf) {
-  if (conf) {
-    let { yes, no, success } = conf
-    delete conf.yes
-    delete conf.no
-    delete conf.success
+const __layer__ = function(opt) {
+  if (opt) {
+    let { yes, no, success } = opt
+    delete opt.yes
+    delete opt.no
+    delete opt.success
 
     this.construct({
-      state: { ...conf },
+      state: { ...opt },
       props: { yes, no, success }
     })
       .append()
@@ -130,27 +130,35 @@ const _layer = {
     }
     return _layer.open(opt)
   },
-  msg: function(msg, conf) {
-    if (typeof conf !== 'object') {
-      var tmp = conf
-      conf = { timeout: 2500 }
-      if (typeof tmp === 'number') {
-        conf.icon = tmp
-      }
+  toast: function(content, type, timeout, cb) {
+    // if (typeof opt !== 'object') {
+    //   var tmp = opt
+    //   opt = { timeout: 2500 }
+    //   if (typeof tmp === 'number') {
+    //     opt.icon = tmp
+    //   }
+    // }
+
+    if (typeof type === 'number') {
+      timeout = type
+      type = 'info'
     }
 
-    if (!conf.hasOwnProperty('timeout')) {
-      conf.timeout = 2500
+    // if (!opt.hasOwnProperty('timeout')) {
+    //   opt.timeout = 2500
+    // }
+
+    let opt = {
+      content: `<mark class="toast-box">${content}</mark>`,
+      menubar: false,
+      mask: false,
+      type: 7,
+      fixed: true
     }
 
-    conf.specialMode = true //特殊模式
-    conf.content = '<p class="msg-box">' + msg + '</p>'
-    conf.type = 7
-    conf.fixed = true
-    conf.shade = false
-    conf.menubar = false
-    conf.radius = '5px'
-    return _layer.open(conf)
+    opt.toast = true // toast模式
+
+    return _layer.open(opt)
   },
   loading: function(style, time, cb) {
     style = style >>> 0
@@ -174,34 +182,34 @@ const _layer = {
       fixed: true
     })
   },
-  tips: function(content, container, conf) {
+  tips: function(content, container, opt) {
     if (!(container instanceof HTMLElement)) {
       return Anot.error('tips类型必须指定一个目标容器')
     }
-    if (typeof conf !== 'object') {
-      var tmp = conf
-      conf = { timeout: 2500 }
+    if (typeof opt !== 'object') {
+      var tmp = opt
+      opt = { timeout: 2500 }
       if (typeof tmp === 'number') {
-        conf.icon = tmp
+        opt.icon = tmp
       }
     }
-    if (!conf.hasOwnProperty('timeout')) {
-      conf.timeout = 2500
+    if (!opt.hasOwnProperty('timeout')) {
+      opt.timeout = 2500
     }
-    if (!conf.background) {
-      conf.background = 'rgba(0,0,0,.5)'
+    if (!opt.background) {
+      opt.background = 'rgba(0,0,0,.5)'
     }
-    if (!conf.color) {
-      conf.color = '#fff'
+    if (!opt.color) {
+      opt.color = '#fff'
     }
-    conf.container = container
-    conf.content = content
-    conf.type = 5
-    conf.icon = 0
-    conf.fixed = true
-    conf.shade = false
-    conf.menubar = false
-    return _layer.open(conf)
+    opt.container = container
+    opt.content = content
+    opt.type = 5
+    opt.icon = 0
+    opt.fixed = true
+    opt.shade = false
+    opt.menubar = false
+    return _layer.open(opt)
   },
   prompt: function(title, yescb) {
     if (typeof yescb !== 'function') {
@@ -226,33 +234,33 @@ const _layer = {
     require(['css!./skin/' + skin], callback)
   },
   close: close,
-  open: function(conf) {
-    if (typeof conf === 'string') {
-      /*conf = '$wrap-' + conf
-      if (!layerObj[conf]) {
+  open: function(opt) {
+    if (typeof opt === 'string') {
+      /*opt = '$wrap-' + opt
+      if (!layerObj[opt]) {
         throw new Error('layer实例不存在')
       } else {
         //只能显示一个实例
-        if (layerObj[conf].show) {
-          return conf
+        if (layerObj[opt].show) {
+          return opt
         }
-        layerObj[conf].show = true
+        layerObj[opt].show = true
 
-        if (!Anot.vmodels[conf]) {
-          Anot(layerObj[conf].obj.init)
+        if (!Anot.vmodels[opt]) {
+          Anot(layerObj[opt].obj.init)
         }
 
-        layerObj[conf].parentElem.appendChild(layerDom[conf][1])
-        layerDom[conf][1]
+        layerObj[opt].parentElem.appendChild(layerDom[opt][1])
+        layerDom[opt][1]
           .querySelector('.detail')
-          .appendChild(layerObj[conf].wrap)
-        layerObj[conf].wrap.style.display = ''
-        // Anot.scan(layerDom[conf][1])
-        layerObj[conf].obj.show()
-        return conf
+          .appendChild(layerObj[opt].wrap)
+        layerObj[opt].wrap.style.display = ''
+        // Anot.scan(layerDom[opt][1])
+        layerObj[opt].obj.show()
+        return opt
       }*/
     } else {
-      return new __layer__(conf).init.$id
+      return new __layer__(opt).init.$id
     }
   },
   version: Anot.ui.layer
@@ -277,16 +285,24 @@ __layer__.prototype = {
     5: 9
   },
   timeout: null,
-  construct: function(conf) {
-    let _id = conf.$id || uuid()
+  construct: function(opt) {
+    let _id = opt.$id || uuid()
     this.init = {
       $id: _id,
       state: {
         ...defconf,
-        ...conf.state
+        ...opt.state
       },
-      props: conf.props,
-      skip: ['area', 'shift', 'skin', 'mask', 'maskClose', 'container'],
+      props: opt.props,
+      skip: [
+        'area',
+        'shift',
+        'skin',
+        'mask',
+        'maskClose',
+        'container',
+        'follow'
+      ],
       methods: {
         onMaskClick: function() {
           if (this.type < 4 && !this.maskClose) {
@@ -358,8 +374,8 @@ __layer__.prototype = {
     if (state.type === 5) {
       layBox.classList.add('active')
     }
-    if (state.specialMode && state.type === 7) {
-      layBox.classList.add('type-unspecial')
+    if (state.toast) {
+      layBox.classList.add('type-toast')
     } else {
       layBox.classList.add('type-' + state.type)
     }
@@ -396,9 +412,10 @@ __layer__.prototype = {
       ${this.getMenubar()}
       <div
         class="layer-content do-fn-cl ${state.icon < 0 ? 'none-icon' : ''}"
-        style="${boxcss}">
+        style="${boxcss}"
+        ${!state.wrap && state.type !== 6 ? ':html="content"' : ''}>
 
-        ${this.getCont()}
+        ${state.type === 6 ? this.getLoading(state.load) : ''}
       </div>
       ${this.getCtrl()}
       ${arrow}
@@ -407,17 +424,14 @@ __layer__.prototype = {
     outerBox.appendChild(layBox)
     return [outerBox, layBox]
   },
-  getCont: function() {
-    let { state, $id } = this.init
-    if (state.type === 6) {
-      return this.getLoading(state.load)
-    } else {
-      return `
-        ${this.getIcon()}
-        <div class="detail" ${!state.wrap ? ':html="content"' : ''}></div>
-      `
-    }
-  },
+  // getCont: function() {
+  //   let { state, $id } = this.init
+  //   if (state.type === 6) {
+  //     return this.getLoading(state.load)
+  //   } else {
+  //     return !state.wrap ? '{{content | html}}' : ''
+  //   }
+  // },
   getLoading: function(style) {
     return `
       <div class="loading style-${style}">
@@ -481,7 +495,7 @@ __layer__.prototype = {
     }
   },
   append: function() {
-    let { state, $id } = this.init
+    let { state, $id, container } = this.init
     //如果有已经打开的弹窗,则关闭
     if (unique) {
       _layer.close(unique)
@@ -491,14 +505,17 @@ __layer__.prototype = {
     }
     layerDom[$id] = this.create()
 
-    delete state.specialMode
+    delete state.toast
+    if (!container) {
+      container = document.body
+    }
 
-    document.body.appendChild(layerDom[$id][0])
+    container.appendChild(layerDom[$id][0])
     this.vm = Anot(this.init)
     return this
   },
   show: function() {
-    let { state, $id, container } = this.init
+    let { state, $id, follow } = this.init
 
     setTimeout(function() {
       var style = { visibility: '', background: state.background }
@@ -509,10 +526,10 @@ __layer__.prototype = {
         // only type[tips] can define `color`
         style.color = state.color
 
-        let $container = Anot(container)
-        let ew = $container.innerWidth()
-        let ol = $container.offset().left - document.body.scrollLeft
-        let ot = $container.offset().top - document.body.scrollTop
+        let $follow = Anot(follow)
+        let ew = $follow.innerWidth()
+        let ol = $follow.offset().left - document.body.scrollLeft
+        let ot = $follow.offset().top - document.body.scrollTop
 
         style.left = ol + ew * 0.7
         style.top = ot - parseInt(css.height) - 8
@@ -557,7 +574,7 @@ __layer__.prototype = {
             _this.vm.yes($id)
           }
         }, state.timeout)
-      } else if (statetype === 6) {
+      } else if (state.type === 6) {
         // loading类型, 非自动关闭时, 主动触发回调
         this.vm.yes($id)
       }

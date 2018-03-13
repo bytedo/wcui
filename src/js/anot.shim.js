@@ -5725,7 +5725,9 @@
     time: function(str) {
       str = str >> 0
       var s = str % 60
-      ;(m = Math.floor(str / 60)), (h = Math.floor(m / 60)), (m = m % 60)
+      var m = Math.floor(str / 60)
+      var h = Math.floor(m / 60)
+      m = m % 60
       m = m < 10 ? '0' + m : m
       s = s < 10 ? '0' + s : s
 
