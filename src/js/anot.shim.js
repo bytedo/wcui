@@ -239,13 +239,13 @@
         if ($elem === DOC.body) {
           scanTag($elem, [])
         } else {
-          var $parent = null
-          while (($parent = $elem.parentNode)) {
+          var $parent = $elem
+          while (($parent = $parent.parentNode)) {
             if ($parent.anotctrl) {
-              scanTag($elem.parentNode, [VMODELS[$parent.anotctrl]])
               break
             }
           }
+          scanTag($elem.parentNode, $parent ? [VMODELS[$parent.anotctrl]] : [])
         }
       }
       return vm
