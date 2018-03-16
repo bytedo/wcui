@@ -2930,7 +2930,7 @@
       binding.observers.forEach(function(it) {
         if (it.type === 'function') {
           // log(it, expr)
-          let reg = new RegExp(it.p + '\\(([^)]*)\\)', 'g')
+          var reg = new RegExp(it.p + '\\(([^)]*)\\)', 'g')
           expr = expr.replace(reg, function(s, m) {
             m = m.trim()
             return (
