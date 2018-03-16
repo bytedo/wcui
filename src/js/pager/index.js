@@ -45,6 +45,8 @@ function update(currPage, vm) {
   vm.pageList.clear()
   if (totalPage > 1) {
     vm.pageList.pushArray(calculate({ currPage, totalPage, maxPageShow }))
+  } else {
+    vm.pageList.pushArray([1])
   }
 }
 

@@ -8,6 +8,7 @@ const scss = require('node-sass')
 const postcss = require('postcss')
 const autoprefixer = require('autoprefixer')
 const chalk = require('chalk')
+const uglify = require('uglify-js')
 
 const sourceDir = path.resolve(__dirname, 'src')
 const buildDir = path.resolve(__dirname, 'dist')
@@ -17,7 +18,7 @@ const prefixer = postcss().use(
   })
 )
 const jsOpt = {
-  presets: ['es2015', 'minify'],
+  presets: ['es2015'],
   plugins: [
     'transform-es2015-modules-amd',
     'transform-decorators-legacy',
@@ -39,7 +40,8 @@ const compileJs = (entry, output) => {
   if (/anot/.test(entry)) {
     tmpOpt = Object.assign({}, jsOpt, { plugins: [] })
   }
-  const { code } = babel.transformFileSync(entry, tmpOpt)
+  let { code } = babel.transformFileSync(entry, tmpOpt)
+  code = uglify.minify(code).code
   log(
     '编译JS: %s, 耗时 %s ms',
     chalk.green(entry),
@@ -82,7 +84,7 @@ const jsFiles = fs.ls('./src/js/', true)
 const cssFiles = fs.ls('./src/css/', true)
 
 if (fs.isdir(buildDir)) {
-  fs.rm(buildDir, true)
+  // fs.rm(buildDir, true)
   log(chalk.cyan('清除旧目录 dist/'))
 }
 

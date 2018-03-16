@@ -1543,7 +1543,6 @@
     $vmodel.mounted = mounted
 
     if (old && old.$up) {
-      log(old.$up)
       old.$up.$children.push($vmodel)
     }
 
@@ -2952,7 +2951,7 @@
         "'use strict';\ntry{\nvar " +
           assigns.join(',\n') +
           expr +
-          '\n}catch(e){log(e)}'
+          '\n}catch(e){console.log(e)}'
       )
     )
     /* jshint ignore:end */
