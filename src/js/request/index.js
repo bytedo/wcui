@@ -1,95 +1,115 @@
 /**
- * Request组件, modern版, 支持IE9+,chrome,FF
- * @authors yutent (yutent@doui.cc)
- * @date    2016-11-27 13:08:40
  *
+ * @authors yutent (yutent@doui.cc)
+ * @date    2018-03-25 23:59:13
+ * @version $Id$
  */
 
 'use strict'
 import 'promise/index'
 import Format from './lib/format'
 
-var _request = function(url, protocol) {
-    this.transport = true
-    protocol = (protocol + '').trim().toUpperCase()
-    this.xhr = Xhr()
-    this.defer = Promise.defer()
-    this.opt = {
-      url: (url + '').trim(),
-      type: protocol || 'GET',
-      form: '',
-      data: {},
-      headers: {},
-      timeoutID: 0,
-      uuid: Math.random()
-        .toString(16)
-        .substr(2)
-    }
-  },
-  _requestp = _request.prototype,
-  toS = Object.prototype.toString,
-  win = window,
-  doc = win.document,
-  encode = encodeURIComponent,
-  decode = decodeURIComponent,
-  noop = function(e, res) {
-    this.defer.resolve(res)
-  }
+// 本地协议/头 判断正则
+const rlocalProtocol = /^(?:about|app|app-storage|.+-extension|file|res|widget):$/
+const rheaders = /^(.*?):[ \t]*([^\r\n]*)\r?$/gm
+const encode = encodeURIComponent
+const decode = decodeURIComponent
+const toS = Object.prototype.toString
+const win = window
+const doc = win.document
 
-// -----------------------------
+const noop = function(e, res) {
+  this.defer.resolve(res)
+}
+const Xhr = function() {
+  return new XMLHttpRequest()
+}
+const supportCors = 'withCredentials' in Xhr()
 
-// 本地协议判断正则
-var rlocalProtocol = /^(?:about|app|app-storage|.+-extension|file|res|widget):$/
-var isLocal = false
+let isLocal = false
 try {
   isLocal = rlocalProtocol.test(location.ptyperotocol)
 } catch (e) {}
 
-var rheaders = /^(.*?):[ \t]*([^\r\n]*)\r?$/gm
+let originAnchor = doc.createElement('a')
+originAnchor.href = location.href
 
-// ----------------- 一些兼容性预处理 --------------------
-
-win.Xhr = function() {
-  return new XMLHttpRequest()
+const noBodyMethods = ['GET', 'HEAD']
+const error = {
+  10001: 'argument url is required',
+  10002: 'method "set" required an object or 2 args',
+  10003: 'method "send" can not call by different way',
+  10004: 'method "send" arguments error',
+  10005: 'method "send" required an object/string or 2 args',
+  10006: 'method "field" required an object or 2 args',
+  10011: 'Promise  required a callback',
+  10012: 'Parse error',
+  10104: 'Request pending...',
+  10200: 'ok',
+  10204: 'no content',
+  10304: 'not modified',
+  10500: 'Internal Server Error',
+  10504: 'Connected timeout',
+  form: 'application/x-www-form-urlencoded; charset=UTF-8',
+  json: 'application/json; charset=UTF-8',
+  text: 'text/plain; charset=UTF-8'
 }
-var supportCors = 'withCredentials' in Xhr()
 
-// ---------------------------------------------------------
-// -------------------- request 模块开始 --------------------
-// ---------------------------------------------------------
-
-var requestConvert = {
-  text: function(val) {
+const convert = {
+  text(val) {
     return val
   },
-  xml: function(val, xml) {
+  xml(val, xml) {
     return xml !== undefined ? xml : Format.parseXML(val)
   },
-  html: function(val) {
+  html(val) {
     return Format.parseHTML(val)
   },
-  json: function(val) {
+  json(val) {
     return JSON.parse(val)
   },
-  script: function(val) {
+  script(val) {
     return Format.parseJS(val)
   },
-  jsonp: function(name) {
+  jsonp(name) {
     var json = request.cache[name]
     delete request.cache[name]
     return json
   }
 }
-var requestExtend = {
-  formData: function() {
+
+class _Request {
+  constructor(url = '', method = 'GET') {
+    if (!url) {
+      throw new Error(error[10001])
+    }
+    method = method.toUpperCase()
+
+    this.transport = Object.create(null)
+    this.xhr = Xhr()
+    this.defer = Promise.defer()
+    this.opt = {
+      url,
+      method,
+      form: null,
+      data: {},
+      headers: {},
+      timeoutID: 0,
+      uuid: Math.random()
+        .toString(16)
+        .slice(2)
+    }
+  }
+
+  _formData() {
     if (this.opt.form) {
-      var data = Format.parseForm(this.opt.form)
+      let data = Format.parseForm(this.opt.form)
       Format.merge(this.opt.data, data)
     }
 
-    var form = new FormData()
-    for (var i in this.opt.data) {
-      var el = this.opt.data[i]
+    let form = new FormData()
+    for (let i in this.opt.data) {
+      let el = this.opt.data[i]
       if (Array.isArray(el)) {
         el.forEach(function(it) {
           form.append(i + '[]', it)
@@ -99,60 +119,65 @@ var requestExtend = {
       }
     }
     return form
-  },
-  jsonp: function(jsonpcallback) {
-    win[jsonpcallback] = function(val) {
-      delete win[jsonpcallback]
-      request.cache[jsonpcallback] = val
-    }
-  },
-  dispatch: function(self) {
-    if (!this.transport) return this.defer.reject('Request pending...')
+  }
 
-    var _this = this,
-      result = {
-        response: {
-          url: this.opt.url,
-          headers: { 'content-type': '' }
-        },
-        request: {
-          url: this.opt.url,
-          headers: _this.opt.headers
-        },
-        status: self === null ? 504 : 200,
-        statusText: self === null ? 'Connected timeout' : 'ok',
-        text: '',
-        body: '',
-        error: null
-      }
+  _jsonp(cb) {
+    win[cb] = function(val) {
+      delete win[cb]
+      request.cache[cb] = val
+    }
+  }
+
+  _dispatch(isTimeout) {
+    if (!this.transport) {
+      return this.defer.reject(error[10104])
+    }
+
+    let result = {
+      response: {
+        url: this.opt.url,
+        headers: { 'content-type': '' }
+      },
+      request: {
+        url: this.opt.url,
+        headers: this.opt.headers
+      },
+      status: isTimeout === null ? 504 : 200,
+      statusText: isTimeout === null ? 'Connected timeout' : 'ok',
+      text: '',
+      body: '',
+      error: null
+    }
 
     //状态为4,既已成功, 则清除超时
-    clearTimeout(_this.opt.timeoutID)
+    clearTimeout(this.opt.timeoutID)
 
-    if (typeof this.transport === 'object' && this.opt.type === 'JSONP') {
+    if (this.transport.nodeType && this.opt.method === 'JSONP') {
       //移除script
-      // this.transport.parentNode.removeChild(this.transport);
+      this.transport.parentNode.removeChild(this.transport)
 
       //超时返回
-      if (self !== null) {
-        var exec =
+      if (!isTimeout) {
+        let exec =
           !this.transport.readyState ||
           this.transport.readyState === 'loaded' ||
           this.transport.readyState === 'complete'
 
         if (exec) {
-          result.body = requestConvert.jsonp(this.opt.data.callback)
+          result.body = convert.jsonp(this.opt.data.callback)
           result.text = JSON.stringify(result.body)
         }
       }
-
-      this.callback(result.error, result)
+      this.defer.resolve(result)
     } else {
       //成功的回调
-      var isSucc = self
-          ? (self.status >= 200 && self.status < 300) || self.status === 304
-          : false,
-        headers = (self && self.getAllResponseHeaders().split('\n')) || []
+      let isSucc = isTimeout
+        ? false
+        : (this.transport.status >= 200 && this.transport.status < 300) ||
+          this.transport.status === 304
+
+      let headers =
+        (!isTimeout && this.transport.getAllResponseHeaders().split('\n')) || []
 
       //处理返回的Header
       headers.forEach(function(it, i) {
@@ -166,21 +191,18 @@ var requestExtend = {
       })
 
       if (isSucc) {
-        result.status = self.status
+        result.status = this.transport.status
         if (result.status === 204) {
-          result.statusText = 'no content'
+          result.statusText = error[10204]
         } else if (result.status === 304) {
-          result.statusText = 'not modified'
+          result.statusText = error[10304]
         }
       } else {
-        result.status = self === null ? 504 : self.status || 500
-        result.statusText =
-          self === null
-            ? 'Connected timeout'
-            : self.statusText || 'Internal Server Error'
-        result.error = Format.merge(new Error(result.statusText), {
-          status: result.status
-        })
+        result.status = isTimeout ? 504 : this.transport.status || 500
+        result.statusText = isTimeout
+          ? error[10504]
+          : this.transport.statusText || error[10500]
+        result.error = new Error(result.statusText)
       }
 
       try {
@@ -190,304 +212,351 @@ var requestExtend = {
         ) || ['text']
 
         dataType = dataType[0].toLowerCase()
-        result.text = (self && (self.responseText || self.responseXML)) || ''
-        result.body = requestConvert[dataType](
+        result.text = isTimeout
+          ? ''
+          : this.transport.responseText || this.transport.responseXML
+
+        result.body = convert[dataType](
           result.text,
-          self && self.responseXML
+          !isTimeout && this.transport.responseXML
         )
       } catch (err) {
         result.error = err
-        result.statusText = 'parse error'
+        result.statusText = error[10012]
       }
 
-      _this.callback(result.error, result)
+      this.defer.resolve(result)
     }
-    delete _this.defer
-    delete _this.transport
-    delete _this.opt
-    delete _this.xhr
-  }
-}
-
-// 设置表单类型, 支持2种, form/json
-_requestp.type = function(t) {
-  if (this.opt.formType === 'form-data') return this
-
-  this.opt.formType = t || 'form'
-  if (t === 'form' || this.opt.type === 'GET')
-    this.set('content-type', 'application/x-www-form-urlencoded; charset=UTF-8')
-  else this.set('content-type', 'application/json; charset=UTF-8')
-
-  return this
-}
-
-//设置头信息
-_requestp.set = function(k, val) {
-  if (!this.transport) return
-
-  if (typeof k === 'object') {
-    for (var i in k) {
-      i = i.toLowerCase()
-      this.opt.headers[i] = k[i]
-    }
-  } else if (typeof k === 'string') {
-    if (arguments.length < 2) throw new Error('2 arguments required')
-
-    // 全转小写,避免重复写入
-    k = k.toLowerCase()
-
-    if (val === undefined) delete this.opt.headers[k]
-    else this.opt.headers[k] = val
-  } else {
-    throw new Error(
-      'arguments must be string/object, but [' + typeof k + '] given'
-    )
-  }
-  return this
-}
-
-//设置请求参数
-_requestp.send = function(k, val) {
-  if (!this.transport) return
-
-  // 1. send方法可以多次调用, 但必须保证格式一致
-  // 2. 2次圴提交纯字符串也会抛出异常
-  if (typeof k === 'object') {
-    if (this.opt.data && typeof this.opt.data === 'string')
-      throw new Error('param can not be string and object at the same time')
-    if (!this.opt.data) this.opt.data = {}
-
-    Format.merge(this.opt.data, k)
-  } else {
-    if (typeof k === 'string') {
-      if (arguments.length === 1) {
-        if (this.opt.data) throw new Error('invalid param in function send')
-
-        this.opt.data = k
-      } else {
-        if (this.opt.data && typeof this.opt.data === 'string')
-          throw new Error('param can not be string and object at the same time')
-
-        if (!this.opt.data) this.opt.data = {}
-
-        this.opt.data[k] = val
-      }
-    } else {
-      throw new Error(
-        'argument of send must be string/object, but [' + typeof k + '] given'
-      )
-    }
+    delete this.transport
+    delete this.opt
+    delete this.xhr
   }
 
-  return this
-}
-
-//该方法用于 form-data类型的post请求的参数设置
-_requestp.field = function(k, val) {
-  if (!this.transport) return this
-
-  // 此类型优先级最高
-  this.opt.formType = 'form-data'
-  this.opt.type = 'POST'
-  if (!this.opt.data || (this.opt.data && typeof this.opt.data !== 'object'))
-    this.opt.data = {}
-
-  if (arguments.length === 1 && typeof k === 'object') {
-    Format.merge(this.opt.data, k)
-  } else if (arguments.length === 2) {
-    this.opt.data[k] = val
-  } else {
-    throw new TypeError(
-      'argument must be an object, but ' + typeof k + ' given'
-    )
-  }
-  return this
-}
-
-//设置缓存
-_requestp.cache = function(t) {
-  if (!this.transport) return
-
-  if (this.opt.type === 'GET') this.opt.cache = !!t
-
-  return this
-}
-
-//取消网络请求
-_requestp.abort = function() {
-  delete this.transport
-  if (!this.opt.form) this.xhr.abort()
-
-  return this
-}
-
-//超时设置, 单位毫秒
-_requestp.timeout = function(time) {
-  if (typeof time !== 'number' || time < 1) return this
-
-  this.opt.timeout = time
-  return this
-}
-
-_requestp.form = function(form) {
-  if (typeof form === 'object' && form.nodeName === 'FORM') {
-    this.opt.type = 'POST'
-    this.opt.form = form
-  }
-
-  return this
-}
-
-var originAnchor = doc.createElement('a')
-originAnchor.href = location.href
-_requestp.end = function(callback) {
-  var _this = this
-  // 回调已执行, 或已取消, 则直接返回, 防止重复执行
-  if (!this.transport) return this
-
-  if (!this.opt.url) throw new Error('Invalid  request url')
-
-  Format.merge(this, requestExtend)
-
-  this.callback = callback || noop.bind(this)
-
-  // 1. url规范化
-  this.opt.url = this.opt.url
-    .replace(/#.*$/, '')
-    .replace(/^\/\//, location.protocol + '//')
-
-  // 2. 处理跨域
-  if (typeof this.opt.crossDomain !== 'boolean') {
-    var anchor = doc.createElement('a')
-    try {
-      anchor.href = this.opt.url
-      // IE7及以下浏览器 '1'[0]的结果是 undefined
-      // IE7下需要获取绝对路径
-      var absUrl = !'1'[0] ? anchor.getAttribute('href', 4) : anchor.href
-      anchor.href = absUrl
-      anchor.async = true
-      this.opt.crossDomain =
-        originAnchor.protocol !== anchor.protocol ||
-        originAnchor.host !== anchor.host
-    } catch (e) {
-      this.opt.crossDomain = true
-    }
-  }
-
-  // 2.1 进一步处理跨域配置
-  if (this.opt.type === 'JSONP') {
-    //如果没有跨域，自动转回xhr GET
-    if (!this.opt.crossDomain) {
-      this.opt.type = 'GET'
-    } else {
-      this.opt.data['callback'] =
-        this.opt.data['callback'] || 'jsonp' + request.cid++
-      this.jsonp(this.opt.data['callback']) //创建临时处理方法
-    }
-  }
-  // 2.2 如果不是跨域请求，则自动加上一条header信息，用以标识这是ajax请求
-  if (!this.opt.crossDomain) {
-    this.set('X-Requested-With', 'XMLHttpRequest')
-  } else {
-    supportCors && (this.xhr.withCredentials = true)
-  }
-
-  // 3. data转字符串
-  this.opt.param = Format.param(this.opt.data)
-
-  // 4. 设置Content-Type类型, 默认x-www-form-urlencoded
-  if (!this.opt.formType) this.type('form')
-
-  // 5.处理GET请求
-  this.opt.hasContent = this.opt.type === 'POST' //是否为post请求
-  if (!this.opt.hasContent) {
-    //GET请求直接把参数拼接到url上
-    if (this.opt.param) {
-      this.opt.url += (/\?/.test(this.opt.url) ? '&' : '?') + this.opt.param
-    }
-    //加随机值,避免缓存
-    if (this.opt.cache === false)
-      this.opt.url +=
-        (/\?/.test(this.opt.url) ? '&' : '?') + '_=' + Math.random()
-  } else {
+  // 设置表单类型, 支持3种, form(即x-www-form-urlencoded)/json/text
+  type(type) {
+    // 如果已经是带附件上传的表单,不再支持修改表单类型
     if (this.opt.formType === 'form-data') {
-      delete this.opt.headers['content-type']
-      this.opt.param = this.formData()
-    } else if (this.opt.formType !== 'form') {
-      this.opt.param = JSON.stringify(this.opt.data)
+      return this
     }
+
+    this.opt.formType = type || 'form'
+
+    // 不是POST方式, 强制为x-www-form-urlencoded
+    if (type === 'form' || noBodyMethods.indexOf(this.opt.method) > -1) {
+      this.set('content-type', error.form)
+    } else if (type === 'json') {
+      this.set('content-type', error.json)
+    } else {
+      this.set('content-type', error.text)
+    }
+
+    return this
   }
 
-  //jsonp
-  if (this.opt.type === 'JSONP') {
-    this.transport = doc.createElement('script')
-    this.transport.onerror = this.transport.onload = function() {
-      _this.dispatch(_this.transport)
+  //设置头信息
+  set(key, val) {
+    // 已经发起请求之后,不再允许追加头信息了
+    if (!this.transport) {
+      return this
     }
-    this.transport.src = this.opt.url
-    doc.head.insertBefore(this.transport, doc.head.firstChild)
 
-    //6. 超时处理
-    if (this.opt.timeout && this.opt.timeout > 0) {
-      this.opt.timeoutID = setTimeout(function() {
-        _this.transport.onerror = _this.transport.onload = null
-        _this.dispatch(null)
-      }, this.opt.timeout)
+    let obj = {}
+
+    if (arguments.length === 1) {
+      if (typeof key !== 'object') {
+        this.defer.reject(error[10002])
+        return this
+      }
+      obj = key
+    } else if (arguments.length === 2) {
+      if (typeof key === 'string' && val !== undefined) {
+        obj[key] = val
+      }
+    } else {
+      this.defer.reject(error[10002])
+      return this
     }
-  } else {
-    this.xhr.onreadystatechange = function(ev) {
-      if (_this.opt.timeout && _this.opt.timeout > 0) {
-        _this.opt['time' + this.readyState] = ev.timeStamp
-        if (this.readyState === 4) {
-          _this.opt.isTimeout =
-            _this.opt.time4 - _this.opt.time1 > _this.opt.timeout
+    for (let k in obj) {
+      // 全转小写,避免重复写入
+      let v = obj[k]
+      k = k.toLowerCase()
+      this.opt.headers[k] = v
+    }
+    return this
+  }
+
+  // 设置请求数据(POST方式会放入body, GET则拼接到url上)
+  send(key, val) {
+    if (!this.transport) {
+      return this
+    }
+
+    if (arguments.length === 1) {
+      if (typeof key === 'string') {
+        this.opt.data = key
+      } else if (typeof key === 'object') {
+        if (typeof this.opt.data !== 'object') {
+          this.defer.reject(error[10003])
+          return this
         }
+        Format.merge(this.opt.data, key)
+      } else {
+        this.defer.reject(error[10004])
       }
-
-      if (this.readyState !== 4) {
-        return
+    } else if (arguments.length === 2) {
+      if (typeof key !== 'string') {
+        this.defer.reject(error[10004])
+        return this
       }
-
-      _this.dispatch(_this.opt.isTimeout ? null : _this.xhr)
+      if (val === undefined) {
+        delete this.opt.data[key]
+      } else {
+        this.opt.data[key] = val
+      }
+    } else {
+      this.defer.reject(error[10005])
     }
 
-    // 6. 初始化xhr提交
-    this.xhr.open(this.opt.type, this.opt.url, true)
-
-    // 7. 设置头信息
-    for (var i in this.opt.headers) {
-      if (this.opt.headers[i]) this.xhr.setRequestHeader(i, this.opt.headers[i])
-    }
-
-    // 8. 发起网络请求
-    _this.xhr.send(_this.opt.param)
-
-    //超时处理
-    if (this.opt.timeout && this.opt.timeout > 0) {
-      this.xhr.timeout = this.opt.timeout
-    }
+    return this
   }
-  return this.defer.promise
-}
 
-// ---------------------- end ------------------------
+  //该方法用于 form-data类型的post请求的参数设置
+  field(key, val) {
+    if (!this.transport) {
+      return this
+    }
+
+    // 此类型优先级最高
+    this.opt.formType = 'form-data'
+    this.opt.method = 'POST'
+    if (!this.opt.data || typeof this.opt.data !== 'object') {
+      this.opt.data = {}
+    }
+
+    if (arguments.length === 1 && typeof key === 'object') {
+      Format.merge(this.opt.data, key)
+    } else if (arguments.length === 2) {
+      this.opt.data[key] = val
+    } else {
+      this.defer.reject(error[10006])
+    }
+    return this
+  }
+
+  //设置缓存
+  cache(bool) {
+    if (!this.transport) {
+      return this
+    }
+
+    if (noBodyMethods.indexOf(this.opt.method) > -1) {
+      this.opt.cache = !!bool
+    }
+
+    return this
+  }
+
+  //取消网络请求
+  abort() {
+    delete this.transport
+    if (!this.opt.form) {
+      this.xhr.abort()
+    }
+
+    return this
+  }
+
+  //超时设置, 单位毫秒
+  timeout(time) {
+    if (typeof time !== 'number' || time < 1) {
+      return this
+    }
+
+    this.opt.timeout = time
+    return this
+  }
+
+  form(form) {
+    if (typeof form === 'object' && form.nodeName === 'FORM') {
+      this.opt.method = 'POST'
+      this.opt.form = form
+    }
+
+    return this
+  }
+
+  then(cb) {
+    if (typeof cb !== 'function') {
+      this.defer.reject(error[10011])
+      return this.defer.promise
+    }
+
+    // 回调已执行, 或已取消, 则直接返回, 防止重复执行
+    if (!this.transport) {
+      return this.defer.promise
+    }
+
+    // ------------------------------------------
+    // 1. url规范化
+    // ------------------------------------------
+    this.opt.url = this.opt.url
+      .replace(/#.*$/, '')
+      .replace(/^\/\//, location.protocol + '//')
+
+    // ------------------------------------------
+    // 2. 处理跨域
+    // ------------------------------------------
+    // 2.1 判断是否跨域
+    if (typeof this.opt.crossDomain !== 'boolean') {
+      var anchor = doc.createElement('a')
+      try {
+        anchor.href = this.opt.url
+        // IE7及以下浏览器 '1'[0]的结果是 undefined
+        // IE7下需要获取绝对路径
+        var absUrl = !'1'[0] ? anchor.getAttribute('href', 4) : anchor.href
+        anchor.href = absUrl
+        anchor.async = true
+        this.opt.crossDomain =
+          originAnchor.protocol !== anchor.protocol ||
+          originAnchor.host !== anchor.host
+      } catch (e) {
+        this.opt.crossDomain = true
+      }
+    }
+
+    // 2.2 进一步处理跨域配置
+    if (this.opt.method === 'JSONP') {
+      //如果没有跨域，自动转回xhr GET
+      if (!this.opt.crossDomain) {
+        this.opt.method = 'GET'
+      } else {
+        this.opt.data['callback'] =
+          this.opt.data['callback'] || 'jsonp' + request.cid++
+        this._jsonp(this.opt.data['callback']) //创建临时处理方法
+      }
+    }
+
+    // 2.3 如果不是跨域请求，则自动加上一条header信息，用以标识这是ajax请求
+    if (!this.opt.crossDomain) {
+      this.set('X-Requested-With', 'XMLHttpRequest')
+    } else {
+      supportCors && (this.xhr.withCredentials = true)
+    }
+
+    // ------------------------------------------
+    // 3. 解析 data
+    // ------------------------------------------
+    this.opt.param = Format.param(this.opt.data)
+
+    // ------------------------------------------
+    // 4. 修正默认表单类型
+    // ------------------------------------------
+    if (!this.opt.formType) {
+      this.type('form')
+    }
+
+    // ------------------------------------------
+    // 5. 根据method类型,处理body
+    // ------------------------------------------
+    let hasBody = noBodyMethods.indexOf(this.opt.method) < 0 //是否为post请求
+    if (!hasBody) {
+      //GET请求直接把参数拼接到url上
+      if (this.opt.param) {
+        this.opt.url += (/\?/.test(this.opt.url) ? '&' : '?') + this.opt.param
+      }
+      //加随机值,避免缓存
+      if (this.opt.cache === false) {
+        this.opt.url +=
+          (/\?/.test(this.opt.url) ? '&' : '?') + '_=' + Math.random()
+      }
+    } else {
+      if (this.opt.formType === 'form-data') {
+        delete this.opt.headers['content-type']
+        this.opt.param = this._formData()
+      } else if (this.opt.formType !== 'form') {
+        if (typeof this.opt.data === 'object') {
+          this.opt.data = JSON.stringify(this.opt.data)
+        }
+        this.opt.param = this.opt.data
+      }
+    }
+
+    // ------------------------------------------
+    // 6. 构造并发起请求
+    // ------------------------------------------
+    // 6.1 jsonp
+    if (this.opt.method === 'JSONP') {
+      // 6.1.1 构造script并插入
+      this.transport = doc.createElement('script')
+      this.transport.onerror = this.transport.onload = () => {
+        this._dispatch()
+      }
+      this.transport.src = this.opt.url
+      doc.head.insertBefore(this.transport, doc.head.firstChild)
+
+      // 6.1.2 超时处理
+      if (this.opt.timeout && this.opt.timeout > 0) {
+        this.opt.timeoutID = setTimeout(() => {
+          this.transport.onerror = this.transport.onload = null
+          this._dispatch(true)
+        }, this.opt.timeout)
+      }
+    } else {
+      this.transport = this.xhr
+      // 6.2 非jsonp
+      // 6.2.1 监听http状态
+      this.xhr.onreadystatechange = ev => {
+        if (this.opt.timeout && this.opt.timeout > 0) {
+          this.opt['time' + this.xhr.readyState] = ev.timeStamp
+          if (this.xhr.readyState === 4) {
+            this.opt.isTimeout =
+              this.opt.time4 - this.opt.time1 > this.opt.timeout
+          }
+        }
+
+        if (this.xhr.readyState !== 4) {
+          return
+        }
+
+        this._dispatch(this.opt.isTimeout)
+      }
+
+      // 6.2.2 初始化xhr提交
+      this.xhr.open(this.opt.method, this.opt.url, true)
+
+      // 6.2.3 设置头信息
+      for (var i in this.opt.headers) {
+        this.xhr.setRequestHeader(i, this.opt.headers[i])
+      }
+
+      // 6.2.4 发起网络请求
+      this.xhr.send(this.opt.param)
+
+      // 6.2.5 超时处理
+      if (this.opt.timeout && this.opt.timeout > 0) {
+        this.xhr.timeout = this.opt.timeout
+      }
+    }
+
+    return this.defer.promise.then(res => {
+      return cb(res)
+    })
+  }
+}
 
 if (!win.request) {
   win.request = {
-    get: function(url) {
-      if (!url) throw new Error('argument url is required')
-
-      return new _request(url, 'GET')
+    get(url) {
+      return new _Request(url, 'GET')
     },
-    post: function(url) {
-      if (!url) throw new Error('argument url is required')
-
-      return new _request(url, 'POST')
+    post(url) {
+      return new _Request(url, 'POST')
     },
-    jsonp: function(url) {
-      if (!url) throw new Error('argument url is required')
-
-      return new _request(url, 'JSONP')
+    jsonp(url) {
+      return new _Request(url, 'JSONP')
+    },
+    open(url, method = 'GET') {
+      return new _Request(url, method)
     },
     cache: {},
     cid: 0,
