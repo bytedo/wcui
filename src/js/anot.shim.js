@@ -35,7 +35,7 @@
   var head = DOC.head //HEAD元素
   head.insertAdjacentHTML(
     'afterBegin',
-    '<anot :skip class="anot-hide"><style id="anot-style">.anot-hide{ display: none!important } .do-rule-tips {position:absolute;z-index:65535;min-width:75px;height:30px;padding:7px 8px;line-height:16px;color:#333;background:#f9ca05;white-space:pre;} .do-rule-tips::before {position:absolute;left:5px;bottom:-8px;width:0;height:0;border:8px solid transparent;border-left:8px solid #f9ca05;content: " "}</style></anot>'
+    '<anot skip class="anot-hide"><style id="anot-style">.anot-hide{ display: none!important }</style></anot>'
   )
   var ifGroup = head.firstChild
 
@@ -3939,115 +3939,120 @@
 
   /*------ 表单验证 -------*/
   var __rules = {}
-  Anot.validate = function(key) {
-    return (
-      !__rules[key] ||
-      __rules[key].every(function(it) {
-        return it.checked
-      })
-    )
+  Anot.validate = function(key, cb) {
+    if (!__rules[key]) {
+      throw new Error('validate [' + key + '] not exists.')
+    }
+    if (typeof cb === 'function') {
+      __rules[key].event = cb
+    }
+    var result = __rules[key].result
+    for (var k in result) {
+      if (!result[k].passed) {
+        return result[k]
+      }
+    }
+    return true
   }
   Anot.directive('rule', {
     priority: 2010,
     init: function(binding) {
       if (binding.param && !__rules[binding.param]) {
-        __rules[binding.param] = []
+        __rules[binding.param] = {
+          event: noop,
+          result: {}
+        }
       }
       binding.target = __rules[binding.param]
     },
-    update: function(obj) {
-      var _this = this,
-        elem = this.element,
-        ruleID = -1
-
-      if (!['INPUT', 'TEXTAREA'].includes(elem.nodeName)) return
-
+    update: function(opt) {
+      var _this = this
+      var elem = this.element
+      if (!['INPUT', 'TEXTAREA'].includes(elem.nodeName)) {
+        return
+      }
       if (this.target) {
-        ruleID = this.target.length
-        this.target.push({ checked: true })
+        this.target.result[elem.expr] = { key: elem.expr }
       }
+      var target = this.target
 
-      //如果父级元素没有定位属性,则加上相对定位
-      if (getComputedStyle(elem.parentNode).position === 'static') {
-        elem.parentNode.style.position = 'relative'
-      }
-
-      var $elem = Anot(elem),
-        ol = elem.offsetLeft + elem.offsetWidth - 50,
-        ot = elem.offsetTop + elem.offsetHeight + 8,
-        tips = document.createElement('div')
-
-      tips.className = 'do-rule-tips'
-      tips.style.left = ol + 'px'
-      tips.style.bottom = ot + 'px'
-
+      // 0: 验证通过
+      // 10001: 不能为空
+      // 10002: 必须为合法数字
+      // 10003: Email格式错误
+      // 10004: 手机格式错误
+      // 10005: 必须为纯中文
+      // 10006: 格式匹配错误(正则)
+      // 10011: 输入值超过指定最大长度
+      // 10012: 输入值短于指定最小长度
+      // 10021: 输入值大于指定最大数值
+      // 10022: 输入值小于指定最小数值
+      // 10031: 与指定的表单的值不一致
       function checked(ev) {
-        var txt = '',
-          val = elem.value
+        var val = elem.value
+        var code = 0
 
-        if (obj.require && (val === '' || val === null)) txt = '必填项'
-
-        if (!txt && obj.isNumeric) txt = !isFinite(val) ? '必须为合法数字' : ''
-
-        if (!txt && obj.isEmail)
-          txt = !/^[\w\.\-]+@\w+([\.\-]\w+)*\.\w+$/.test(val)
-            ? 'Email格式错误'
-            : ''
-
-        if (!txt && obj.isPhone)
-          txt = !/^1[34578]\d{9}$/.test(val) ? '手机格式错误' : ''
-
-        if (!txt && obj.isCN)
-          txt = !/^[\u4e00-\u9fa5]+$/.test(val) ? '必须为纯中文' : ''
-
-        if (!txt && obj.exp)
-          txt = !obj.exp.test(val) ? obj.msg || '格式错误' : ''
-
-        if (!txt && obj.maxLen)
-          txt =
-            val.length > obj.maxLen ? '长度不得超过' + obj.maxLen + '位' : ''
-
-        if (!txt && obj.minLen)
-          txt =
-            val.length < obj.minLen ? '长度不得小于' + obj.minLen + '位' : ''
-
-        if (!txt && obj.hasOwnProperty('max'))
-          txt = val > obj.max ? '输入值不能大于' + obj.max : ''
-
-        if (!txt && obj.hasOwnProperty('min'))
-          txt = val < obj.min ? '输入值不能小于' + obj.min : ''
-
-        if (!txt && obj.eq) {
-          var eqEl = document.querySelector('#' + obj.eq)
-          txt = val !== eqEl.value ? obj.msg || '2次值不一致' : ''
+        if (opt.require && (val === '' || val === null)) {
+          code = 10001
         }
 
-        if (txt) {
-          if (ev) {
-            tips.textContent = txt
-            elem.parentNode.appendChild(tips)
+        if (code === 0 && opt.isNumeric) {
+          code = !isFinite(val) ? 10002 : 0
+        }
+
+        if (code === 0 && opt.isEmail)
+          code = !/^[\w\.\-]+@\w+([\.\-]\w+)*\.\w+$/.test(val) ? 10003 : 0
+
+        if (code === 0 && opt.isPhone) {
+          code = !/^1[34578]\d{9}$/.test(val) ? 10004 : 0
+        }
+
+        if (code === 0 && opt.isCN) {
+          code = !/^[\u4e00-\u9fa5]+$/.test(val) ? 10005 : 0
+        }
+
+        if (code === 0 && opt.exp) {
+          code = !opt.exp.test(val) ? 10006 : 0
+        }
+
+        if (code === 0 && opt.maxLen) {
+          code = val.length > opt.maxLen ? 10011 : 0
+        }
+
+        if (code === 0 && opt.minLen) {
+          code = val.length < opt.minLen ? 10012 : 0
+        }
+
+        if (code === 0 && opt.hasOwnProperty('max')) {
+          code = val > opt.max ? 10021 : 0
+        }
+
+        if (code === 0 && opt.hasOwnProperty('min')) {
+          code = val < opt.min ? 10022 : 0
+        }
+
+        if (code === 0 && opt.eq) {
+          var eqEl = document.querySelector('#' + opt.eq)
+          txt = val !== eqEl.value ? 10031 : 0
+        }
+
+        target.result[elem.expr].code = code
+        target.result[elem.expr].passed = opt.require ? code === 0 : true
+
+        var done
+        for (var k in target.result) {
+          if (!target.result[k].passed) {
+            done = true
+            target.event(target.result[k])
+            break
           }
-          //必须是"必填项"才会更新验证状态
-          if (_this.target && obj.require) {
-            _this.target[ruleID].checked = false
-          }
-        } else {
-          if (_this.target) {
-            _this.target[ruleID].checked = true
-          }
-          try {
-            elem.parentNode.removeChild(tips)
-          } catch (err) {}
+        }
+        if (!done) {
+          target.event(true)
         }
       }
 
-      $elem.bind('change,blur', checked)
-      $elem.bind('focus', function(ev) {
-        try {
-          elem.parentNode.removeChild(tips)
-        } catch (err) {}
-      })
-
+      Anot(elem).bind('blur', checked)
       checked()
     }
   })
@@ -4097,6 +4102,7 @@
                   ? 'change'
                   : 'input'
       }
+      elem.expr = binding.expr
       //===================绑定事件======================
       var bound = (binding.bound = function(type, callback) {
         elem.addEventListener(type, callback, false)

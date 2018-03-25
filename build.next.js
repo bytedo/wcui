@@ -3,7 +3,6 @@
 const log = console.log
 const fs = require('iofs')
 const path = require('path')
-const babel = require('babel-core')
 const scss = require('node-sass')
 const postcss = require('postcss')
 const autoprefixer = require('autoprefixer')
@@ -17,15 +16,6 @@ const prefixer = postcss().use(
     browsers: ['ie > 9', 'iOS > 8', 'Android >= 4.4', 'ff > 38', 'Chrome > 38']
   })
 )
-const jsOpt = {
-  presets: ['es2015'],
-  plugins: [
-    'transform-es2015-modules-amd',
-    'transform-decorators-legacy',
-    'transform-class-properties',
-    'transform-object-rest-spread'
-  ]
-}
 const cssOpt = {
   includePaths: ['src/css/'],
   outputStyle: 'compressed'
@@ -36,12 +26,9 @@ const compileJs = (entry, output) => {
     return
   }
   let t1 = Date.now()
-  let tmpOpt = jsOpt
-  if (/anot/.test(entry)) {
-    tmpOpt = Object.assign({}, jsOpt, { plugins: [] })
-  }
-  let { code } = babel.transformFileSync(entry, tmpOpt)
-  code = uglify.minify(code).code.replace(/\.scss/g, '.css')
+  let buf = fs.cat(entry).toString()
+  let { code } = uglify.minify(buf)
+  code = code.replace(/\.scss/g, '.css')
   log(
     '编译JS: %s, 耗时 %s ms',
     chalk.green(entry),

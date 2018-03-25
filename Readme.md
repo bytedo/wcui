@@ -15,5 +15,8 @@
 npm start
 
 # 生产环境
-npm run build
+npm run prod
+
+# 不编译,只压缩
+npm run next
 ```

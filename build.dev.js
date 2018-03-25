@@ -40,7 +40,8 @@ const compileJs = (entry, output) => {
       fs.cp(entry, output)
     } else {
       try {
-        const { code } = babel.transformFileSync(entry, jsOpt)
+        let { code } = babel.transformFileSync(entry, jsOpt)
+        code = code.replace(/\.scss/g, '.css')
         fs.echo(code, output)
       } catch (err) {
         return log(err)

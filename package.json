@@ -5,16 +5,14 @@
   "main": "index.js",
   "scripts": {
     "start": "node ./build.dev.js",
-    "build": "node ./build.prod.js"
+    "prod": "node ./build.prod.js",
+    "next": "node ./build.next.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/yutent/doui.git"
   },
-  "keywords": [
-    "doui",
-    "Anot"
-  ],
+  "keywords": ["doui", "Anot"],
   "author": "yutent",
   "license": "MIT",
   "devDependencies": {
@@ -29,7 +27,7 @@
     "iofs": "^1.0.3",
     "node-sass": "^4.8.2",
     "postcss": "^6.0.19",
-    "uglify-js": "^3.3.15"
+    "uglify-es": "^3.3.9"
   },
   "dependencies": {}
 }

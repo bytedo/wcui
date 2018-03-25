@@ -5,22 +5,7 @@
  * support IE10+ and other browsers
  * 
  ==================================================*/
-;(function(global, factory) {
-  if (typeof module === 'object' && typeof module.exports === 'object') {
-    module.exports = global.document
-      ? factory(global, true)
-      : function(w) {
-          if (!w.document) {
-            throw new Error('Anot.js只能运行在浏览器环境')
-          }
-          return factory(w)
-        }
-  } else {
-    factory(global)
-  }
-
-  // Pass this if window is not defined yet
-})(typeof window !== 'undefined' ? window : this, function(window, noGlobal) {
+const _Anot = (function() {
   /*********************************************************************
    *                    全局变量及方法                                   *
    **********************************************************************/
@@ -35,7 +20,7 @@
   var head = DOC.head //HEAD元素
   head.insertAdjacentHTML(
     'afterBegin',
-    '<anot :skip class="anot-hide"><style id="anot-style">.anot-hide{ display: none!important } .do-rule-tips {position:absolute;z-index:65535;min-width:75px;height:30px;padding:7px 8px;line-height:16px;color:#333;background:#f9ca05;white-space:pre;} .do-rule-tips::before {position:absolute;left:5px;bottom:-8px;width:0;height:0;border:8px solid transparent;border-left:8px solid #f9ca05;content: " "}</style></anot>'
+    '<anot skip class="anot-hide"><style id="anot-style">.anot-hide{ display: none!important }</style></anot>'
   )
   var ifGroup = head.firstChild
 
@@ -141,7 +126,7 @@
     }
 
     if (tickObserver) {
-      var node = document.createTextNode('any')
+      var node = document.createTextNode('anot')
       new tickObserver(callback).observe(node, { characterData: true }) // jshint ignore:line
       var bool = false
       return function(fn) {
@@ -181,7 +166,11 @@
       return ''
     },
     check: function(val) {
-      return Anot.type(val) === this.checkType
+      this.result = Anot.type(val)
+      return this.result === this.checkType
+    },
+    call: function() {
+      return this.toString()
     }
   }
 
@@ -235,13 +224,13 @@
         if ($elem === DOC.body) {
           scanTag($elem, [])
         } else {
-          var $parent = null
-          while (($parent = $elem.parentNode)) {
+          var $parent = $elem
+          while (($parent = $parent.parentNode)) {
             if ($parent.anotctrl) {
-              scanTag($elem.parentNode, [VMODELS[$parent.anotctrl]])
               break
             }
           }
+          scanTag($elem.parentNode, $parent ? [VMODELS[$parent.anotctrl]] : [])
         }
       }
       return vm
@@ -460,7 +449,7 @@
       value: function() {
         var thisYear = this.getFullYear(),
           that = new Date(thisYear, 0, 1),
-          firstDay = that.getDay(),
+          firstDay = that.getDay() || 1,
           numsOfToday = (this - that) / 86400000
         return Math.ceil((numsOfToday + firstDay) / 7)
       },
@@ -1373,6 +1362,7 @@
     var methods = source.methods
     var props = source.props
     var watches = source.watch
+    var mounted = source.mounted
 
     delete source.state
     delete source.computed
@@ -1488,6 +1478,8 @@
     hideProperty($vmodel, '$active', false)
     hideProperty($vmodel, '$pathname', old ? old.$pathname : '')
     hideProperty($vmodel, '$accessors', accessors)
+    hideProperty($vmodel, '$refs', {})
+    hideProperty($vmodel, '$children', [])
     hideProperty($vmodel, 'hasOwnProperty', trackBy)
     if (options.watch) {
       hideProperty($vmodel, '$watch', function() {
@@ -1498,6 +1490,12 @@
           var ee = path.slice(4)
           for (var i in Anot.vmodels) {
             var v = Anot.vmodels[i]
+            v.$fire && v.$fire.apply(v, [ee, a])
+          }
+        } else if (path.indexOf('child!') === 0) {
+          var ee = 'props.' + path.slice(6)
+          for (var i in $vmodel.$children) {
+            var v = $vmodel.$children[i]
             v.$fire && v.$fire.apply(v, [ee, a])
           }
         } else {
@@ -1527,6 +1525,11 @@
     }
 
     $vmodel.$active = true
+    $vmodel.mounted = mounted
+
+    if (old && old.$up) {
+      old.$up.$children.push($vmodel)
+    }
 
     return $vmodel
   }
@@ -2912,7 +2915,7 @@
       binding.observers.forEach(function(it) {
         if (it.type === 'function') {
           // log(it, expr)
-          let reg = new RegExp(it.p + '\\(([^)]*)\\)', 'g')
+          var reg = new RegExp(it.p + '\\(([^)]*)\\)', 'g')
           expr = expr.replace(reg, function(s, m) {
             m = m.trim()
             return (
@@ -2933,7 +2936,7 @@
         "'use strict';\ntry{\nvar " +
           assigns.join(',\n') +
           expr +
-          '\n}catch(e){log(e)}'
+          '\n}catch(e){console.log(e)}'
       )
     )
     /* jshint ignore:end */
@@ -3082,17 +3085,19 @@
   }
 
   var rnoCollect = /^(:\S+|data-\S+|on[a-z]+|id|style|class)$/
-  var ronattr = /^on\-[\w-]+$/
+  var ronattr = '__fn__'
   function getOptionsFromTag(elem, vmodels) {
     var attributes = elem.attributes
     var ret = {}
     for (var i = 0, attr; (attr = attributes[i++]); ) {
       var name = attr.name
       if (attr.specified && !rnoCollect.test(name)) {
-        var camelizeName = camelize(attr.name)
-        if (/^on\-[\w-]+$/.test(name)) {
-          ret[camelizeName] = getBindingCallback(elem, name, vmodels)
+        if (name.indexOf(ronattr) === 0) {
+          name = attr.value.slice(6)
+          ret[name] = elem[attr.value]
+          delete elem[attr.value]
         } else {
+          var camelizeName = camelize(name)
           ret[camelizeName] = parseData(attr.value)
         }
       }
@@ -3224,6 +3229,12 @@
                 //确保所有:attr-name扫描完再处理
                 _delay_component(widget)
               }
+            } else {
+              // 非组件才检查 ref属性
+              var ref = isRef(elem)
+              if (ref) {
+                vmodels[0].$refs[ref] = elem
+              }
             }
           }
 
@@ -3267,34 +3278,19 @@
       createSignalTower(elem, newVmodel)
       hideProperty(newVmodel, '$elem', elem)
       if (vmodels.length) {
-        attrs.forEach(function(attr, i) {
+        var props = {}
+        attrs.forEach(function(attr) {
           if (/^:/.test(attr.name)) {
             var name = attr.name.match(rmsAttr)[1]
             var value = null
-            if (!name || Anot.directives[name]) {
+            if (!name || Anot.directives[name] || events[name]) {
               return
             }
             try {
               value = parseExpr(attr.value, vmodels, {}).apply(0, vmodels)
+              value = toJson(value)
               elem.removeAttribute(attr.name)
-              if (!value) {
-                return
-              }
-              if (
-                newVmodel.props[name] &&
-                newVmodel.props[name].type === 'PropsTypes'
-              ) {
-                if (newVmodel.props[name].check(value)) {
-                  newVmodel.props[name] = value
-                } else {
-                  Anot.error(
-                    'props「' + name + '」类型错误!' + value,
-                    TypeError
-                  )
-                }
-              } else {
-                newVmodel.props[name] = value
-              }
+              props[name] = value
             } catch (error) {
               log(
                 'Props parse faild on (%s[class=%s]),',
@@ -3306,13 +3302,38 @@
             }
           }
         })
+        // 一旦设定了 props的类型, 就必须传入正确的值
+        for (var k in newVmodel.props) {
+          if (newVmodel.props[k] && newVmodel.props[k].type === 'PropsTypes') {
+            if (newVmodel.props[k].check(props[k])) {
+              newVmodel.props[k] = props[k]
+              delete props[k]
+            } else {
+              Anot.error(
+                'props.' +
+                  k +
+                  ' needs [' +
+                  newVmodel.props[k].checkType +
+                  '], but [' +
+                  newVmodel.props[k].result +
+                  '] given.',
+                TypeError
+              )
+            }
+          }
+        }
+        Object.assign(newVmodel.props, props)
+        props = undefined
       }
     }
     scanAttr(elem, vm) //扫描特性节点
 
     if (newVmodel) {
       setTimeout(function() {
-        newVmodel.$fire(':scan-end', elem)
+        if (typeof newVmodel.mounted === 'function') {
+          newVmodel.mounted()
+        }
+        delete newVmodel.mounted
       })
     }
   }
@@ -3436,15 +3457,13 @@
   var componentQueue = []
   var widgetList = []
   var componentHooks = {
-    construct: function(props, next) {
-      next(props)
-    },
+    construct: noop,
     componentWillMount: noop,
     componentDidMount: noop,
     childComponentDidMount: noop,
     componentWillUnmount: noop,
-    render: function(str) {
-      return str
+    render: function() {
+      return null
     }
   }
 
@@ -3474,21 +3493,19 @@
             return
           }
           var props = getOptionsFromTag(elem, host.vmodels)
-          var vmOpts = getOptionsFromVM(host.vmodels, props.config)
           var $id = props.uuid || generateID(widget)
-          var componentDefinition = {}
 
-          props = Object.assign({}, vmOpts, props)
-          vmOpts = void 0
-          delete props.config
           delete props.uuid
-          hooks.construct.call(elem, props, function next(val) {
-            Object.assign(hooks.props, val)
-            Object.assign(componentDefinition, hooks)
-          })
+          delete props.name
 
-          componentDefinition.$refs = {}
-          componentDefinition.$id = $id
+          hooks.props = hooks.props || {}
+          hooks.state = hooks.state || {}
+
+          Object.assign(hooks.props, props)
+
+          hooks.construct.call(elem, hooks.props, hooks.state)
+
+          hooks.$id = $id
 
           //==========构建VM=========
           var {
@@ -3497,15 +3514,17 @@
             childComponentDidMount,
             componentWillUnmount,
             render
-          } = componentDefinition
+          } = hooks
 
-          delete componentDefinition.construct
-          delete componentDefinition.componentWillMount
-          delete componentDefinition.componentDidMount
-          delete componentDefinition.childComponentDidMount
-          delete componentDefinition.componentWillUnmount
+          delete hooks.construct
+          delete hooks.componentWillMount
+          delete hooks.componentDidMount
+          delete hooks.childComponentDidMount
+          delete hooks.componentWillUnmount
 
-          var vmodel = Anot(componentDefinition)
+          var vmodel = Anot(hooks)
+          delete vmodel.mounted
+          host.vmodels[0].$children.push(vmodel)
 
           elem.msResolved = 1 //防止二进扫描此元素
 
@@ -3514,18 +3533,30 @@
 
           if (!elem.content.firstElementChild) {
             Anot.clearHTML(elem)
-            elem.innerHTML = render()
+            var html = render.call(vmodel) || ''
+
+            html = html.replace(/<\w+[^>]*>/g, function(m, s) {
+              return m.replace(/[\n\t\s]{1,}/g, ' ')
+            })
+
+            elem.innerHTML = html
           }
 
           // 组件所使用的标签是temlate,所以必须要要用子元素替换掉
           var child = elem.content.firstElementChild
-          elem.parentNode.replaceChild(child, elem)
+          var nullComponent = DOC.createComment('empty component')
+          elem.parentNode.replaceChild(child || nullComponent, elem)
+
+          // 空组件直接跳出
+          if (!child) {
+            return
+          }
 
           child.msResolved = 1
           var cssText = elem.style.cssText
           var className = elem.className
           elem = host.element = child
-          elem.style.cssText += ';' + cssText
+          elem.style && (elem.style.cssText += ';' + cssText)
 
           if (className) {
             Anot(elem).addClass(className)
@@ -3542,10 +3573,11 @@
             if (ev.childReady) {
               dependencies += ev.childReady
               if (vmodel !== ev.vm) {
-                vmodel.$refs[ev.vm.$id] = ev.vm
+                vmodel.$children.push(ev.vm)
+                ev.vm.$up = vmodel
                 if (ev.childReady === -1) {
                   children++
-                  childComponentDidMount.call(vmodel, elem, ev)
+                  childComponentDidMount.call(vmodel, ev.vm)
                 }
                 ev.stopPropagation()
               }
@@ -3590,22 +3622,9 @@
               })
             }, 17)
           }
-        })(obj, Anot.components[name], obj.element, obj.name) // jshint ignore:line
+        })(obj, toJson(Anot.components[name]), obj.element, obj.name) // jshint ignore:line
       }
     }
-  }
-
-  function getOptionsFromVM(vmodels, pre) {
-    if (pre) {
-      for (var i = 0, v; (v = vmodels[i++]); ) {
-        if (v.hasOwnProperty(pre) && typeof v[pre] === 'object') {
-          var vmOptions = v[pre]
-          return vmOptions.$model || vmOptions
-          break
-        }
-      }
-    }
-    return {}
   }
 
   function isWidget(el) {
@@ -3615,6 +3634,10 @@
       return el.getAttribute('name')
     }
     return null
+  }
+
+  function isRef(el) {
+    return el.hasAttribute('ref') ? el.getAttribute('ref') : null
   }
 
   var bools = [
@@ -3687,11 +3710,16 @@
     update: function(val) {
       var elem = this.element
       var obj = val
+      var vm = this.vmodels[0]
 
       if (typeof obj === 'object' && obj !== null) {
-        if (!Anot.isPlainObject(obj)) obj = obj.$model
+        if (!Anot.isPlainObject(obj)) {
+          obj = obj.$model
+        }
       } else {
-        if (!this.param) return
+        if (!this.param) {
+          return
+        }
 
         obj = {}
         obj[this.param] = val
@@ -3711,24 +3739,32 @@
           //chrome v37- 下embed标签动态设置的src，无法发起请求
           if (window.chrome && elem.tagName === 'EMBED') {
             var parent = elem.parentNode
-            var com = document.createComment(':src')
+            var com = DOC.createComment(':src')
             parent.replaceChild(com, elem)
             parent.replaceChild(elem, com)
           }
         } else {
           var k = i
           //古董IE下，部分属性名字要进行映射
-          if (!W3C && propMap[k]) k = propMap[k]
+          if (!W3C && propMap[k]) {
+            k = propMap[k]
+          }
+          if (obj[i] === false || obj[i] === null || obj[i] === undefined) {
+            obj[i] = ''
+          }
 
           if (typeof elem[boolMap[k]] === 'boolean') {
             //布尔属性必须使用el.xxx = true|false方式设值
             elem[boolMap[k]] = !!obj[i]
 
             //如果为false, IE全系列下相当于setAttribute(xxx, ''),会影响到样式,需要进一步处理
-            if (!obj[i]) obj[i] = !!obj[i]
+            if (!obj[i]) {
+              obj[i] = !!obj[i]
+            }
+            if (obj[i] === false) {
+              return elem.removeAttribute(k)
+            }
           }
-          if (obj[i] === false || obj[i] === null || obj[i] === undefined)
-            return elem.removeAttribute(k)
 
           //SVG只能使用setAttribute(xxx, yyy), VML只能使用elem.xxx = yyy ,HTML的固有属性必须elem.xxx = yyy
           var isInnate = rsvg.test(elem)
@@ -3737,6 +3773,13 @@
           if (isInnate) {
             elem[k] = obj[i]
           } else {
+            if (typeof obj[i] === 'object') {
+              obj[i] = JSON.stringify(obj[i])
+            } else if (typeof obj[i] === 'function') {
+              k = '__fn__' + camelize(k)
+              elem[k] = obj[i].bind(vm)
+              obj[i] = k
+            }
             elem.setAttribute(k, obj[i])
           }
         }
@@ -3881,115 +3924,121 @@
 
   /*------ 表单验证 -------*/
   var __rules = {}
-  Anot.validate = function(key) {
-    return (
-      !__rules[key] ||
-      __rules[key].every(function(it) {
-        return it.checked
-      })
-    )
+  Anot.validate = function(key, cb) {
+    if (!__rules[key]) {
+      throw new Error('validate [' + key + '] not exists.')
+    }
+    if (typeof cb === 'function') {
+      __rules[key].event = cb
+    }
+    var result = __rules[key].result
+    for (var k in result) {
+      if (!result[k].passed) {
+        return result[k]
+      }
+    }
+    return true
   }
+
   Anot.directive('rule', {
     priority: 2010,
     init: function(binding) {
       if (binding.param && !__rules[binding.param]) {
-        __rules[binding.param] = []
+        __rules[binding.param] = {
+          event: noop,
+          result: {}
+        }
       }
       binding.target = __rules[binding.param]
     },
-    update: function(obj) {
-      var _this = this,
-        elem = this.element,
-        ruleID = -1
-
-      if (!['INPUT', 'TEXTAREA'].includes(elem.nodeName)) return
-
+    update: function(opt) {
+      var _this = this
+      var elem = this.element
+      if (!['INPUT', 'TEXTAREA'].includes(elem.nodeName)) {
+        return
+      }
       if (this.target) {
-        ruleID = this.target.length
-        this.target.push({ checked: true })
+        this.target.result[elem.expr] = { key: elem.expr }
       }
+      var target = this.target
 
-      //如果父级元素没有定位属性,则加上相对定位
-      if (getComputedStyle(elem.parentNode).position === 'static') {
-        elem.parentNode.style.position = 'relative'
-      }
-
-      var $elem = Anot(elem),
-        ol = elem.offsetLeft + elem.offsetWidth - 50,
-        ot = elem.offsetTop + elem.offsetHeight + 8,
-        tips = document.createElement('div')
-
-      tips.className = 'do-rule-tips'
-      tips.style.left = ol + 'px'
-      tips.style.bottom = ot + 'px'
-
+      // 0: 验证通过
+      // 10001: 不能为空
+      // 10002: 必须为合法数字
+      // 10003: Email格式错误
+      // 10004: 手机格式错误
+      // 10005: 必须为纯中文
+      // 10006: 格式匹配错误(正则)
+      // 10011: 输入值超过指定最大长度
+      // 10012: 输入值短于指定最小长度
+      // 10021: 输入值大于指定最大数值
+      // 10022: 输入值小于指定最小数值
+      // 10031: 与指定的表单的值不一致
       function checked(ev) {
-        var txt = '',
-          val = elem.value
+        var val = elem.value
+        var code = 0
 
-        if (obj.require && (val === '' || val === null)) txt = '必填项'
-
-        if (!txt && obj.isNumeric) txt = !isFinite(val) ? '必须为合法数字' : ''
-
-        if (!txt && obj.isEmail)
-          txt = !/^[\w\.\-]+@\w+([\.\-]\w+)*\.\w+$/.test(val)
-            ? 'Email格式错误'
-            : ''
-
-        if (!txt && obj.isPhone)
-          txt = !/^1[34578]\d{9}$/.test(val) ? '手机格式错误' : ''
-
-        if (!txt && obj.isCN)
-          txt = !/^[\u4e00-\u9fa5]+$/.test(val) ? '必须为纯中文' : ''
-
-        if (!txt && obj.exp)
-          txt = !obj.exp.test(val) ? obj.msg || '格式错误' : ''
-
-        if (!txt && obj.maxLen)
-          txt =
-            val.length > obj.maxLen ? '长度不得超过' + obj.maxLen + '位' : ''
-
-        if (!txt && obj.minLen)
-          txt =
-            val.length < obj.minLen ? '长度不得小于' + obj.minLen + '位' : ''
-
-        if (!txt && obj.hasOwnProperty('max'))
-          txt = val > obj.max ? '输入值不能大于' + obj.max : ''
-
-        if (!txt && obj.hasOwnProperty('min'))
-          txt = val < obj.min ? '输入值不能小于' + obj.min : ''
-
-        if (!txt && obj.eq) {
-          var eqEl = document.querySelector('#' + obj.eq)
-          txt = val !== eqEl.value ? obj.msg || '2次值不一致' : ''
+        if (opt.require && (val === '' || val === null)) {
+          code = 10001
         }
 
-        if (txt) {
-          if (ev) {
-            tips.textContent = txt
-            elem.parentNode.appendChild(tips)
+        if (code === 0 && opt.isNumeric) {
+          code = !isFinite(val) ? 10002 : 0
+        }
+
+        if (code === 0 && opt.isEmail)
+          code = !/^[\w\.\-]+@\w+([\.\-]\w+)*\.\w+$/.test(val) ? 10003 : 0
+
+        if (code === 0 && opt.isPhone) {
+          code = !/^1[34578]\d{9}$/.test(val) ? 10004 : 0
+        }
+
+        if (code === 0 && opt.isCN) {
+          code = !/^[\u4e00-\u9fa5]+$/.test(val) ? 10005 : 0
+        }
+
+        if (code === 0 && opt.exp) {
+          code = !opt.exp.test(val) ? 10006 : 0
+        }
+
+        if (code === 0 && opt.maxLen) {
+          code = val.length > opt.maxLen ? 10011 : 0
+        }
+
+        if (code === 0 && opt.minLen) {
+          code = val.length < opt.minLen ? 10012 : 0
+        }
+
+        if (code === 0 && opt.hasOwnProperty('max')) {
+          code = val > opt.max ? 10021 : 0
+        }
+
+        if (code === 0 && opt.hasOwnProperty('min')) {
+          code = val < opt.min ? 10022 : 0
+        }
+
+        if (code === 0 && opt.eq) {
+          var eqEl = document.querySelector('#' + opt.eq)
+          txt = val !== eqEl.value ? 10031 : 0
+        }
+
+        target.result[elem.expr].code = code
+        target.result[elem.expr].passed = opt.require ? code === 0 : true
+
+        var done
+        for (var k in target.result) {
+          if (!target.result[k].passed) {
+            done = true
+            target.event(target.result[k])
+            break
           }
-          //必须是"必填项"才会更新验证状态
-          if (_this.target && obj.require) {
-            _this.target[ruleID].checked = false
-          }
-        } else {
-          if (_this.target) {
-            _this.target[ruleID].checked = true
-          }
-          try {
-            elem.parentNode.removeChild(tips)
-          } catch (err) {}
+        }
+        if (!done) {
+          target.event(true)
         }
       }
 
-      $elem.bind('change,blur', checked)
-      $elem.bind('focus', function(ev) {
-        try {
-          elem.parentNode.removeChild(tips)
-        } catch (err) {}
-      })
-
+      Anot(elem).bind('blur', checked)
       checked()
     }
   })
@@ -4039,12 +4088,13 @@
                   ? 'change'
                   : 'input'
       }
+      elem.expr = binding.expr
       //===================绑定事件======================
       var bound = (binding.bound = function(type, callback) {
         elem.addEventListener(type, callback, false)
         var old = binding.rollback
         binding.rollback = function() {
-          elem.anotStter = null
+          elem.anotSetter = null
           Anot.unbind(elem, type, callback)
           old && old()
         }
@@ -4148,7 +4198,7 @@
             elem.msFocus = false
           })
         }
-        elem.anotStter = updateVModel //#765
+        elem.anotSetter = updateVModel //#765
         watchValueInTimer(function() {
           if (root.contains(elem)) {
             if (!elem.msFocus) {
@@ -4167,7 +4217,7 @@
       if (!this.init) {
         for (var i in Anot.vmodels) {
           var v = Anot.vmodels[i]
-          v.$fire('any-duplex-init', binding)
+          v.$fire('anot-duplex-init', binding)
         }
         var cpipe = binding.pipe || (binding.pipe = pipe)
         cpipe(null, binding, 'init')
@@ -4250,17 +4300,7 @@
         if (-val === -number) {
           return number
         }
-        var arr = /strong|medium|weak/.exec(
-          binding.element.getAttribute('data-duplex-number')
-        ) || ['medium']
-        switch (arr[0]) {
-          case 'strong':
-            return 0
-          case 'medium':
-            return val === '' ? '' : 0
-          case 'weak':
-            return val
-        }
+        return 0
       },
       set: fixNull
     }
@@ -4308,8 +4348,8 @@
       function newSetter(value) {
         // jshint ignore:line
         setters[this.tagName].call(this, value)
-        if (!this.msFocus && this.anotStter) {
-          this.anotStter()
+        if (!this.msFocus && this.anotSetter) {
+          this.anotSetter()
         }
       }
       var inputProto = HTMLInputElement.prototype
@@ -5676,7 +5716,9 @@
     time: function(str) {
       str = str >> 0
       var s = str % 60
-      ;(m = Math.floor(str / 60)), (h = Math.floor(m / 60)), (m = m % 60)
+      var m = Math.floor(str / 60)
+      var h = Math.floor(m / 60)
+      m = m % 60
       m = m < 10 ? '0' + m : m
       s = s < 10 ? '0' + s : s
 
@@ -5763,14 +5805,38 @@
     }
   })
 
-  // Map over Anot in case of overwrite
-  var _Anot = window.Anot
-  Anot.noConflict = function(deep) {
-    if (deep && window.Anot === Anot) {
-      window.Anot = _Anot
+  /*********************************************************************
+   *                    DOMReady                                       *
+   **********************************************************************/
+
+  var readyList = [],
+    isReady
+  var fireReady = function(fn) {
+    isReady = true
+    var require = Anot.require
+    if (require && require.checkDeps) {
+      modules['domReady!'].state = 4
+      require.checkDeps()
     }
-    return Anot
+    while ((fn = readyList.shift())) {
+      fn(Anot)
+    }
   }
 
-  window.Anot = Anot
-})
+  if (DOC.readyState === 'complete') {
+    setTimeout(fireReady) //如果在domReady之外加载
+  } else {
+    DOC.addEventListener('DOMContentLoaded', fireReady)
+  }
+  window.addEventListener('load', fireReady)
+  Anot.ready = function(fn) {
+    if (!isReady) {
+      readyList.push(fn)
+    } else {
+      fn(Anot)
+    }
+  }
+
+  return Anot
+})()
+export default _Anot
