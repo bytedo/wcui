@@ -20,16 +20,8 @@
     .button,.page {min-width:40px;height:40px}
   }
     
-  .button,.page {display:inline-block;border:0;color: nth($cgr, 1);text-decoration:none;cursor:pointer;vertical-align:top;font-size:14px;font-weight:100;
-    
-    &.home::after {content:"\e691";font-size:18px;}
-    &.prev::after {content:"\e67c";font-size:18px;}
-    &.next::after {content:"\e66e";font-size:18px;}
-    &.end::after {content:"\e693";font-size:18px;}
-  }
-
-  
-
+  .button,.page {display:inline-block;border:0;color: nth($cgr, 1);text-decoration:none;cursor:pointer;vertical-align:top;font-size:14px;font-weight:100;}
+  .button {font-size:18px;}
   .curr, .disabled {cursor:default;}
   
   &.skin-1 {width:100%;

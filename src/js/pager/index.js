@@ -51,22 +51,22 @@ function update(currPage, vm) {
 }
 
 const tmpls = {
-  home: `<button class="do-ui-font button home"
+  home: `<button class="do-icon-dbl-left button"
     :css="{'border-radius': props.radius}"
     :attr-disabled="currPage === 1"
     :data="{to: parseUrl(1)}"
     :click="setPage(1, $event)"></button>`,
-  end: `<button class="do-ui-font button end"
+  end: `<button class="do-icon-dbl-right button"
     :css="{'border-radius': props.radius}"
     :attr-disabled="currPage === totalPage"
     :data="{to: parseUrl(totalPage)}"
     :click="setPage(totalPage, $event)"></button>`,
-  prev: `<button class="do-ui-font button prev"
+  prev: `<button class="do-icon-left button"
     :css="{'border-radius': props.radius}"
     :attr-disabled="{disabled: currPage < 2}"
     :data="{to: parseUrl(currPage - 1)}"
     :click="setPage(currPage - 1, $event)"></button>`,
-  next: `<button class="do-ui-font button next"
+  next: `<button class="do-icon-right button"
     :css="{'border-radius': props.radius}"
     :attr-disabled="{disabled: currPage >= totalPage}"
     :data="{to: parseUrl(currPage + 1)}"
@@ -83,7 +83,8 @@ const tmpls = {
   total: `<span class="total-box">共 {{totalPage}} 页 {{totalItems}} 条</span>`,
   jumper: `<div class="input-box">前往
       <input type="text" :duplex="inputPage" :keyup="setPage(null, $event)"> 页
-    </div>`
+    </div>`,
+  slot: `<slot name="extra" />`
 }
 
 export default Anot.component('pager', {
@@ -119,7 +120,7 @@ export default Anot.component('pager', {
     delete props.color
     delete props.size
   },
-  render: function() {
+  render: function(slots) {
     let { layout, theme, simpleMode } = this.props
     if (simpleMode) {
       layout = ['prev', 'curr', 'next']
@@ -130,7 +131,15 @@ export default Anot.component('pager', {
       }
       layout = layout.split(',')
     }
-    layout = layout.map(it => tmpls[it] || '')
+    layout = layout.map(it => {
+      if (it === 'slot') {
+        if (slots && slots.extra) {
+          return slots.extra
+        }
+      } else {
+        return tmpls[it] || ''
+      }
+    })
     return `
     <div
       class="do-pager do-fn-noselect"

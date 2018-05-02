@@ -6,7 +6,6 @@
  */
 
 'use strict'
-import 'promise/index'
 import Format from './lib/format'
 
 // 本地协议/头 判断正则
@@ -173,8 +172,7 @@ class _Request {
       //成功的回调
       let isSucc = isTimeout
         ? false
-        : (this.transport.status >= 200 && this.transport.status < 300) ||
-          this.transport.status === 304
+        : this.transport.status >= 200 && this.transport.status < 400
 
       let headers =
         (!isTimeout && this.transport.getAllResponseHeaders().split('\n')) || []
@@ -225,7 +223,11 @@ class _Request {
         result.statusText = error[10012]
       }
 
-      this.defer.resolve(result)
+      if (result.status >= 200 && result.status < 400) {
+        this.defer.resolve(result)
+      } else {
+        this.defer.reject(result)
+      }
     }
     delete this.transport
     delete this.opt

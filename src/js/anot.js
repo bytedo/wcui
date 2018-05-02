@@ -305,6 +305,244 @@ const _Anot = (function() {
 
   /*-----------------部分ES6的JS实现 start---------------*/
 
+  // ===============================
+  // ========== Promise ============
+  // ===============================
+  ;(function(nativePromise) {
+    function _yes(val) {
+      return val
+    }
+
+    function _no(err) {
+      throw err
+    }
+
+    function done(callback) {
+      return this.then(callback, _no)
+    }
+
+    function fail(callback) {
+      return this.then(_yes, callback)
+    }
+
+    function defer() {
+      var obj = {}
+      obj.promise = new _Promise(function(yes, no) {
+        obj.resolve = yes
+        obj.reject = no
+      })
+      return obj
+    }
+
+    //成功的回调
+    function _resolve(obj, val) {
+      if (obj._state !== 'pending') {
+        return
+      }
+
+      if (val && typeof val.then === 'function') {
+        var method = val instanceof _Promise ? '_then' : 'then'
+        val[method](
+          function(v) {
+            _transmit(obj, v, true)
+          },
+          function(v) {
+            _transmit(obj, v, false)
+          }
+        )
+      } else {
+        _transmit(obj, val, true)
+      }
+    }
+
+    //失败的回调
+    function _reject(obj, val) {
+      if (obj._state !== 'pending') {
+        return
+      }
+
+      _transmit(obj, val, false)
+    }
+
+    // 改变Promise的_fired值，并保持用户传参，触发所有回调
+    function _transmit(obj, val, isResolved) {
+      obj._fired = true
+      obj._val = val
+      obj._state = isResolved ? 'fulfilled' : 'rejected'
+
+      fireCallback(obj, function() {
+        for (var i in obj.callback) {
+          obj._fire(obj.callback[i].yes, obj.callback[i].no)
+        }
+      })
+    }
+
+    function fireCallback(obj, callback) {
+      var isAsync = false
+
+      if (typeof obj.async === 'boolean') {
+        isAsync = obj.async
+      } else {
+        isAsync = obj.async = true
+      }
+
+      if (isAsync) {
+        setTimeout(callback, 0)
+      } else {
+        callback()
+      }
+    }
+
+    function _some(bool, iterable) {
+      iterable = Array.isArray(iterable) ? iterable : []
+
+      var n = 0
+      var res = []
+      var end = false
+
+      return new _Promise(function(yes, no) {
+        if (!iterable.length) no(res)
+
+        function loop(obj, idx) {
+          obj.then(
+            function(val) {
+              if (!end) {
+                res[idx] = val
+                n++
+                if (bool || n >= iterable.length) {
+                  yes(bool ? val : res)
+                  end = true
+                }
+              }
+            },
+            function(val) {
+              end = true
+              no(val)
+            }
+          )
+        }
+
+        for (var i = 0, len = iterable.length; i < len; i++) {
+          loop(iterable[i], i)
+        }
+      })
+    }
+
+    //---------------------------
+    var _Promise = function(callback) {
+      this.callback = []
+      var _this = this
+
+      if (typeof this !== 'object') {
+        throw new TypeError('Promises must be constructed via new')
+      }
+
+      if (typeof callback !== 'function') {
+        throw new TypeError('Argument must be a function')
+      }
+
+      callback(
+        function(val) {
+          _resolve(_this, val)
+        },
+        function(val) {
+          _reject(_this, val)
+        }
+      )
+    }
+    var self = {
+      _state: 1,
+      _fired: 1,
+      _val: 1,
+      callback: 1
+    }
+
+    _Promise.prototype = {
+      constructor: _Promise,
+      _state: 'pending',
+      _fired: false,
+      _fire: function(yes, no) {
+        if (this._state === 'rejected') {
+          if (typeof no === 'function') no(this._val)
+          else throw this._val
+        } else {
+          if (typeof yes === 'function') yes(this._val)
+        }
+      },
+      _then: function(yes, no) {
+        if (this._fired) {
+          var _this = this
+          fireCallback(_this, function() {
+            _this._fire(yes, no)
+          })
+        } else {
+          this.callback.push({ yes: yes, no: no })
+        }
+      },
+      then: function(yes, no) {
+        yes = typeof yes === 'function' ? yes : _yes
+        no = typeof no === 'function' ? no : _no
+        var _this = this
+        var next = new _Promise(function(resolve, reject) {
+          _this._then(
+            function(val) {
+              try {
+                val = yes(val)
+              } catch (err) {
+                return reject(err)
+              }
+            },
+            function(val) {
+              try {
+                val = no(val)
+              } catch (err) {
+                return reject(err)
+              }
+              resolve(val)
+            }
+          )
+        })
+        for (var i in _this) {
+          if (!self[i]) next[i] = _this[i]
+        }
+        return next
+      },
+      done: done,
+      catch: fail,
+      fail: fail
+    }
+
+    _Promise.all = function(arr) {
+      return _some(false, arr)
+    }
+
+    _Promise.race = function(arr) {
+      return _some(true, arr)
+    }
+
+    _Promise.defer = defer
+
+    _Promise.resolve = function(val) {
+      var obj = this.defer()
+      obj.resolve(val)
+      return obj.promise
+    }
+
+    _Promise.reject = function(val) {
+      var obj = this.defer()
+      obj.reject(val)
+      return obj.promise
+    }
+    if (/native code/.test(nativePromise)) {
+      nativePromise.prototype.done = done
+      nativePromise.prototype.fail = fail
+      if (!nativePromise.defer) {
+        nativePromise.defer = defer
+      }
+    }
+    window.Promise = nativePromise || _Promise
+  })(window.Promise)
+
   if (!Object.assign) {
     Object.defineProperty(Object, 'assign', {
       enumerable: false,
@@ -529,6 +767,33 @@ const _Anot = (function() {
 
   /*-----------------部分ES6的JS实现 ending---------------*/
 
+  function cacheStore(tpye, key, val) {
+    if (!window[tpye]) {
+      return log('该浏览器不支持本地储存' + tpye)
+    }
+
+    if (this.type(key) === 'object') {
+      for (var i in key) {
+        window[tpye].setItem(i, key[i])
+      }
+      return
+    }
+    switch (arguments.length) {
+      case 2:
+        return window[tpye].getItem(key)
+      default:
+        if ((this.type(val) == 'string' && val.trim() === '') || val === null) {
+          window[tpye].removeItem(key)
+          return
+        }
+        if (this.type(val) !== 'object' && this.type(val) !== 'array') {
+          window[tpye].setItem(key, val.toString())
+        } else {
+          window[tpye].setItem(key, JSON.stringify(val))
+        }
+    }
+  }
+
   Anot.mix({
     rword: rword,
     subscribers: subscribers,
@@ -671,55 +936,32 @@ const _Anot = (function() {
     },
     /**
      * [ls localStorage操作]
-     * @param  {[type]} name  [键名]
+     * @param  {[type]} key  [键名]
      * @param  {[type]} val [键值，为空时删除]
      * @return
      */
-    ls: function(name, val) {
-      if (!window.localStorage) {
-        return log('该浏览器不支持本地储存localStorage')
-      }
-
-      if (this.type(name) === 'object') {
-        for (var i in name) {
-          localStorage.setItem(i, name[i])
-        }
-        return
-      }
-      switch (arguments.length) {
-        case 1:
-          return localStorage.getItem(name)
-        default:
-          if (
-            (this.type(val) == 'string' && val.trim() === '') ||
-            val === null
-          ) {
-            localStorage.removeItem(name)
-            return
-          }
-          if (this.type(val) !== 'object' && this.type(val) !== 'array') {
-            localStorage.setItem(name, val.toString())
-          } else {
-            localStorage.setItem(name, JSON.stringify(val))
-          }
-      }
+    ls: function(key, val) {
+      return cacheStore('localStorage', key, val)
+    },
+    ss: function(key, val) {
+      return cacheStore('sessionStorage', key, val)
     },
     /**
      * [cookie cookie 操作 ]
-     * @param  name  [cookie名]
-     * @param  value [cookie值]
+     * @param  key  [cookie名]
+     * @param  val [cookie值]
      * @param  {[json]} opt   [有效期，域名，路径等]
      * @return {[boolean]}       [读取时返回对应的值，写入时返回true]
      */
-    cookie: function(name, value, opt) {
+    cookie: function(key, val, opt) {
       if (arguments.length > 1) {
-        if (!name) {
+        if (!key) {
           return
         }
 
         //设置默认的参数
         opt = opt || {}
-        opt = this.mix(
+        opt = Object.assign(
           {
             expires: '',
             path: '/',
@@ -729,9 +971,9 @@ const _Anot = (function() {
           opt
         )
 
-        if (!value) {
+        if ((this.type(val) == 'string' && val.trim() === '') || val === null) {
           document.cookie =
-            encodeURIComponent(name) +
+            encodeURIComponent(key) +
             '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; domain=' +
             opt.domain +
             '; path=' +
@@ -755,9 +997,9 @@ const _Anot = (function() {
           }
         }
         document.cookie =
-          encodeURIComponent(name) +
+          encodeURIComponent(key) +
           '=' +
-          encodeURIComponent(value) +
+          encodeURIComponent(val) +
           opt.expires +
           '; domain=' +
           opt.domain +
@@ -767,24 +1009,15 @@ const _Anot = (function() {
           opt.secure
         return true
       } else {
-        if (!name) {
-          var keys = document.cookie
-            .replace(
-              /((?:^|\s*;)[^\=]+)(?=;|$)|^\s*|\s*(?:\=[^;]*)?(?:\1|$)/g,
-              ''
-            )
-            .split(/\s*(?:\=[^;]*)?;\s*/)
-          for (var i = 0, len = keys.length; i < len; i++) {
-            keys[i] = decodeURIComponent(keys[i])
-          }
-          return keys
+        if (!key) {
+          return document.cookie
         }
         return (
           decodeURIComponent(
             document.cookie.replace(
               new RegExp(
                 '(?:(?:^|.*;)\\s*' +
-                  encodeURIComponent(name).replace(/[\-\.\+\*]/g, '\\$&') +
+                  encodeURIComponent(key).replace(/[\-\.\+\*]/g, '\\$&') +
                   '\\s*\\=\\s*([^;]*).*$)|^.*$'
               ),
               '$1'
@@ -1527,7 +1760,7 @@ const _Anot = (function() {
     $vmodel.$active = true
     $vmodel.mounted = mounted
 
-    if (old && old.$up) {
+    if (old && old.$up && old.$up.$children) {
       old.$up.$children.push($vmodel)
     }
 
@@ -3467,6 +3700,19 @@ const _Anot = (function() {
     }
   }
 
+  function parseSlot(collections) {
+    var arr = aslice.call(collections, 0)
+    var obj = {}
+    arr.forEach(function(elem) {
+      var slot = elem.getAttribute('slot')
+      if (slot) {
+        elem.removeAttribute('slot')
+        obj[slot] = elem.outerHTML
+      }
+    })
+    return obj
+  }
+
   Anot.components = {}
   Anot.component = function(name, opts) {
     if (opts) {
@@ -3531,16 +3777,20 @@ const _Anot = (function() {
           componentWillMount.call(vmodel)
           globalHooks.componentWillMount.call(null, vmodel)
 
-          if (!elem.content.firstElementChild) {
-            Anot.clearHTML(elem)
-            var html = render.call(vmodel) || ''
+          var slots = null
 
-            html = html.replace(/<\w+[^>]*>/g, function(m, s) {
-              return m.replace(/[\n\t\s]{1,}/g, ' ')
-            })
-
-            elem.innerHTML = html
+          if (elem.content.firstElementChild) {
+            slots = parseSlot(elem.content.children)
           }
+
+          Anot.clearHTML(elem)
+          var html = render.call(vmodel, slots) || ''
+
+          html = html.replace(/<\w+[^>]*>/g, function(m, s) {
+            return m.replace(/[\n\t\s]{1,}/g, ' ')
+          })
+
+          elem.innerHTML = html
 
           // 组件所使用的标签是temlate,所以必须要要用子元素替换掉
           var child = elem.content.firstElementChild

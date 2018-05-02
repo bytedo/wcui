@@ -40,14 +40,13 @@ const compileJs = (entry, output) => {
 const compileCss = (entry, output) => {
   let t1 = Date.now()
   const { css } = scss.renderSync({ ...cssOpt, file: entry })
-  prefixer.process(css, { from: '', to: '' }).then(result => {
-    log(
-      '编译scss: %s, 耗时 %s ms',
-      chalk.green(entry),
-      chalk.yellow(Date.now() - t1)
-    )
-    fs.echo(result.css, output)
-  })
+
+  log(
+    '编译scss: %s, 耗时 %s ms',
+    chalk.green(entry),
+    chalk.yellow(Date.now() - t1)
+  )
+  fs.echo(css, output)
 }
 
 const compileHtm = (entry, output) => {
