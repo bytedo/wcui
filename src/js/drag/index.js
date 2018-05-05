@@ -23,8 +23,14 @@ Anot.directive('drag', {
   priority: 1500,
   init: function(binding) {
     binding.expr = '"' + binding.expr + '"'
-    Anot(binding.element).css('cursor', 'move')
+    let ico = document.documentMode ? 'move' : 'grab'
 
+    if (window.sidebar) {
+      ico = '-moz-' + ico
+    } else if (window.chrome) {
+      ico = '-webkit-' + ico
+    }
+    Anot(binding.element).css('cursor', ico)
     //取得拖动的3种状态回调
     //按下,且拖拽之前
     binding.beforedrag = getBindingCallback(
@@ -69,16 +75,19 @@ Anot.directive('drag', {
     delete binding.element.dataset.dragged
   },
   update: function(val) {
-    var _this = this,
-      target = val ? this.element.parentNode : this.element,
-      $drag = Anot(this.element),
-      $doc = Anot(document),
-      $target = null,
-      parentElem = null
+    let _this = this
+    let target = val ? this.element.parentNode : this.element
+    let $drag = Anot(this.element)
+    let $doc = Anot(document)
+    let $target = null
+    let parentElem = null
 
     // val值不为空时, 获取真正的拖动元素
     // 仅从父级上找
     while (val && target) {
+      if (!target.classList) {
+        Anot.error(`${this.name}=${this.expr}, 解析异常[元素不存在]`)
+      }
       if (target.classList.contains(val) || target.id === val) {
         break
       } else {
@@ -91,11 +100,17 @@ Anot.directive('drag', {
       parentElem = target.parentNode
     }
 
-    var dx, dy, mx, my, ox, oy, fox, foy, tw, th, ww, wh, bst, bsl
+    let dx, dy, mx, my, ox, oy, fox, foy, tw, th, ww, wh, bst, bsl
+    let cssTransition
     $drag.bind('mousedown', function(ev) {
-      var gcs = getComputedStyle(target),
-        cst = gcs.transform.replace(/matrix\((.*)\)/, '$1'),
-        offset = $target.offset()
+      let gcs = getComputedStyle(target)
+      let cst = gcs.transform.replace(/matrix\((.*)\)/, '$1')
+      let offset = $target.offset()
+
+      if (gcs.transitionDuration !== '0s') {
+        cssTransition = gcs.transitionDuration
+        target.style.transitionDuration = '0s'
+      }
 
       cst = cst !== 'none' ? cst.split(', ') : [1, 0, 0, 1, 0, 0]
       cst[4] -= 0
@@ -127,24 +142,29 @@ Anot.directive('drag', {
 
       //拖拽前回调
       if (_this.beforedrag) {
-        var result = _this.beforedrag.call(_this.vmodels, target, ox, oy)
+        let result = _this.beforedrag.call(
+          _this.vmodels,
+          target,
+          ox + dx,
+          oy + dy
+        )
         if (result === false) {
           return
         }
       }
 
       //限制区域, 4个值依次是: 上, 下, 左, 右
-      var limit = [0, wh - th, 0, ww - tw]
+      let limit = [0, wh - th, 0, ww - tw]
 
       if (_this.limit === 'parent') {
-        var pgcs = getComputedStyle(parentElem),
-          pcst = pgcs.transform.replace(/matrix\((.*)\)/, '$1'),
-          poffset = Anot(parentElem).offset()
+        let pgcs = getComputedStyle(parentElem)
+        let pcst = pgcs.transform.replace(/matrix\((.*)\)/, '$1')
+        let poffset = Anot(parentElem).offset()
 
         pcst = pcst !== 'none' ? pcst.split(', ') : [1, 0, 0, 1, 0, 0]
 
-        var pox = poffset.left - pcst[4] - bsl,
-          poy = poffset.top - pcst[5] - bst
+        let pox = poffset.left - pcst[4] - bsl
+        let poy = poffset.top - pcst[5] - bst
 
         limit = [
           poy,
@@ -154,66 +174,69 @@ Anot.directive('drag', {
         ]
       }
 
-      var mvfn = $doc.bind('mousemove', function(ev) {
-          //坐标轴限制
+      let mvfn = $doc.bind('mousemove', function(ev) {
+        // 防止拖动到边缘时导致页面滚动
+        ev.preventDefault()
+
+        //坐标轴限制
+        if (_this.axis !== 'y') {
+          cst[4] = ev.pageX - mx + dx
+        }
+        if (_this.axis !== 'x') {
+          cst[5] = ev.pageY - my + dy
+        }
+
+        fox = ox + cst[4] //修正的offset
+        foy = oy + cst[5] //修正的offset
+
+        //如果不允许溢出可视区
+        if (!_this.overflow) {
           if (_this.axis !== 'y') {
-            cst[4] = ev.pageX - mx + dx
+            if (fox <= limit[2]) {
+              fox = limit[2]
+              //修正矩阵
+              cst[4] = fox - ox
+            }
+            if (fox >= limit[3]) {
+              fox = limit[3]
+              //修正矩阵
+              cst[4] = fox - ox
+            }
           }
+
           if (_this.axis !== 'x') {
-            cst[5] = ev.pageY - my + dy
-          }
-
-          ;(fox = ox + cst[4]), //修正的offset
-            (foy = oy + cst[5]) //修正的offset
-
-          //如果不允许溢出可视区
-          if (!_this.overflow) {
-            if (_this.axis !== 'y') {
-              if (fox <= limit[2]) {
-                fox = limit[2]
-                //修正矩阵
-                cst[4] = fox - ox
-              }
-              if (fox >= limit[3]) {
-                fox = limit[3]
-                //修正矩阵
-                cst[4] = fox - ox
-              }
+            if (foy <= limit[0]) {
+              foy = limit[0]
+              //修正矩阵
+              cst[5] = foy - oy
             }
-
-            if (_this.axis !== 'x') {
-              if (foy <= limit[0]) {
-                foy = limit[0]
-                //修正矩阵
-                cst[5] = foy - oy
-              }
-              if (foy >= limit[1]) {
-                foy = limit[1]
-                //修正矩阵
-                cst[5] = foy - oy
-              }
+            if (foy >= limit[1]) {
+              foy = limit[1]
+              //修正矩阵
+              cst[5] = foy - oy
             }
           }
+        }
 
-          $target.css({
-            transform: 'matrix(' + cst.join(', ') + ')'
-          })
-
-          //拖拽过程的回调
-          if (_this.dragging) {
-            _this.dragging.call(_this.vmodels, target, fox, foy)
-          }
-          // 防止拖动到边缘时导致页面滚动
-          ev.preventDefault()
-        }),
-        upfn = $doc.bind('mouseup', function(ev) {
-          $doc.unbind('mousemove', mvfn)
-          $doc.unbind('mouseup', upfn)
-          //结束回调
-          if (_this.dragged) {
-            _this.dragged.call(_this.vmodels, target, fox, foy)
-          }
+        $target.css({
+          transform: 'matrix(' + cst.join(', ') + ')'
         })
+
+        //拖拽过程的回调
+        if (_this.dragging) {
+          _this.dragging.call(_this.vmodels, target, fox, foy)
+        }
+      })
+      let upfn = $doc.bind('mouseup', function(ev) {
+        $doc.unbind('mousemove', mvfn)
+        $doc.unbind('mouseup', upfn)
+
+        target.style.transitionDuration = cssTransition
+        //结束回调
+        if (_this.dragged) {
+          _this.dragged.call(_this.vmodels, target, fox, foy)
+        }
+      })
     })
   }
 })
