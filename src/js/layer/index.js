@@ -8,31 +8,32 @@
 'use strict'
 
 import 'drag/index'
-import './skin/def.scss'
+import './skin/default.scss'
 
 Anot.ui.layer = '1.0.0-base'
+
 let layerDom = {}
 let layerObj = {}
-let unique = null //储存当前打开的1/2/3类型的弹窗
+let unique = null // 储存当前打开的1/2/3类型的弹窗
 let lid = 0
 let defconf = {
   type: 1, // 弹窗类型
-  skin: 'def', //默认主题
-  icon: 1, //图标类型
+  skin: 'default', // 默认主题
   background: '#fff',
-  mask: true, //遮罩
-  maskClose: false, //遮罩点击关闭弹窗
-  radius: '0px', //弹窗圆角半径
+  mask: true, // 遮罩
+  maskClose: false, // 遮罩点击关闭弹窗
+  radius: '0px', // 弹窗圆角半径
   area: ['auto', 'auto'],
-  title: '提示', //弹窗主标题(在工具栏上的)
-  menubar: true, //是否显示菜单栏
+  title: '提示', // 弹窗主标题(在工具栏上的)
+  menubar: true, // 是否显示菜单栏
   content: '', // 弹窗的内容
-  fixed: false, //是否固定不可拖拽
-  offset: null, //弹窗出来时的坐标, 为数组,可有4个值,依次是 上右下左
-  btns: ['确定', '取消'] //弹窗的2个按钮的文字
+  fixed: false, // 是否固定不可拖拽
+  shift: 'cc', // 弹窗出来的初始位置,用于出场动画
+  offset: [], // 弹窗出来后的坐标, 为数组,可有4个值,依次是 上右下左
+  btns: ['确定', '取消'] // 弹窗的2个按钮的文字
 }
 const uuid = function() {
-  return 'layer-' + ++lid
+  return 'layer-' + lid++
 }
 const close = function(id) {
   if (typeof id !== 'string' && typeof id !== 'number') {
@@ -50,20 +51,24 @@ const close = function(id) {
       layerObj[id].show = false
     } catch (err) {}
   } else {
+    unique = null
     try {
-      // document.body.removeChild(layerDom[id][1])
-      document.body.removeChild(layerDom[id][0])
-      unique = null
+      layerDom[id][0].classList.add('shift')
+      layerDom[id][1].classList.add('shift')
+      layerDom[id][0].style.opacity = ''
+      layerDom[id][1].style.opacity = 0
+      setTimeout(_ => {
+        document.body.removeChild(layerDom[id][0])
+        delete layerDom[id]
+        delete Anot.vmodels[id]
+      }, 200)
     } catch (err) {}
-
-    delete layerDom[id]
-    delete Anot.vmodels[id]
   }
 }
 
 const repeat = function(str, num) {
-  var idx = 0,
-    result = ''
+  let idx = 0
+  let result = ''
   while (idx < num) {
     result += str
     idx++
@@ -77,215 +82,47 @@ const fixOffset = function(val) {
     return val
   }
 }
-const __layer__ = function(opt) {
-  if (opt) {
-    let { yes, no, success } = opt
-    delete opt.yes
-    delete opt.no
-    delete opt.success
 
-    this.construct({
-      state: { ...opt },
-      props: { yes, no, success }
-    })
-      .append()
-      .show()
-  }
-}
-
-const _layer = {
-  alert: function(content, title, cb) {
-    let opt = { content, fixed: true, icon: 5 }
-
-    if (typeof title === 'function') {
-      opt.yes = title
-    } else {
-      if (title) {
-        opt.title = title + ''
-      }
-      if (cb && typeof cb === 'function') {
-        opt.yes = cb
-      }
-    }
-    return _layer.open(opt)
-  },
-  confirm: function(content, title, yescb, nocb) {
-    let opt = { content, fixed: true, icon: 0, type: 2 }
-
-    if (typeof title === 'function') {
-      opt.yes = title
-      if (typeof yescb === 'function') {
-        opt.no = yescb
-      }
-    } else {
-      if (title) {
-        opt.title = title + ''
-      }
-      if (yescb && typeof yescb === 'function') {
-        opt.yes = yescb
-      }
-      if (nocb && typeof nocb === 'function') {
-        opt.no = nocb
-      }
-    }
-    return _layer.open(opt)
-  },
-  toast: function(content, type, timeout, cb) {
-    // if (typeof opt !== 'object') {
-    //   var tmp = opt
-    //   opt = { timeout: 2500 }
-    //   if (typeof tmp === 'number') {
-    //     opt.icon = tmp
-    //   }
-    // }
-
-    if (typeof type === 'number') {
-      timeout = type
-      type = 'info'
-    }
-
-    // if (!opt.hasOwnProperty('timeout')) {
-    //   opt.timeout = 2500
-    // }
-
-    let opt = {
-      content: `<mark class="toast-box">${content}</mark>`,
-      menubar: false,
-      mask: false,
-      type: 7,
-      fixed: true
-    }
-
-    opt.toast = true // toast模式
-
-    return _layer.open(opt)
-  },
-  loading: function(style, time, cb) {
-    style = style >>> 0
-
-    if (typeof time === 'function') {
-      cb = time
-      time = 0
-    } else {
-      time = time >>> 0
-      if (typeof cb !== 'function') {
-        cb = Anot.noop
-      }
-    }
-    return _layer.open({
-      type: 6,
-      load: style,
-      yes: cb,
-      timeout: time,
-      menubar: false,
-      background: 'none',
-      fixed: true
-    })
-  },
-  tips: function(content, container, opt) {
-    if (!(container instanceof HTMLElement)) {
-      return Anot.error('tips类型必须指定一个目标容器')
-    }
-    if (typeof opt !== 'object') {
-      var tmp = opt
-      opt = { timeout: 2500 }
-      if (typeof tmp === 'number') {
-        opt.icon = tmp
-      }
-    }
-    if (!opt.hasOwnProperty('timeout')) {
-      opt.timeout = 2500
-    }
-    if (!opt.background) {
-      opt.background = 'rgba(0,0,0,.5)'
-    }
-    if (!opt.color) {
-      opt.color = '#fff'
-    }
-    opt.container = container
-    opt.content = content
-    opt.type = 5
-    opt.icon = 0
-    opt.fixed = true
-    opt.shade = false
-    opt.menubar = false
-    return _layer.open(opt)
-  },
-  prompt: function(title, yescb) {
-    if (typeof yescb !== 'function') {
-      return console.error(
-        'argument [callback] requires a function, but ' +
-          typeof yescb +
-          ' given'
-      )
-    }
-    let opt = {
-      type: 3,
-      prompt: '',
-      title,
-      content:
-        '<input class="prompt-value" data-duplex-focus :class="{alert: !prompt}" :duplex="prompt" />',
-      fixed: true,
-      yes: yescb
-    }
-    return _layer.open(opt)
-  },
-  use: function(skin, callback) {
-    require(['css!./skin/' + skin], callback)
-  },
-  close: close,
-  open: function(opt) {
-    if (typeof opt === 'string') {
-      /*opt = '$wrap-' + opt
-      if (!layerObj[opt]) {
-        throw new Error('layer实例不存在')
-      } else {
-        //只能显示一个实例
-        if (layerObj[opt].show) {
-          return opt
-        }
-        layerObj[opt].show = true
-
-        if (!Anot.vmodels[opt]) {
-          Anot(layerObj[opt].obj.init)
-        }
-
-        layerObj[opt].parentElem.appendChild(layerDom[opt][1])
-        layerDom[opt][1]
-          .querySelector('.detail')
-          .appendChild(layerObj[opt].wrap)
-        layerObj[opt].wrap.style.display = ''
-        // Anot.scan(layerDom[opt][1])
-        layerObj[opt].obj.show()
-        return opt
-      }*/
-    } else {
-      return new __layer__(opt).init.$id
-    }
-  },
-  version: Anot.ui.layer
-}
-
-/*type: { // 弹窗类型对应的id值
-        1: 'alert',
-        2: 'confirm',
-        3: 'prompt',
-        4: 'iframe',
-        5: 'tips',
-        6: 'loading',
-        7: 'msg',
-    }*/
-__layer__.prototype = {
-  dot: {
+/* type: { // 弹窗类型对应的id值
+  1: 'alert',
+  2: 'confirm',
+  3: 'prompt',
+  4: 'iframe',
+  5: 'tips',
+  6: 'loading',
+  7: 'msg',
+} */
+class __layer__ {
+  get dot() {
     //loading的子元素数量
-    1: 0,
-    2: 0,
-    3: 5,
-    4: 5,
-    5: 9
-  },
-  timeout: null,
-  construct: function(opt) {
+    return {
+      1: 1,
+      2: 1,
+      3: 5,
+      4: 5,
+      5: 9
+    }
+  }
+
+  constructor(opt) {
+    if (opt) {
+      let { yes, no, success } = opt
+      delete opt.yes
+      delete opt.no
+      delete opt.success
+
+      this.__init__({
+        state: { ...opt },
+        props: { yes, no, success }
+      })
+        .append()
+        .show()
+    }
+    this.timeout = null
+  }
+
+  // 真正的初始化弹层配置
+  __init__(opt) {
     let _id = opt.$id || uuid()
     this.init = {
       $id: _id,
@@ -311,7 +148,7 @@ __layer__.prototype = {
               this.$refs.layer.classList.remove('scale')
             }, 100)
           } else {
-            this.close()
+            this.maskClose && this.close()
           }
         },
         handleConfirm: function() {
@@ -347,16 +184,15 @@ __layer__.prototype = {
       }
     }
 
-    if (this.init.state.icon > 9) {
-      this.init.state.icon = 9
-    }
     //base版没有iframe类型
     if (this.init.state.type === 4) {
       this.init.state.type = 7
     }
     return this
-  },
-  create: function() {
+  }
+
+  // 创建弹层容器及骨架
+  create() {
     let { state, $id } = this.init
     let outerBox = document.createElement('div')
     let layBox = document.createElement('div')
@@ -371,9 +207,19 @@ __layer__.prototype = {
 
     layBox.classList.add('layer-box')
     layBox.classList.add('skin-' + state.skin)
+
+    if (typeof state.shift === 'string') {
+      layBox.classList.add('__' + state.shift)
+    } else {
+      for (let k in state.shift) {
+        layBox.style.cssText += `${k}: ${state.shift[k]};`
+      }
+    }
+
     if (state.type === 5) {
       layBox.classList.add('active')
     }
+
     if (state.toast) {
       layBox.classList.add('type-toast')
     } else {
@@ -383,11 +229,10 @@ __layer__.prototype = {
     layBox.setAttribute('ref', 'layer')
     layBox.setAttribute(':click', 'cancelBubble')
 
-    //暂时隐藏,避免修正定位时,能看到闪一下
-    layBox.style.cssText +=
-      'visibility:hidden; border-radius:' + state.radius + 'px'
+    // 暂时隐藏,避免修正定位时,能看到闪一下
+    layBox.style.cssText += 'border-radius:' + state.radius + 'px'
 
-    //没有菜单栏, 且未禁止拖拽,则加上可拖拽属性
+    // 没有菜单栏, 且未禁止拖拽,则加上可拖拽属性
     if (!state.menubar && !state.fixed) {
       layBox.setAttribute(':drag', '')
       layBox.setAttribute('data-limit', 'window')
@@ -409,64 +254,57 @@ __layer__.prototype = {
     }
 
     layBox.innerHTML = `
-      ${this.getMenubar()}
+      ${this.mkMenubar()}
       <div
-        class="layer-content do-fn-cl ${state.icon < 0 ? 'none-icon' : ''}"
+        class="layer-content do-fn-cl"
         style="${boxcss}"
         ${!state.wrap && state.type !== 6 ? ':html="content"' : ''}>
 
-        ${state.type === 6 ? this.getLoading(state.load) : ''}
+        ${state.type === 6 ? this.mkLoading(state.load) : ''}
       </div>
-      ${this.getCtrl()}
+      ${this.mkCtrl()}
       ${arrow}
     `
     delete state.wrap
     outerBox.appendChild(layBox)
     return [outerBox, layBox]
-  },
-  // getCont: function() {
-  //   let { state, $id } = this.init
-  //   if (state.type === 6) {
-  //     return this.getLoading(state.load)
-  //   } else {
-  //     return !state.wrap ? '{{content | html}}' : ''
-  //   }
-  // },
-  getLoading: function(style) {
+  }
+
+  // 创建loading元素
+  mkLoading(style) {
     return `
       <div class="loading style-${style}">
         <span class="dot-box">
-          ${repeat('<i></i>', this.dot[style])}
+          ${repeat(
+            style === 1
+              ? '<i class="do-icon-loading"></i>'
+              : style === 2 ? '<i class="do-icon-app2"></i>' : '<i></i>',
+            this.dot[style]
+          )}
         </span>
       </div>
     `
-  },
-  //获取窗口导航条
-  getMenubar: function() {
-    let { state, $id } = this.init
+  }
+
+  // 创建窗口导航条
+  mkMenubar() {
+    let { menubar, fixed } = this.init.state
     let html = ''
-    if (state.menubar) {
+    if (menubar) {
       html = `
         <div class="layer-title do-fn-noselect"
           :text="title"
-          ${!state.fixed ? ':drag="layer-box" data-limit="window"' : ''}>
+          ${!fixed ? ':drag="layer-box" data-limit="window"' : ''}>
         </div>
       `
     }
     return html
-  },
-  //获取窗口内容的图标
-  getIcon: function() {
-    let { state, $id } = this.init
-    if (state.type < 4 || state.type === 5 || state.specialMode) {
-      return `<span class="do-ui-font msg-icon icon-${state.icon}"></span>`
-    }
-    return ''
-  },
-  // 获取窗口按钮
-  getCtrl: function() {
-    let { state, $id } = this.init
-    if (state.type > 3) {
+  }
+
+  // 创建窗口按钮
+  mkCtrl() {
+    let { type } = this.init.state
+    if (type > 3) {
       return ''
     } else {
       let html = ''
@@ -477,7 +315,7 @@ __layer__.prototype = {
           :text="btns[0]"
           ></a>
         `
-      if (state.type > 1) {
+      if (type > 1) {
         btns =
           `
         <a href="javascript:;" class="action-no"
@@ -493,19 +331,23 @@ __layer__.prototype = {
       `
       return html
     }
-  },
-  append: function() {
+  }
+
+  append() {
     let { state, $id, container } = this.init
-    //如果有已经打开的弹窗,则关闭
+    // 如果有已经打开的弹窗,则关闭
     if (unique) {
-      _layer.close(unique)
+      close(unique)
     }
     if (state.type < 4) {
       unique = $id
     }
+
+    // 返回一个数组,第1个元素是容器,第2个是骨架
     layerDom[$id] = this.create()
 
     delete state.toast
+    this.toast = true
     if (!container) {
       container = document.body
     }
@@ -513,12 +355,13 @@ __layer__.prototype = {
     container.appendChild(layerDom[$id][0])
     this.vm = Anot(this.init)
     return this
-  },
-  show: function() {
+  }
+
+  show() {
     let { state, $id, follow } = this.init
 
     setTimeout(function() {
-      var style = { visibility: '', background: state.background }
+      let style = { background: state.background }
       let css = getComputedStyle(layerDom[$id][1])
 
       // tips类型, 弹层的定位要在指定的容器上
@@ -533,31 +376,46 @@ __layer__.prototype = {
 
         style.left = ol + ew * 0.7
         style.top = ot - parseInt(css.height) - 8
+        style.opacity = 1
+        Anot(layerDom[$id][1]).css(style)
       } else {
+        let offsetStyle = { opacity: 1 }
         if (state.offset) {
-          style.top = fixOffset(state.offset[0])
-          style.right = fixOffset(state.offset[1])
-          style.bottom = fixOffset(state.offset[2])
-          style.left = fixOffset(state.offset[3])
+          offsetStyle.top = fixOffset(state.offset[0])
+          offsetStyle.right = fixOffset(state.offset[1])
+          offsetStyle.bottom = fixOffset(state.offset[2])
+          offsetStyle.left = fixOffset(state.offset[3])
           //左右都为auto时,改为居中
-          if (style.left === 'auto' && style.right === 'auto') {
-            style.left = '50%'
+          if (offsetStyle.left === 'auto' && offsetStyle.right === 'auto') {
+            offsetStyle.left = '50%'
             style.marginLeft = -parseInt(css.width) / 2
           }
           //上下都为auto时,同样改为居中
-          if (style.top === 'auto' && style.bottom === 'auto') {
-            style.top = '50%'
+          if (offsetStyle.top === 'auto' && offsetStyle.bottom === 'auto') {
+            offsetStyle.top = '50%'
             style.marginTop = -parseInt(css.height) / 2
           }
         } else {
-          style = Anot.mix(style, {
+          style = Object.assign(style, {
             marginLeft: -parseInt(css.width) / 2,
             marginTop: -parseInt(css.height) / 2
           })
         }
-      }
+        Anot(layerDom[$id][1]).css(style)
 
-      Anot(layerDom[$id][1]).css(style)
+        setTimeout(() => {
+          layerDom[$id][1].classList.add('shift')
+          setTimeout(_ => {
+            Anot(layerDom[$id][1]).css(offsetStyle)
+            setTimeout(_ => {
+              try {
+                layerDom[$id][1].classList.remove('shift')
+                layerDom[$id][1].classList.remove('__' + state.shift)
+              } catch (err) {}
+            }, 500)
+          }, 50)
+        }, 50)
+      }
     }, 4)
 
     // loading类型,回调需要自动触发
@@ -565,21 +423,195 @@ __layer__.prototype = {
       //大于0自动触发超时关闭
       if (state.timeout > 0) {
         clearTimeout(this.timeout)
-        this.timeout = setTimeout(function() {
-          clearTimeout(_this.timeout)
-          _layer.close($id)
+        this.timeout = setTimeout(() => {
+          clearTimeout(this.timeout)
+          close($id)
 
           // 为loading类型时,自动关闭同时触发回调
           if (state.type === 6) {
-            _this.vm.yes($id)
+            this.vm.props.yes($id)
           }
         }, state.timeout)
       } else if (state.type === 6) {
         // loading类型, 非自动关闭时, 主动触发回调
-        this.vm.yes($id)
+        this.vm.props.yes($id)
       }
     }
   }
+}
+
+const _layer = {
+  alert: function(content, title, cb) {
+    let opt = { content, fixed: true }
+
+    if (typeof title === 'function') {
+      opt.yes = title
+    } else {
+      if (title) {
+        opt.title = title + ''
+      }
+      if (cb && typeof cb === 'function') {
+        opt.yes = cb
+      }
+    }
+    return _layer.open(opt)
+  },
+  confirm: function(content, title, yescb, nocb) {
+    let opt = { content, fixed: true, type: 2 }
+
+    if (typeof title === 'function') {
+      opt.yes = title
+      if (typeof yescb === 'function') {
+        opt.no = yescb
+      }
+    } else {
+      if (title) {
+        opt.title = title + ''
+      }
+      if (yescb && typeof yescb === 'function') {
+        opt.yes = yescb
+      }
+      if (nocb && typeof nocb === 'function') {
+        opt.no = nocb
+      }
+    }
+    return _layer.open(opt)
+  },
+  toast: function(txt, type = 'info', timeout = 2500) {
+    if (typeof type === 'number') {
+      timeout = type
+      type = 'info'
+    }
+    switch (type) {
+      case 'info':
+        break
+      case 'warn':
+        break
+      case 'error':
+        type = 'deny'
+        break
+      default:
+        type = 'info'
+    }
+
+    let opt = {
+      content: `
+      <mark class="toast-box style-${type}">
+        <i class="do-icon-${type}"></i>
+        ${txt}
+      </mark>`,
+      menubar: false,
+      mask: false,
+      type: 7,
+      shift: 'tc',
+      timeout,
+      offset: [50, 'auto'],
+      fixed: true,
+      toast: true // toast模式
+    }
+
+    return _layer.open(opt)
+  },
+  loading: function(style, time, cb) {
+    style = style >>> 0
+
+    if (typeof time === 'function') {
+      cb = time
+      time = 0
+    } else {
+      time = time >>> 0
+      if (typeof cb !== 'function') {
+        cb = Anot.noop
+      }
+    }
+    return _layer.open({
+      type: 6,
+      load: style,
+      yes: cb,
+      timeout: time,
+      menubar: false,
+      background: 'none',
+      shift: 'ct',
+      fixed: true
+    })
+  },
+  tips: function(content, container, opt = {}) {
+    if (!(container instanceof HTMLElement)) {
+      return Anot.error('tips类型必须指定一个目标容器')
+    }
+    if (!opt.hasOwnProperty('timeout')) {
+      opt.timeout = 2500
+    }
+    if (!opt.background) {
+      opt.background = 'rgba(0,0,0,.5)'
+    }
+    if (!opt.color) {
+      opt.color = '#fff'
+    }
+    Object.assign(opt, {
+      container,
+      content,
+      type: 5,
+      fixed: true,
+      mask: false,
+      menubar: false
+    })
+    return _layer.open(opt)
+  },
+  prompt: function(title, yescb) {
+    if (typeof yescb !== 'function') {
+      return console.error(
+        'argument [callback] requires a function, but ' +
+          typeof yescb +
+          ' given'
+      )
+    }
+    let opt = {
+      type: 3,
+      prompt: '',
+      title,
+      content:
+        '<input class="prompt-value" data-duplex-focus :class="{alert: !prompt}" :duplex="prompt" />',
+      fixed: true,
+      yes: yescb
+    }
+    return _layer.open(opt)
+  },
+  use: function(skin, callback) {
+    require(['css!./skin/' + skin], callback)
+  },
+  close: close,
+  open: function(opt) {
+    console.log(opt)
+    if (typeof opt === 'string') {
+      /*opt = '$wrap-' + opt
+      if (!layerObj[opt]) {
+        throw new Error('layer实例不存在')
+      } else {
+        //只能显示一个实例
+        if (layerObj[opt].show) {
+          return opt
+        }
+        layerObj[opt].show = true
+
+        if (!Anot.vmodels[opt]) {
+          Anot(layerObj[opt].obj.init)
+        }
+
+        layerObj[opt].parentElem.appendChild(layerDom[opt][1])
+        layerDom[opt][1]
+          .querySelector('.detail')
+          .appendChild(layerObj[opt].wrap)
+        layerObj[opt].wrap.style.display = ''
+        // Anot.scan(layerDom[opt][1])
+        layerObj[opt].obj.show()
+        return opt
+      }*/
+    } else {
+      return new __layer__(opt).init.$id
+    }
+  },
+  version: Anot.ui.layer
 }
 
 Anot.directive('layer', {

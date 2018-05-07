@@ -11,30 +11,28 @@
 
 .do-layer {width:auto;height:auto;
 
-    
-  .layer-box {position:absolute;}
   a {text-decoration:none;}
 
   
-  .layer-box {left:50%;top:50%;z-index:65535;
+  .layer-box {position:absolute;z-index:65535;opacity:0;
+    
+    &.shift {transition: all .5s ease-out;}
 
-    &.shift {transition: all .3s ease-in-out;}
+    &.__tc {top:0;left:50%;}
+    &.__tl {top:0;left:0;}
+    &.__tr {top:0;left:100%;}
+    &.__ct {top:50%;left:50%;}
+    &.__cc {top:47.5%;left:50%;}
+    &.__bc {top:100%;left:50%;}
+    &.__bl {top:100%;left:0;}
+    &.__br {top:100%;left:100%;}
+
+    
 
     &.scale {transform:scale(1.02);transition:transform .1s linear;}
 
     /* 默认皮肤 */
-    &.skin-def {padding:15px 10px;border-radius:3px;color:#666;font-size:14px;box-shadow:0 5px 20px rgba(0,0,0,.3);
-        
-      .icon-0::before {content:"\e674";color:nth($cr, 1);} // question
-      .icon-1::before {content:"\e610";color:nth($ct, 1);} // get
-      .icon-2::before {content:"\e6f8";color:nth($cb, 1);} // happy
-      .icon-3::before {content:"\e6fd";color:nth($co, 1);} // sad
-      .icon-4::before {content:"\e6f6";color:nth($co, 1);} // warn
-      .icon-5::before {content:"\e673";color:nth($ct, 1);} // face
-      .icon-6::before {content:"\e636";color:nth($cgr, 1);} // time
-      .icon-7::before {content:"\e623";color:nth($co, 1);} // star
-      .icon-8::before {content:"\e604";color:nth($cr, 1);} // mute
-      .icon-9::before {content:"\e605";color:nth($ct, 1);} // unmute   
+    &.skin-default {padding:15px 10px;border-radius:3px;color:#666;font-size:14px;box-shadow:0 5px 20px rgba(0,0,0,.3); 
 
 
       /* 弹层标题栏 */
@@ -51,9 +49,6 @@
             &:focus {border-color:nth($ct, 1)}
         }
         .msg-box {line-height:30px;}
-          
-
-        &.none-icon .detail {margin:0 auto;}
       }
 
 
@@ -98,29 +93,36 @@
 
       .layer-content {min-height:40px;height:40px;padding:0}
 
-      .toast-box {display:inline-block;position:relative;min-height:40px;padding:5px 8px 5px 50px;line-height:28px;border:1px solid nth($co, 1);border-radius:3px;background:#fffbed;color:nth($co, 3);word-break: break-all;
+      .toast-box {display:inline-block;position:relative;min-height:40px;padding:5px 12px 5px 50px;line-height:28px;border-radius:3px;word-break: break-all;
 
-        &::before {position:absolute;left:15px;top:5px;font:20px/28px "ui font";color:nth($cr, 1);content:"\e6f6";}
+        &.style-info {border:1px solid nth($ct, 1);background:#edfbf8;color:nth($ct, 3);}
+        &.style-warn {border:1px solid nth($co, 1);background:#fffbed;color:nth($co, 3);}
+        &.style-deny {border:1px solid nth($cr, 1);background:#fffbed;color:nth($cr, 3);}
+
+        >i {position:absolute;left:12px;top:5px;line-height:28px;font-size:26px;}
       }
     }
 
     
     /* 内置几种loading动画 */
-    .loading-box {position:relative;width:100px;height:100px;margin:auto;
+    .loading {position:relative;width:100px;height:100px;margin:auto;
 
       .dot-box {position:absolute;display:block;}
       
       /* 常规的转动 */
       &.style-1,&.style-2 {
 
-        .dot-box {width:70%;height:70%;margin:15%;-webkit-animation: circle 1.3s infinite linear;-moz-animation: circle 1.3s infinite linear;animation: circle 1.3s infinite linear;
-
-          &::after {content:"\e648";font:70px/1 "ui font";}
+        .dot-box {width:70%;height:70%;margin:15%;line-height:70px;font-size:70px;text-align:center;
+          
+          i {display:block;width:100%;height:100%;}
         }
       }
 
+      &.style-1 {
+        .dot-box {animation: circle 1.3s infinite linear;}
+      }
       &.style-2 {
-        .dot-box::after {content:"\e64a";}
+        .dot-box {animation: round 1s infinite linear;}
       }
       
       /* 频谱波动 */
@@ -182,6 +184,8 @@
 
   &.mask {position:fixed;z-index:65534;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,.3);
 
+    &.shift {transition: all .5s ease-out;}
+
     .layer-box {position:absolute;}
   }
   &:active {z-index:65536;}
@@ -190,55 +194,32 @@
 
 
 
-@-webkit-keyframes circle {
-    to {-webkit-transform: rotate(360deg);}
-}
-@-moz-keyframes circle {
-    to {-moz-transform: rotate(360deg);}
-}
+
 @keyframes circle {
-    to {transform: rotate(360deg)}
+  to {transform: rotate(360deg)}
 }
 
-@-webkit-keyframes circle2 {
-    70%,to {-webkit-transform: rotate(405deg);}
-}
-@-moz-keyframes circle2 {
-    70%,to {-moz-transform: rotate(405deg);}
-}
 @keyframes circle2 {
-    70%,to {transform: rotate(405deg);}
+  70%,to {transform: rotate(405deg);}
 }
 
-@-webkit-keyframes bounce {
-    25% {-webkit-transform: scaleY(1.3);}
-    50% {-webkit-transform: scaleY(.6);}
+@keyframes round {
+  from,24.99%, to {transform:rotate(0deg)}
+  25%,49.99% {transform:rotate(90deg)}
+  50%,74.99% {transform:rotate(180deg)}
+  75%,99.99% {transform:rotate(270deg)}
 }
-@-moz-keyframes bounce {
-    25% {-moz-transform: scaleY(1.3);}
-    50% {-moz-transform: scaleY(.6);}
-}
+
+
 @keyframes bounce {
-    25% {transform: scaleY(1.3);}
-    50% {transform: scaleY(.6);}
+  25% {transform: scaleY(1.3);}
+  50% {transform: scaleY(.6);}
 }
 
 
-
-@-webkit-keyframes grid {
-    
-    36% {-webkit-transform: scale(.1);opacity:.3}
-    60% {-webkit-transform: scale(1);opacity:1}
-}
-@-moz-keyframes grid {
-    
-    36% {-moz-transform: scale(.1);opacity:.3}
-    60% {-moz-transform: scale(1);opacity:1}
-}
-@keyframes grid {
-    
-    36% {transform: scale(.1);opacity:.3}
-    60% {transform: scale(1);opacity:1}
+@keyframes grid { 
+  36% {transform: scale(.1);opacity:.3}
+  60% {transform: scale(1);opacity:1}
 }
 
 
