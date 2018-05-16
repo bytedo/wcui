@@ -8,7 +8,11 @@
 
 @import "var.scss";
 
-.do-meditor {position:relative;width:100%;height:100%;min-height:180px;padding-top:43px;border:1px solid #ddd;background:#fff;color:#666;
+@font-face {font-family: "mefont";
+  src: url('data:application/x-font-woff;charset=utf-8;base64,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') format('woff');
+}
+
+.do-meditor {position:relative;width:100%;height:100%;min-height:180px;padding-top:41px;border:1px solid nth($cp, 3);background:#fff;color:#666;box-shadow: 0 8px 40px rgba(0, 0, 0, 0.15);
 
   ::-webkit-scrollbar {width:5px;height:5px;background:#ebeeec;}
   ::-webkit-scrollbar:hover {background:rgba(0,0,0,.05);}
@@ -16,10 +20,70 @@
   ::-webkit-scrollbar-thumb {background:nth($ct, 1);}
   ::-webkit-scrollbar-thumb:hover {background:nth($ct, 3);}
 
+  
+
+  .tool-bar {overflow:hidden;position:absolute;top:0;left:0;z-index:99;width:100%;height:41px;padding:0 3px;line-height:40px;border-bottom:1px solid nth($cp, 1);background:#fff;color:nth($cgr, 2);text-align:center;font-size:24px;
+
+    span {float:left;width:40px;height:40px;
+
+      &:hover {background:#f7f8fb;}
+      &.icon-pipe {width:28px;background:#fff;color:nth($cp, 3);}
+    }
+  }
+
+  .editor-body{overflow:hidden;overflow-y:auto;float:left;width:100%;height:100%;padding:5px 5px 50px;border:0;outline:none;resize:none;color:#666;background:#f7f8fb;font-size:14px;}
+  
+  .md-preview {float:right;overflow:hidden;overflow-y:auto;display:block;width:50%;height:100%;padding:10px 10px 50px;line-height:2;border-left:1px solid #ddd;color:#666;font-size:14px;background:#ff0;}
+
+
+
+  /*全屏模式*/
+  &.fullscreen {position:fixed;left:0;top:0;z-index:999;}
+
+  &.preview .editor-body {width:50%}
+
 }
-.do-meditor-font {font-family:"PingFang SC","Helvetica Neue","Hiragino Sans GB","Segoe UI","Microsoft YaHei",sans-serif;}
+.do-meditor__font {font-family:"PingFang SC","Helvetica Neue","Hiragino Sans GB","Segoe UI","Microsoft YaHei",sans-serif;}
+.do-meditor__icon {display:inline-block;font-family:"mefont" !important;font-style:normal;-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;
+  
+  &.icon-attach:before { content: "\e673"; }
+  &.icon-about:before { content: "\e674"; }
+  &.icon-blockcode:before { content: "\e675"; }
+  &.icon-bold:before { content: "\e679"; }
+  &.icon-through:before { content: "\e67a"; }
+  &.icon-fullscreen:before { content: "\e67b"; }
+  &.icon-italic:before { content: "\e67c"; }
+  &.icon-h2:before { content: "\e67d"; }
+  &.icon-h1:before { content: "\e67e"; }
+  &.icon-h4:before { content: "\e67f"; }
+  &.icon-h5:before { content: "\e680"; }
+  &.icon-h3:before { content: "\e681"; }
+  &.icon-help:before { content: "\e682"; }
+  &.icon-h6:before { content: "\e683"; }
+  &.icon-inlinecode:before { content: "\e684"; }
+  &.icon-hr:before { content: "\e685"; }
+  &.icon-link:before { content: "\e686"; }
+  &.icon-unordered:before { content: "\e687"; }
+  &.icon-ordered:before { content: "\e688"; }
+  &.icon-image:before { content: "\e689"; }
+  &.icon-pipe:before { content: "\e68a"; }
+  &.icon-preview:before { content: "\e68c"; }
+  &.icon-quote:before { content: "\e68d"; }
+  &.icon-table:before { content: "\e690"; }
+  &.icon-time:before { content: "\e691"; }
+  &.icon-face:before { content: "\e677"; }
+}
 
 
+
+.do-meditor__button {overflow:hidden;position:relative;display:inline-block;width:auto;min-width:60px;height:40px;margin-left:5px;padding:0 10px;color:nth($ct, 1);text-align:center;
+
+  &::before {position:absolute;left:-50%;top:-50%;z-index:-1;display:block;width:200%;height:200%;border-radius:50%;background:nth($cp, 2); content:"";opacity:0;transform: scale(0, .0); transition:opacity 1.3s cubic-bezier(0.23, 1, 0.32, 1),transform 1.3s cubic-bezier(0.23, 1, 0.32, 1);}        
+  &:hover {
+    &::before {opacity:1;transform:scale(1, .8);}
+  }
+  &:active {background:nth($cp, 1)}
+}
 
 
 /* 关于编辑器模块*/
@@ -31,47 +95,46 @@
 
 /*表格模块*/
 
-.do-meditor-table {width:270px;height:270px;padding:10px;
-  li {width:100%;height:25px;
-    span {float:left;width:25px;height:25px;border:2px solid #fff;background:#f2f2f2;}
+.do-meditor-table {width:270px;height:270px;padding:0;
+  li {width:100%;height:27px;
+    span {float:left;width:27px;height:27px;border:2px solid #fff;background:#f2f2f2;}
     span.active {background:rgba(4,151,137,.2);}
   }
 }
 
 /*表情模块*/
-.do-meditor-face {float:left;;width:241px;height:241px;margin:10px;border-top:1px solid #e2e2e2;border-left:1px solid #e2e2e2;
+.do-meditor-face {float:left;;width:241px;height:241px;border-top:1px solid #e2e2e2;border-left:1px solid #e2e2e2;
 
-  li {float:left;width:40px;height:40px;padding:8px;border:1px solid #e2e2e2;border-top:0;border-left:0}
-  li img {width:100%;@include ts();}
-  li:hover img {-webkit-transform:scale(3);-moz-transform:scale(3);-ms-transform:scale(3);transform:scale(3);}
+  li {float:left;width:40px;height:40px;padding:5px;line-height:30px;border:1px solid #e2e2e2;border-top:0;border-left:0;text-align:center;}
+  li span {display:block;width:100%;height:100%;background:#fff;@include ts();}
+  li:hover span {box-shadow:0 1px 5px rgba(0,0,0,.2);transform:scale(3);}
 }
 
 
 /*段落模块*/
-.do-meditor-h1 {width:150px;height:auto;padding:5px 0;
+.do-meditor-h1 {width:150px;height:auto;
 
   li {width:100%;height:auto;padding:0 10px;line-height:1.5;font-size:18px;cursor:default;}
   li:hover {background:#f2f2f2;}
-  li::before {font-family:"ui font" !important;-webkit-font-smoothing: antialiased;-webkit-text-stroke-width: 0.2px;-moz-osx-font-smoothing: grayscale;}
-  li.h1 {font-size:23px;}
-  li.h2 {font-size:21px;}
-  li.h1::before {content:"\e62b  "}
-  li.h2::before {content:"\e625  "}
-  li.h3::before {content:"\e626  "}
-  li.h4::before {content:"\e629  "}
-  li.h5::before {content:"\e62a  "}
-  li.h6::before {content:"\e624  "}
+  li.h1 {font-size:25px;}
+  li.h2 {font-size:23px;}
+  li.h3 {font-size:21px;}
 }
 
 /*通用输入模块, 链接/图片插入/文件插入/代码块插入*/
-.do-meditor-common {width:360px;height:auto;padding:15px 20px;
-  section {width:100%;height: 35px;margin:10px 0;line-height:35px;
+.do-meditor-common {width:360px;height:auto;padding:0 20px;font-size:14px;color:nth($cgr, 2);
 
-    &.input {line-height:33px;border:1px solid #e9e9e9;}
+  section {width:100%;height: 40px;margin:10px 0;line-height:40px;
+
+    &.input {border-radius:5px;background:nth($cp, 2);
+      
+      .txt {width:100%;height:40px;padding:0 10px;border:0;background:none;color:nth($cgr, 1);font-size:14px;}
+    }
+
     .label {float: left;width:30%;text-align:center;background:#f7f7f7;}
     label {float: left;width:50%;}
-    .txt {float: left;width:70%;height:33px;padding:0 8px;border:0;border-left:1px solid #e9e9e9;background:#fff;color:#666;}
-    .submit {float:right;width:30%;height:35px;background:#ddd;color:#666;text-align:center;}
+    
+    .submit {float:right;width:30%;}
   }
 }
 
@@ -91,45 +154,3 @@
 }
 
 
-
-
-.do-meditor {
-  .tool-bar {overflow:hidden;position:absolute;top:0;left:0;z-index:99;width:100%;height:43px;padding:5px 10px;border-bottom:1px solid #ddd;background:#f5f5f5;color:#666;
-
-    span {display:inline-block;width:32px;height:32px;line-height:32px;text-align:center;font-size:28px;}
-    span:hover {background:#e5e5e5;}
-    .icon-pipe {width:20px;color:nth($cp, 3)}
-    .icon-pipe:hover {background:none;}
-    .icon-pipe::before {content:"\e677"}
-    .icon-h1::before {content:"\e65c"}
-    .icon-bold::before {content:"\e66c"}
-    .icon-italic::before {content:"\e670"}
-    .icon-through::before {content:"\e66d"}
-    .icon-link::before {content:"\e667"}
-    .icon-inlinecode::before {content:"\e67a"}
-    .icon-blockcode::before {content:"\e67b"}
-    .icon-quote::before {content:"\e66a"}
-    .icon-hr::before {content:"\e676"}
-    .icon-time::before {content:"\e675"}
-    .icon-face::before {content:"\e673"}
-    .icon-image::before {content:"\e682"}
-    .icon-file::before {content:"\e66b"}
-    .icon-preview::before {content:"\e67d"}
-    .icon-fullscreen::before {content:"\e67e"}
-    .icon-table::before {content:"\e65a"}
-    .icon-ordered::before {content:"\e664"}
-    .icon-unordered::before {content:"\e663"}
-    .icon-about::before {content:"\e672"}
-  }
-
-  .editor-body{overflow:hidden;overflow-y:auto;float:left;width:100%;height:100%;padding:5px 5px 50px;border:0;outline:none;resize:none;color:#666;background:#fff;}
-  .md-preview {float:right;overflow:hidden;overflow-y:auto;display:block;width:50%;height:100%;padding:10px 10px 50px;line-height:2;border-left:1px solid #ddd;color:#666;font-size:14px;background:#fff;}
-
-
-
-  /*全屏模式*/
-  &.fullscreen {position:fixed;left:0;top:0;z-index:999;}
-
-  &.preview .editor-body {width:50%}
-
-}

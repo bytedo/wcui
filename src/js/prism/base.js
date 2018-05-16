@@ -7,15 +7,13 @@
 
 import './highlight.scss'
 
-var _self = window
-
 var Prism = (function() {
   // Private helper vars
   var lang = /\blang(?:uage)?-(\w+)\b/i
   var uniqueId = 0
 
-  var _ = (_self.Prism = {
-    manual: _self.Prism && _self.Prism.manual,
+  var _ = (window.Prism = {
+    manual: window.Prism && window.Prism.manual,
     util: {
       encode: function(tokens) {
         if (tokens instanceof Token) {
@@ -221,7 +219,7 @@ var Prism = (function() {
 
       _.hooks.run('before-highlight', env)
 
-      if (async && _self.Worker) {
+      if (async && window.Worker) {
         var worker = new Worker(_.filename)
 
         worker.onmessage = function(evt) {
@@ -487,13 +485,13 @@ var Prism = (function() {
     )
   }
 
-  if (!_self.document) {
-    if (!_self.addEventListener) {
+  if (!window.document) {
+    if (!window.addEventListener) {
       // in Node.js
-      return _self.Prism
+      return window.Prism
     }
     // In worker
-    _self.addEventListener(
+    window.addEventListener(
       'message',
       function(evt) {
         var message = JSON.parse(evt.data),
@@ -501,15 +499,15 @@ var Prism = (function() {
           code = message.code,
           immediateClose = message.immediateClose
 
-        _self.postMessage(_.highlight(code, _.languages[lang], lang))
+        window.postMessage(_.highlight(code, _.languages[lang], lang))
         if (immediateClose) {
-          _self.close()
+          window.close()
         }
       },
       false
     )
 
-    return _self.Prism
+    return window.Prism
   }
 
   //Get current script and highlight
@@ -537,7 +535,7 @@ var Prism = (function() {
     }
   }
 
-  return _self.Prism
+  return window.Prism
 })()
 
 Prism.languages.markup = {

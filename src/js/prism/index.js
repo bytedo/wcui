@@ -232,7 +232,6 @@ Prism.languages.insertBefore('cpp', 'keyword', {
 })
 
 /*-----------------------coffeescript-----------------------*/
-
 ;(function(Prism) {
   // Ignore comments starting with { to privilege string interpolation highlighting
   var comment = /#(?!\{).+/,
@@ -322,7 +321,6 @@ Prism.languages.insertBefore('cpp', 'keyword', {
 })(Prism)
 
 /*---------------------------ruby---------------------------*/
-
 ;(function(Prism) {
   Prism.languages.ruby = Prism.languages.extend('clike', {
     comment: [
@@ -650,7 +648,6 @@ Prism.languages.haskell = {
 }
 
 /*---------------------------jade---------------------------*/
-
 ;(function(Prism) {
   Prism.languages.jade = {
     comment: {
@@ -862,7 +859,6 @@ Prism.languages.json = {
 Prism.languages.jsonp = Prism.languages.json
 
 /*--------------------------kotlin----------------------------*/
-
 ;(function(Prism) {
   Prism.languages.kotlin = Prism.languages.extend('clike', {
     keyword: {
@@ -1525,7 +1521,6 @@ Prism.languages.rust = {
 }
 
 /*------------------------------------------------------------*/
-
 ;(function(Prism) {
   Prism.languages.sass = Prism.languages.extend('css', {
     // Sass comments don't need to be closed, only indented
@@ -1676,7 +1671,6 @@ Prism.languages.scss['atrule'].inside.rest = Prism.util.clone(
 )
 
 /*-----------------------------smarty-------------------------*/
-
 ;(function(Prism) {
   var smarty_pattern = /\{\*[\s\S]+?\*\}|\{[\s\S]+?\}/g
   var smarty_litteral_start = '{literal}'

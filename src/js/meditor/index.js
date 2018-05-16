@@ -17,13 +17,14 @@ marked.setOptions({
     return Prism.highlight(code, Prism.languages[lang])
   }
 })
-var editorVM = []
+let editorVM = []
 Anot.ui.meditor = '1.0.0'
+const log = console.log
 //存放编辑器公共静态资源
 window.ME = {
   version: Anot.ui.meditor,
+  // 工具栏title
   toolbar: {
-    //工具栏title
     pipe: '',
     h1: '标题',
     quote: '引用文本',
@@ -45,19 +46,19 @@ window.ME = {
     fullscreen: '全屏',
     about: '关于编辑器'
   },
-  addon, //已有插件
-  //往文本框中插入内容
+  addon, // 已有插件
+  // 往文本框中插入内容
   insert: function(dom, val, isSelect) {
     if (document.selection) {
       dom.focus()
-      var range = document.selection.createRange()
+      let range = document.selection.createRange()
       range.text = val
       dom.focus()
       range.moveStart('character', -1)
     } else if (dom.selectionStart || dom.selectionStart === 0) {
-      var startPos = dom.selectionStart,
-        endPos = dom.selectionEnd,
-        scrollTop = dom.scrollTop
+      let startPos = dom.selectionStart
+      let endPos = dom.selectionEnd
+      let scrollTop = dom.scrollTop
 
       dom.value =
         dom.value.slice(0, startPos) +
@@ -82,15 +83,15 @@ window.ME = {
     if (document.selection) {
       return document.selection.createRange().text
     } else {
-      var startPos = dom.selectionStart,
-        endPos = dom.selectionEnd
+      let startPos = dom.selectionStart
+      let endPos = dom.selectionEnd
 
       if (endPos) {
         //强制选择整行
         if (line) {
           startPos = dom.value.slice(0, startPos).lastIndexOf('\n')
 
-          var tmpEnd = dom.value.slice(endPos).indexOf('\n')
+          let tmpEnd = dom.value.slice(endPos).indexOf('\n')
           tmpEnd = tmpEnd < 0 ? 0 : tmpEnd
 
           startPos += 1 //把\n加上
@@ -169,27 +170,24 @@ var elems = {
   },
   hr: '\n\n___\n\n',
   a: function(str, attr, inner) {
-    var href = attr.match(attrExp('href')),
-      title = attr.match(attrExp('title')),
-      tar = attr.match(attrExp('target'))
+    let href = attr.match(attrExp('href'))
+    let title = attr.match(attrExp('title'))
+    let tar = attr.match(attrExp('target'))
+    let attrs = ''
 
-    href = (href && href[1]) || ''
-    title = (title && title[1]) || ''
+    href = (href && href[1]) || null
+    title = (title && title[1]) || null
     tar = (tar && tar[1]) || '_self'
 
-    href = href === 'javascript:void(0);' ? 'javascript:;' : href
+    if (!href) {
+      return inner || href
+    }
 
-    return (
-      '[' +
-      (inner || href) +
-      '](' +
-      href +
-      ' "title=' +
-      title +
-      ';target=' +
-      tar +
-      '")'
-    )
+    href = href.replace('viod(0)', '')
+    attrs = `target=${tar}`
+    attrs += title ? `;title=${title}` : ''
+
+    return `[${inner || href}](${href} "${attrs}")`
   },
   em: function(str, attr, inner) {
     return (inner && '_' + inner + '_') || ''
@@ -233,7 +231,12 @@ function html2md(str) {
   try {
     str = decodeURIComponent(str)
   } catch (err) {}
-  str = str.replace(/\t/g, '    ').replace(/<meta [^>]*>/, '')
+
+  str = str.replace(/\t/g, '  ').replace(/<meta [^>]*>/, '')
+  str = str.replace(
+    /<(div|span|dl|dd|dt|table|tr|td|thead|tbody|i|em|strong|h[1-6]|ul|ol|li) [^>]*>/g,
+    '<$1>'
+  )
 
   for (var i in elems) {
     var cb = elems[i],
@@ -313,7 +316,7 @@ var defaultToolbar = [
     '|',
     'table',
     'image',
-    'file',
+    'attach',
     'inlinecode',
     'blockcode',
     '|',
@@ -330,7 +333,7 @@ function tool(name) {
   return (
     '<span title="' +
     ME.toolbar[name] +
-    '" class="icon-' +
+    '" class="do-meditor__icon icon-' +
     name +
     '" ' +
     (name !== 'pipe' ? ':click="onToolClick(\'' + name + '\', $event)"' : '') +
@@ -340,35 +343,43 @@ function tool(name) {
 
 Anot.component('meditor', {
   render: function() {
-    var toolbar = (this.toolbar || defaultToolbar)
-      .map(function(it) {
-        return tool(it)
-      })
-      .join('')
+    let toolbar = (this.toolbar || defaultToolbar).map(it => tool(it)).join('')
+
     delete this.toolbar
-    return (
-      '<div class="do-meditor do-meditor-font" :visible="editorVisible"' +
-      ' :class="{fullscreen: fullscreen, preview: preview}">' +
-      '<div class="tool-bar do-ui-font do-fn-noselect">{toolbar}</div>' +
-      '<textarea ref="textarea" class="editor-body" spellcheck="false" :duplex="plainTxt" :attr="{disabled: disabled}" :on-paste="$paste($event)"></textarea>' +
-      '<content class="md-preview do-marked-theme" :visible="preview" :html="htmlTxt"></content>' +
-      '</div>'
-    ).replace(/\{toolbar\}/g, toolbar)
+
+    return `
+    <div 
+      class="do-meditor do-meditor__font" 
+      :visible="editorVisible"
+      :class="{fullscreen: fullscreen, preview: preview}">
+      <div class="tool-bar do-fn-noselect">${toolbar}</div>
+      <textarea 
+        ref="editor"
+        class="editor-body" 
+        spellcheck="false" 
+        :attr="{disabled: disabled}"
+        :duplex="plainTxt"
+        :on-paste="onPaste($event)"></textarea>
+      <content 
+        class="md-preview do-marked-theme" 
+        :visible="preview" 
+        :html="htmlTxt"></content>
+    </div>
+    `
   },
 
-  construct: function(base, opt, attr) {
-    Anot.mix(base, opt, attr)
-    if (base.$addons && Array.isArray(base.$addons)) {
-      extraAddons = base.$addons.map(function(name) {
-        return ME.path + '/addon/' + name
-      })
-      delete base.$addons
+  construct: function(props, state) {
+    // Anot.mix(base, opt, attr)
+    // if (base.$addons && Array.isArray(base.$addons)) {
+    //   extraAddons = base.$addons.map(function(name) {
+    //     return ME.path + '/addon/' + name
+    //   })
+    //   delete base.$addons
+    // }
+    if (props.hasOwnProperty('$show')) {
+      state.editorVisible = props.$show
+      delete props.$show
     }
-    if (base.hasOwnProperty('$show')) {
-      base.editorVisible = base.$show
-      delete base.$show
-    }
-    return base
   },
   componentWillMount: function(vm) {},
   componentDidMount: function(vm, elem) {
@@ -411,24 +422,31 @@ Anot.component('meditor', {
   },
   watch: {
     plainTxt: function(val) {
-      this.$compile()
+      this.compile()
       //只有开启实时预览,才会赋值给htmlTxt
       if (this.preview) {
         this.htmlTxt = this.$htmlTxt
       }
-      this.$onUpdate(this.plainTxt, vm.$htmlTxt)
+      if (typeof this.props.onUpdate === 'function') {
+        this.props.onUpdate(this.plainTxt, this.$htmlTxt)
+      }
     }
   },
   state: {
     disabled: false, //禁用编辑器
     fullscreen: false, //是否全屏
     preview: false, //是否显示预览
-    $editor: null, //编辑器元素
+    // $editor: null, //编辑器元素
     editorVisible: true,
     $htmlTxt: '', //临时储存html文本
     htmlTxt: '', //用于预览渲染
     plainTxt: '', //纯md文本
     $safelyCompile: true
+  },
+  props: {
+    onSuccess: Anot.PropsTypes.isFunction(),
+    onUpdate: Anot.PropsTypes.isFunction(),
+    onFullscreen: Anot.PropsTypes.isFunction()
   },
   methods: {
     onToolClick: function(name, ev) {
@@ -438,24 +456,23 @@ Anot.component('meditor', {
         console.log('%c没有对应的插件%c[%s]', 'color:#f00;', '', name)
       }
     },
-    $onSuccess: Anot.noop,
-    $onUpdate: Anot.noop,
-    $onFullscreen: Anot.noop,
-    $paste: function(ev) {
+    onPaste: function(ev) {
       ev.preventDefault()
-      var txt = ev.clipboardData.getData('text/plain').trim(),
-        html = ev.clipboardData.getData('text/html').trim()
+      let txt = ev.clipboardData.getData('text/plain').trim()
+      let html = ev.clipboardData.getData('text/html').trim()
 
       html = html2md(html)
 
       if (html) {
-        ME.insert(this, html)
+        ME.insert(ev.target, html)
       } else if (txt) {
-        ME.insert(this, txt)
+        ME.insert(ev.target, txt)
       }
-      this.plainTxt = this.value
+      log(ev.target.value)
+      this.plainTxt = this.$refs.editor.value
     },
     compile: function() {
+      log(this)
       var txt = this.plainTxt.trim()
 
       if (this.$safelyCompile) {

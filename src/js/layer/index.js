@@ -182,8 +182,8 @@ class __layer__ {
         }
       },
       mounted: function() {
-        if (typeof this.success === 'function') {
-          this.success(_id)
+        if (typeof this.props.success === 'function') {
+          this.props.success.call(this)
         }
       }
     }
@@ -216,7 +216,9 @@ class __layer__ {
       layBox.classList.add('__' + state.shift)
     } else {
       for (let k in state.shift) {
-        layBox.style.cssText += `${k}: ${state.shift[k]};`
+        let val = state.shift[k]
+        val += isFinite(val) ? 'px' : ''
+        layBox.style.cssText += `${k}: ${val};`
       }
     }
 
