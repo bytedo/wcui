@@ -39,9 +39,9 @@ const close = function(id) {
   if (typeof id !== 'string' && typeof id !== 'number') {
     return Anot.error('要关闭的layer实例不存在')
   }
-  if (/^\$wrap\-/.test(id) || layerObj['$wrap-' + id]) {
+  if (/^layerwrap\-/.test(id) || layerObj['layerwrap-' + id]) {
     try {
-      id = (layerObj['$wrap-' + id] ? '$wrap-' : '') + id
+      id = (layerObj['layerwrap-' + id] ? 'layerwrap-' : '') + id
       //未显示过,忽略
       if (!layerObj[id].show) {
         return
@@ -134,6 +134,7 @@ class __layer__ {
       skip: [
         'area',
         'shift',
+        'offset',
         'skin',
         'mask',
         'maskClose',
@@ -141,12 +142,15 @@ class __layer__ {
         'follow'
       ],
       methods: {
+        shake() {
+          this.$refs.layer.classList.add('scale')
+          setTimeout(() => {
+            this.$refs.layer.classList.remove('scale')
+          }, 100)
+        },
         onMaskClick: function() {
           if (this.type < 4 && !this.maskClose) {
-            this.$refs.layer.classList.add('scale')
-            setTimeout(() => {
-              this.$refs.layer.classList.remove('scale')
-            }, 100)
+            this.shake()
           } else {
             this.maskClose && this.close()
           }
@@ -154,7 +158,7 @@ class __layer__ {
         handleConfirm: function() {
           if (this.type === 3) {
             if (!this.prompt) {
-              return
+              return this.shake()
             }
           }
           if (typeof this.props.yes === 'function') {
@@ -216,10 +220,6 @@ class __layer__ {
       }
     }
 
-    if (state.type === 5) {
-      layBox.classList.add('active')
-    }
-
     if (state.toast) {
       layBox.classList.add('type-toast')
     } else {
@@ -248,9 +248,7 @@ class __layer__ {
     }
     let arrow = ''
     if (state.type === 5) {
-      arrow += `<i class="arrow" style="border-top-color: ${
-        state.background
-      };"></i>`
+      arrow += `<i class="arrow"></i>`
     }
 
     layBox.innerHTML = `
@@ -334,12 +332,14 @@ class __layer__ {
   }
 
   append() {
-    let { state, $id, container } = this.init
-    // 如果有已经打开的弹窗,则关闭
-    if (unique) {
-      close(unique)
-    }
+    let { state, $id } = this.init
+    let container = state.container
+
     if (state.type < 4) {
+      // 如果有已经打开的弹窗,则关闭
+      if (unique) {
+        close(unique)
+      }
       unique = $id
     }
 
@@ -358,7 +358,8 @@ class __layer__ {
   }
 
   show() {
-    let { state, $id, follow } = this.init
+    let { state, $id } = this.init
+    let container = state.container
 
     setTimeout(function() {
       let style = { background: state.background }
@@ -368,16 +369,45 @@ class __layer__ {
       if (state.type === 5) {
         // only type[tips] can define `color`
         style.color = state.color
-
-        let $follow = Anot(follow)
-        let ew = $follow.innerWidth()
-        let ol = $follow.offset().left - document.body.scrollLeft
-        let ot = $follow.offset().top - document.body.scrollTop
-
-        style.left = ol + ew * 0.7
-        style.top = ot - parseInt(css.height) - 8
         style.opacity = 1
+        let $container = Anot(container)
+        let $arrow = $container[0].querySelector('.arrow')
+        let cw = $container.innerWidth()
+        let ch = $container.innerHeight()
+        let ol = $container.offset().left - document.body.scrollLeft
+        let ot = $container.offset().top - document.body.scrollTop
+
+        let layw = parseInt(css.width)
+        let layh = parseInt(css.height)
+
+        let arrowOffset = ['top']
+
+        if (ot + 18 < layh) {
+          arrowOffset[0] = 'bottom'
+          $arrow.style.borderBottomColor = state.background
+          style.top = ot + ch + 8
+        } else {
+          $arrow.style.borderTopColor = state.background
+          style.top = ot - layh - 8
+        }
+
+        if (ol + cw * 0.7 + layw > window.innerWidth) {
+          style.left = ol + cw * 0.3 - layw
+          arrowOffset[1] = 'left'
+        } else {
+          style.left = ol + cw * 0.7
+        }
+
+        $arrow.classList.add('offset-' + arrowOffset.join('-'))
         Anot(layerDom[$id][1]).css(style)
+        $container.bind('mouseenter', ev => {
+          layerDom[$id][1].style.visibility = 'visible'
+        })
+        $container.bind('mouseleave', () => {
+          setTimeout(() => {
+            layerDom[$id][1].style.visibility = 'hidden'
+          }, 100)
+        })
       } else {
         let offsetStyle = { opacity: 1 }
         if (state.offset) {
@@ -537,11 +567,9 @@ const _layer = {
   },
   tips: function(content, container, opt = {}) {
     if (!(container instanceof HTMLElement)) {
-      return Anot.error('tips类型必须指定一个目标容器')
+      return Anot.error('layer "tips" require a DOM object')
     }
-    if (!opt.hasOwnProperty('timeout')) {
-      opt.timeout = 2500
-    }
+
     if (!opt.background) {
       opt.background = 'rgba(0,0,0,.5)'
     }
@@ -554,7 +582,8 @@ const _layer = {
       type: 5,
       fixed: true,
       mask: false,
-      menubar: false
+      menubar: false,
+      timeout: 0
     })
     return _layer.open(opt)
   },
@@ -570,21 +599,16 @@ const _layer = {
       type: 3,
       prompt: '',
       title,
-      content:
-        '<input class="prompt-value" data-duplex-focus :class="{alert: !prompt}" :duplex="prompt" />',
+      content: `<input class="prompt-value" data-duplex-focus :class="{alert: !prompt}" :duplex="prompt" />`,
       fixed: true,
       yes: yescb
     }
     return _layer.open(opt)
   },
-  use: function(skin, callback) {
-    require(['css!./skin/' + skin], callback)
-  },
   close: close,
   open: function(opt) {
-    console.log(opt)
     if (typeof opt === 'string') {
-      /*opt = '$wrap-' + opt
+      opt = 'layerwrap-' + opt
       if (!layerObj[opt]) {
         throw new Error('layer实例不存在')
       } else {
@@ -594,19 +618,18 @@ const _layer = {
         }
         layerObj[opt].show = true
 
+        layerObj[opt].parentElem.appendChild(layerDom[opt][0])
+        layerDom[opt][0]
+          .querySelector('.layer-content')
+          .appendChild(layerObj[opt].wrap)
+        layerObj[opt].wrap.style.display = ''
+
         if (!Anot.vmodels[opt]) {
           Anot(layerObj[opt].obj.init)
         }
-
-        layerObj[opt].parentElem.appendChild(layerDom[opt][1])
-        layerDom[opt][1]
-          .querySelector('.detail')
-          .appendChild(layerObj[opt].wrap)
-        layerObj[opt].wrap.style.display = ''
-        // Anot.scan(layerDom[opt][1])
         layerObj[opt].obj.show()
         return opt
-      }*/
+      }
     } else {
       return new __layer__(opt).init.$id
     }
@@ -617,49 +640,42 @@ const _layer = {
 Anot.directive('layer', {
   priority: 1400,
   init: function(binding) {
+    // 去掉:layer属性,避免二次扫描
+    binding.element.removeAttribute(binding.name)
     if (!binding.param || binding.param !== 'tips') {
-      binding.param = '' //去掉param,保证之后的逻辑处理正常
-      // 去掉:layer属性,避免二次扫描
-      binding.element.removeAttribute(binding.name)
+      binding.param = '' // 去掉param,保证之后的逻辑处理正常
       binding.element.style.display = 'none'
     }
   },
   update: function(val) {
     if (!val) {
-      return Anot.error(
-        ':layer指令格式不正确或无效属性. [' +
-          this.name +
-          '="' +
-          this.expr +
-          '"]'
+      return console.error(
+        `SyntaxError: Unexpected [${this.name}=${this.expr}]`
       )
     }
 
-    var _this = this,
-      init = Object.assign({}, this.element.dataset)
-
-    if (init.hasOwnProperty('area')) {
-      init.area = init.area.split(',')
-    }
-    if (init.hasOwnProperty('offset')) {
-      init.offset = init.offset.split(',')
-    }
-    if (init.hasOwnProperty('btns')) {
-      init.btns = init.btns.split(',')
-    }
-
     if (!this.param) {
-      init.wrap = true
-      init.type = 7
-      init.$id = '$wrap-' + val
-      if (!init.hasOwnProperty('menubar')) {
-        init.menubar = false
+      let state = Object.assign({ type: 7, wrap: true }, this.element.dataset)
+      let init = { $id: 'layerwrap-' + val, state, props: {} }
+
+      if (state.hasOwnProperty('area')) {
+        state.area = state.area.split(',')
+      }
+      if (state.hasOwnProperty('offset')) {
+        state.offset = state.offset.split(',')
+      }
+      if (state.hasOwnProperty('btns')) {
+        state.btns = state.btns.split(',')
       }
 
-      var tmp = new __layer__().construct(init)
+      if (!state.hasOwnProperty('menubar')) {
+        state.menubar = false
+      }
+
+      let tmp = new __layer__().__init__(init)
 
       //去掉data-*属性
-      for (var i in this.element.dataset) {
+      for (let i in this.element.dataset) {
         delete this.element.dataset[i]
       }
 
@@ -671,54 +687,7 @@ Anot.directive('layer', {
       }
       layerDom[tmp.init.$id] = tmp.create()
     } else if (this.param === 'tips') {
-      var $elem = Anot(this.element),
-        ew = $elem.innerWidth(),
-        ol = $elem.offset().left - document.body.scrollLeft,
-        ot = $elem.offset().top - document.body.scrollTop,
-        tipsBox = document.createElement('div'),
-        tipsArrow = document.createElement('i'),
-        tipsCont = document.createElement('div')
-
-      tipsBox.className = 'do-layer skin-' + (init.skin || 'def') + ' type-5'
-      tipsBox.style.left = ol + ew * 0.7 + 'px'
-      if (init.background) {
-        tipsBox.style.background = init.background
-        tipsArrow.style.borderTopColor = init.background
-      }
-      if (init.color) {
-        tipsBox.style.color = init.color
-      }
-      tipsCont.className = 'layer-content'
-      tipsCont.textContent = val
-      tipsArrow.className = 'arrow'
-      tipsBox.appendChild(tipsCont)
-      tipsBox.appendChild(tipsArrow)
-
-      Anot(document).bind('scroll', function() {
-        ol = $elem.offset().left - document.body.scrollLeft
-        ot = $elem.offset().top - document.body.scrollTop
-
-        tipsBox.style.left = ol + ew * 0.7 + 'px'
-        tipsBox.style.top = ot - tipsBox.offsetHeight - 8 + 'px'
-      })
-
-      $elem.bind('mouseenter', function(ev) {
-        _this.element.parentNode.appendChild(tipsBox)
-        clearTimeout(_this.showTime)
-        clearTimeout(_this.hideTime)
-        _this.showTime = setTimeout(function() {
-          tipsBox.style.top = ot - tipsBox.offsetHeight - 8 + 'px'
-          tipsBox.classList.add('active')
-        }, 4)
-      })
-      $elem.bind('mouseleave', function() {
-        _this.hideTime = setTimeout(function() {
-          clearTimeout(_this.hideTime)
-          try {
-            _this.element.parentNode.removeChild(tipsBox)
-          } catch (err) {}
-        }, 150)
-      })
+      _layer.tips(val, this.element)
     }
   }
 })

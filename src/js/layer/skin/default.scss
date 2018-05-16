@@ -75,17 +75,21 @@
 
 
     /* tips类弹层(type 5) */
-    &.type-5 {visibility:hidden;min-width:75px;max-width:600px;line-height:1.5;color:#fff;background:rgba(0,0,0,.5);opacity:0;box-shadow:none;-webkit-transition:opacity .3s ease-in-out;-moz-transition:opacity .3s ease-in-out;transition:opacity .3s ease-in-out;
+    &.type-5 {visibility:hidden;z-index:65534;min-width:75px;max-width:600px;line-height:1.5;color:#fff;background:rgba(0,0,0,.5);opacity:0;box-shadow:none;-webkit-transition:opacity .3s ease-in-out;-moz-transition:opacity .3s ease-in-out;transition:opacity .3s ease-in-out;
 
-      &.active {visibility:visible;opacity:1;}
-      i.arrow {position:absolute;left:5px;bottom:-14px;width:0;height:0;border:6px solid transparent;border-top:8px solid rgba(0,0,0,.5);content: ""}
+      // &.active {visibility:visible;opacity:1;}
+      i.arrow {position:absolute;width:0;height:0;border:6px solid transparent;content: ""}
+      i.offset-top {left:5px;bottom:-14px;border-top:8px solid rgba(0,0,0,.5);}
+      i.offset-bottom {left:5px;top:-14px;border-bottom:8px solid rgba(0,0,0,.5);}
+      i.offset-top-left {right:5px;bottom:-14px;border-top:8px solid rgba(0,0,0,.5);}
+      i.offset-bottom-left {right:5px;top:-14px;border-bottom:8px solid rgba(0,0,0,.5);}
 
-      .layer-content {margin:0;padding:0}
+      .layer-content {min-height:20px;margin:0;padding:0}
     }
 
     
     /* loading类弹层 */
-    &.type-6 {box-shadow:none;background:transparent;}
+    &.type-6 {z-index:65539;box-shadow:none;background:transparent;}
 
     
     /* 特殊类弹层(toast弹层) */
@@ -119,10 +123,10 @@
       }
 
       &.style-1 {
-        .dot-box {animation: circle 1.3s infinite linear;}
+        .dot-box {animation: circle .8s infinite linear;}
       }
       &.style-2 {
-        .dot-box {animation: round 1s infinite linear;}
+        .dot-box {animation: round .6s infinite linear;}
       }
       
       /* 频谱波动 */
