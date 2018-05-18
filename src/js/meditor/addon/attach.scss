@@ -5,58 +5,76 @@
  * @date    2017-04-20 19:13:24
  * 
  */
+@import 'var.scss';
 
-.do-meditor-attach {width:630px;height:auto;background:#f7f7f7;cursor:default;
+.do-meditor-attach {width:630px;height:300px;cursor:default;color:nth($cgr, 1);
+  dt.close {position:absolute;z-index:65539;top:-8px;right:-8px;width:40px;height:40px;line-height:40px;font-size:20px;text-align:center;cursor:pointer;
 
-    .tab-box {width:100%;height:50px;line-height:49px;border-bottom:1px solid #e2e2e2;text-align:center;
+    &:hover {color:nth($ct, 1);font-size:28px;}
+  }
+    
+  .tab-box {float:left;width:130px;height:300px;padding:10px 5px;text-align:center;background:nth($cp, 2);border-radius:5px;
 
-        .item {position:relative;float:left;width:100px;height:49px;border-right:1px solid #ddd;cursor:pointer;}
-        .item.active {background:#fff;}
-        .item.active::after {position:absolute;left:0;bottom:-1px;width:100%;height:1px;background:#fff;content:""}
-        a.action-close {top:5px;width:40px;height:40px;line-height:40px;font-size:20px;}
-        a.action-close:hover {line-height:40px;border:0;}
+    .item {display:block;width:100%;height:40px;line-height:40px;border-radius:3px;cursor:pointer;
+
+      &.active {background:#fff;}
+    }
+  }
+
+
+  .cont-box {position:relative;float:right;width:480px;height:auto;min-height:200px;
+
+    .remote,
+    .local {position:relative;width:92%;height:auto;margin:0 auto;}
+
+    .remote {padding:30px 0;}
+    .hide  {display:none;}
+
+    .section {display:block;width:100%;height:auto;margin:15px 0;line-height:35px;
+
+      .txt {width:100%;height:45px;padding:0 10px;border:0;border-radius:5px;background:nth($cp, 2);color:nth($cgr, 1);font-size:14px;}
+      .submit {float:right;width:30%;height:45px;line-height:45px;}
     }
 
-    .cont-box {position:relative;width:100%;height:auto;min-height:200px;background:#fff;
 
-        .remote,
-        .local {position:relative;width:60%;height:auto;margin:0 auto;padding:15px 0 30px;}
-        .local {width:96%;}
-
-        .hide  {display:none;}
-
-        .section {display:block;width:100%;height:auto;margin:15px 0;line-height:35px;
-
-            &.input {line-height:33px;border:1px solid #e9e9e9;}
-
-            .label {float: left;width:30%;text-align:center;background:#f7f7f7;}
-            .txt {float: left;width:70%;height:33px;padding:0 8px;border:0;border-left:1px solid #e9e9e9;background:#fff;color:#666;}
-            .submit {float:right;width:30%;height:35px;background:#ddd;color:#666;text-align:center;}
-        }
-
-
-        .select-file  {width:100%;height:35px;line-height:33px}
-        .select-file span.file  {float:left;width:100px;height:35px;border:1px solid #ddd;background:#f7f7f7;color:#666;text-align:center;cursor:pointer;}
-        .select-file span.tips  {display:inline-block;padding:0 10px;line-height:35px;color:#666;}
-        .upload-box  {width:100%;height:auto;min-height:190px;margin:10px 0;border:1px solid #e2e2e2;}
-        .upload-box .tr {width:100%;height:35px;line-height:35px;text-align:center;}
-        .upload-box .tr:hover {background:#fafafa}
-        .upload-box .thead {line-height:34px;border-bottom:1px solid #e2e2e2;background:#f7f7f7;}
-
-        .upload-box .td {float:left;}
-        .upload-box .td.name {width:45%;}
-        .upload-box .td.progress {width:40%;}
-        .upload-box .td.option {width:15%;}
-        .upload-box .td.option a {display:inline-block;padding:3px 5px;line-height:13px;border:1px solid #e2e2e2;background:#f7f7f7;color:#666;}
-        .upload-box .td .red {color:#f30;}
-
-        .manager {overflow:hidden;overflow-y:auto;width:100%;height:320px;padding:10px;}
-        .manager .item {float:left;width:22%;height:130px;margin:10px 1.5%;padding:5px;}
-        .manager .item:hover {background:#f7f7f7;}
-        .manager .thumb {display:block;width:100%;height:100px;}
-        .manager .name {overflow:hidden;height:20px;line-height:30px; text-align:center;}
-        .manager img {width:100%;height:100%;}
-        .manager .attach-icon {display:inline-block;width:100%;height:100px;text-align:center;font:50px/100px "ui font" !important;-webkit-font-smoothing: antialiased;-webkit-text-stroke-width: 0.2px;-moz-osx-font-smoothing: grayscale;}
+    .select-file  {width:100%;height:35px;line-height:35px;
+      
+      .file  {float:left;width:100px;height:35px;border-radius:3px;background:nth($cp, 1);text-align:center;cursor:pointer;
+        
+        &:hover {background:nth($cp, 2);}
+        &:active {background:nth($cp, 3);}
+      }
+      .tips  {display:inline-block;padding:0 10px;}
     }
+ 
+    .upload-box {width:100%;height:auto;min-height:255px;padding-top:10px;
+
+      .thead {width:100%;height:35px;line-height:35px;background:nth($cp, 2);}
+      .thead .col {text-align:center;}
+
+      .col {float:left;height:30px;padding:0 5px;}
+      .col:nth-child(1) {width:50%}
+      .col:nth-child(2) {width:35%}
+      .col:nth-child(3) {width:15%}
+
+      .tbody {overflow:hidden;overflow-y:auto;width:100%;height:220px;
+        p {display:block;width:100%;height:30px;line-height:30px;}
+      }
+
+      .insert {display:inline-block;padding:3px 5px;line-height:13px;background:nth($cp, 2);color:nth($cgr, 1);cursor:pointer;}
+      .red {color:#f30;}
+    }
+
+  
+      
+
+      .manager {overflow:hidden;overflow-y:auto;width:100%;height:320px;padding:10px;}
+      .manager .item {float:left;width:22%;height:130px;margin:10px 1.5%;padding:5px;}
+      .manager .item:hover {background:#f7f7f7;}
+      .manager .thumb {display:block;width:100%;height:100px;}
+      .manager .name {overflow:hidden;height:20px;line-height:30px; text-align:center;}
+      .manager img {width:100%;height:100%;}
+      .manager .attach-icon {display:inline-block;width:100%;height:100px;text-align:center;font:50px/100px "ui font" !important;-webkit-font-smoothing: antialiased;-webkit-text-stroke-width: 0.2px;-moz-osx-font-smoothing: grayscale;}
+  }
 
 }

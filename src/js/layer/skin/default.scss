@@ -75,7 +75,7 @@
 
 
     /* tips类弹层(type 5) */
-    &.type-5 {visibility:hidden;z-index:65534;min-width:75px;max-width:600px;line-height:1.5;color:#fff;background:rgba(0,0,0,.5);opacity:0;box-shadow:none;-webkit-transition:opacity .3s ease-in-out;-moz-transition:opacity .3s ease-in-out;transition:opacity .3s ease-in-out;
+    &.type-5 {visibility:hidden;position:fixed;z-index:65534;min-width:75px;max-width:600px;line-height:1.5;color:#fff;background:rgba(0,0,0,.5);opacity:0;box-shadow:none;-webkit-transition:opacity .3s ease-in-out;-moz-transition:opacity .3s ease-in-out;transition:opacity .3s ease-in-out;
 
       // &.active {visibility:visible;opacity:1;}
       i.arrow {position:absolute;width:0;height:0;border:6px solid transparent;content: ""}
@@ -190,7 +190,6 @@
 
     &.shift {transition: all .5s ease-out;}
 
-    .layer-box {position:absolute;}
   }
   &:active {z-index:65536;}
 }

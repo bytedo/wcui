@@ -17,158 +17,71 @@ marked.setOptions({
     return Prism.highlight(code, Prism.languages[lang])
   }
 })
-let editorVM = []
-Anot.ui.meditor = '1.0.0'
-const log = console.log
-//存放编辑器公共静态资源
-window.ME = {
-  version: Anot.ui.meditor,
-  // 工具栏title
-  toolbar: {
-    pipe: '',
-    h1: '标题',
-    quote: '引用文本',
-    bold: '粗体',
-    italic: '斜体',
-    through: '删除线',
-    unordered: '无序列表',
-    ordered: '有序列表',
-    link: '超链接',
-    hr: '横线',
-    time: '插入当前时间',
-    face: '表情',
-    table: '插入表格',
-    image: '插入图片',
-    file: '插入附件',
-    inlinecode: '行内代码',
-    blockcode: '代码块',
-    preview: '预览',
-    fullscreen: '全屏',
-    about: '关于编辑器'
-  },
-  addon, // 已有插件
-  // 往文本框中插入内容
-  insert: function(dom, val, isSelect) {
-    if (document.selection) {
-      dom.focus()
-      let range = document.selection.createRange()
-      range.text = val
-      dom.focus()
-      range.moveStart('character', -1)
-    } else if (dom.selectionStart || dom.selectionStart === 0) {
-      let startPos = dom.selectionStart
-      let endPos = dom.selectionEnd
-      let scrollTop = dom.scrollTop
-
-      dom.value =
-        dom.value.slice(0, startPos) +
-        val +
-        dom.value.slice(endPos, dom.value.length)
-
-      dom.selectionStart = isSelect ? startPos : startPos + val.length
-      dom.selectionEnd = startPos + val.length
-      dom.scrollTop = scrollTop
-      dom.focus()
-    } else {
-      dom.value += val
-      dom.focus()
+if (!String.prototype.repeat) {
+  String.prototype.repeat = function(num) {
+    let result = ''
+    while (num > 0) {
+      result += this
+      num--
     }
-  },
-  /**
-   * [selection 获取选中的文本]
-   * @param  {[type]} dom  [要操作的元素]
-   * @param  {[type]} line [是否强制选取整行]
-   */
-  selection: function(dom, line) {
-    if (document.selection) {
-      return document.selection.createRange().text
-    } else {
-      let startPos = dom.selectionStart
-      let endPos = dom.selectionEnd
-
-      if (endPos) {
-        //强制选择整行
-        if (line) {
-          startPos = dom.value.slice(0, startPos).lastIndexOf('\n')
-
-          let tmpEnd = dom.value.slice(endPos).indexOf('\n')
-          tmpEnd = tmpEnd < 0 ? 0 : tmpEnd
-
-          startPos += 1 //把\n加上
-          endPos += tmpEnd
-
-          dom.selectionStart = startPos
-          dom.selectionEnd = endPos
-        }
-      } else {
-        //强制选择整行
-        if (line) {
-          endPos = dom.value.indexOf('\n')
-          endPos = endPos < 0 ? dom.value.length : endPos
-          dom.selectionEnd = endPos
-        }
-      }
-      return dom.value.slice(startPos, endPos)
-    }
-  },
-  repeat: function(str, num) {
-    if (String.prototype.repeat) {
-      return str.repeat(num)
-    } else {
-      var result = ''
-      while (num > 0) {
-        result += str
-        num--
-      }
-      return result
-    }
-  },
-  get: function(id) {
-    if (id === void 0) {
-      id = editorVM.length - 1
-    }
-    var vm = editorVM[id]
-    if (vm) {
-      return {
-        id: vm.$id,
-        getVal: function() {
-          return vm.plainTxt.trim()
-        },
-        getHtml: function() {
-          return vm.$htmlTxt
-        },
-        setVal: function(txt) {
-          vm.plainTxt = txt || ''
-        },
-        show: function() {
-          vm.editorVisible = true
-        },
-        hide: function() {
-          vm.editorVisible = false
-        }
-      }
-    }
-    return null
-  },
-  doc: Anot(document)
-}
-//获取真实的引用路径,避免因为不同的目录结构导致加载失败的情况
-for (var i in Anot.modules) {
-  if (/meditor/.test(i)) {
-    ME.path = i.slice(0, i.lastIndexOf('/'))
-    break
+    return result
   }
 }
-var elems = {
-  p: function(str, attr, inner) {
-    return inner ? '\n' + inner + '\n' : ''
-  },
-  br: '\n',
-  'h([1-6])': function(str, level, attr, inner) {
-    var h = ME.repeat('#', level)
-    return '\n' + h + ' ' + inner + '\n'
-  },
-  hr: '\n\n___\n\n',
+
+Anot.ui.meditor = '1.0.0'
+const log = console.log
+// 工具栏title
+const TOOLBAR = {
+  pipe: '',
+  h1: '标题',
+  quote: '引用文本',
+  bold: '粗体',
+  italic: '斜体',
+  through: '删除线',
+  unordered: '无序列表',
+  ordered: '有序列表',
+  link: '超链接',
+  hr: '横线',
+  time: '插入当前时间',
+  face: '表情',
+  table: '插入表格',
+  image: '插入图片',
+  file: '插入附件',
+  inlinecode: '行内代码',
+  blockcode: '代码块',
+  preview: '预览',
+  fullscreen: '全屏',
+  about: '关于编辑器'
+}
+const DEFAULT_TOOLBAR = [
+  'h1',
+  'quote',
+  '|',
+  'bold',
+  'italic',
+  'through',
+  '|',
+  'unordered',
+  'ordered',
+  '|',
+  'hr',
+  'link',
+  'time',
+  'face',
+  '|',
+  'table',
+  'image',
+  'attach',
+  'inlinecode',
+  'blockcode',
+  '|',
+  'preview',
+  'fullscreen',
+  '|',
+  'about'
+]
+
+const ELEMS = {
   a: function(str, attr, inner) {
     let href = attr.match(attrExp('href'))
     let title = attr.match(attrExp('title'))
@@ -212,18 +125,27 @@ var elems = {
     alt = (alt && alt[1]) || ''
 
     return '![' + alt + '](' + src + ')'
-  }
+  },
+  p: function(str, attr, inner) {
+    return inner ? '\n' + inner : ''
+  },
+  br: '\n',
+  'h([1-6])': function(str, level, attr, inner) {
+    let h = '#'.repeat(level)
+    return '\n' + h + ' ' + inner + '\n'
+  },
+  hr: '\n\n___\n\n'
 }
 
-function attrExp(field) {
-  return new RegExp(field + '\\s?=\\s?["\']?([^"\']*)["\']?', 'i')
+function attrExp(field, flag = 'i') {
+  return new RegExp(field + '\\s?=\\s?["\']?([^"\']*)["\']?', flag)
 }
 function tagExp(tag, open) {
   var exp = ''
   if (['br', 'hr', 'img'].indexOf(tag) > -1) {
-    exp = '<' + tag + '([^>]*)\\/?>'
+    exp = '<' + tag + '([^>]*?)\\/?>'
   } else {
-    exp = '<' + tag + '([^>]*)>([\\s\\S]*?)<\\/' + tag + '>'
+    exp = '<' + tag + '([^>]*?)>([\\s\\S]*?)<\\/' + tag + '>'
   }
   return new RegExp(exp, 'gi')
 }
@@ -233,14 +155,20 @@ function html2md(str) {
   } catch (err) {}
 
   str = str.replace(/\t/g, '  ').replace(/<meta [^>]*>/, '')
-  str = str.replace(
-    /<(div|span|dl|dd|dt|table|tr|td|thead|tbody|i|em|strong|h[1-6]|ul|ol|li) [^>]*>/g,
-    '<$1>'
-  )
+  str = str
+    .replace(attrExp('class', 'g'), '')
+    .replace(attrExp('style', 'g'), '')
+  str = str
+    .replace(
+      /<(div|span|header|footer|nav|dl|dd|dt|table|tr|td|thead|tbody|i|em|b|strong|h[1-6]|ul|ol|li|p|pre) [^>]*>/g,
+      '<$1>'
+    )
+    .replace(/<svg [^>]*>.*?<\/svg>/g, '{invalid image}')
 
-  for (var i in elems) {
-    var cb = elems[i],
-      exp = tagExp(i)
+  // log(str)
+  for (let i in ELEMS) {
+    let cb = ELEMS[i]
+    let exp = tagExp(i)
 
     if (i === 'blockquote') {
       while (str.match(exp)) {
@@ -250,6 +178,11 @@ function html2md(str) {
       str = str.replace(exp, cb)
     }
 
+    // 对另外3种同类标签做一次处理
+    if (i === 'p') {
+      exp = tagExp('div')
+      str = str.replace(exp, cb)
+    }
     if (i === 'em') {
       exp = tagExp('i')
       str = str.replace(exp, cb)
@@ -259,23 +192,23 @@ function html2md(str) {
       str = str.replace(exp, cb)
     }
   }
-  var liExp = /<(ul|ol)[^>]*>(?:(?!<ul|<ol)[\s\S])*?<\/\1>/gi
+  let liExp = /<(ul|ol)>(?:(?!<ul|<ol)[\s\S])*?<\/\1>/gi
   while (str.match(liExp)) {
     str = str.replace(liExp, function(match) {
-      match = match.replace(/<(ul|ol)[^>]*>([\s\S]*?)<\/\1>/gi, function(
+      match = match.replace(/<(ul|ol)>([\s\S]*?)<\/\1>/gi, function(
         m,
         t,
         inner
       ) {
-        var li = inner.split('</li>')
+        let li = inner.split('</li>')
         li.pop()
 
-        for (var i = 0, len = li.length; i < len; i++) {
-          var pre = t === 'ol' ? i + 1 + '. ' : '* '
+        for (let i = 0, len = li.length; i < len; i++) {
+          let pre = t === 'ol' ? i + 1 + '. ' : '* '
           li[i] =
             pre +
             li[i]
-              .replace(/\s*<li[^>]*>([\s\S]*)/i, function(m, n) {
+              .replace(/\s*<li>([\s\S]*)/i, function(m, n) {
                 n = n.trim().replace(/\n/g, '\n  ')
                 return n
               })
@@ -287,6 +220,7 @@ function html2md(str) {
     })
   }
   str = str
+
     .replace(/<[\/]?[\w]*[^>]*>/g, '')
     .replace(/```([\w\W]*)```/g, function(str, inner) {
       inner = inner
@@ -298,52 +232,50 @@ function html2md(str) {
   return str
 }
 
-var defaultToolbar = [
-    'h1',
-    'quote',
-    '|',
-    'bold',
-    'italic',
-    'through',
-    '|',
-    'unordered',
-    'ordered',
-    '|',
-    'hr',
-    'link',
-    'time',
-    'face',
-    '|',
-    'table',
-    'image',
-    'attach',
-    'inlinecode',
-    'blockcode',
-    '|',
-    'preview',
-    'fullscreen',
-    '|',
-    'about'
-  ],
-  extraAddons = []
-
 function tool(name) {
   name = (name + '').trim().toLowerCase()
   name = '|' === name ? 'pipe' : name
-  return (
-    '<span title="' +
-    ME.toolbar[name] +
-    '" class="do-meditor__icon icon-' +
-    name +
-    '" ' +
-    (name !== 'pipe' ? ':click="onToolClick(\'' + name + '\', $event)"' : '') +
-    '></span>'
-  )
+  let event = name === 'pipe' ? '' : `:click="onToolClick('${name}', $event)"`
+  let title = TOOLBAR[name]
+  return `
+  <span title="${title}" class="do-meditor__icon icon-${name}" ${event}></span>`
+}
+
+class MEObject {
+  constructor(vm) {
+    this.vm = vm
+    this.id = vm.$id
+  }
+
+  getVal() {
+    return this.vm.plainTxt.trim()
+  }
+  getHtml() {
+    return this.vm.__tmp__
+  }
+  setVal(txt) {
+    this.vm.plainTxt = txt || ''
+  }
+  show() {
+    this.vm.editorVisible = true
+  }
+  hide() {
+    this.vm.editorVisible = false
+  }
+  extends(addon) {
+    Object.assign(this.vm.addon, addon)
+  }
 }
 
 Anot.component('meditor', {
+  construct: function(props, state) {
+    if (props.hasOwnProperty('$show')) {
+      state.editorVisible = props.$show
+      delete props.$show
+    }
+  },
   render: function() {
-    let toolbar = (this.toolbar || defaultToolbar).map(it => tool(it)).join('')
+    let toolbar = (this.toolbar || DEFAULT_TOOLBAR).map(it => tool(it)).join('')
 
     delete this.toolbar
 
@@ -360,98 +292,151 @@ Anot.component('meditor', {
         :attr="{disabled: disabled}"
         :duplex="plainTxt"
         :on-paste="onPaste($event)"></textarea>
-      <content 
+      <content
+        ref="preview"
         class="md-preview do-marked-theme" 
         :visible="preview" 
         :html="htmlTxt"></content>
     </div>
     `
   },
-
-  construct: function(props, state) {
-    // Anot.mix(base, opt, attr)
-    // if (base.$addons && Array.isArray(base.$addons)) {
-    //   extraAddons = base.$addons.map(function(name) {
-    //     return ME.path + '/addon/' + name
-    //   })
-    //   delete base.$addons
-    // }
-    if (props.hasOwnProperty('$show')) {
-      state.editorVisible = props.$show
-      delete props.$show
-    }
-  },
-  componentWillMount: function(vm) {},
   componentDidMount: function(vm, elem) {
-    console.log(this)
-    // vm.$editor = elem.children[1]
+    let $editor = Anot(this.$refs.editor)
+    let preview = this.$refs.preview
+    $editor.bind('keydown', ev => {
+      let wrap = this.selection() || ''
+      let select = !!wrap
+      //tab键改为插入2个空格,阻止默认事件,防止焦点失去
+      if (ev.keyCode === 9) {
+        ev.preventDefault()
+        wrap = wrap
+          .split('\n')
+          .map(function(it) {
+            return ev.shiftKey ? it.replace(/^\s\s/, '') : '  ' + it
+          })
+          .join('\n')
+        this.insert(wrap, select)
+      }
+      //修复按退格键删除选中文本时,选中的状态不更新的bug
+      if (ev.keyCode === 8) {
+        if (select) {
+          ev.preventDefault()
+          this.insert('', select)
+        }
+      }
+    })
 
-    // editorVM.push(vm)
-    // //自动加载额外的插件
-    // require(extraAddons, function() {
-    //   var args = Array.prototype.slice.call(arguments, 0)
-    //   args.forEach(function(addon) {
-    //     addon && addon(vm)
-    //   })
-    // })
+    $editor.bind('scroll', ev => {
+      let syncTop =
+        ev.target.scrollTop / ev.target.scrollHeight * preview.scrollHeight
 
-    // Anot(vm.$editor).bind('keydown', function(ev) {
-    //   var wrap = ME.selection(vm.$editor) || '',
-    //     select = !!wrap
-    //   //tab键改为插入2个空格,阻止默认事件,防止焦点失去
-    //   if (ev.keyCode === 9) {
-    //     wrap = wrap
-    //       .split('\n')
-    //       .map(function(it) {
-    //         return ev.shiftKey ? it.replace(/^\s\s/, '') : '  ' + it
-    //       })
-    //       .join('\n')
-    //     ME.insert(this, wrap, select)
-    //     ev.preventDefault()
-    //   }
-    //   //修复按退格键删除选中文本时,选中的状态不更新的bug
-    //   if (ev.keyCode === 8) {
-    //     if (select) {
-    //       ME.insert(this, '', select)
-    //       ev.preventDefault()
-    //     }
-    //   }
-    // })
-    // //编辑器成功加载的回调
-    // vm.$onSuccess(ME.get(), vm)
+      preview.scrollTop = syncTop
+    })
+    //编辑器成功加载的回调
+    if (typeof this.props.onCreated === 'function') {
+      this.props.onCreated(new MEObject(this))
+    }
   },
   watch: {
     plainTxt: function(val) {
       this.compile()
       //只有开启实时预览,才会赋值给htmlTxt
       if (this.preview) {
-        this.htmlTxt = this.$htmlTxt
+        this.htmlTxt = this.__tmp__
       }
       if (typeof this.props.onUpdate === 'function') {
-        this.props.onUpdate(this.plainTxt, this.$htmlTxt)
+        this.props.onUpdate(this.plainTxt, this.__tmp__)
       }
     }
   },
   state: {
     disabled: false, //禁用编辑器
     fullscreen: false, //是否全屏
-    preview: false, //是否显示预览
-    // $editor: null, //编辑器元素
+    preview: true, //是否显示预览
     editorVisible: true,
-    $htmlTxt: '', //临时储存html文本
     htmlTxt: '', //用于预览渲染
     plainTxt: '', //纯md文本
-    $safelyCompile: true
+    addon // 已有插件
   },
   props: {
+    safelyCompile: true,
     onSuccess: Anot.PropsTypes.isFunction(),
     onUpdate: Anot.PropsTypes.isFunction(),
     onFullscreen: Anot.PropsTypes.isFunction()
   },
+  skip: ['addon', 'insert', 'selection'],
   methods: {
+    // 往文本框中插入内容
+    insert(val, isSelect) {
+      let dom = this.$refs.editor
+      if (document.selection) {
+        dom.focus()
+        let range = document.selection.createRange()
+        range.text = val
+        dom.focus()
+        range.moveStart('character', -1)
+      } else if (dom.selectionStart || dom.selectionStart === 0) {
+        let startPos = dom.selectionStart
+        let endPos = dom.selectionEnd
+        let scrollTop = dom.scrollTop
+
+        dom.value =
+          dom.value.slice(0, startPos) +
+          val +
+          dom.value.slice(endPos, dom.value.length)
+
+        dom.selectionStart = isSelect ? startPos : startPos + val.length
+        dom.selectionEnd = startPos + val.length
+        dom.scrollTop = scrollTop
+        dom.focus()
+      } else {
+        dom.value += val
+        dom.focus()
+      }
+      this.plainTxt = dom.value
+    },
+    /**
+     * [selection 获取选中的文本]
+     * @param  {[type]} dom  [要操作的元素]
+     * @param  {[type]} forceHoleLine [是否强制光标所在的整行文本]
+     */
+    selection(forceHoleLine) {
+      let dom = this.$refs.editor
+      if (document.selection) {
+        return document.selection.createRange().text
+      } else {
+        let startPos = dom.selectionStart
+        let endPos = dom.selectionEnd
+
+        if (endPos) {
+          //强制选择整行
+          if (forceHoleLine) {
+            startPos = dom.value.slice(0, startPos).lastIndexOf('\n')
+
+            let tmpEnd = dom.value.slice(endPos).indexOf('\n')
+            tmpEnd = tmpEnd < 0 ? dom.value.slice(endPos).length : tmpEnd
+
+            startPos += 1 // 把\n加上
+            endPos += tmpEnd
+
+            dom.selectionStart = startPos
+            dom.selectionEnd = endPos
+          }
+        } else {
+          //强制选择整行
+          if (forceHoleLine) {
+            endPos = dom.value.indexOf('\n')
+            endPos = endPos < 0 ? dom.value.length : endPos
+            dom.selectionEnd = endPos
+          }
+        }
+        dom.focus()
+        return dom.value.slice(startPos, endPos)
+      }
+    },
     onToolClick: function(name, ev) {
-      if (ME.addon[name]) {
-        ME.addon[name].call(ME, ev.target, this)
+      if (this.addon[name]) {
+        this.addon[name].call(this, ev.target)
       } else {
         console.log('%c没有对应的插件%c[%s]', 'color:#f00;', '', name)
       }
@@ -464,24 +449,22 @@ Anot.component('meditor', {
       html = html2md(html)
 
       if (html) {
-        ME.insert(ev.target, html)
+        this.insert(html)
       } else if (txt) {
-        ME.insert(ev.target, txt)
+        this.insert(txt)
       }
-      log(ev.target.value)
       this.plainTxt = this.$refs.editor.value
     },
     compile: function() {
-      log(this)
-      var txt = this.plainTxt.trim()
+      let txt = this.plainTxt.trim()
 
-      if (this.$safelyCompile) {
+      if (this.props.safelyCompile) {
         txt = txt
           .replace(/<script([^>]*?)>/g, '&lt;script$1&gt;')
           .replace(/<\/script>/g, '&lt;/script&gt;')
       }
       //只解析,不渲染
-      this.$htmlTxt = marked(txt)
+      this.__tmp__ = marked(txt)
     }
   }
 })

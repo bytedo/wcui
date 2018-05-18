@@ -22,6 +22,7 @@ let defconf = {
   background: '#fff',
   mask: true, // 遮罩
   maskClose: false, // 遮罩点击关闭弹窗
+  maskColor: null, // 遮罩背景色
   radius: '0px', // 弹窗圆角半径
   area: ['auto', 'auto'],
   title: '提示', // 弹窗主标题(在工具栏上的)
@@ -64,6 +65,7 @@ const close = function(id) {
       }, 200)
     } catch (err) {}
   }
+  document.body.style.overflow = ''
 }
 
 const repeat = function(str, num) {
@@ -207,6 +209,9 @@ class __layer__ {
     outerBox.classList.add('do-layer')
     if (state.mask) {
       outerBox.classList.add('mask')
+    }
+    if (state.maskColor) {
+      outerBox.style.background = state.maskColor
     }
 
     layBox.classList.add('layer-box')
@@ -373,40 +378,49 @@ class __layer__ {
         style.color = state.color
         style.opacity = 1
         let $container = Anot(container)
+        let $doc = Anot(document)
         let $arrow = $container[0].querySelector('.arrow')
         let cw = $container.innerWidth()
         let ch = $container.innerHeight()
-        let ol = $container.offset().left - document.body.scrollLeft
-        let ot = $container.offset().top - document.body.scrollTop
+        let ol = $container.offset().left - $doc.scrollLeft()
+        let ot = $container.offset().top - $doc.scrollTop()
 
         let layw = parseInt(css.width)
         let layh = parseInt(css.height)
-
         let arrowOffset = ['top']
 
-        if (ot + 18 < layh) {
-          arrowOffset[0] = 'bottom'
-          $arrow.style.borderBottomColor = state.background
-          style.top = ot + ch + 8
-        } else {
-          $arrow.style.borderTopColor = state.background
-          style.top = ot - layh - 8
-        }
-
-        if (ol + cw * 0.7 + layw > window.innerWidth) {
-          style.left = ol + cw * 0.3 - layw
-          arrowOffset[1] = 'left'
-        } else {
-          style.left = ol + cw * 0.7
-        }
-
-        $arrow.classList.add('offset-' + arrowOffset.join('-'))
         Anot(layerDom[$id][1]).css(style)
+
         $container.bind('mouseenter', ev => {
-          layerDom[$id][1].style.visibility = 'visible'
+          let tmpStyle = { visibility: 'visible' }
+          ol = $container.offset().left - $doc.scrollLeft()
+          ot = $container.offset().top - $doc.scrollTop()
+
+          if (ot + 18 < layh) {
+            arrowOffset[0] = 'bottom'
+            $arrow.style.borderBottomColor = state.background
+            tmpStyle.top = ot + ch + 8
+          } else {
+            $arrow.style.borderTopColor = state.background
+            tmpStyle.top = ot - layh - 8
+          }
+
+          if (ol + cw * 0.7 + layw > window.innerWidth) {
+            tmpStyle.left = ol + cw * 0.3 - layw
+            arrowOffset[1] = 'left'
+          } else {
+            tmpStyle.left = ol + cw * 0.7
+          }
+
+          $arrow.classList.add('offset-' + arrowOffset.join('-'))
+          Anot(layerDom[$id][1]).css(tmpStyle)
         })
         $container.bind('mouseleave', () => {
           setTimeout(() => {
+            $arrow.classList.remove('offset-' + arrowOffset.join('-'))
+            arrowOffset = ['top']
+            $arrow.style.borderBottomColor = ''
+            $arrow.style.borderTopColor = ''
             layerDom[$id][1].style.visibility = 'hidden'
           }, 100)
         })
@@ -436,6 +450,7 @@ class __layer__ {
         Anot(layerDom[$id][1]).css(style)
 
         setTimeout(() => {
+          document.body.style.overflow = 'hidden'
           layerDom[$id][1].classList.add('shift')
           setTimeout(_ => {
             Anot(layerDom[$id][1]).css(offsetStyle)

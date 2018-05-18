@@ -14,11 +14,11 @@
 
 .do-meditor {position:relative;width:100%;height:100%;min-height:180px;padding-top:41px;border:1px solid nth($cp, 3);background:#fff;color:#666;box-shadow: 0 8px 40px rgba(0, 0, 0, 0.15);
 
-  ::-webkit-scrollbar {width:5px;height:5px;background:#ebeeec;}
-  ::-webkit-scrollbar:hover {background:rgba(0,0,0,.05);}
+  ::-webkit-scrollbar {width:5px;height:5px;background:nth($cp, 2);}
+  ::-webkit-scrollbar:hover {background:nth($cp, 1);}
   ::-webkit-scrollbar-button {display:none;}
-  ::-webkit-scrollbar-thumb {background:nth($ct, 1);}
-  ::-webkit-scrollbar-thumb:hover {background:nth($ct, 3);}
+  ::-webkit-scrollbar-thumb {background:nth($cgr, 2);}
+  ::-webkit-scrollbar-thumb:hover {background:nth($cgr, 1);}
 
   
 
@@ -31,9 +31,9 @@
     }
   }
 
-  .editor-body{overflow:hidden;overflow-y:auto;float:left;width:100%;height:100%;padding:5px 5px 50px;border:0;outline:none;resize:none;color:#666;background:#f7f8fb;font-size:14px;}
+  .editor-body{overflow:hidden;overflow-y:auto;float:left;width:100%;height:100%;padding:5px 5px 50px;line-height:2;border:0;outline:none;resize:none;color:#666;background:#fff;font-size:14px;}
   
-  .md-preview {float:right;overflow:hidden;overflow-y:auto;display:block;width:50%;height:100%;padding:10px 10px 50px;line-height:2;border-left:1px solid #ddd;color:#666;font-size:14px;background:#ff0;}
+  .md-preview {float:right;overflow:hidden;overflow-y:auto;display:block;width:50%;height:100%;padding:10px 10px 50px;line-height:2;border-left:1px solid #ddd;color:#666;font-size:14px;background:#fff;}
 
 
 
@@ -76,7 +76,7 @@
 
 
 
-.do-meditor__button {overflow:hidden;position:relative;display:inline-block;width:auto;min-width:60px;height:40px;margin-left:5px;padding:0 10px;color:nth($ct, 1);text-align:center;
+.do-meditor__button {overflow:hidden;position:relative;display:inline-block;width:auto;min-width:60px;height:40px;margin-left:5px;padding:0 10px;line-height:40px;color:nth($ct, 1);text-align:center;
 
   &::before {position:absolute;left:-50%;top:-50%;z-index:-1;display:block;width:200%;height:200%;border-radius:50%;background:nth($cp, 2); content:"";opacity:0;transform: scale(0, .0); transition:opacity 1.3s cubic-bezier(0.23, 1, 0.32, 1),transform 1.3s cubic-bezier(0.23, 1, 0.32, 1);}        
   &:hover {
@@ -126,30 +126,27 @@
 
   section {width:100%;height: 40px;margin:10px 0;line-height:40px;
 
-    &.input {border-radius:5px;background:nth($cp, 2);
-      
-      .txt {width:100%;height:40px;padding:0 10px;border:0;background:none;color:nth($cgr, 1);font-size:14px;}
-    }
-
-    .label {float: left;width:30%;text-align:center;background:#f7f7f7;}
-    label {float: left;width:50%;}
-    
+    .txt {width:100%;height:40px;padding:0 10px;border:0;border-radius:5px;background:nth($cp, 2);color:nth($cgr, 1);font-size:14px;}
+    .label {float: left;width:50%;}
     .submit {float:right;width:30%;}
   }
 }
 
-.do-meditor-codeblock {width:780px;height:auto;padding:15px 20px;background:#fafafa;
+.do-meditor-codeblock {width:780px;height:auto;
   section {display:block;width:100%;height:auto;margin:10px 0;line-height:35px;
   
     .label {float: left;width:80px;}
-    select {float:left;width:200px;height:35px;padding:0 30px 0 10px;border:0;border-bottom:1px solid #e7e7e7;background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAMCAMAAABV0m3JAAAADFBMVEUAAAD///+Pj4+JiYkxcGihAAAABHRSTlMAABBwqVQF9wAAADNJREFUeNqlzjEOACAMw8DQ/v/PSE5FFhaEx5usdekBuzRVH0RtCqJYELUFrVjQigX/5jdvzgDh9izlMQAAAABJRU5ErkJggg==) no-repeat right 8px;color:nth($cgr, 1);outline:none;-webkit-appearance:none;-moz-appearance: none;@include ts;
+    select {float:left;width:200px;height:35px;padding:0 30px 0 10px;border:0;border-radius:0;border-bottom:1px solid nth($cp, 3);background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAMCAMAAABV0m3JAAAADFBMVEUAAAD///+Pj4+JiYkxcGihAAAABHRSTlMAABBwqVQF9wAAADNJREFUeNqlzjEOACAMw8DQ/v/PSE5FFhaEx5usdekBuzRVH0RtCqJYELUFrVjQigX/5jdvzgDh9izlMQAAAABJRU5ErkJggg==) no-repeat right 12px;color:nth($cgr, 1);outline:none;-webkit-appearance:none;-moz-appearance: none;@include ts;
         
       &::-ms-expand {display:none;}
 
-      &:focus {border-color:nth($ct, 1);}
+      &:focus {box-shadow:0 0 5px nth($ct, 2)}
     }
-    textarea {width:100%;height:300px;padding:5px 10px;border:1px solid #ddd;background:#fff;resize:none;outline:none;}
-    .submit {float:right;width:80px;height:35px;background:#ddd;color:#666;text-align:center;}
+    textarea {width:100%;height:300px;padding:5px 10px;border:0;border-radius:5px;background:nth($cp, 2);font-size:14px;resize:none;outline:none;
+      
+      &:focus {box-shadow:0 0 5px nth($ct, 2)}
+    }
+    .submit {float:right;width:80px;}
   }
 }
 

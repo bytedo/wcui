@@ -20,32 +20,33 @@ function trim(str, sign) {
   return str.replace(new RegExp('^' + sign + '|' + sign + '$', 'g'), '')
 }
 
+const $doc = Anot(document)
+
 const addon = {
-  h1: function(elem, vm) {
+  h1: function(elem) {
     let that = this
-    let editor = vm.$refs.editor
     let offset = Anot(elem).offset()
-    let wrap = this.selection(editor, true) || '在此输入文本'
+    let wrap = this.selection(true) || '在此输入文本'
     layer.open({
       type: 7,
       menubar: false,
       maskClose: true,
+      maskColor: 'rgba(255,255,255,0)',
       fixed: true,
       insert: function(level) {
-        wrap = wrap.replace(/^#{1,6} /, '')
-        wrap = that.repeat('#', level) + ' ' + wrap
-        that.insert(editor, wrap, true)
+        wrap = wrap.replace(/^(#{1,6} )?/, '#'.repeat(level) + ' ')
+        that.insert(wrap, true)
         this.close()
       },
       offset: [
-        offset.top + 40 - that.doc.scrollTop(),
+        offset.top + 40 - $doc.scrollTop(),
         'auto',
         'auto',
-        offset.left - that.doc.scrollLeft()
+        offset.left - $doc.scrollLeft()
       ],
       shift: {
-        top: offset.top - that.doc.scrollTop(),
-        left: offset.left - that.doc.scrollLeft()
+        top: offset.top - $doc.scrollTop(),
+        left: offset.left - $doc.scrollLeft()
       },
       content: `
       <ul class="do-meditor-h1 do-fn-noselect do-meditor__font">
@@ -58,60 +59,61 @@ const addon = {
       </ul>`
     })
   },
-  quote: function(elem, vm) {
-    let wrap = this.selection(vm.$refs.editor) || '在此输入文本'
+  quote: function(elem) {
+    let wrap = this.selection() || '在此输入文本'
     wrap = '> ' + wrap
 
-    this.insert(vm.$refs.editor, wrap, true)
+    this.insert(wrap, true)
   },
-  bold: function(elem, vm) {
-    let wrap = this.selection(vm.$refs.editor) || '在此输入文本'
+  bold: function(elem) {
+    let wrap = this.selection() || '在此输入文本'
     let wraped = trim(wrap, '\\*\\*')
 
     wrap = wrap === wraped ? '**' + wrap + '**' : wraped
 
-    this.insert(vm.$refs.editor, wrap, true)
+    this.insert(wrap, true)
   },
-  italic: function(elem, vm) {
-    let wrap = this.selection(vm.$refs.editor) || '在此输入文本'
+  italic: function(elem) {
+    let wrap = this.selection() || '在此输入文本'
     let wraped = trim(wrap, '_')
 
     wrap = wrap === wraped ? '_' + wrap + '_' : wraped
 
-    this.insert(vm.$refs.editor, wrap, true)
+    this.insert(wrap, true)
   },
-  through: function(elem, vm) {
-    let wrap = this.selection(vm.$refs.editor) || '在此输入文本'
+  through: function(elem) {
+    let wrap = this.selection() || '在此输入文本'
     let wraped = trim(wrap, '~~')
 
     wrap = wrap === wraped ? '~~' + wrap + '~~' : wraped
 
-    this.insert(vm.$refs.editor, wrap, true)
+    this.insert(wrap, true)
   },
-  unordered: function(elem, vm) {
-    let wrap = this.selection(vm.$refs.editor) || '在此输入文本'
+  unordered: function(elem) {
+    let wrap = this.selection() || '在此输入文本'
     wrap = '* ' + wrap
 
-    this.insert(vm.$refs.editor, wrap, false)
+    this.insert(wrap, false)
   },
-  ordered: function(elem, vm) {
-    let wrap = this.selection(vm.$refs.editor) || '在此输入文本'
+  ordered: function(elem) {
+    let wrap = this.selection() || '在此输入文本'
     wrap = '1. ' + wrap
 
-    this.insert(vm.$refs.editor, wrap, false)
+    this.insert(wrap, false)
   },
-  hr: function(elem, vm) {
-    this.insert(vm.$refs.editor, '\n\n---\n\n', false)
+  hr: function(elem) {
+    this.insert('\n\n---\n\n', false)
   },
-  link: function(elem, vm) {
+  link: function(elem) {
     let that = this
     let offset = Anot(elem).offset()
-    let wrap = this.selection(vm.$refs.editor) || ''
+    let wrap = this.selection() || ''
 
     layer.open({
       type: 7,
       menubar: false,
       maskClose: true,
+      maskColor: 'rgba(255,255,255,0)',
       fixed: true,
       link: '',
       linkName: wrap,
@@ -124,29 +126,29 @@ const addon = {
           this.linkTarget === 1 ? ' "target=_blank"' : ''
         })`
 
-        that.insert(vm.$refs.editor, val, false)
+        that.insert(val, false)
         this.close()
       },
       offset: [
-        offset.top + 40 - that.doc.scrollTop(),
+        offset.top + 40 - $doc.scrollTop(),
         'auto',
         'auto',
-        offset.left - that.doc.scrollLeft()
+        offset.left - $doc.scrollLeft()
       ],
       shift: {
-        top: offset.top - that.doc.scrollTop(),
-        left: offset.left - that.doc.scrollLeft()
+        top: offset.top - $doc.scrollTop(),
+        left: offset.left - $doc.scrollLeft()
       },
       content: `
       <div class="do-meditor-common do-meditor__font">
-        <section class="input">
+        <section>
           <input class="txt" :duplex="linkName" placeholder="链接文字"/>
         </section>
-        <section class="input">
+        <section>
           <input class="txt" :duplex="link" placeholder="链接地址"/>
         </section>
         <section>
-          <label>
+          <label class="label">
             <input 
               name="link" 
               type="radio" 
@@ -155,7 +157,7 @@ const addon = {
               value="1"/>
             新窗口打开
           </label>
-          <label>
+          <label class="label">
             <input 
               name="link" 
               type="radio" 
@@ -174,10 +176,10 @@ const addon = {
       </div>`
     })
   },
-  time: function(elem, vm) {
-    this.insert(vm.$refs.editor, new Date().format(), false)
+  time: function(elem) {
+    this.insert(new Date().format(), false)
   },
-  face: function(elem, vm) {
+  face: function(elem) {
     let that = this
     let offset = Anot(elem).offset()
 
@@ -186,6 +188,7 @@ const addon = {
       title: '插入表情',
       fixed: true,
       maskClose: true,
+      maskColor: 'rgba(255,255,255,0)',
       arr: [
         '😀',
         '😅',
@@ -225,14 +228,14 @@ const addon = {
         '🙏'
       ],
       offset: [
-        offset.top + 40 - that.doc.scrollTop(),
+        offset.top + 40 - $doc.scrollTop(),
         'auto',
         'auto',
-        offset.left - that.doc.scrollLeft()
+        offset.left - $doc.scrollLeft()
       ],
       shift: {
-        top: offset.top - that.doc.scrollTop(),
-        left: offset.left - that.doc.scrollLeft()
+        top: offset.top - $doc.scrollTop(),
+        left: offset.left - $doc.scrollLeft()
       },
       content: `
         <ul class="do-meditor-face">
@@ -241,12 +244,12 @@ const addon = {
           </li>
         </ul>`,
       insert: function(val) {
-        that.insert(vm.$refs.editor, val, false)
+        that.insert(val, false)
         this.close()
       }
     })
   },
-  table: function(elem, vm) {
+  table: function(elem) {
     let that = this
     let offset = Anot(elem).offset()
 
@@ -255,15 +258,16 @@ const addon = {
       title: '0行 x 0列',
       fixed: true,
       maskClose: true,
+      maskColor: 'rgba(255,255,255,0)',
       offset: [
-        offset.top + 40 - that.doc.scrollTop(),
+        offset.top + 40 - $doc.scrollTop(),
         'auto',
         'auto',
-        offset.left - that.doc.scrollLeft()
+        offset.left - $doc.scrollLeft()
       ],
       shift: {
-        top: offset.top - that.doc.scrollTop(),
-        left: offset.left - that.doc.scrollLeft()
+        top: offset.top - $doc.scrollTop(),
+        left: offset.left - $doc.scrollLeft()
       },
       matrix: objArr(10).map(function() {
         return objArr(10)
@@ -313,26 +317,27 @@ const addon = {
             let x = ev.target.dataset.x - 0 + 1
             let y = ev.target.dataset.y - 0 + 1
 
-            let thead = `\n\n${that.repeat('| 表头 ', x)}|\n`
-            let pipe = `${that.repeat('| -- ', x)}|\n`
-            let tbody = that.repeat(that.repeat('| ', x) + '|\n', y)
+            let thead = `\n\n${'| 表头 '.repeat(x)}|\n`
+            let pipe = `${'| -- '.repeat(x)}|\n`
+            let tbody = ('|    '.repeat(x) + '|\n').repeat(y)
 
-            that.insert(vm.$refs.editor, thead + pipe + tbody, false)
+            that.insert(thead + pipe + tbody, false)
             this.close()
           }
         })
       }
     })
   },
-  image: function(elem, vm) {
+  image: function(elem) {
     let that = this
     let offset = Anot(elem).offset()
-    let wrap = this.selection(vm.$refs.editor) || ''
+    let wrap = this.selection() || ''
 
     layer.open({
       type: 7,
       menubar: false,
       maskClose: true,
+      maskColor: 'rgba(255,255,255,0)',
       fixed: true,
       img: '',
       imgAlt: wrap,
@@ -342,25 +347,25 @@ const addon = {
         }
         let val = `![${this.imgAlt}](${this.img})`
 
-        that.insert(vm.$refs.editor, val, false)
+        that.insert(val, false)
         this.close()
       },
       offset: [
-        offset.top + 40 - that.doc.scrollTop(),
+        offset.top + 40 - $doc.scrollTop(),
         'auto',
         'auto',
-        offset.left - that.doc.scrollLeft()
+        offset.left - $doc.scrollLeft()
       ],
       shift: {
-        top: offset.top - that.doc.scrollTop(),
-        left: offset.left - that.doc.scrollLeft()
+        top: offset.top - $doc.scrollTop(),
+        left: offset.left - $doc.scrollLeft()
       },
       content: `
       <div class="do-meditor-common do-meditor__font">
-        <section class="input">
+        <section>
           <input class="txt" :duplex="imgAlt" placeholder="图片描述"/>
         </section>
-        <section class="input">
+        <section>
           <input class="txt" :duplex="img" placeholder="图片地址"/>
         </section>
         <section>
@@ -373,17 +378,17 @@ const addon = {
       `
     })
   },
-  attach: function(elem, vm) {
-    this.addon.link.call(this, elem, vm, false)
+  attach: function(elem) {
+    this.addon.link.call(this, elem)
   },
-  inlinecode: function(elem, vm) {
-    let wrap = this.selection(vm.$refs.editor) || '在此输入文本'
+  inlinecode: function(elem) {
+    let wrap = this.selection() || '在此输入文本'
     let wraped = trim(wrap, '`')
 
     wrap = wrap === wraped ? '`' + wrap + '`' : wraped
-    this.insert(vm.$refs.editor, wrap, true)
+    this.insert(wrap, true)
   },
-  blockcode: function(elem, vm) {
+  blockcode: function(elem) {
     let that = this
     layer.open({
       type: 7,
@@ -426,48 +431,55 @@ const addon = {
       ],
       lang: 'javascript',
       code: '',
-      $confirm: function() {
-        var lvm = Anot.vmodels[layid]
-        var val =
-          '\n```' + lvm.lang + '\n' + (lvm.code || '//在此输入代码') + '\n```\n'
-
-        that.insert(vm.$refs.editor, val, false)
-        layer.close(layid)
+      maskClose: true,
+      insert: function() {
+        let val = `\n\`\`\`${this.lang}\n${this.code ||
+          '// 在此输入代码'}\n\`\`\`\n`
+        that.insert(val, false)
+        this.close()
       },
-      content:
-        '<div class="do-meditor-codeblock do-meditor__font">' +
-        '<section class="do-fn-cl"><span class="label">语言类型</span>' +
-        '<select :duplex="lang">' +
-        '<option :repeat="$lang" :attr-value="el.id">{{el.name || el.id}}</option>' +
-        '</select>' +
-        '</section>' +
-        '<section>' +
-        '<textarea :duplex="code" placeholder="在这里输入/粘贴代码"></textarea>' +
-        '</section>' +
-        '<section class="do-fn-cl">' +
-        '<a href="javascript:;" class="submit" :click="$confirm">确定</a>' +
-        '</section>' +
-        '</div>'
+      content: `
+      <div class="do-meditor-codeblock do-meditor__font">
+        <section class="do-fn-cl">
+          <span class="label">语言类型</span>
+          <select :duplex="lang">
+            <option :repeat="$lang" :attr-value="el.id">{{el.name || el.id}}</option>
+          </select>
+        </section>
+        <section>
+          <textarea :duplex="code" placeholder="在这里输入/粘贴代码"></textarea>
+        </section>
+        <section class="do-fn-cl">
+          <a 
+            href="javascript:;" 
+            class="do-meditor__button submit" 
+            :click="insert">确定</a>
+        </section>
+      </div>
+      `
     })
   },
-  preview: function(elem, vm) {
-    vm.preview = !vm.preview
-    if (vm.preview) {
-      vm.htmlTxt = vm.$htmlTxt
+  preview: function() {
+    this.preview = !this.preview
+    if (this.preview) {
+      this.htmlTxt = this.__tmp__
     }
   },
-  fullscreen: function(elem, vm) {
-    vm.fullscreen = !vm.fullscreen
-    vm.$onFullscreen(vm.fullscreen)
+  fullscreen: function() {
+    this.fullscreen = !this.fullscreen
+    if (typeof this.props.onFullscreen === 'function') {
+      this.props.onFullscreen(this.fullscreen)
+    }
   },
   about: function(elem) {
-    var offset = Anot(elem).offset()
+    let offset = Anot(elem).offset()
     layer.open({
       type: 7,
       title: '关于编辑器',
       maskClose: true,
-      offset: [offset.top + 37 - this.doc.scrollTop()],
-      shift: { top: offset.top - this.doc.scrollTop() },
+      maskColor: 'rgba(255,255,255,0)',
+      offset: [offset.top + 37 - $doc.scrollTop()],
+      shift: { top: offset.top - $doc.scrollTop() },
       content:
         '<div class="do-meditor-about do-meditor__font">' +
         '<pre>' +
@@ -477,7 +489,7 @@ const addon = {
         '| |  | | |__| (_| | | || (_) | |\n' +
         '|_|  |_|_____\\__,_|_|\\__\\___/|_|    ' +
         'v' +
-        this.version +
+        Anot.ui.meditor +
         '</pre>' +
         '<p>开源在线Markdown编辑器</p>' +
         '<p><a target="_blank" href="https://doui.cc/product/meditor">https://doui.cc/product/meditor</a></p>' +
