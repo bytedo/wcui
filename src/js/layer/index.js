@@ -33,6 +33,7 @@ let defconf = {
   offset: [], // 弹窗出来后的坐标, 为数组,可有4个值,依次是 上右下左
   btns: ['确定', '取消'] // 弹窗的2个按钮的文字
 }
+const $doc = Anot(document)
 const uuid = function() {
   return 'layer-' + lid++
 }
@@ -214,6 +215,9 @@ class __layer__ {
     outerBox.classList.add('do-layer')
     if (state.mask) {
       outerBox.classList.add('mask')
+      if (state.container && state.container !== document.body) {
+        outerBox.classList.add('inner')
+      }
     }
     if (state.maskColor) {
       outerBox.style.background = state.maskColor
@@ -383,7 +387,6 @@ class __layer__ {
         style.color = state.color
         style.opacity = 1
         let $container = Anot(container)
-        let $doc = Anot(document)
         let $arrow = $container[0].querySelector('.arrow')
         let cw = $container.innerWidth()
         let ch = $container.innerHeight()
@@ -564,23 +567,26 @@ const _layer = {
 
     return _layer.open(opt)
   },
-  loading: function(style, time, cb) {
+  loading: function(style, container, cb) {
     style = style >>> 0
+    style = style < 1 ? 1 : style > 5 ? 5 : style
 
-    if (typeof time === 'function') {
-      cb = time
-      time = 0
+    if (typeof container === 'function') {
+      cb = container
+      container = null
     } else {
-      time = time >>> 0
+      if (!(container instanceof HTMLElement)) {
+        container = null
+      }
       if (typeof cb !== 'function') {
         cb = Anot.noop
       }
     }
     return _layer.open({
+      container,
       type: 6,
       load: style,
       yes: cb,
-      timeout: time,
       menubar: false,
       background: 'none',
       shift: 'ct',
@@ -660,7 +666,7 @@ const _layer = {
 }
 
 Anot.directive('layer', {
-  priority: 1400,
+  priority: 8090,
   init: function(binding) {
     // 去掉:layer属性,避免二次扫描
     binding.element.removeAttribute(binding.name)
@@ -671,13 +677,15 @@ Anot.directive('layer', {
   },
   update: function(val) {
     if (!val) {
+      console.error(this)
       return console.error(
         `SyntaxError: Unexpected [${this.name}=${this.expr}]`
       )
     }
 
+    let state = Object.assign({ type: 7, wrap: true }, this.element.dataset)
+
     if (!this.param) {
-      let state = Object.assign({ type: 7, wrap: true }, this.element.dataset)
       let init = { $id: 'layerwrap-' + val, state, props: {} }
 
       if (state.hasOwnProperty('area')) {
@@ -709,7 +717,72 @@ Anot.directive('layer', {
       }
       layerDom[tmp.init.$id] = tmp.create()
     } else if (this.param === 'tips') {
-      _layer.tips(val, this.element)
+      let tips = document.createElement('div')
+      let cont = document.createElement('span')
+      let arrow = document.createElement('i')
+      tips.className = 'do-layer__tips'
+      cont.className = 'layer-content'
+      arrow.className = 'arrow'
+      cont.textContent = val
+      tips.appendChild(cont)
+      tips.appendChild(arrow)
+      this.element.appendChild(tips)
+
+      if (state.color) {
+        style.color = state.color
+      }
+      if (state.color) {
+        style.background = state.background
+      }
+
+      let style = {}
+      let css = getComputedStyle(tips)
+      let $container = Anot(this.element)
+      let cw = $container.innerWidth()
+      let ch = $container.innerHeight()
+      let ol = $container.offset().left - $doc.scrollLeft()
+      let ot = $container.offset().top - $doc.scrollTop()
+
+      let layw = parseInt(css.width)
+      let layh = parseInt(css.height)
+      let arrowOffset = ['top']
+
+      Anot(tips).css(style)
+
+      $container.bind('mouseenter', ev => {
+        let tmpStyle = { visibility: 'visible' }
+        ol = $container.offset().left - $doc.scrollLeft()
+        ot = $container.offset().top - $doc.scrollTop()
+
+        if (ot + 18 < layh) {
+          arrowOffset[0] = 'bottom'
+          arrow.style.borderBottomColor = state.background
+          tmpStyle.top = ot + ch + 8
+        } else {
+          arrow.style.borderTopColor = state.background
+          tmpStyle.top = ot - layh - 8
+        }
+
+        if (ol + cw * 0.7 + layw > window.innerWidth) {
+          tmpStyle.left = ol + cw * 0.3 - layw
+          arrowOffset[1] = 'left'
+        } else {
+          tmpStyle.left = ol + cw * 0.7
+        }
+
+        arrow.classList.add('offset-' + arrowOffset.join('-'))
+        Anot(tips).css(tmpStyle)
+      })
+      $container.bind('mouseleave', () => {
+        setTimeout(() => {
+          arrow.classList.remove('offset-' + arrowOffset.join('-'))
+          arrowOffset = ['top']
+          arrow.style.borderBottomColor = ''
+          arrow.style.borderTopColor = ''
+          tips.style.visibility = 'hidden'
+        }, 100)
+      })
+      // _layer.tips(val, this.element)
     }
   }
 })

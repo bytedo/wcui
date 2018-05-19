@@ -22,8 +22,9 @@ const jsOpt = {
   plugins: [
     'transform-es2015-modules-amd',
     'transform-decorators-legacy',
-    'transform-class-properties',
-    'transform-object-rest-spread'
+    'transform-object-rest-spread',
+    ['transform-es2015-classes', { loose: true }],
+    ['transform-es2015-for-of', { loose: true }]
   ]
 }
 const cssOpt = {
@@ -37,10 +38,12 @@ const compileJs = (entry, output) => {
   }
   let t1 = Date.now()
   let tmpOpt = jsOpt
-  if (/anot/.test(entry)) {
-    tmpOpt = Object.assign({}, jsOpt, { plugins: [] })
+  let code = ''
+  if (!/anot/.test(entry)) {
+    code = babel.transformFileSync(entry, jsOpt).code
+  } else {
+    code = fs.cat(entry).toString()
   }
-  let { code } = babel.transformFileSync(entry, tmpOpt)
   code = uglify.minify(code).code.replace(/\.scss/g, '.css')
   log(
     '编译JS: %s, 耗时 %s ms',
@@ -79,7 +82,6 @@ const compileHtm = (entry, output) => {
 /*=====                                               ===*/
 /*=======================================================*/
 
-const fontFiles = fs.ls('./src/font/', true)
 const jsFiles = fs.ls('./src/js/', true)
 const cssFiles = fs.ls('./src/css/', true)
 
@@ -87,11 +89,6 @@ if (fs.isdir(buildDir)) {
   fs.rm(buildDir, true)
   log(chalk.cyan('清除旧目录 dist/'))
 }
-
-// 字体文件直接复制
-fontFiles.forEach(file => {
-  fs.cp('./src/font/' + file, './dist/font/' + file)
-})
 
 // css目录
 cssFiles.forEach(file => {

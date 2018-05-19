@@ -11,6 +11,10 @@ import 'layer/index'
 import './attach.scss'
 
 const $doc = Anot(document)
+const LANG = {
+  image: ['远程图片', '图片管理', '图片描述', '图片地址'],
+  file: ['远程附件', '附件管理', '附件描述', '附件地址']
+}
 
 class Uploader {
   constructor(url) {
@@ -64,84 +68,6 @@ class Uploader {
   }
 }
 
-var $init = function(vm) {
-  vm.$editor.addEventListener('paste', function(ev) {
-    var txt = ev.clipboardData.getData('text/plain').trim(),
-      html = ev.clipboardData.getData('text/html').trim()
-
-    //文本类型直接默认处理
-    if (txt || html) {
-      return
-    }
-
-    if (ev.clipboardData.items) {
-      var items = ev.clipboardData.items,
-        len = items.length,
-        blob = null
-      for (var i = 0, it; (it = items[i++]); ) {
-        if (it.type.indexOf('image') > -1) {
-          blob = it.getAsFile()
-        }
-      }
-
-      if (blob !== null) {
-        layer.msg('截图处理中...')
-        // 压缩截图,避免文件过大
-        var reader = new FileReader()
-        reader.onload = function() {
-          var img = document.createElement('img'),
-            canvas = document.createElement('canvas')
-
-          img.onload = function() {
-            canvas.width = img.width
-            canvas.height = img.height
-
-            var ctx = canvas.getContext('2d')
-            ctx.clearRect(0, 0, canvas.width, canvas.height)
-            ctx.drawImage(this, 0, 0, canvas.width, canvas.height)
-
-            if (canvas.toBlob) {
-              canvas.toBlob(
-                function(obj) {
-                  uploadScreenshot(vm, obj)
-                },
-                'image/jpeg',
-                0.8
-              )
-            } else {
-              var base64 = canvas.toDataURL('image/jpeg', 0.8),
-                buf = atob(base64.split(',')[1]),
-                arrBuf = new ArrayBuffer(buf.length),
-                intArr = new Uint8Array(arrBuf),
-                obj = null
-
-              for (var i = 0; i < buf.length; i++) {
-                intArr[i] = buf.charCodeAt(i)
-              }
-              obj = new Blob([intArr], { type: 'image/jpeg' })
-              uploadScreenshot(vm, obj)
-            }
-          }
-          img.src = this.result
-        }
-        reader.readAsDataURL(blob)
-      }
-    }
-    ev.preventDefault()
-  })
-}
-
-let cache = {
-  //缓存附件列表
-  image: [],
-  file: []
-}
-
-const LANG = {
-  image: ['远程图片', '图片管理', '图片描述', '图片地址'],
-  file: ['远程附件', '附件管理', '附件描述', '附件地址']
-}
-
 const fixCont = function(vm, tool) {
   let limit = false
   if (vm.props.uploadSizeLimit) {
@@ -177,7 +103,7 @@ const fixCont = function(vm, tool) {
           <a 
             href="javascript:;" 
             class="do-meditor__button submit" 
-            :click="$confirm">确定</a>
+            :click="confirm">确定</a>
         </section>
       </div>
       <div class="local" :visible="tab === 2">
@@ -208,12 +134,20 @@ const fixCont = function(vm, tool) {
           </li>
         </ul>
       </div>
-      <ul class="manager" :visible="tab === 3">
-        <li class="item" :repeat="attachList" :click="insert(el)">
-          <span class="thumb" :html="el.thumb"></span>
-          <p class="name" :attr-title="el.name" :text="el.name"></p>
-        </li>
-      </ul>
+      <div class="manager" :visible="tab === 3">
+        <ul class="list-box">
+          <li 
+            class="item" 
+            :repeat="attachList"
+            :layer-tips="el.name"
+            :click="insert(el)">
+
+            <span class="thumb" :html="el.thumb"></span>
+            <p class="name" :text="el.name"></p>
+          </li>
+        </ul>
+        
+      </div>
     </dd>
   </dl>`
 }
@@ -296,7 +230,10 @@ function uploadScreenshot(vm, blob) {
   if (vm.props.beforeUpload) {
     vm.props
       .beforeUpload(attach, upload)
-      .then(upload => {
+      .then(next => {
+        if (!next) {
+          return Promise.reject('something wrong with beforeUpload')
+        }
         return upload.then(res => {
           return res.data
         })
@@ -315,37 +252,6 @@ function uploadScreenshot(vm, blob) {
   }
 }
 
-function getAttach(vm, cb) {
-  var xhr = new XMLHttpRequest(),
-    url = vm.manageUrl || ME.manageUrl
-
-  if (/\?/.test(url)) {
-    url += '&type=' + openType
-  } else {
-    url += '?type=' + openType
-  }
-  url += '&t=' + Math.random()
-
-  xhr.open('GET', url, true)
-  xhr.onreadystatechange = function() {
-    if (
-      this.readyState === 4 &&
-      this.status === 200 &&
-      this.responseText !== ''
-    ) {
-      var res = this.responseText
-      try {
-        res = JSON.parse(res)
-      } catch (err) {}
-      cb(res)
-    } else {
-      if (this.status !== 200 && this.responseText)
-        console.error(this.responseText)
-    }
-  }
-  xhr.send()
-}
-
 function showDialog(elem, vm, tool) {
   let offset = Anot(elem).offset()
 
@@ -353,7 +259,10 @@ function showDialog(elem, vm, tool) {
     type: 7,
     menubar: false,
     fixed: true,
-    offset: [offset.top + 37 - $doc.scrollTop()],
+    offset: [offset.top + 40 - $doc.scrollTop()],
+    shift: {
+      top: offset.top - $doc.scrollTop()
+    },
     tab: 2,
     attach: '',
     attachAlt: '',
@@ -415,17 +324,90 @@ function showDialog(elem, vm, tool) {
       vm.insert(val)
       this.close()
     },
-    content: fixCont(vm, tool)
+    content: fixCont(vm, tool),
+    success() {
+      this.switchTab(3)
+    }
   })
 }
 
-const addon = {
-  attach(elem) {
-    showDialog(elem, this, 'file')
-  },
-  image(elem) {
-    showDialog(elem, this, 'image')
+const plugin = {
+  __init__(ME) {
+    Object.assign(ME.vm.addon, {
+      attach(elem) {
+        showDialog(elem, this, 'file')
+      },
+      image(elem) {
+        showDialog(elem, this, 'image')
+      }
+    })
+
+    ME.vm.$refs.editor.addEventListener('paste', function(ev) {
+      ev.preventDefault()
+      let txt = ev.clipboardData.getData('text/plain')
+
+      //文本类型直接默认处理
+      if (txt) {
+        return
+      }
+
+      if (ev.clipboardData.items) {
+        let items = ev.clipboardData.items
+        let len = items.length
+        let blob = null
+
+        for (let it of items) {
+          if (it.type.indexOf('image') > -1) {
+            blob = it.getAsFile()
+          }
+        }
+
+        if (blob !== null) {
+          layer.toast('截图处理中...')
+          // 压缩截图,避免文件过大
+          let reader = new FileReader()
+          reader.onload = function() {
+            let img = document.createElement('img')
+            let canvas = document.createElement('canvas')
+
+            img.onload = function() {
+              canvas.width = img.width
+              canvas.height = img.height
+
+              let ctx = canvas.getContext('2d')
+              ctx.clearRect(0, 0, canvas.width, canvas.height)
+              ctx.drawImage(this, 0, 0, canvas.width, canvas.height)
+
+              // 目前 IE和Safari的toBlob方法还不支持图片质量的设定
+              if (canvas.toBlob && (window.chrome || window.sidebar)) {
+                canvas.toBlob(
+                  function(obj) {
+                    uploadScreenshot(ME.vm, obj)
+                  },
+                  'image/jpeg',
+                  0.8
+                )
+              } else {
+                let base64 = canvas.toDataURL('image/jpeg', 0.8)
+                let buf = atob(base64.split(',')[1])
+                let intArr = new Uint8Array(buf.length)
+                let obj = null
+
+                for (let i = 0; i < buf.length; i++) {
+                  intArr[i] = buf.charCodeAt(i)
+                }
+                obj = new Blob([intArr], { type: 'image/jpeg' })
+
+                uploadScreenshot(ME.vm, obj)
+              }
+            }
+            img.src = this.result
+          }
+          reader.readAsDataURL(blob)
+        }
+      }
+    })
   }
 }
 
-export default addon
+export default plugin

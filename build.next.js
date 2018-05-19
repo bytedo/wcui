@@ -65,7 +65,6 @@ const compileHtm = (entry, output) => {
 /*=====                                               ===*/
 /*=======================================================*/
 
-const fontFiles = fs.ls('./src/font/', true)
 const jsFiles = fs.ls('./src/js/', true)
 const cssFiles = fs.ls('./src/css/', true)
 
@@ -73,11 +72,6 @@ if (fs.isdir(buildDir)) {
   fs.rm(buildDir, true)
   log(chalk.cyan('清除旧目录 dist/'))
 }
-
-// 字体文件直接复制
-fontFiles.forEach(file => {
-  fs.cp('./src/font/' + file, './dist/font/' + file)
-})
 
 // css目录
 cssFiles.forEach(file => {

@@ -75,9 +75,8 @@
 
 
     /* tips类弹层(type 5) */
-    &.type-5 {visibility:hidden;position:fixed;z-index:65534;min-width:75px;max-width:600px;line-height:1.5;color:#fff;background:rgba(0,0,0,.5);opacity:0;box-shadow:none;-webkit-transition:opacity .3s ease-in-out;-moz-transition:opacity .3s ease-in-out;transition:opacity .3s ease-in-out;
+    &.type-5 {visibility:hidden;position:fixed;z-index:65534;min-width:75px;max-width:600px;padding:10px;line-height:1.5;color:#fff;background:rgba(0,0,0,.5);box-shadow:none;
 
-      // &.active {visibility:visible;opacity:1;}
       i.arrow {position:absolute;width:0;height:0;border:6px solid transparent;content: ""}
       i.offset-top {left:5px;bottom:-14px;border-top:8px solid rgba(0,0,0,.5);}
       i.offset-bottom {left:5px;top:-14px;border-bottom:8px solid rgba(0,0,0,.5);}
@@ -189,12 +188,23 @@
   &.mask {position:fixed;z-index:65534;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,.3);
 
     &.shift {transition: all .5s ease-out;}
-
+    &.inner {position:absolute;}
   }
   &:active {z-index:65536;}
 }
 
 
+/* 指令式的tips */
+.do-layer__tips {visibility:hidden;position:fixed;z-index:65534;min-width:75px;max-width:600px;padding:10px;line-height:1.5;border-radius:3px;font-size:14px;color:#fff;background:rgba(0,0,0,.5);
+
+  i.arrow {position:absolute;width:0;height:0;border:6px solid transparent;content: ""}
+  i.offset-top {left:5px;bottom:-14px;border-top:8px solid rgba(0,0,0,.5);}
+  i.offset-bottom {left:5px;top:-14px;border-bottom:8px solid rgba(0,0,0,.5);}
+  i.offset-top-left {right:5px;bottom:-14px;border-top:8px solid rgba(0,0,0,.5);}
+  i.offset-bottom-left {right:5px;top:-14px;border-bottom:8px solid rgba(0,0,0,.5);}
+
+  .layer-content {min-height:20px;margin:0;padding:0}
+}
 
 
 

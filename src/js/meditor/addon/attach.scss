@@ -8,7 +8,14 @@
 @import 'var.scss';
 
 .do-meditor-attach {width:630px;height:300px;cursor:default;color:nth($cgr, 1);
-  dt.close {position:absolute;z-index:65539;top:-8px;right:-8px;width:40px;height:40px;line-height:40px;font-size:20px;text-align:center;cursor:pointer;
+
+  ::-webkit-scrollbar {width:5px;height:5px;background:nth($cp, 2);}
+  ::-webkit-scrollbar:hover {background:nth($cp, 1);}
+  ::-webkit-scrollbar-button {display:none;}
+  ::-webkit-scrollbar-thumb {background:nth($cgr, 2);}
+  ::-webkit-scrollbar-thumb:hover {background:nth($cgr, 1);}
+
+  dt.close {position:absolute;z-index:65539;top:-15px;right:-10px;width:30px;height:30px;line-height:30px;font-size:20px;text-align:center;cursor:pointer;
 
     &:hover {color:nth($ct, 1);font-size:28px;}
   }
@@ -65,15 +72,19 @@
       .red {color:#f30;}
     }
 
-    .manager {overflow:hidden;overflow-y:auto;width:100%;height:255px;padding:10px;
+    .manager {overflow:hidden;overflow-y:auto;width:100%;height:300px;
 
-      .item {float:left;width:22%;height:130px;margin:10px 1.5%;padding:5px;
-        &:hover {background:#f7f7f7;}
+      .list-box {width:100%;column-count:4;column-gap: 5;}
+      .item {margin:0 0 10px;padding:5px;text-align:center;background:nth($cp, 2); break-inside: avoid;@include ts(background);
+      
+        &:hover {background:nth($cp, 3)}
+
+        .thumb {display:block;width:100%;}
+        .name {overflow:hidden;height:30px;line-height:30px; text-align:center;}
+        img {width:100%;height:auto;}
+        em {line-height:1;font-size:50px;}
       }
-      .thumb {display:block;width:100%;height:100px;}
-      .name {overflow:hidden;height:20px;line-height:30px; text-align:center;}
-      img {width:100%;height:100%;}
-      em {line-height:100px;font-size:50px;}
+      
     }
   }
 

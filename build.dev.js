@@ -22,8 +22,9 @@ const jsOpt = {
   plugins: [
     'transform-es2015-modules-amd',
     'transform-decorators-legacy',
-    'transform-class-properties',
-    'transform-object-rest-spread'
+    'transform-object-rest-spread',
+    ['transform-es2015-classes', { loose: true }],
+    ['transform-es2015-for-of', { loose: true }]
   ]
 }
 const cssOpt = {
@@ -78,7 +79,6 @@ const compileHtm = (entry, output) => {
 /*=====                                               ===*/
 /*=======================================================*/
 
-const fontFiles = fs.ls('./src/font/', true)
 const jsFiles = fs.ls('./src/js/', true)
 const cssFiles = fs.ls('./src/css/', true)
 

@@ -108,11 +108,12 @@ const ELEMS = {
   strong: function(str, attr, inner) {
     return (inner && '**' + inner + '**') || ''
   },
-  code: function(str, attr, inner) {
-    return (inner && '`' + inner + '`') || ''
-  },
+
   pre: function(str, attr, inner) {
     return '\n\n```\n' + inner + '\n```\n'
+  },
+  code: function(str, attr, inner) {
+    return (inner && '`' + inner + '`') || ''
   },
   blockquote: function(str, attr, inner) {
     return '> ' + inner.trim()
@@ -154,16 +155,13 @@ function html2md(str) {
     str = decodeURIComponent(str)
   } catch (err) {}
 
-  str = str.replace(/\t/g, '  ').replace(/<meta [^>]*>/, '')
   str = str
+    .replace(/\t/g, '  ')
+    .replace(/<meta [^>]*>/, '')
     .replace(attrExp('class', 'g'), '')
     .replace(attrExp('style', 'g'), '')
-  str = str
-    .replace(
-      /<(div|span|header|footer|nav|dl|dd|dt|table|tr|td|thead|tbody|i|em|b|strong|h[1-6]|ul|ol|li|p|pre) [^>]*>/g,
-      '<$1>'
-    )
-    .replace(/<svg [^>]*>.*?<\/svg>/g, '{invalid image}')
+    .replace(/<(?!a |img )(\w+) [^>]*>/g, '<$1>')
+    .replace(/<svg[^>]*>.*?<\/svg>/g, '{invalid image}')
 
   // log(str)
   for (let i in ELEMS) {
@@ -176,6 +174,9 @@ function html2md(str) {
       }
     } else {
       str = str.replace(exp, cb)
+      if (i === 'pre') {
+        str = str.replace(/<[/]?code>/g, '')
+      }
     }
 
     // 对另外3种同类标签做一次处理
@@ -262,9 +263,6 @@ class MEObject {
   hide() {
     this.vm.editorVisible = false
   }
-  extends(addon) {
-    Object.assign(this.vm.addon, addon)
-  }
 }
 
 Anot.component('meditor', {
@@ -290,8 +288,7 @@ Anot.component('meditor', {
         class="editor-body" 
         spellcheck="false" 
         :attr="{disabled: disabled}"
-        :duplex="plainTxt"
-        :on-paste="onPaste($event)"></textarea>
+        :duplex="plainTxt"></textarea>
       <content
         ref="preview"
         class="md-preview do-marked-theme" 
@@ -324,6 +321,21 @@ Anot.component('meditor', {
           this.insert('', select)
         }
       }
+    })
+
+    $editor.bind('paste', ev => {
+      ev.preventDefault()
+      let txt = ev.clipboardData.getData('text/plain').trim()
+      let html = ev.clipboardData.getData('text/html').trim()
+
+      html = html2md(html)
+
+      if (html) {
+        this.insert(html)
+      } else if (txt) {
+        this.insert(txt)
+      }
+      this.plainTxt = this.$refs.editor.value
     })
 
     $editor.bind('scroll', ev => {
@@ -441,20 +453,7 @@ Anot.component('meditor', {
         console.log('%c没有对应的插件%c[%s]', 'color:#f00;', '', name)
       }
     },
-    onPaste: function(ev) {
-      ev.preventDefault()
-      let txt = ev.clipboardData.getData('text/plain').trim()
-      let html = ev.clipboardData.getData('text/html').trim()
 
-      html = html2md(html)
-
-      if (html) {
-        this.insert(html)
-      } else if (txt) {
-        this.insert(txt)
-      }
-      this.plainTxt = this.$refs.editor.value
-    },
     compile: function() {
       let txt = this.plainTxt.trim()
 

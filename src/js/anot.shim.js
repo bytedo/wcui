@@ -234,20 +234,26 @@
       vm.$id = $id
       VMODELS[$id] = vm
 
-      var $elem = document.querySelector('[anot=' + vm.$id + ']')
-      if ($elem) {
-        if ($elem === DOC.body) {
-          scanTag($elem, [])
-        } else {
-          var $parent = $elem
-          while (($parent = $parent.parentNode)) {
-            if ($parent.anotctrl) {
-              break
+      Anot.nextTick(function() {
+        var $elem = document.querySelector('[anot=' + vm.$id + ']')
+        if ($elem) {
+          if ($elem === DOC.body) {
+            scanTag($elem, [])
+          } else {
+            var $parent = $elem
+            while (($parent = $parent.parentNode)) {
+              if ($parent.anotctrl) {
+                break
+              }
             }
+            scanTag(
+              $elem.parentNode,
+              $parent ? [VMODELS[$parent.anotctrl]] : []
+            )
           }
-          scanTag($elem.parentNode, $parent ? [VMODELS[$parent.anotctrl]] : [])
         }
-      }
+      })
+
       return vm
     } else {
       this[0] = this.element = source
@@ -2172,6 +2178,7 @@
             injectDependency(array, binding)
           }
         })
+
         binding.getter = parseExpr(binding.expr, binding.vmodels, binding)
         binding.observers.forEach(function(a) {
           a.v.$watch(a.p, binding)
@@ -3038,8 +3045,8 @@
   }
 
   function addAssign(vars, vmodel, name, binding) {
-    var ret = [],
-      prefix = ' = ' + name + '.'
+    var ret = []
+    var prefix = ' = ' + name + '.'
     for (var i = vars.length, prop; (prop = vars[--i]); ) {
       var arr = prop.split('.')
       var first = arr[0]
@@ -3137,7 +3144,7 @@
       /* jshint ignore:start */
       var fn2 = scpCompile(
         names.concat(
-          "'use strict';" + 'return function(vvv){' + expr + ' = vvv\n}\n'
+          '"use strict";\n  return function(vvv){' + expr + ' = vvv\n}\n'
         )
       )
       /* jshint ignore:end */
@@ -3178,11 +3185,23 @@
       })
       expr = '\nreturn ' + expr + ';' //IE全家 Function("return ")出错，需要Function("return ;")
     }
+    // log('')
+    // log(
+    //   names
+    //     .concat(
+    //       "'use strict';\ntry{\nvar " +
+    //         assigns.join(',\n') +
+    //         expr +
+    //         '\n}catch(e){console.log(e)}'
+    //     )
+    //     .join('')
+    // )
+    // log('')
     /* jshint ignore:start */
     getter = scpCompile(
       names.concat(
-        "'use strict';\ntry{\nvar " +
-          assigns.join(',\n') +
+        "'use strict';\ntry{\n  var " +
+          assigns.join(',\n  ') +
           expr +
           '\n}catch(e){console.log(e)}'
       )
@@ -3290,7 +3309,7 @@
       Anot.injectBinding(binding)
       if (binding.getter && binding.element.nodeType === 1) {
         //移除数据绑定，防止被二次解析
-        //chrome使用removeAttributeNode移除不存在的特性节点时会报错 https://github.com/RubyLouvre/Anot/issues/99
+        //chrome使用removeAttributeNode移除不存在的特性节点时会报错
         binding.element.removeAttribute(binding.name)
       }
     }
@@ -3505,8 +3524,8 @@
   }
 
   function scanTag(elem, vmodels, node) {
-    //扫描顺序  skip(0) --> anot(1) --> :if(10) --> :repeat(100)
-    //--> :if-loop(110) --> :attr(970) ...--> :each(1400)-->:with(1500)--〉:duplex(2000)垫后
+    //扫描顺序  skip(0) --> anot(1) --> :if(10) --> :repeat(90)
+    //--> :if-loop(110) --> :attr(970) ...--> :duplex(2000)垫后
     var skip = elem.getAttribute('skip')
     node = elem.getAttributeNode('anot')
     var vm = vmodels.concat()
@@ -3557,15 +3576,16 @@
               newVmodel.props[k] = props[k]
               delete props[k]
             } else {
-              Anot.error(
-                'props.' +
-                  k +
-                  ' needs [' +
-                  newVmodel.props[k].checkType +
-                  '], but [' +
-                  newVmodel.props[k].result +
-                  '] given.',
-                TypeError
+              console.error(
+                new TypeError(
+                  'props.' +
+                    k +
+                    ' needs [' +
+                    newVmodel.props[k].checkType +
+                    '], but [' +
+                    newVmodel.props[k].result +
+                    '] given.'
+                )
               )
             }
           }
@@ -5463,11 +5483,6 @@
       var kill = elem.previousSibling
       var start = binding.start
 
-      /*log(kill === start, kill)
-        while(kill !== start && kill.nodeName !== '#comment'){
-            parent.removeChild(kill)
-            kill = elem.previousSibling
-        }*/
       if (clear) {
         while (kill !== start) {
           parent.removeChild(kill)
@@ -5509,9 +5524,6 @@
           )
           decorateProxy(proxy, binding, xtype)
         } else {
-          // if (xtype === "array") {
-          //     proxy[param] = value[i]
-          // }
           fragments.push({})
           retain[keyOrId] = true
         }
@@ -5528,7 +5540,6 @@
         if (xtype === 'array') {
           proxy.$first = i === 0
           proxy.$last = i === length - 1
-          // proxy[param] = value[i]
         } else {
           proxy.$val = toJson(value[keyOrId]) //这里是处理vm.object = newObject的情况
         }
