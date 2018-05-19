@@ -58,11 +58,16 @@ const close = function(id) {
       layerDom[id][1].classList.add('shift')
       layerDom[id][0].style.opacity = ''
       layerDom[id][1].style.opacity = 0
-      setTimeout(_ => {
-        document.body.removeChild(layerDom[id][0])
-        delete layerDom[id]
-        delete Anot.vmodels[id]
-      }, 200)
+      setTimeout(
+        (_ => {
+          return function() {
+            document.body.removeChild(layerDom[_][0])
+            delete layerDom[_]
+            delete Anot.vmodels[_]
+          }
+        })(id),
+        200
+      )
     } catch (err) {}
   }
   document.body.style.overflow = ''

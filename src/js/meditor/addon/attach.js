@@ -209,7 +209,7 @@ const fixCont = function(vm, tool) {
         </ul>
       </div>
       <ul class="manager" :visible="tab === 3">
-        <li class="item" :repeat="attachList" :click="$insert(el)">
+        <li class="item" :repeat="attachList" :click="insert(el)">
           <span class="thumb" :html="el.thumb"></span>
           <p class="name" :attr-title="el.name" :text="el.name"></p>
         </li>
@@ -359,25 +359,32 @@ function showDialog(elem, vm, tool) {
     attachAlt: '',
     uploadQueue: [], //当前上传的列表
     attachList: [], //附件管理列表
-    switchTab: function(id) {
+    switchTab(id) {
       this.tab = id
       if (id === 3) {
         this.attachList.clear()
-        if (cache[tool].length) {
-          this.attachList = cache[tool]
-        } else {
-          getAttach(vm, function(json) {
-            if (json) {
-              cache[tool] = json.data.list.map(function(it) {
-                it.thumb =
-                  tool === 'image'
-                    ? '<img src="' + it.url + '"/>'
-                    : '<em class="attach-icon">&#xe73e;</em>'
-                return it
+        if (vm.props.getAttachList) {
+          vm.props
+            .getAttachList(tool)
+            .then(list => {
+              list.forEach(it => {
+                let ext = it.name.slice(it.name.lastIndexOf('.'))
+                it.isImage = /^\.(jpg|jpeg|png|gif|bmp|webp|ico)$/.test(ext)
+                it.thumb = it.isImage
+                  ? `<img src="${it.url}" />`
+                  : `<em class="do-icon-txt"></em>`
               })
-              this.attachList = json.data.list
-            }
-          })
+              return list
+            })
+            .then(list => {
+              list = list.filter(it => {
+                if (tool === 'image') {
+                  return it.isImage
+                }
+                return true
+              })
+              this.attachList = list
+            })
         }
       }
     },
@@ -408,7 +415,6 @@ function showDialog(elem, vm, tool) {
       vm.insert(val)
       this.close()
     },
-
     content: fixCont(vm, tool)
   })
 }
