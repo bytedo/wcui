@@ -108,8 +108,8 @@ const ELEMS = {
   strong: function(str, attr, inner) {
     return (inner && '**' + inner + '**') || ''
   },
-
   pre: function(str, attr, inner) {
+    inner = inner.replace(/<[/]?code>/g, '')
     return '\n\n```\n' + inner + '\n```\n'
   },
   code: function(str, attr, inner) {
@@ -174,9 +174,6 @@ function html2md(str) {
       }
     } else {
       str = str.replace(exp, cb)
-      if (i === 'pre') {
-        str = str.replace(/<[/]?code>/g, '')
-      }
     }
 
     // 对另外3种同类标签做一次处理

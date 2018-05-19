@@ -6,44 +6,44 @@
  *
  */
 
+@import 'var.scss';
+
 /*代码块*/
-.do-ui-blockcode {position: relative;border: 1px solid #ddd;margin: 15px 0;padding: 8px 0;line-height: 1.5;background: #fafafa;
+.do-ui-blockcode {position: relative;margin: 15px 0;padding: 8px 0;line-height: 1.5;border-radius:3px;background: nth($cp, 2);
+
+  /*语法高亮*/
+  .lang {position: relative;display: block;padding: 0 8px;color: #383a42;word-wrap: break-word;white-space: pre-wrap;font-family: Courier;
+
+    .c-comment{color: #8e908c;font-style:italic;}
+    .c-smartyx {color: #607d8b;}
+    .c-important {color: #f5871f;font-style:italic;}
+    .c-punctuation {color: #986756;}
+    .c-regex {color: #c82829;}
+
+    .c-boolean,
+    .c-number,.c-params {color: #f5871f;}
+    .c-function {color:#009688;}
+
+    .c-class-name,
+    .c-build-in {color:#3aa9f3;}
+
+    .c-class-name,
+    .c-build-in {font-style:italic;font-weight:bold;}
+
+    .c-attr-name,
+    .c-property {color: #c79f0f;font-weight:bold;}
 
 
-    /*语法高亮*/
-    .lang {position: relative;display: block;padding: 0 8px;color: #383a42;word-wrap: break-word;white-space: pre-wrap;font-family: Courier;
+    .c-string,
+    .c-attr-value {color: #5ab302;}
 
-        .c-comment{color: #8e908c;font-style:italic;}
-        .c-smartyx {color: #607d8b;}
-        .c-important {color: #f5871f;font-style:italic;}
-        .c-punctuation {color: #986756;}
-        .c-regex {color: #c82829;}
+    .c-tag,
+    .c-keyword,
+    .c-selector,
+    .c-operator {color: #d81406;}
 
-        .c-boolean,
-        .c-number {color: #f5871f;}
-        .c-function {color:#009688;}
-
-        .c-class-name,
-        .c-build-in {color:#3aa9f3;}
-
-        .c-class-name,
-        .c-build-in {font-style:italic;font-weight:bold;}
-
-        .c-attr-name,
-        .c-property {color: #c79f0f;font-weight:bold;}
-
-        .c-property {font-style:italic;}
-
-        .c-string,
-        .c-attr-value {color: #5ab302;}
-
-        .c-tag,
-        .c-keyword,
-        .c-selector,
-        .c-operator {color: #d81406;}
-
-        .c-keyword {font-style:italic;}
-    }
+    .c-keyword,.c-params,.c-property {font-style:italic;}
+  }
 }
 /*行内代码*/
-.do-ui-inlinecode {margin:0 2px;padding:0 5px;color:#d14;border:1px solid #ddd;border-radius:3px;}
+.do-ui-inlinecode {display:inline-block;margin:0 2px;padding:0 5px;line-height: 1.5;color:#d14;background: nth($cp, 2);border-radius:3px;}
