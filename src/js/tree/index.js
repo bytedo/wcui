@@ -16,11 +16,13 @@ function format(arr, { id, parent, label, children }) {
   let tmp = {}
   let farr = []
   arr.sort(function(a, b) {
-    return a.pid === b.pid ? a.sort - b.sort : a.pid - b.pid
+    return a[parent] === b[parent] ? a.sort - b.sort : a[parent] - b[parent]
   })
   arr.forEach(function(it) {
-    it.checked = !!it.checked
+    // Anot.hideProperty(it, '__checked__', !!it.__checked__)
+    // it.__checked__ = !!it.__checked__
     it.open = !!it.open
+    // console.log(it.hasOwnProperty('__checked__'), it.__checked__)
     tmp[it[id]] = it
     var parentItem = tmp[it[parent]]
 
@@ -39,16 +41,22 @@ export default Anot.component('tree', {
       return null
     }
     return `
-    <ul class="do-tree" :class="{{props.className}}" :if="list.size()">
+    <ul class="do-tree" :if="list.size()">
       <li :repeat="list" :class="{open: el.open, dir: el[props.children]}">
-        <em class="ui-font" :click="toggle(el)"></em>
+        <em 
+          :class="{
+            'do-icon-txt': !el.open && !el[props.children],
+            'do-icon-folder-close': el[props.children] && !el.open,
+            'do-icon-folder-open': el[props.children] && el.open,
+          }" 
+          :click="__toggle(el)"></em>
         <span
-          class="checkbox ui-font"
+          class="checkbox"
+          :class="{'do-icon-get': el.__checked__}"
           :if="multiCheck"
-          :class="{checked: el.checked}"
-          :click="onChecked(el)"></span>
+          :click="__check(el, null, $event)"></span>
         <span
-          :click="onSelected(el)"
+          :click="__select(el)"
           :class="{active: el[props.id] === currItem}"
           :text="el[props.label]"></span>
         <template
@@ -56,8 +64,8 @@ export default Anot.component('tree', {
           :attr="{
             'multi-check': multiCheck,
             list: el[props.children],
-            onSelected: props.onSelected,
-            onChecked: onChecked,
+            '@onActive': props.onActive,
+            '@onPick': __check,
             id: props.id,
             label: props.label,
             parent: props.parent,
@@ -68,7 +76,6 @@ export default Anot.component('tree', {
     `
   },
   construct: function(props, state) {
-    props.className = 'skin-' + (props.theme || 'def')
     props.id = props.id || 'id'
     props.label = props.label || 'label'
     props.parent = props.parent || 'parent'
@@ -76,73 +83,96 @@ export default Anot.component('tree', {
     state.list = format(props.list || [], props)
     state.multiCheck = !!props.multiCheck
     delete props.list
-    delete props.theme
     delete props.multiCheck
   },
   componentDidMount: function() {
-    if (typeof this.props.onCreated === 'function') {
-      this.props.onCreated(this)
+    if (typeof this.props.created === 'function') {
+      this.props.created(this)
     }
   },
   state: {
     list: [],
     multiCheck: false,
     currItem: -1,
-    checked: {}
+    checkedItems: {}
   },
-  skip: ['checked'],
+  skip: ['checkedItems'],
   props: {
-    className: '',
     id: '',
     label: '',
     parent: '',
     children: '',
-    onCreated: Anot.PropsTypes.isFunction(),
-    onSelected: Anot.PropsTypes.isFunction(),
-    onChecked: Anot.PropsTypes.isFunction()
+    created: Anot.PropsTypes.isFunction(),
+    onActive: Anot.PropsTypes.isFunction(),
+    onPick: Anot.PropsTypes.isFunction()
   },
   methods: {
-    toggle: function(obj) {
+    // 子目录的开关
+    __toggle: function(obj) {
+      if (!obj[this.props.children]) {
+        return
+      }
       obj.open = !obj.open
     },
-    onChecked: function(el, childChecked) {
+    // 选中条目, 并将选中的列表向上冒泡, 直到最外层将结果通过回调返回给外部
+    __check: function(el, itemsFromChild, ev) {
+      if (ev) {
+        Anot(ev.target).toggleClass('do-icon-get')
+      }
+
+      // return
       let item = null
       let arr = []
-      let { id, onChecked } = this.props
+      let vm, id, onPick, checkedItems
 
-      if (!childChecked) {
-        el.checked = !el.checked
-        item = el.$model
-        this.checked[item[id]] = el.checked ? item : null
+      if (this.props) {
+        vm = this
+        id = this.props.id
+        onPick = this.props.onPick
+        checkedItems = this.checkedItems
       } else {
-        item = el
-        Object.assign(this.checked, childChecked)
+        vm = this.$up
+        id = vm.props.id
+        onPick = vm.props.onPick
+        checkedItems = vm.checkedItems
       }
 
-      if (!this.$up) {
-        for (let i in this.checked) {
-          if (!this.checked[i]) {
-            delete this.checked[i]
+      if (itemsFromChild) {
+        item = el
+        Object.assign(checkedItems, itemsFromChild)
+      } else {
+        el.__checked__ = !el.__checked__
+        // Anot.hideProperty(el, '__checked__', !el.__checked__)
+        item = el.$model
+        checkedItems[item[id]] = el.__checked__ ? item : null
+      }
+
+      if (vm.$up) {
+        arr = checkedItems
+      } else {
+        // 冒泡到最高一层时, 将对象转为数组
+        for (let i in checkedItems) {
+          if (checkedItems[i]) {
+            arr.push(checkedItems[i])
           } else {
-            arr.push(this.checked[i])
+            delete checkedItems[i]
           }
         }
-      } else {
-        arr = this.checked
       }
-
-      if (typeof onChecked === 'function') {
-        onChecked(item, arr)
+      if (typeof onPick === 'function') {
+        onPick(item, arr)
       }
     },
-    onSelected: function(el) {
-      let { id, onSelected } = this.props
+    // 单个条目的点击选择
+    __select: function(el) {
+      let { id, onActive } = this.props
       this.currItem = el[id]
-      if (typeof onSelected === 'function') {
-        onSelected(el.$model)
+      if (typeof onActive === 'function') {
+        onActive(el.$model)
       }
     },
-    reset: function(arr) {
+    // 以给定的列表重置组件渲染
+    resetWith: function(arr) {
       this.checked = {}
       this.list.clear()
       this.list.pushArray(format(arr || []))

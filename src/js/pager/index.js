@@ -155,8 +155,8 @@ export default Anot.component('pager', {
     )
   },
   componentDidMount: function() {
-    if (typeof this.props.onCreated === 'function') {
-      this.props.onCreated(this)
+    if (typeof this.props.created === 'function') {
+      this.props.created(this)
     }
   },
   state: {
@@ -178,7 +178,7 @@ export default Anot.component('pager', {
     simpleMode: !1,
     radius: 3,
     onPageChange: Anot.PropsTypes.isFunction(),
-    onCreated: Anot.PropsTypes.isFunction()
+    created: Anot.PropsTypes.isFunction()
   },
   skip: ['classList'],
   methods: {

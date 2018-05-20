@@ -1735,6 +1735,7 @@
     hideProperty($vmodel, '$refs', {})
     hideProperty($vmodel, '$children', [])
     hideProperty($vmodel, 'hasOwnProperty', trackBy)
+    hideProperty($vmodel, '$mounted', mounted)
     if (options.watch) {
       hideProperty($vmodel, '$watch', function() {
         return $watch.apply($vmodel, arguments)
@@ -1779,7 +1780,6 @@
     }
 
     $vmodel.$active = true
-    $vmodel.mounted = mounted
 
     if (old && old.$up && old.$up.$children) {
       old.$up.$children.push($vmodel)
@@ -1930,6 +1930,7 @@
       configurable: true
     })
   }
+  Anot.hideProperty = hideProperty
 
   function toJson(val) {
     var xtype = Anot.type(val)
@@ -3610,10 +3611,10 @@
 
     if (newVmodel) {
       setTimeout(function() {
-        if (typeof newVmodel.mounted === 'function') {
-          newVmodel.mounted()
+        if (typeof newVmodel.$mounted === 'function') {
+          newVmodel.$mounted()
         }
-        delete newVmodel.mounted
+        delete newVmodel.$mounted
       })
     }
   }
@@ -3816,7 +3817,7 @@
           delete hooks.componentWillUnmount
 
           var vmodel = Anot(hooks)
-          delete vmodel.mounted
+          delete vmodel.$mounted
           host.vmodels[0].$children.push(vmodel)
 
           elem.msResolved = 1 //防止二进扫描此元素
@@ -4028,8 +4029,10 @@
           continue
         }
         // 通过属性设置回调,必须以@符号开头
-        if (typeof obj[i] === 'function' && i.indexOf('@') !== 0) {
-          continue
+        if (i.indexOf('@') === 0) {
+          if (typeof obj[i] !== 'function') {
+            continue
+          }
         }
         if (i === 'href' || i === 'src') {
           //处理IE67自动转义的问题

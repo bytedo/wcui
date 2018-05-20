@@ -275,8 +275,8 @@ export default Anot.component('datepicker', {
     this.resetCalendarTable()
   },
   componentDidMount: function() {
-    if (typeof this.props.onCreated === 'function') {
-      this.props.onCreated(this)
+    if (typeof this.props.created === 'function') {
+      this.props.created(this)
     }
 
     document.addEventListener('click', () => {
@@ -309,7 +309,7 @@ export default Anot.component('datepicker', {
     width: null,
     size: 'mini', //默认规格,mini, medium, large
     format: '', // 日期显示格式
-    onCreated: Anot.PropsTypes.isFunction(),
+    created: Anot.PropsTypes.isFunction(),
     onDatePicked: Anot.PropsTypes.isFunction()
   },
   skip: ['max', 'min', 'last', 'timer'],

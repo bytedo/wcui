@@ -342,8 +342,8 @@ Anot.component('meditor', {
       preview.scrollTop = syncTop
     })
     //编辑器成功加载的回调
-    if (typeof this.props.onCreated === 'function') {
-      this.props.onCreated(new MEObject(this))
+    if (typeof this.props.created === 'function') {
+      this.props.created(new MEObject(this))
     }
   },
   watch: {
@@ -369,7 +369,7 @@ Anot.component('meditor', {
   },
   props: {
     safelyCompile: true,
-    onSuccess: Anot.PropsTypes.isFunction(),
+    created: Anot.PropsTypes.isFunction(),
     onUpdate: Anot.PropsTypes.isFunction(),
     onFullscreen: Anot.PropsTypes.isFunction()
   },

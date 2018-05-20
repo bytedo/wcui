@@ -9,29 +9,19 @@
 @import '../../css/var.scss';
 
 
-.do-tree {overflow:hidden;overflow-y:auto;position:relative;width:100%;height:100%;line-height:28px;font-size:13px;color:nth($cgr, 1);
+.do-tree {overflow:hidden;overflow-y:auto;position:relative;width:100%;height:100%;line-height:36px;font-size:15px;color:nth($cgr, 1);
   
-  .ui-font {font-family:"ui font" !important;font-style:normal;-webkit-font-smoothing: antialiased;-webkit-text-stroke-width: 0.2px;-moz-osx-font-smoothing: grayscale;}
   ul {width:100%;height:auto;}
-  li {overflow:hidden; white-space:nowrap; text-overflow:ellipsis}
+  li {overflow:hidden; min-height:35px;margin:1px 0; white-space:nowrap; text-overflow:ellipsis}
 
   li ul {display:none;margin-left:20px;}
   li.open>ul {display:block;}
 
   li em,
   li span {display:inline-block;cursor:pointer;color:nth($cgr, 2);}
-  li em {float:left;padding:0 5px;}
+  li em {float:left;padding:0 5px;font-size:20px;}
   li span:hover {color:nth($cgr, 2);}
   li span.active {color:nth($cgr, 3);font-weight:bold;}
-  li span.checkbox {float:left;position:relative;width:14px;height:14px;margin:7px 5px 7px 0;border:1px solid nth($cgr, 1);border-radius:3px;
-
-    &::after {display:block;width:12px;height:12px;line-height:12px;}
-    &.checked::after {content:"\e60f";}
-  }
-
-  &.skin-def {
-    li>em::before {content:"\e612";}
-    li.dir>em::before {content:"\e622";}
-    li.dir.open>em::before {content:"\e8ea";}
+  li span.checkbox {float:left;position:relative;width:20px;height:20px;margin:8px 5px 8px 0;line-height:18px;border:1px solid nth($cgr, 1);border-radius:3px; font-size:20px;text-align:center;
   }
 }
