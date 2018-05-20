@@ -830,7 +830,7 @@ Renderer.prototype.code = function(code, lang, escaped) {
     output += '<code class="lang ' + lang + '">' + codes[idx - 1] + '\n</code>' //加\n为了避免空行时无法显示
   }
 
-  return '<pre :skip class="do-ui-blockcode">' + output + '</pre>'
+  return '<pre skip class="do-ui-blockcode">' + output + '</pre>'
 }
 
 Renderer.prototype.blockquote = function(quote) {
@@ -931,7 +931,7 @@ Renderer.prototype.em = function(text) {
 
 Renderer.prototype.codespan = function(txt) {
   txt = txt.replace(/&amp;/g, '&')
-  return '<code :skip class="do-ui-inlinecode">' + txt + '</code>'
+  return '<code skip class="do-ui-inlinecode">' + txt + '</code>'
 }
 
 Renderer.prototype.br = function() {

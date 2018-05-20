@@ -3365,7 +3365,19 @@
           delete elem[attr.value]
         } else {
           var camelizeName = camelize(name)
-          ret[camelizeName] = parseData(attr.value)
+          if (camelizeName.indexOf('@') === 0) {
+            camelizeName = camelizeName.slice(1)
+            var vm = vmodels[0]
+            if (
+              vm &&
+              vm.hasOwnProperty(attr.value) &&
+              typeof vm[attr.value] === 'function'
+            ) {
+              ret[camelizeName] = vm[attr.value].bind(vm)
+            }
+          } else {
+            ret[camelizeName] = parseData(attr.value)
+          }
         }
       }
     }
@@ -4015,6 +4027,10 @@
           console.error('设置style样式, 请改用 :css指令')
           continue
         }
+        // 通过属性设置回调,必须以@符号开头
+        if (typeof obj[i] === 'function' && i.indexOf('@') !== 0) {
+          continue
+        }
         if (i === 'href' || i === 'src') {
           //处理IE67自动转义的问题
           if (!root.hasAttribute) obj[i] = obj[i].replace(/&amp;/g, '&')
@@ -4061,7 +4077,7 @@
             if (typeof obj[i] === 'object') {
               obj[i] = JSON.stringify(obj[i])
             } else if (typeof obj[i] === 'function') {
-              k = '__fn__' + camelize(k)
+              k = ronattr + camelize(k.slice(1))
               elem[k] = obj[i].bind(vm)
               obj[i] = k
             }

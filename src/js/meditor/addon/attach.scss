@@ -14,11 +14,6 @@
   ::-webkit-scrollbar-button {display:none;}
   ::-webkit-scrollbar-thumb {background:nth($cgr, 2);}
   ::-webkit-scrollbar-thumb:hover {background:nth($cgr, 1);}
-
-  dt.close {position:absolute;z-index:65539;top:-15px;right:-10px;width:30px;height:30px;line-height:30px;font-size:20px;text-align:center;cursor:pointer;
-
-    &:hover {color:nth($ct, 1);font-size:28px;}
-  }
     
   .tab-box {float:left;width:130px;height:300px;padding:10px 5px;text-align:center;background:nth($cp, 2);border-radius:5px;
 

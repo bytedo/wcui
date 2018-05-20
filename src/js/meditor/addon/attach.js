@@ -75,7 +75,6 @@ const fixCont = function(vm, tool) {
   }
   return `
   <dl class="do-meditor-attach do-meditor__font">
-    <dt :click="close" class="do-icon-close close"></dt>
     <dt class="tab-box" :drag="do-layer" data-limit="window">
       <span class="item" :class="active:tab === 1" :click="switchTab(1)">
         ${LANG[tool][0]}
@@ -259,6 +258,7 @@ function showDialog(elem, vm, tool) {
     type: 7,
     menubar: false,
     fixed: true,
+    maskClose: true,
     offset: [offset.top + 40 - $doc.scrollTop()],
     shift: {
       top: offset.top - $doc.scrollTop()
@@ -324,10 +324,7 @@ function showDialog(elem, vm, tool) {
       vm.insert(val)
       this.close()
     },
-    content: fixCont(vm, tool),
-    success() {
-      this.switchTab(3)
-    }
+    content: fixCont(vm, tool)
   })
 }
 

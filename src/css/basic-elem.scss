@@ -10,66 +10,58 @@
 
 
 /*--------各种按钮---------*/
-.do-ui-button {display:inline-block;padding:0 5px;border:1px solid #ddd;text-align:center;font-size:12px;background:none;cursor:pointer;@include ts;
+.do-ui-button {display:inline-block;padding:2px 5px;border:1px solid #ddd;text-align:center;font-size:12px;background:none;cursor:pointer;@include ts;
 
-    &.medium {min-width:100px;height:35px;padding:0 8px;line-height:35px;font-size:15px}
-    &.large {min-width:150px;height:50px;padding:0 13px;line-height:50px;font-size:18px;}
-    &.radius-3 {border-radius:3px;}
-    &.radius-5 {border-radius:5px;}
+  &.medium {min-width:100px;height:35px;padding:0 8px;line-height:35px;font-size:15px}
+  &.large {min-width:150px;height:50px;padding:0 13px;line-height:50px;font-size:18px;}
+  &.radius-3 {border-radius:3px;
+    [class^="do-icon-"], [class*=" do-icon-"] {border-radius:3px}
+  }
+  &.radius-5 {border-radius:5px;
+    [class^="do-icon-"], [class*=" do-icon-"] {border-radius:3px}
+  }
+  
+  &.teal {border:0;background:nth($ct, 1);color:#fff;}
+  &.teal:hover {background:nth($ct, 2);}
+  &.teal:active {background:nth($ct, 3);}
+  &.green {border:0;background:nth($cg, 1);color:#fff;}
+  &.green:hover {background:nth($cg, 2);}
+  &.green:active {background:nth($cg, 3);}
+  &.blue {border:0;background:nth($cb, 1);color:#fff;}
+  &.blue:hover {background:nth($cb, 2);}
+  &.blue:active {background:nth($cb, 3);}
+  &.purple {border:0;background:nth($cpp, 1);color:#fff;}
+  &.purple:hover {background:nth($cpp, 2);}
+  &.purple:active {background:nth($cpp, 3);}
+  &.red {border:0;background:nth($cr, 1);color:#fff;}
+  &.red:hover {background:nth($cr, 2);}
+  &.red:active {background:nth($cr, 3);}
+  &.orange {border:0;background:nth($co, 1);color:#fff;}
+  &.orange:hover {background:nth($co, 2);}
+  &.orange:active {background:nth($co, 3);}
+  &.plain {border:0;background:nth($cp, 1);color:nth($cgr, 1);}
+  &.plain:hover {background:nth($cp, 2);}
+  &.plain:active {background:nth($cp, 3);}
+  &.grey {border:0;background:nth($cgr, 1);color:#fff;}
+  &.grey:hover {background:nth($cgr, 2);}
+  &.grey:active {background:nth($cgr, 3);}
+
+  &.disabled {border-color:nth($cp, 1);color:nth($cp, 3);cursor:not-allowed;}
     
-    &.teal {border:0;background:nth($ct, 1);color:#fff;}
-    &.teal:hover {background:nth($ct, 2);}
-    &.teal:active {background:nth($ct, 3);}
-    &.green {border:0;background:nth($cg, 1);color:#fff;}
-    &.green:hover {background:nth($cg, 2);}
-    &.green:active {background:nth($cg, 3);}
-    &.blue {border:0;background:nth($cb, 1);color:#fff;}
-    &.blue:hover {background:nth($cb, 2);}
-    &.blue:active {background:nth($cb, 3);}
-    &.purple {border:0;background:nth($cpp, 1);color:#fff;}
-    &.purple:hover {background:nth($cpp, 2);}
-    &.purple:active {background:nth($cpp, 3);}
-    &.red {border:0;background:nth($cr, 1);color:#fff;}
-    &.red:hover {background:nth($cr, 2);}
-    &.red:active {background:nth($cr, 3);}
-    &.orange {border:0;background:nth($co, 1);color:#fff;}
-    &.orange:hover {background:nth($co, 2);}
-    &.orange:active {background:nth($co, 3);}
-    &.plain {border:0;background:nth($cp, 1);color:nth($cgr, 1);}
-    &.plain:hover {background:nth($cp, 2);}
-    &.plain:active {background:nth($cp, 3);}
-    &.grey {border:0;background:nth($cgr, 1);color:#fff;}
-    &.grey:hover {background:nth($cgr, 2);}
-    &.grey:active {background:nth($cgr, 3);}
-
-    &.disabled {border-color:nth($cp, 1);color:nth($cp, 3);cursor:not-allowed;}
-    
-    /* 额外样式 */
-    &.medium.with-style,
-    &.large.with-style {position:relative;padding-right:43px;
-
-        &::after {position:absolute;right:0;top:0;width:35px;;text-align:center;background:rgba(0,0,0,.2);font-family:"ui font" !important;-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;}
+  
+  
+  /* 额外样式 */
+  &.medium.with-icon,
+  &.large.with-icon {position:relative;padding-left:43px;
+    [class^="do-icon-"], [class*=" do-icon-"] {
+      position:absolute;left:0;top:0;width:35px;font-size:25px;background:rgba(0,0,0,.1);
     }
-    &.large.with-style {padding-right:58px;
-        &::after {width:50px;}
+  }
+  &.large.with-icon {padding-left:58px;
+    [class^="do-icon-"], [class*=" do-icon-"] {
+      width:50px;font-size:35px;
     }
-
-    &.icon-del::after {content:"\e6f0"}
-    &.icon-add::after {content:"\e64c"}
-    &.icon-send::after {content:"\e64b"}
-    &.icon-confirm::after {content:"\e60f"}
-    &.icon-share::after {content:"\e631"}
-    &.icon-bad::after {content:"\e8ee"}
-    &.icon-good::after {content:"\e62d"}
-    &.icon-download::after {content:"\e611"}
-    &.icon-upload::after {content:"\e6f7"}
-    &.icon-mac::after {content:"\e60a"}
-    &.icon-ios::after {content:"\e609"}
-    &.icon-windows::after {content:"\e601"}
-    &.icon-linux::after {content:"\e602"}
-    &.icon-android::after {content:"\e600"}
-
-    
+  }
 }
 
 
