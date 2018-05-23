@@ -219,20 +219,26 @@ const _Anot = (function() {
       vm.$id = $id
       VMODELS[$id] = vm
 
-      var $elem = document.querySelector('[anot=' + vm.$id + ']')
-      if ($elem) {
-        if ($elem === DOC.body) {
-          scanTag($elem, [])
-        } else {
-          var $parent = $elem
-          while (($parent = $parent.parentNode)) {
-            if ($parent.anotctrl) {
-              break
+      Anot.nextTick(function() {
+        var $elem = document.querySelector('[anot=' + vm.$id + ']')
+        if ($elem) {
+          if ($elem === DOC.body) {
+            scanTag($elem, [])
+          } else {
+            var $parent = $elem
+            while (($parent = $parent.parentNode)) {
+              if ($parent.anotctrl) {
+                break
+              }
             }
+            scanTag(
+              $elem.parentNode,
+              $parent ? [VMODELS[$parent.anotctrl]] : []
+            )
           }
-          scanTag($elem.parentNode, $parent ? [VMODELS[$parent.anotctrl]] : [])
         }
-      }
+      })
+
       return vm
     } else {
       this[0] = this.element = source
@@ -1714,6 +1720,7 @@ const _Anot = (function() {
     hideProperty($vmodel, '$refs', {})
     hideProperty($vmodel, '$children', [])
     hideProperty($vmodel, 'hasOwnProperty', trackBy)
+    hideProperty($vmodel, '$mounted', mounted)
     if (options.watch) {
       hideProperty($vmodel, '$watch', function() {
         return $watch.apply($vmodel, arguments)
@@ -1758,7 +1765,6 @@ const _Anot = (function() {
     }
 
     $vmodel.$active = true
-    $vmodel.mounted = mounted
 
     if (old && old.$up && old.$up.$children) {
       old.$up.$children.push($vmodel)
@@ -1909,6 +1915,7 @@ const _Anot = (function() {
       configurable: true
     })
   }
+  Anot.hideProperty = hideProperty
 
   function toJson(val) {
     var xtype = Anot.type(val)
@@ -2157,6 +2164,7 @@ const _Anot = (function() {
             injectDependency(array, binding)
           }
         })
+
         binding.getter = parseExpr(binding.expr, binding.vmodels, binding)
         binding.observers.forEach(function(a) {
           a.v.$watch(a.p, binding)
@@ -3023,8 +3031,8 @@ const _Anot = (function() {
   }
 
   function addAssign(vars, vmodel, name, binding) {
-    var ret = [],
-      prefix = ' = ' + name + '.'
+    var ret = []
+    var prefix = ' = ' + name + '.'
     for (var i = vars.length, prop; (prop = vars[--i]); ) {
       var arr = prop.split('.')
       var first = arr[0]
@@ -3122,7 +3130,7 @@ const _Anot = (function() {
       /* jshint ignore:start */
       var fn2 = scpCompile(
         names.concat(
-          "'use strict';" + 'return function(vvv){' + expr + ' = vvv\n}\n'
+          '"use strict";\n  return function(vvv){' + expr + ' = vvv\n}\n'
         )
       )
       /* jshint ignore:end */
@@ -3163,11 +3171,12 @@ const _Anot = (function() {
       })
       expr = '\nreturn ' + expr + ';' //IE全家 Function("return ")出错，需要Function("return ;")
     }
+
     /* jshint ignore:start */
     getter = scpCompile(
       names.concat(
-        "'use strict';\ntry{\nvar " +
-          assigns.join(',\n') +
+        "'use strict';\ntry{\n  var " +
+          assigns.join(',\n  ') +
           expr +
           '\n}catch(e){console.log(e)}'
       )
@@ -3275,7 +3284,7 @@ const _Anot = (function() {
       Anot.injectBinding(binding)
       if (binding.getter && binding.element.nodeType === 1) {
         //移除数据绑定，防止被二次解析
-        //chrome使用removeAttributeNode移除不存在的特性节点时会报错 https://github.com/RubyLouvre/Anot/issues/99
+        //chrome使用removeAttributeNode移除不存在的特性节点时会报错
         binding.element.removeAttribute(binding.name)
       }
     }
@@ -3331,7 +3340,19 @@ const _Anot = (function() {
           delete elem[attr.value]
         } else {
           var camelizeName = camelize(name)
-          ret[camelizeName] = parseData(attr.value)
+          if (camelizeName.indexOf('@') === 0) {
+            camelizeName = camelizeName.slice(1)
+            var vm = vmodels[0]
+            if (
+              vm &&
+              vm.hasOwnProperty(attr.value) &&
+              typeof vm[attr.value] === 'function'
+            ) {
+              ret[camelizeName] = vm[attr.value].bind(vm)
+            }
+          } else {
+            ret[camelizeName] = parseData(attr.value)
+          }
         }
       }
     }
@@ -3490,8 +3511,8 @@ const _Anot = (function() {
   }
 
   function scanTag(elem, vmodels, node) {
-    //扫描顺序  skip(0) --> anot(1) --> :if(10) --> :repeat(100)
-    //--> :if-loop(110) --> :attr(970) ...--> :each(1400)-->:with(1500)--〉:duplex(2000)垫后
+    //扫描顺序  skip(0) --> anot(1) --> :if(10) --> :repeat(90)
+    //--> :if-loop(110) --> :attr(970) ...--> :duplex(2000)垫后
     var skip = elem.getAttribute('skip')
     node = elem.getAttributeNode('anot')
     var vm = vmodels.concat()
@@ -3542,15 +3563,16 @@ const _Anot = (function() {
               newVmodel.props[k] = props[k]
               delete props[k]
             } else {
-              Anot.error(
-                'props.' +
-                  k +
-                  ' needs [' +
-                  newVmodel.props[k].checkType +
-                  '], but [' +
-                  newVmodel.props[k].result +
-                  '] given.',
-                TypeError
+              console.error(
+                new TypeError(
+                  'props.' +
+                    k +
+                    ' needs [' +
+                    newVmodel.props[k].checkType +
+                    '], but [' +
+                    newVmodel.props[k].result +
+                    '] given.'
+                )
               )
             }
           }
@@ -3563,10 +3585,10 @@ const _Anot = (function() {
 
     if (newVmodel) {
       setTimeout(function() {
-        if (typeof newVmodel.mounted === 'function') {
-          newVmodel.mounted()
+        if (typeof newVmodel.$mounted === 'function') {
+          newVmodel.$mounted()
         }
-        delete newVmodel.mounted
+        delete newVmodel.$mounted
       })
     }
   }
@@ -3769,7 +3791,7 @@ const _Anot = (function() {
           delete hooks.componentWillUnmount
 
           var vmodel = Anot(hooks)
-          delete vmodel.mounted
+          delete vmodel.$mounted
           host.vmodels[0].$children.push(vmodel)
 
           elem.msResolved = 1 //防止二进扫描此元素
@@ -3980,6 +4002,12 @@ const _Anot = (function() {
           console.error('设置style样式, 请改用 :css指令')
           continue
         }
+        // 通过属性设置回调,必须以@符号开头
+        if (i.indexOf('@') === 0) {
+          if (typeof obj[i] !== 'function') {
+            continue
+          }
+        }
         if (i === 'href' || i === 'src') {
           //处理IE67自动转义的问题
           if (!root.hasAttribute) obj[i] = obj[i].replace(/&amp;/g, '&')
@@ -4026,7 +4054,7 @@ const _Anot = (function() {
             if (typeof obj[i] === 'object') {
               obj[i] = JSON.stringify(obj[i])
             } else if (typeof obj[i] === 'function') {
-              k = '__fn__' + camelize(k)
+              k = ronattr + camelize(k.slice(1))
               elem[k] = obj[i].bind(vm)
               obj[i] = k
             }
@@ -4189,7 +4217,6 @@ const _Anot = (function() {
     }
     return true
   }
-
   Anot.directive('rule', {
     priority: 2010,
     init: function(binding) {
@@ -5449,11 +5476,6 @@ const _Anot = (function() {
       var kill = elem.previousSibling
       var start = binding.start
 
-      /*log(kill === start, kill)
-        while(kill !== start && kill.nodeName !== '#comment'){
-            parent.removeChild(kill)
-            kill = elem.previousSibling
-        }*/
       if (clear) {
         while (kill !== start) {
           parent.removeChild(kill)
@@ -5495,9 +5517,6 @@ const _Anot = (function() {
           )
           decorateProxy(proxy, binding, xtype)
         } else {
-          // if (xtype === "array") {
-          //     proxy[param] = value[i]
-          // }
           fragments.push({})
           retain[keyOrId] = true
         }
@@ -5514,7 +5533,6 @@ const _Anot = (function() {
         if (xtype === 'array') {
           proxy.$first = i === 0
           proxy.$last = i === length - 1
-          // proxy[param] = value[i]
         } else {
           proxy.$val = toJson(value[keyOrId]) //这里是处理vm.object = newObject的情况
         }
@@ -6047,7 +6065,9 @@ const _Anot = (function() {
         }
 
         oDate = new Date(stamp)
-        if (oDate + '' === 'Invalid Date') return 'Invalid Date'
+        if (oDate + '' === 'Invalid Date') {
+          return 'Invalid Date'
+        }
       } else {
         oDate = stamp
       }
