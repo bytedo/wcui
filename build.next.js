@@ -28,7 +28,10 @@ const compileJs = (entry, output) => {
   let t1 = Date.now()
   let buf = fs.cat(entry).toString()
   let { code } = uglify.minify(buf)
-  code = code.replace(/\.scss/g, '.css')
+  code = code
+    .replace(/\.scss/g, '.css')
+    .replace(/import"([a-z0-9/.]*)(?<!\.css)"/g, 'import "$1.js"')
+    .replace(/import ([\w]*) from"([a-z0-9/.]*)"/g, 'import $1 from "$2.js"')
   log(
     '编译JS: %s, 耗时 %s ms',
     chalk.green(entry),
