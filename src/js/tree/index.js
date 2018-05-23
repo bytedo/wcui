@@ -20,7 +20,7 @@ function format(arr, { id, parent, label, children }) {
   })
   arr.forEach(function(it) {
     // Anot.hideProperty(it, '__checked__', !!it.__checked__)
-    // it.__checked__ = !!it.__checked__
+    it.__checked__ = !!it.__checked__
     it.open = !!it.open
     // console.log(it.hasOwnProperty('__checked__'), it.__checked__)
     tmp[it[id]] = it
@@ -86,6 +86,11 @@ export default Anot.component('tree', {
     delete props.multiCheck
   },
   componentDidMount: function() {
+    this.list.forEach(it => {
+      if (it.__checked__) {
+        this.checkedItems[it[this.props.id]] = it.$model
+      }
+    })
     if (typeof this.props.created === 'function') {
       this.props.created(this)
     }

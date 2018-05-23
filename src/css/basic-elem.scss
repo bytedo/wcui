@@ -72,31 +72,27 @@
 
 .do-ui-input {position:relative;min-height:30px;padding:0 5px;border:1px solid nth($cp, 3);background:#fff;color:nth($cgr, 1);outline:none;@include ts;
     
-    &::-webkit-input-placeholder {color:nth($cp, 3);}
-    
-    &.area {padding:5px;}
+  &::-webkit-input-placeholder {color:nth($cp, 3);}
+  
+  &.area {padding:5px;}
 
-    &.radius-3 {border-radius:3px;}
-    &.radius-5 {border-radius:5px;}
-    
-    &:focus,&:hover {border-color:nth($ct, 1);}
-    &.alert {border-color:nth($cr, 1);color:nth($cr, 1);
-        input {color:nth($cr, 1);}
+  &.radius-3 {border-radius:3px;}
+  &.radius-5 {border-radius:5px;}
+  
+  &:focus,&:hover {border-color:nth($ct, 1);}
+  &.alert {border-color:nth($cr, 1);color:nth($cr, 1);
+    input {color:nth($cr, 1);}
+  }
+  &.disabled {border-color:transparent;background:nth($cp, 1);color:nth($cp, 3)}
+  
+  &.with-icon {display:inline-block;padding:0;
+
+    input {width:100%;height:100%;min-height:30px;padding:0 30px 0 5px;border: 0;background:transparent;}
+
+    [class^="do-icon-"], [class*=" do-icon-"] {
+      position:absolute;right:0;top:0;width:30px;line-height:30px;font-size:22px;
     }
-    &.disabled {border-color:transparent;background:nth($cp, 1);color:nth($cp, 3)}
-    
-    &.with-style {display:inline-block;padding:0;
-
-        input {width:100%;height:100%;min-height:30px;padding:0 30px 0 5px;border: 0;background:transparent;}
-
-        &::after {position:absolute;right:0;top:0;width:35px;height:30px;line-height:30px;text-align:center;font-family:"ui font" !important;-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;}
-
-        &.icon-user::after {content:"\e6f4"}
-        &.icon-pwd::after {content:"\e655"}
-        &.icon-mail::after {content:"\e66e"}
-        &.icon-date::after {content:"\e650"}
-        &.icon-phone::after {content:"\e651"}
-    }
+  }
 }
 
 
@@ -116,38 +112,38 @@
 }
 .do-ui-radio {padding-left:50px;
 
-    >input {position:absolute;left:10px;top:10px;width:35px;height:10px;border-radius:10px;border:0;background:nth($cp, 3);-webkit-appearance:none;-moz-appearance:none;
-        
-        &:checked {background:nth($cp, 3);}
-        &:disabled {background:nth($cp, 2);}
-        &:disabled:checked {background:nth($cp, 3);}
+  >input {position:absolute;left:10px;top:10px;width:35px;height:10px;border-radius:10px;border:0;background:nth($cp, 3);-webkit-appearance:none;-moz-appearance:none;
+    
+    &:checked {background:nth($cp, 3);}
+    &:disabled {background:nth($cp, 2);}
+    &:disabled:checked {background:nth($cp, 3);}
 
-        &::after {position:absolute;display:block;left:-2px;top:-5px;width:20px;height:20px;border-radius:50%;content:"";background:nth($cp, 2);box-shadow:0 1px 2px rgba(0,0,0,.2);}
-        &:checked::after {left:auto;right:-2px;background:nth($cgr, 2);}
-        &:checked:disabled::after {background:nth($cp, 3);}
-    }
-    &.green >input:checked {background:nth($cg, 2);
-        &::after {background:nth($cg, 3);}
-    }
-    &.teal >input:checked {background:nth($cg, 2);
-        &::after {background:nth($ct, 3);}
-    }
-    &.blue >input:checked {background:nth($cb, 2);
-        &::after {background:nth($cb, 3);}
-    }
-    &.purple >input:checked {background:nth($cb, 2);
-        &::after {background:nth($cpp, 3);}
-    }
-    &.red >input:checked {background:nth($cr, 2);
-        &::after {background:nth($cr, 3);}
-    }
-    &.orange >input:checked {background:nth($co, 2);
-        &::after {background:nth($co, 3);}
-    }
-    &.grey >input:checked {background:nth($cgr, 2);
-        &::after {background:nth($cgr, 3);}
-    }
-    &.disabled {color:nth($cp, 3);}
+    &::after {position:absolute;display:block;left:-2px;top:-5px;width:20px;height:20px;border-radius:50%;content:"";background:nth($cp, 2);box-shadow:0 1px 2px rgba(0,0,0,.2);}
+    &:checked::after {left:auto;right:-2px;background:nth($cgr, 2);}
+    &:checked:disabled::after {background:nth($cp, 3);}
+  }
+  &.green >input:checked {background:nth($cg, 2);
+    &::after {background:nth($cg, 3);}
+  }
+  &.teal >input:checked {background:nth($cg, 2);
+    &::after {background:nth($ct, 3);}
+  }
+  &.blue >input:checked {background:nth($cb, 2);
+    &::after {background:nth($cb, 3);}
+  }
+  &.purple >input:checked {background:nth($cb, 2);
+    &::after {background:nth($cpp, 3);}
+  }
+  &.red >input:checked {background:nth($cr, 2);
+    &::after {background:nth($cr, 3);}
+  }
+  &.orange >input:checked {background:nth($co, 2);
+    &::after {background:nth($co, 3);}
+  }
+  &.grey >input:checked {background:nth($cgr, 2);
+    &::after {background:nth($cgr, 3);}
+  }
+  &.disabled {color:nth($cp, 3);}
 }
 .do-ui-checkbox {
     >input {position:absolute;left:2px;top:2px;width:26px;height:26px;line-height:22px;border:2px solid nth($cp, 3);border-radius:3px;text-align:center;font-size:18px;font-family:"ui font" !important;-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;-webkit-appearance:none;-moz-appearance:none;
