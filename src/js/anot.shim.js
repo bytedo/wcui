@@ -2351,7 +2351,9 @@
     }
     return el.msRetain
       ? 0
-      : el.nodeType === 1 ? !root.contains(el) : !Anot.contains(root, el)
+      : el.nodeType === 1
+        ? !root.contains(el)
+        : !Anot.contains(root, el)
   }
 
   /************************************************************************
@@ -2642,7 +2644,9 @@
               ? null
               : +data + '' === data
                 ? +data
-                : rbrace.test(data) ? JSON.parse(data) : data
+                : rbrace.test(data)
+                  ? JSON.parse(data)
+                  : data
     } catch (e) {}
     return data
   }
@@ -2680,7 +2684,9 @@
   function getWindow(node) {
     return node.window && node.document
       ? node
-      : node.nodeType === 9 ? node.defaultView : false
+      : node.nodeType === 9
+        ? node.defaultView
+        : false
   }
 
   //=============================css相关==================================
@@ -3186,18 +3192,7 @@
       })
       expr = '\nreturn ' + expr + ';' //IE全家 Function("return ")出错，需要Function("return ;")
     }
-    // log('')
-    // log(
-    //   names
-    //     .concat(
-    //       "'use strict';\ntry{\nvar " +
-    //         assigns.join(',\n') +
-    //         expr +
-    //         '\n}catch(e){console.log(e)}'
-    //     )
-    //     .join('')
-    // )
-    // log('')
+
     /* jshint ignore:start */
     getter = scpCompile(
       names.concat(
@@ -3788,6 +3783,13 @@
           }
           var props = getOptionsFromTag(elem, host.vmodels)
           var $id = props.uuid || generateID(widget)
+          var __willpush__ = null
+
+          if (props.hasOwnProperty('hostPush')) {
+            elem.removeAttribute('host-push')
+            __willpush__ = props.hostPush
+            props.hostPush = host.vmodels[0][__willpush__]
+          }
 
           delete props.uuid
           delete props.name
@@ -3822,13 +3824,27 @@
 
           elem.msResolved = 1 //防止二进扫描此元素
 
+          if (__willpush__) {
+            hideProperty(vmodel, '$push', function(val) {
+              host.vmodels[0][__willpush__] = val
+            })
+          }
+
           componentWillMount.call(vmodel)
           globalHooks.componentWillMount.call(null, vmodel)
 
           var slots = null
+          var isTemplate = true
 
-          if (elem.content.firstElementChild) {
-            slots = parseSlot(elem.content.children)
+          if (elem.content) {
+            if (elem.content.firstElementChild) {
+              slots = parseSlot(elem.content.children)
+            }
+          } else {
+            isTemplate = false
+            if (elem.firstElementChild) {
+              slots = parseSlot(elem.children)
+            }
           }
 
           Anot.clearHTML(elem)
@@ -3840,24 +3856,25 @@
 
           elem.innerHTML = html
 
-          // 组件所使用的标签是temlate,所以必须要要用子元素替换掉
-          var child = elem.content.firstElementChild
-          var nullComponent = DOC.createComment('empty component')
-          elem.parentNode.replaceChild(child || nullComponent, elem)
+          if (isTemplate) {
+            // 组件所使用的标签是template,所以必须要要用子元素替换掉
+            var child = elem.content.firstElementChild
+            var nullComponent = DOC.createComment('empty component')
+            elem.parentNode.replaceChild(child || nullComponent, elem)
 
-          // 空组件直接跳出
-          if (!child) {
-            return
-          }
+            // 空组件直接跳出
+            if (!child) {
+              return
+            }
 
-          child.msResolved = 1
-          var cssText = elem.style.cssText
-          var className = elem.className
-          elem = host.element = child
-          elem.style && (elem.style.cssText += ';' + cssText)
-
-          if (className) {
-            Anot(elem).addClass(className)
+            child.msResolved = 1
+            var cssText = elem.style.cssText
+            var className = elem.className
+            elem = host.element = child
+            elem.style && (elem.style.cssText += ';' + cssText)
+            if (className) {
+              Anot(elem).addClass(className)
+            }
           }
 
           hideProperty(vmodel, '$elem', elem)
@@ -3930,6 +3947,9 @@
     var name = el.nodeName.toLowerCase()
     if (name === 'template' && el.getAttribute('name')) {
       return el.getAttribute('name')
+    }
+    if (/^anot-([a-z][a-z0-9\-]*)$/.test(name)) {
+      return RegExp.$1
     }
     return null
   }
@@ -4073,7 +4093,9 @@
           //SVG只能使用setAttribute(xxx, yyy), VML只能使用elem.xxx = yyy ,HTML的固有属性必须elem.xxx = yyy
           var isInnate = rsvg.test(elem)
             ? false
-            : DOC.namespaces && isVML(elem) ? true : k in elem.cloneNode(false)
+            : DOC.namespaces && isVML(elem)
+              ? true
+              : k in elem.cloneNode(false)
           if (isInnate) {
             elem[k] = obj[i]
           } else {
