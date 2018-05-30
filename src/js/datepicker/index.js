@@ -139,7 +139,7 @@ export default Anot.component('datepicker', {
           :css="{'border-radius': props.radius}"
           :attr-placeholder="props.placeholder || '请选择日期'"
           :attr-disabled="disabled">
-        <i class="do-ui-font icon"></i>
+        <i class="do-icon-calendar icon"></i>
       </label>
 
       <dl
@@ -147,11 +147,12 @@ export default Anot.component('datepicker', {
         :if="showCalendar">
 
         <dt class="contrl">
-          <a href="javascript:;" class="do-ui-font" :click="turn(1, -1)"></a>
-          <a href="javascript:;" class="do-ui-font prev-month" :click="turn(0, -1)"></a>
-          <a href="javascript:;" class="do-ui-font next-month" :click="turn(0, 1)"></a>
-          <a href="javascript:;" class="do-ui-font next-year" :click="turn(1, 1)"></a>
-          <span title="双击回到今天"
+          <a class="do-icon-dbl-left" :click="turn(1, -1)"></a>
+          <a class="do-icon-left prev-month" :click="turn(0, -1)"></a>
+          <a class="do-icon-right next-month" :click="turn(0, 1)"></a>
+          <a class="do-icon-dbl-right next-year" :click="turn(1, 1)"></a>
+          <span 
+            title="双击回到今天"
             :dblclick="back2today"
             :text="calendar.year + '-' + numberFormat(calendar.month)"></span>
         </dt>
@@ -186,25 +187,21 @@ export default Anot.component('datepicker', {
           <a href="javascript:;" class="now" :click="now">现在</a>
         </dd>
         <dt class="confirm">
-          <a href="javascript:;" :click="close" class="cancel">取消</a>
-          <a href="javascript:;" :click="onConfirm" class="ok">确定</a>
+          <a :click="close" class="cancel">取消</a>
+          <a :click="onConfirm" class="ok">确定</a>
         </dt>
         <dd class="tips" :if="tips" :text="tips"></dd>
       </dl>
     </div>`
   },
   construct: function(props, state) {
-    if (!props.hasOwnProperty('key')) {
-      return Anot.error('日历组件必须设置key属性')
-    }
-
     // 日期格式化, 不显示时间时, 默认会调用过滤器的格式'Y-m-d H:i:s'
     if (!props.showTime && !props.format) {
       props.format = 'Y-m-d'
     }
 
     //获取初始值
-    let defVal = props.value
+    let defVal = props.hostPush || null
     if (!defVal) {
       if (props.minDate) {
         defVal = props.minDate
@@ -213,9 +210,10 @@ export default Anot.component('datepicker', {
       }
     }
     // 修正默认值, 如果不是Date对象, 则转为Date对象
-    if (defVal && !Date.isDate(defVal)) {
-      defVal += ' GMT+8000'
-      defVal = new Date(defVal)
+    if (defVal) {
+      if (!Date.isDate(defVal)) {
+        defVal = new Date(defVal)
+      }
     } else {
       defVal = new Date()
     }
@@ -245,7 +243,8 @@ export default Anot.component('datepicker', {
       state.max.month = props.maxDate.getMonth() + 1
       state.max.day = props.maxDate.getDate()
     }
-    if (props.value) {
+
+    if (props.hostPush) {
       state.last = {
         year: defVal.getFullYear(),
         month: defVal.getMonth() + 1,
@@ -268,17 +267,17 @@ export default Anot.component('datepicker', {
     //移除部分属性
     delete props.minDate
     delete props.maxDate
-    delete props.value
+    delete props.hostPush
     delete props.disabled
   },
   componentWillMount: function() {
     this.resetCalendarTable()
+    this.$push(this.value)
   },
   componentDidMount: function() {
     if (typeof this.props.created === 'function') {
       this.props.created(this)
     }
-
     document.addEventListener('click', () => {
       this.close()
     })
@@ -345,7 +344,12 @@ export default Anot.component('datepicker', {
   methods: {
     // 重置日历表格
     resetCalendarTable: function() {
-      let { max, min, calendar: { year, month }, last } = this
+      let {
+        max,
+        min,
+        calendar: { year, month },
+        last
+      } = this
       this.calendar.day = 0
       this.calendar.list.clear()
       this.calendar.list.pushArray(
@@ -375,7 +379,11 @@ export default Anot.component('datepicker', {
     },
     // 切换上/下 年/月
     turn: function(isYear, step) {
-      let { calendar: { year, month }, max, min } = this
+      let {
+        calendar: { year, month },
+        max,
+        min
+      } = this
 
       if (isYear === 1) {
         year += step
@@ -439,11 +447,13 @@ export default Anot.component('datepicker', {
     onConfirm: function() {
       this.updateTime()
       this.close()
+      this.$push(this.value)
       if (
         this.calendar.day > 0 &&
         typeof this.props.onDatePicked === 'function'
       ) {
-        this.props.onDatePicked(this.props.key, this.value, this.last.pick)
+        // 返回一个格式化后的值和一个Date对象
+        this.props.onDatePicked(this.value, this.last.pick)
       }
     }
   }

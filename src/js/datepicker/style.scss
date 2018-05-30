@@ -5,7 +5,8 @@
  * @date    2016-02-14 14:00:06
  * 
  */
-@import 'var.scss';
+@import "var.scss";
+
 .do-datepicker { position:relative;width:100%; height:100%;color:nth($cgr, 1);font-size:14px;
 
   &.mini {width:155px;height:30px;line-height:30px;}
@@ -26,7 +27,6 @@
       &[disabled] {background:#f7f8fb;cursor:not-allowed;}
     }
     .icon {position:absolute;right:0;top:0;width:35px;text-align:center;font-size:25px;color:nth($cp, 3);
-      &::after {content:"\e650"}
     }
   }
   .calendar-box { position:absolute; left:0; top:100%; z-index:65534; width:267px; height:auto; min-height:60px;padding:10px;line-height:35px; border:1px solid #ddd; background:#fff; font-size:14px; color:nth($cgr, 1); text-align:center; box-shadow:0 1px 5px rgba(0, 0, 0, 0.1);
@@ -35,24 +35,17 @@
 
     dt.contrl {position:relative; width:100%; height:35px; margin:5px 0 0;border-radius:3px;color:#fff;
 
-      a { position:absolute; left:0; top:0; width:35px; height:35px;color:#fff;
+      a { position:absolute; left:0; top:0; width:35px; height:35px;color:#fff;cursor:pointer;
 
-        &::before {position:absolute;left:0;top:0;z-index:-1;display:block;width:35px;height:35px;border-radius:50%;background:nth($ct, 3); content:"";opacity:0;transform: scale(0);}
+        &::after {position:absolute;left:0;top:0;z-index:-1;display:block;width:35px;height:35px;border-radius:50%;background:nth($ct, 3); content:"";opacity:0;transform: scale(0);}
 
         &:active {font-weight:bold;
-          &::before {animation:ripple .3s cubic-bezier(0.23, 1, 0.32, 1);}
+          &::after {animation:ripple .3s cubic-bezier(0.23, 1, 0.32, 1);}
         }
-        &::after {content:"\e692";}
 
-        &.prev-month {left:35px;
-          &::after {content:"\e67c"}
-        }
-        &.next-month {left:auto; right:35px;
-          &::after {content:"\e66e"}
-        }
-        &.next-year {left:auto; right:0;
-          &::after {content:"\e694"}
-        }
+        &.prev-month {left:35px;}
+        &.next-month {left:auto; right:35px;}
+        &.next-year {left:auto; right:0;}
       }
 
     }
@@ -92,7 +85,7 @@
 
     dt.confirm { position:relative; width:100%; height:41px; padding:10px 0 0;line-height:30px; border-top:1px solid #eee; text-align:right;
 
-      .ok,.cancel {display:inline-block;width:60px; height:30px;margin:0 0 0 10px;border-radius:3px;text-align:center;}
+      .ok,.cancel {display:inline-block;width:60px; height:30px;margin:0 0 0 10px;border-radius:3px;text-align:center;cursor:pointer;}
 
       .ok { background:nth($ct, 1); color:#fff;
         &:hover { background:nth($ct, 2); }

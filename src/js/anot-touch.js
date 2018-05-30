@@ -1749,7 +1749,7 @@ const _Anot = (function() {
     simple.forEach(function(name) {
       var oldVal = old && old[name]
       var val = ($vmodel[name] = state[name])
-      if (val && typeof val === 'object') {
+      if (val && typeof val === 'object' && !Date.isDate(val)) {
         val.$up = $vmodel
         val.$pathname = name
       }
@@ -4017,7 +4017,12 @@ const _Anot = (function() {
 
       if (typeof obj === 'object' && obj !== null) {
         if (!Anot.isPlainObject(obj)) {
-          obj = obj.$model
+          if (Date.isDate(obj)) {
+            obj = {}
+            obj[this.param] = val.toUTCString()
+          } else {
+            obj = obj.$model
+          }
         }
       } else {
         if (!this.param) {
@@ -4085,7 +4090,9 @@ const _Anot = (function() {
             elem[k] = obj[i]
           } else {
             if (typeof obj[i] === 'object') {
-              obj[i] = JSON.stringify(obj[i])
+              obj[i] = Date.isDate(obj[i])
+                ? obj[i].toUTCString()
+                : JSON.stringify(obj[i])
             } else if (typeof obj[i] === 'function') {
               k = ronattr + camelize(k.slice(1))
               elem[k] = obj[i].bind(vm)
