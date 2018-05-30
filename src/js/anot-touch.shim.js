@@ -802,7 +802,7 @@
     switch (arguments.length) {
       case 2:
         return window[tpye].getItem(key)
-      default:
+      case 3:
         if ((this.type(val) == 'string' && val.trim() === '') || val === null) {
           window[tpye].removeItem(key)
           return
@@ -812,6 +812,7 @@
         } else {
           window[tpye].setItem(key, JSON.stringify(val))
         }
+        break
     }
   }
 
@@ -961,11 +962,15 @@
      * @param  {[type]} val [键值，为空时删除]
      * @return
      */
-    ls: function(key, val) {
-      return cacheStore('localStorage', key, val)
+    ls: function() {
+      var args = aslice.call(arguments, 0)
+      args.unshift('localStorage')
+      return cacheStore.apply(this, args)
     },
-    ss: function(key, val) {
-      return cacheStore('sessionStorage', key, val)
+    ss: function() {
+      var args = aslice.call(arguments, 0)
+      args.unshift('sessionStorage')
+      return cacheStore.apply(this, args)
     },
     /**
      * [cookie cookie 操作 ]
