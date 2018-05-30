@@ -220,7 +220,6 @@ export default Anot.component('datepicker', {
 
     if (props.minDate) {
       if (!Date.isDate(props.minDate)) {
-        props.minDate += ' GMT+8000'
         props.minDate = new Date(props.minDate)
       }
       if (defVal <= props.minDate) {
@@ -233,7 +232,6 @@ export default Anot.component('datepicker', {
 
     if (props.maxDate) {
       if (!Date.isDate(props.maxDate)) {
-        props.maxDate += ' GMT+8000'
         props.maxDate = new Date(props.maxDate)
       }
       if (defVal >= props.maxDate) {
