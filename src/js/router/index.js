@@ -33,10 +33,15 @@ const RULE_REGEXP = /(:id)|(\{id\})|(\{id:([A-z\d\,\[\]\{\}\-\+\*\?\!:\^\$]*)\})
 
 class Router {
   constructor(options) {
-    this.table = []
-    this.history = null
-    this.path = ''
-    this.options = Object.assign({}, DEFAULT_OPTIONS, options)
+    Anot.hideProperty(this, 'table', [])
+    Anot.hideProperty(this, 'history', null)
+    Anot.hideProperty(this, 'path', '')
+    Anot.hideProperty(this, 'noMatch', null)
+    Anot.hideProperty(
+      this,
+      'options',
+      Object.assign({}, DEFAULT_OPTIONS, options)
+    )
     this.__listen__()
   }
 
@@ -53,6 +58,7 @@ class Router {
     return Anot.router
   }
 
+  // 事件监听
   __listen__() {
     let { mode, prefix } = this.options
 
@@ -63,10 +69,13 @@ class Router {
 
       if (ev.type === 'load') {
         this.go(path)
+        // hash模式要手动触发一下路由检测
         if (mode === 'hash') {
           this.__check__()
         }
       } else {
+        // 因为pushState不会触发popstate事件,
+        // 所以这里只在hash模式或有ev.state的情况下才会主动触发路由检测
         this.path = path.replace(/^[/]+?/, '')
         if (mode === 'hash' || ev.state) {
           this.__check__()
@@ -98,6 +107,10 @@ class Router {
           let href =
             target.getAttribute('href') || target.getAttribute('xlink:href')
 
+          if (!href) {
+            return
+          }
+
           // hash地址,只管修正前缀即可, 会触发popstate事件
           if (prefix.test(href)) {
             this.path = href.replace(prefix, '').trim()
@@ -112,7 +125,7 @@ class Router {
     })
   }
 
-  _getRegExp(rule, opts) {
+  __parseRule__(rule, opts) {
     let re = rule.replace(RULE_REGEXP, function(m, p1, p2, p3, p4) {
       let w = '([\\w.-]'
       if (p1 || p2) {
@@ -137,7 +150,7 @@ class Router {
   __add__(rule, callback) {
     // 特殊值"!", 则自动作非匹配回调处理
     if (rule === '!') {
-      this.notMatch = callback
+      this.noMatch = callback
       return
     }
     if (rule.charAt(0) !== '/') {
@@ -147,9 +160,10 @@ class Router {
     rule = rule.replace(/^[\/]+|[\/]+$|\s+/g, '')
     let opts = { rule, callback }
 
-    Anot.Array.ensure(this.table, this._getRegExp(rule, opts))
+    Anot.Array.ensure(this.table, this.__parseRule__(rule, opts))
   }
 
+  // 路由检测
   __check__() {
     let { allowReload, historyOpen } = this.options
     if (!allowReload && this.path === this.history) {
@@ -158,9 +172,6 @@ class Router {
 
     if (historyOpen) {
       this.history = this.path
-      if (Anot.ls) {
-        Anot.ls('lastPath', this.path)
-      }
     }
 
     for (let i = 0, route; (route = this.table[i++]); ) {
@@ -170,7 +181,7 @@ class Router {
         return route.callback.apply(route, args)
       }
     }
-    this.notMatch && this.notMatch(this.path)
+    this.noMatch && this.noMatch(this.path)
   }
 
   // 跳转到路由
@@ -179,6 +190,10 @@ class Router {
 
     if (mode === 'hash') {
       path = path.trim().replace(prefix, '')
+      // 页面刷新时, 不主动添加空hash, 避免执行2次noMatch回调
+      if (!path && path === location.hash) {
+        return
+      }
       location.hash = '!/' + path
       this.path = path
     } else {
@@ -186,6 +201,7 @@ class Router {
       path = path.replace(/^[/]+?/, '')
       window.history.pushState({ path }, null, `/${path + hash}`)
       this.path = path
+      // pushState不会触发popstate事件,所以要手动触发路由检测
       this.__check__()
     }
   }
@@ -201,5 +217,38 @@ class Router {
     }
   }
 }
+
+Anot.component('link', {
+  construct(props, state) {
+    let { mode } = Anot.router.options
+    if (!props.to) {
+      return
+    }
+
+    if (mode === 'hash') {
+      state.link = '#!' + props.to
+    } else {
+      state.link = props.to
+    }
+    delete props.to
+  },
+  render() {
+    return '<a :attr-href="link" :text="props.label" :click="onClick"></a>'
+  },
+  state: {
+    link: ''
+  },
+  props: {
+    label: '',
+    click: Anot.PropsTypes.isFunction()
+  },
+  methods: {
+    onClick() {
+      if (typeof this.props.click === 'function') {
+        this.props.click()
+      }
+    }
+  }
+})
 
 export default Router

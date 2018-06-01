@@ -292,7 +292,9 @@ class __layer__ {
           ${repeat(
             style === 1
               ? '<i class="do-icon-loading"></i>'
-              : style === 2 ? '<i class="do-icon-app2"></i>' : '<i></i>',
+              : style === 2
+                ? '<i class="do-icon-app2"></i>'
+                : '<i></i>',
             this.dot[style]
           )}
         </span>
@@ -323,7 +325,7 @@ class __layer__ {
     } else {
       let html = ''
       let btns = `
-        <a href="javascript:;" class="action-yes"
+        <a class="action-yes"
           :click="handleConfirm"
           tabindex="-1"
           :text="btns[0]"
@@ -332,7 +334,7 @@ class __layer__ {
       if (type > 1) {
         btns =
           `
-        <a href="javascript:;" class="action-no"
+        <a class="action-no"
           :click="handleCancel"
           :text="btns[1]"
           ></a>
