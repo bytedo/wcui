@@ -39,7 +39,7 @@ a:focus,input,button:focus,input:focus {outline:none;}
 ::-moz-focus-inner {
     border:none;outline:none;
 }
-[anot],[\:if],do-* {visibility:hidden;}
+[anot],[\:if] {visibility:hidden;}
 
 .do-fn-cl { *zoom: 1; }
 .do-fn-cl::after { content: "."; display: block; height: 0; clear: both; visibility: hidden; overflow:hidden;} 

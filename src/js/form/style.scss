@@ -1,0 +1,22 @@
+@charset "UTF-8";
+/**
+ * 
+ * @authors yutent (yutent@doui.cc)
+ * @date    2018-06-12 13:08:26
+ * @version $Id$
+ */
+
+@import "var.scss";
+
+
+.do-button {overflow:hidden;position:relative;display:inline-block;width:auto;min-width:60px;height:30px;margin-left:5px;padding:0 10px;color:nth($ct, 1);text-align:center;cursor:pointer;
+
+  &::before {position:absolute;left:-50%;top:-50%;display:block;width:200%;height:200%;border-radius:50%;background:nth($cp, 2); content:"";opacity:0;transform: scale(0, .0); transition:opacity 1.3s cubic-bezier(0.23, 1, 0.32, 1),transform 1.3s cubic-bezier(0.23, 1, 0.32, 1);}
+    
+  &:hover {
+    &::before {opacity:1;transform:scale(1, .8);}
+  }
+  &:active {background:nth($cp, 1)}
+
+  &__text,&__icon {position:relative;display:inline-block;}
+}

@@ -93,8 +93,8 @@ if (fs.isdir(buildDir)) {
 // css目录
 cssFiles.forEach(file => {
   if (/\.scss$/.test(file)) {
-    let entry = path.resolve(sourceDir, 'css/', file)
-    let output = path.resolve(buildDir, 'css/', file.replace(/scss$/, 'css'))
+    let entry = file
+    let output = file.replace('src/css', 'dist/css').replace(/scss$/, 'css')
 
     compileCss(entry, output)
   }
@@ -102,8 +102,8 @@ cssFiles.forEach(file => {
 
 // js目录的处理要复杂一点
 jsFiles.forEach(file => {
-  let entry = path.resolve(sourceDir, 'js', file)
-  let output = path.resolve(buildDir, 'js', file)
+  let entry = file
+  let output = file.replace(/src\/js/, 'dist/js').replace(/scss$/, 'css')
   let ext = file.slice(file.lastIndexOf('.') + 1)
 
   switch (ext) {
@@ -111,7 +111,6 @@ jsFiles.forEach(file => {
       compileJs(entry, output)
       break
     case 'scss':
-      output = output.replace(/scss$/, 'css')
       compileCss(entry, output)
       break
     case 'htm':

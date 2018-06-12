@@ -240,15 +240,15 @@
           if ($elem === DOC.body) {
             scanTag($elem, [])
           } else {
-            var $parent = $elem
-            while (($parent = $parent.parentNode)) {
-              if ($parent.anotctrl) {
+            var _parent = $elem
+            while ((_parent = _parent.parentNode)) {
+              if (_parent.anotctrl) {
                 break
               }
             }
             scanTag(
               $elem.parentNode,
-              $parent ? [VMODELS[$parent.anotctrl]] : []
+              _parent ? [VMODELS[_parent.anotctrl]] : []
             )
           }
         }
@@ -1471,6 +1471,7 @@
 
   function $emit(key, args) {
     var event = this.$events
+    var _parent = null
     if (event && event[key]) {
       if (args) {
         args[2] = key
@@ -1484,22 +1485,22 @@
           } catch (e) {}
         }
       }
-      var parent = this.$up
-      if (parent) {
+      _parent = this.$up
+      if (_parent) {
         if (this.$pathname) {
-          $emit.call(parent, this.$pathname + '.' + key, args) //以确切的值往上冒泡
+          $emit.call(_parent, this.$pathname + '.' + key, args) //以确切的值往上冒泡
         }
-        $emit.call(parent, '*.' + key, args) //以模糊的值往上冒泡
+        $emit.call(_parent, '*.' + key, args) //以模糊的值往上冒泡
       }
     } else {
-      parent = this.$up
+      _parent = this.$up
       if (this.$ups) {
         for (var i in this.$ups) {
           $emit.call(this.$ups[i], i + '.' + key, args) //以确切的值往上冒泡
         }
         return
       }
-      if (parent) {
+      if (_parent) {
         var p = this.$pathname
         if (p === '') p = '*'
         var path = p + '.' + key
@@ -1508,11 +1509,11 @@
         args = (args && args.concat([path, key])) || [path, key]
 
         if (arr.indexOf('*') === -1) {
-          $emit.call(parent, path, args) //以确切的值往上冒泡
+          $emit.call(_parent, path, args) //以确切的值往上冒泡
           arr[1] = '*'
-          $emit.call(parent, arr.join('.'), args) //以模糊的值往上冒泡
+          $emit.call(_parent, arr.join('.'), args) //以模糊的值往上冒泡
         } else {
-          $emit.call(parent, path, args) //以确切的值往上冒泡
+          $emit.call(_parent, path, args) //以确切的值往上冒泡
         }
       }
     }
@@ -1757,6 +1758,12 @@
           for (var i in $vmodel.$children) {
             var v = $vmodel.$children[i]
             v.$fire && v.$fire.apply(v, [ee, a])
+          }
+          // component! 这是一个特殊的标识,可以直接修改子组件的state值
+        } else if (path.indexOf('component!') === 0) {
+          var ee = path.slice(10)
+          for (var i in $vmodel.$children) {
+            $vmodel.$children[i][ee] = a
           }
         } else {
           $emit.call($vmodel, path, [a])
@@ -2773,9 +2780,9 @@
         }
         array.push(obj)
       }
-      var parent = node.parentNode
-      if (parent && parent.nodeType === 1) {
-        showHidden(parent, array)
+      var _parent = node.parentNode
+      if (_parent && _parent.nodeType === 1) {
+        showHidden(_parent, array)
       }
     }
   }
@@ -3354,12 +3361,16 @@
 
   var rnoCollect = /^(:\S+|data-\S+|on[a-z]+|id|style|class)$/
   var ronattr = '__fn__'
+  var specifiedVars = [':disabled', ':loading']
   function getOptionsFromTag(elem, vmodels) {
-    var attributes = elem.attributes
+    var attributes = aslice.call(elem.attributes, 0)
     var ret = {}
     for (var i = 0, attr; (attr = attributes[i++]); ) {
       var name = attr.name
-      if (attr.specified && !rnoCollect.test(name)) {
+      if (
+        (attr.specified && !rnoCollect.test(name)) ||
+        specifiedVars.includes(name)
+      ) {
         if (name.indexOf(ronattr) === 0) {
           name = attr.value.slice(6)
           ret[name] = elem[attr.value]
@@ -3379,6 +3390,7 @@
           } else {
             ret[camelizeName] = parseData(attr.value)
           }
+          elem.removeAttribute(name)
         }
       }
     }
@@ -3754,8 +3766,9 @@
     arr.forEach(function(elem) {
       var slot = elem.getAttribute('slot')
       if (slot) {
+        obj[slot] = obj[slot] || []
         elem.removeAttribute('slot')
-        obj[slot] = elem.outerHTML
+        obj[slot].push(elem.outerHTML)
       }
     })
     return obj
@@ -3786,6 +3799,8 @@
             //如果还没有解析完,就延迟一下 #1155
             return
           }
+          var parentVm = host.vmodels[0]
+          var state = {}
           var props = getOptionsFromTag(elem, host.vmodels)
           var $id = props.uuid || generateID(widget)
           var __willpush__ = null
@@ -3793,7 +3808,24 @@
           if (props.hasOwnProperty('hostPush')) {
             elem.removeAttribute('host-push')
             __willpush__ = props.hostPush
-            props.hostPush = host.vmodels[0][__willpush__]
+            props.hostPush = parentVm[__willpush__]
+          }
+
+          if (props.hasOwnProperty(':disabled')) {
+            var disabledKey = props[':disabled']
+            state.disabled = parentVm[disabledKey]
+            parentVm.$watch(disabledKey, function(val) {
+              parentVm.$fire('component!disabled', val)
+            })
+            delete props[':disabled']
+          }
+          if (props.hasOwnProperty(':loading')) {
+            var loadingKey = props[':loading']
+            state.loading = parentVm[loadingKey]
+            parentVm.$watch(loadingKey, function(val) {
+              parentVm.$fire('component!loading', val)
+            })
+            delete props[':loading']
           }
 
           delete props.uuid
@@ -3803,6 +3835,7 @@
           hooks.state = hooks.state || {}
 
           Object.assign(hooks.props, props)
+          Object.assign(hooks.state, state)
 
           hooks.construct.call(elem, hooks.props, hooks.state)
 
@@ -3825,13 +3858,13 @@
 
           var vmodel = Anot(hooks)
           delete vmodel.$mounted
-          host.vmodels[0].$children.push(vmodel)
+          parentVm.$children.push(vmodel)
 
           elem.msResolved = 1 //防止二进扫描此元素
 
           if (__willpush__) {
             hideProperty(vmodel, '$push', function(val) {
-              host.vmodels[0][__willpush__] = val
+              parentVm[__willpush__] = val
             })
           }
 
@@ -4003,12 +4036,12 @@
         effectBinding(elem, binding)
         binding.includeRendered = getBindingCallback(
           elem,
-          'data-include-rendered',
+          'data-rendered',
           binding.vmodels
         )
         binding.includeLoaded = getBindingCallback(
           elem,
-          'data-include-loaded',
+          'data-loaded',
           binding.vmodels
         )
         var outer = (binding.includeReplace = !!Anot(elem).data(
@@ -4072,10 +4105,10 @@
 
           //chrome v37- 下embed标签动态设置的src，无法发起请求
           if (window.chrome && elem.tagName === 'EMBED') {
-            var parent = elem.parentNode
+            var _parent = elem.parentNode
             var com = DOC.createComment(':src')
-            parent.replaceChild(com, elem)
-            parent.replaceChild(elem, com)
+            _parent.replaceChild(com, elem)
+            _parent.replaceChild(elem, com)
           }
         } else {
           var k = i
@@ -4390,7 +4423,7 @@
       var elem = binding.element
       var vmodels = binding.vmodels
       binding.changed =
-        getBindingCallback(elem, 'data-duplex-changed', vmodels) || noop
+        getBindingCallback(elem, 'data-changed', vmodels) || noop
       var params = []
       var casting = oneObject('string,number,boolean,checked')
       if (elem.type === 'radio' && binding.param === '') {
@@ -5010,12 +5043,12 @@
 
   Anot.mix(Anot.effect, {
     apply: applyEffect,
-    append: function(el, parent, after, opts) {
+    append: function(el, _parent, after, opts) {
       return applyEffect(
         el,
         1,
         function() {
-          parent.appendChild(el)
+          _parent.appendChild(el)
         },
         after,
         opts
@@ -5032,12 +5065,12 @@
         opts
       )
     },
-    remove: function(el, parent, after, opts) {
+    remove: function(el, _parent, after, opts) {
       return applyEffect(
         el,
         0,
         function() {
-          if (el.parentNode === parent) parent.removeChild(el)
+          if (el.parentNode === _parent) _parent.removeChild(el)
         },
         after,
         opts
@@ -5050,15 +5083,15 @@
       var binding = this
       var elem = this.element
       var isHtmlFilter = elem.nodeType !== 1
-      var parent = isHtmlFilter ? elem.parentNode : elem
-      if (!parent) return
+      var _parent = isHtmlFilter ? elem.parentNode : elem
+      if (!_parent) return
       val = val == null ? '' : val
 
       if (elem.nodeType === 3) {
         var signature = generateID('html')
-        parent.insertBefore(DOC.createComment(signature), elem)
+        _parent.insertBefore(DOC.createComment(signature), elem)
         binding.element = DOC.createComment(signature + ':end')
-        parent.replaceChild(binding.element, elem)
+        _parent.replaceChild(binding.element, elem)
         elem = binding.element
       }
       if (typeof val !== 'object') {
@@ -5084,10 +5117,10 @@
           if (!node || (node.nodeType === 8 && node.nodeValue === endValue)) {
             break
           } else {
-            parent.removeChild(node)
+            _parent.removeChild(node)
           }
         }
-        parent.insertBefore(fragment, elem)
+        _parent.insertBefore(fragment, elem)
       } else {
         Anot.clearHTML(elem).appendChild(fragment)
       }
@@ -5445,14 +5478,9 @@
         elem.removeAttribute(binding.name)
         effectBinding(elem, binding)
         binding.param = binding.param || 'el'
-        binding.sortedCallback = getBindingCallback(
-          elem,
-          'data-repeat-sortby',
-          binding.vmodels
-        )
         var rendered = getBindingCallback(
           elem,
-          'data-repeat-rendered',
+          'data-rendered',
           binding.vmodels
         )
 
@@ -5463,18 +5491,18 @@
         binding.start = start
         binding.template = anotFragment.cloneNode(false)
 
-        var parent = elem.parentNode
-        parent.replaceChild(end, elem)
-        parent.insertBefore(start, end)
+        var _parent = elem.parentNode
+        _parent.replaceChild(end, elem)
+        _parent.insertBefore(start, end)
         binding.template.appendChild(elem)
 
         binding.element = end
 
         if (rendered) {
-          var removeFn = Anot.bind(parent, 'datasetchanged', function() {
-            rendered.apply(parent, parent.args)
-            Anot.unbind(parent, 'datasetchanged', removeFn)
-            parent.msRendered = rendered
+          var removeFn = Anot.bind(_parent, 'datasetchanged', function() {
+            rendered.apply(_parent, _parent.args)
+            Anot.unbind(_parent, 'datasetchanged', removeFn)
+            _parent.msRendered = rendered
           })
         }
       }
@@ -5501,14 +5529,6 @@
         }
       }
       var track = this.track
-      if (binding.sortedCallback) {
-        //如果有回调，则让它们排序
-        var keys2 = binding.sortedCallback.call(parent, track)
-        if (keys2 && Array.isArray(keys2)) {
-          track = keys2
-        }
-      }
-
       var action = 'move'
       binding.$repeat = value
       var fragments = []
@@ -5519,7 +5539,7 @@
       var elem = this.element
       var length = track.length
 
-      var parent = elem.parentNode
+      var _parent = elem.parentNode
 
       //检查新元素数量
       var newCount = 0
@@ -5538,7 +5558,7 @@
 
       if (clear) {
         while (kill !== start) {
-          parent.removeChild(kill)
+          _parent.removeChild(kill)
           kill = elem.previousSibling
         }
       }
@@ -5600,7 +5620,7 @@
       }
       this.proxies = proxies
       if (init && !binding.effectDriver) {
-        parent.insertBefore(transation, elem)
+        _parent.insertBefore(transation, elem)
         fragments.forEach(function(fragment) {
           scanNodeArray(fragment.nodes || [], fragment.vmodels)
           //if(fragment.vmodels.length > 2)
@@ -5632,7 +5652,7 @@
                 staggerIndex = mayStaggerAnimate(
                   binding.effectEnterStagger,
                   function() {
-                    parent.insertBefore(
+                    _parent.insertBefore(
                       fragment.content,
                       preElement.nextSibling
                     )
@@ -5652,7 +5672,7 @@
                 function() {
                   var curNode = removeItem(proxy2.$anchor)
                   var inserted = Anot.slice(curNode.childNodes)
-                  parent.insertBefore(curNode, preElement.nextSibling)
+                  _parent.insertBefore(curNode, preElement.nextSibling)
                   animateRepeat(inserted, 1, binding)
                 },
                 staggerIndex
@@ -5670,17 +5690,17 @@
 
       //repeat --> duplex
       ;(function(args) {
-        parent.args = args
-        if (parent.msRendered) {
+        _parent.args = args
+        if (_parent.msRendered) {
           //第一次事件触发,以后直接调用
-          parent.msRendered.apply(parent, args)
+          _parent.msRendered.apply(_parent, args)
         }
       })(kernel.newWatch ? arguments : [action])
       var id = setTimeout(function() {
         clearTimeout(id)
         //触发上层的select回调及自己的rendered回调
-        Anot.fireDom(parent, 'datasetchanged', {
-          bubble: parent.msHasEvent
+        Anot.fireDom(_parent, 'datasetchanged', {
+          bubble: _parent.msHasEvent
         })
       })
       this.enterCount -= 1

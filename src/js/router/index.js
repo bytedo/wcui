@@ -7,7 +7,7 @@
 
 'use strict'
 //储存版本信息
-Anot.ui.router = '0.0.1'
+Anot.ui.router = '1.0.0'
 
 //判定A标签的target属性是否指向自身
 //thanks https://github.com/quirkey/sammy/blob/master/lib/sammy.js#L219
@@ -233,21 +233,13 @@ Anot.component('link', {
     delete props.to
   },
   render() {
-    return '<a :attr-href="link" :text="props.label" :click="onClick"></a>'
+    return '<a :attr-href="link" :text="props.label"></a>'
   },
   state: {
     link: ''
   },
   props: {
-    label: '',
-    click: Anot.PropsTypes.isFunction()
-  },
-  methods: {
-    onClick() {
-      if (typeof this.props.click === 'function') {
-        this.props.click()
-      }
-    }
+    label: ''
   }
 })
 
