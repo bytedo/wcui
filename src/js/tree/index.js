@@ -75,7 +75,7 @@ export default Anot.component('tree', {
     </ul>
     `
   },
-  construct: function(props, state) {
+  __init__: function(props, state, next) {
     props.id = props.id || 'id'
     props.label = props.label || 'label'
     props.parent = props.parent || 'parent'
@@ -84,6 +84,7 @@ export default Anot.component('tree', {
     state.multiCheck = !!props.multiCheck
     delete props.list
     delete props.multiCheck
+    next()
   },
   componentDidMount: function() {
     this.list.forEach(it => {

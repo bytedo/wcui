@@ -37,7 +37,10 @@ function calculate({ currPage, maxPageShow, totalPage }) {
 }
 // 更新组件
 function update(currPage, vm) {
-  const { totalPage, props: { maxPageShow } } = vm
+  const {
+    totalPage,
+    props: { maxPageShow }
+  } = vm
   vm.currPage = vm.inputPage = currPage
   if (typeof vm.props.onPageChange === 'function') {
     vm.props.onPageChange(currPage)
@@ -88,7 +91,7 @@ const tmpls = {
 }
 
 export default Anot.component('pager', {
-  construct: function(props, state) {
+  __init__: function(props, state, next) {
     props.theme = +props.theme || 1
     if (props.simpleMode) {
       props.theme = 1
@@ -119,6 +122,7 @@ export default Anot.component('pager', {
     delete props.pageSize
     delete props.color
     delete props.size
+    next()
   },
   render: function(slots) {
     let { layout, theme, simpleMode } = this.props

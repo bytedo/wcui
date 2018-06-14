@@ -194,7 +194,7 @@ export default Anot.component('datepicker', {
       </dl>
     </div>`
   },
-  construct: function(props, state) {
+  __init__: function(props, state, next) {
     // 日期格式化, 不显示时间时, 默认会调用过滤器的格式'Y-m-d H:i:s'
     if (!props.showTime && !props.format) {
       props.format = 'Y-m-d'
@@ -267,6 +267,7 @@ export default Anot.component('datepicker', {
     delete props.maxDate
     delete props.hostPush
     delete props.disabled
+    next()
   },
   componentWillMount: function() {
     this.resetCalendarTable()

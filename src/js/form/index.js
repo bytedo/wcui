@@ -11,16 +11,16 @@ const log = console.log
 Anot.ui.form = '0.1.0'
 // 按钮
 Anot.component('button', {
-  construct(props, state) {
+  __init__(props, state, next) {
     state.text = this.textContent
     state.style = { 'border-radius': props.radius }
     this.classList.add('do-fn-noselect')
     this.classList.add('do-button')
+    this.classList.add(props.color || 'grey')
     this.setAttribute(':click', 'onClick')
     this.setAttribute(':class', '{disabled: disabled}')
     this.setAttribute(':css', 'style')
 
-    this.classList.add(props.color || 'grey')
     if (props.size) {
       this.classList.add(props.size)
     }
@@ -30,6 +30,8 @@ Anot.component('button', {
     delete props.disabled
     delete props.color
     delete props.size
+
+    next()
   },
   render() {
     let icon = ''
@@ -63,7 +65,7 @@ Anot.component('button', {
 
 // 单选按钮
 Anot.component('radio', {
-  construct(props, state) {
+  __init__(props, state, next) {
     state.text = this.textContent
     state.checked = state.value === props.label
     if (props.hasOwnProperty('disabled')) {
@@ -71,15 +73,14 @@ Anot.component('radio', {
     }
     this.classList.add('do-radio')
     this.classList.add('do-fn-noselect')
-
-    if (!state.disabled) {
-      this.classList.add(props.color || 'grey')
-    }
+    this.classList.add(props.color || 'grey')
     this.setAttribute(':class', '{disabled: disabled, checked: checked}')
     this.setAttribute(':click', 'onClick')
 
     delete props.disabled
     delete props.color
+
+    next()
   },
   render() {
     return `
@@ -113,21 +114,20 @@ Anot.component('radio', {
 
 // 开关
 Anot.component('switch', {
-  construct(props, state) {
+  __init__(props, state, next) {
     if (props.hasOwnProperty('disabled')) {
       state.disabled = true
     }
 
     this.classList.add('do-switch')
     this.classList.add('do-fn-noselect')
-    if (!state.disabled) {
-      this.classList.add(props.color || 'grey')
-    }
+    this.classList.add(props.color || 'grey')
     this.setAttribute(':class', '{disabled: disabled, checked: value}')
     this.setAttribute(':click', 'onClick')
 
     delete props.disabled
     delete props.color
+    next()
   },
   render() {
     return `
@@ -144,6 +144,64 @@ Anot.component('switch', {
         return
       }
       this.value = !this.value
+    }
+  }
+})
+
+// 多选
+Anot.component('checkbox', {
+  __init__(props, state, next) {
+    if (!Array.isArray(state.value)) {
+      this.parentNode.removeChild(this)
+      Anot.error('多选框的传入值必须一个数组', TypeError)
+    }
+    state.text = this.textContent
+    state.checked = state.value.indexOf(props.label) > -1
+    if (props.hasOwnProperty('disabled')) {
+      state.disabled = true
+    }
+
+    this.classList.add('do-checkbox')
+    this.classList.add('do-fn-noselect')
+    this.classList.add(props.color || 'grey')
+    this.setAttribute(':class', '{disabled: disabled, checked: checked}')
+    this.setAttribute(':click', 'onClick')
+
+    delete props.disabled
+    delete props.color
+    next()
+  },
+  render() {
+    return `
+      <span class="do-checkbox__box">
+        <i class="do-icon-get" :visible="checked"></i>
+      </span>
+      <span class="do-checkbox__text" :text="text"></span>
+    `
+  },
+  state: {
+    value: [],
+    text: '',
+    checked: false,
+    disabled: false
+  },
+  methods: {
+    onClick() {
+      if (this.disabled) {
+        return
+      }
+      let { label } = this.props
+      let list = this.value.$model
+      for (let i in list) {
+        if (list[i] === label) {
+          this.checked = false
+          this.value.removeAt.call(this.value, i)
+          return
+        }
+      }
+      this.checked = true
+      this.value.push(label)
+      // this.value = !this.value
     }
   }
 })

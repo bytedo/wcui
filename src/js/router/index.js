@@ -219,7 +219,7 @@ class Router {
 }
 
 Anot.component('link', {
-  construct(props, state) {
+  __init__(props, state, next) {
     let { mode } = Anot.router.options
     if (!props.to) {
       return
@@ -231,6 +231,7 @@ Anot.component('link', {
       state.link = props.to
     }
     delete props.to
+    next()
   },
   render() {
     return '<a :attr-href="link" :text="props.label"></a>'

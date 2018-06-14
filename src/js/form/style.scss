@@ -55,65 +55,56 @@
 
 .do-radio {position:relative;display:inline-block;width:auto;height:30px;padding:0 10px;line-height:30px;text-align:center;cursor:default;font-size:14px;
 
-  &.disabled {cursor:not-allowed;}
 
-  &__box {float:left;width:20px;height:20px;margin:5px;border:1px solid nth($cgr, 1);border-radius:50%;
-    
-  }
-  &.checked &__box::after {display:block;width:14px;height:14px;margin:2px;border-radius:50%;content:""}
-
-  &__text {color:nth($cgr, 1);}
-  
+  &__box {float:left;width:20px;height:20px;margin:5px;border:1px solid nth($cgr, 1);border-radius:50%;}
+  &.checked &__box::after {display:block;width:14px;height:14px;margin:2px;border-radius:50%;content:""}  
 
   &.teal &__box  {border-color:nth($ct, 1);
     &::after {background:nth($ct, 1);}
   }
-  &.teal &__text {color:nth($ct, 1);}
+  &.teal {color:nth($ct, 1);}
 
   &.green &__box  {border-color:nth($cg, 1);
     &::after {background:nth($cg, 1);}
   }
-  &.green &__text {color:nth($cg, 1);}
+  &.green {color:nth($cg, 1);}
 
   &.blue &__box {border-color:nth($cb, 1);
     &::after {background:nth($cb, 1);}
   }
-  &.blue &__text {color:nth($cb, 1);}
+  &.blue {color:nth($cb, 1);}
 
   &.purple &__box {border-color:nth($cpp, 1);
     &::after {background:nth($cpp, 1);}
   }
-  &.purple &__text {color:nth($cpp, 1);}
+  &.purple {color:nth($cpp, 1);}
 
   &.red &__box  {border-color:nth($cr, 1);
     &::after {background:nth($cr, 1);}
   }
-  &.red &__text {color:nth($cr, 1);}
+  &.red {color:nth($cr, 1);}
 
   &.orange &__box  {border-color:nth($co, 1);
     &::after {background:nth($co, 1);}
   }
-  &.orange &__text {color:nth($co, 1);}
+  &.orange {color:nth($co, 1);}
 
   &.plain &__box  {border-color:nth($cp, 3);
     &::after {background:nth($cp, 3);}
   }
-  &.plain &__text {color:nth($cp, 3);}
+  &.plain {color:nth($cp, 3);}
 
   &.grey &__box  {border-color:nth($cgr, 1);
     &::after {background:nth($cgr, 1);}
   }
-  &.grey &__text {color:nth($cgr, 1);}
+  &.grey {color:nth($cgr, 1);}
 
   
-  &.disabled &__box {border-color:nth($cp, 1);
-    &::after {background:nth($cp, 1);}
+  &.disabled {color:nth($cp, 3);cursor:not-allowed;text-decoration:line-through;}
+  &.disabled.checked {color:nth($cgr, 2);}
+  &.disabled &__box {border-color:nth($cp, 3);
+    &::after {background:nth($cp, 3);}
   }
-  &.disabled &__text {color:nth($cp, 1);}
-  &.disabled.checked &__text {color:nth($cgr, 1);}
-    
-
-  
 }
 
 
@@ -161,4 +152,52 @@
   }
   &.disabled &__label::before {right:7px;}
   &.disabled.checked &__label::before {left:7px;}
+}
+
+
+.do-checkbox {position:relative;display:inline-block;width:auto;height:30px;padding:0 10px;line-height:30px;text-align:center;cursor:default;font-size:14px;
+
+
+  &__box {float:left;width:20px;height:20px;margin:5px;line-height:18px;border:1px solid nth($cgr, 1);border-radius:3px;font-size:18px;text-align:center;
+    
+  }
+  &.checked &__box {color:#fff;font-weight:bold;}
+
+  &.grey {color:nth($cgr, 1);}
+  &.grey &__box {border-color:nth($cgr, 1);}
+  &.grey.checked &__box {background:nth($cgr, 1);}
+
+  &.teal {color:nth($ct, 1);}
+  &.teal &__box {border-color:nth($ct, 1);}
+  &.teal.checked &__box {background:nth($ct, 1);}
+
+  &.green {color:nth($cg, 1);}
+  &.green &__box {border-color:nth($cg, 1);}
+  &.green.checked &__box {background:nth($cg, 1);}
+
+  &.blue {color:nth($cb, 1);}
+  &.blue &__box {border-color:nth($cb, 1);}
+  &.blue.checked &__box {background:nth($cb, 1);}
+
+  &.purple {color:nth($cpp, 1);}
+  &.purple &__box {border-color:nth($cpp, 1);}
+  &.purple.checked &__box {background:nth($cpp, 1);}
+
+  &.orange {color:nth($co, 1);}
+  &.orange &__box {border-color:nth($co, 1);}
+  &.orange.checked &__box {background:nth($co, 1);}
+
+  &.plain {color:nth($cp, 3);}
+  &.plain &__box {border-color:nth($cp, 3);}
+  &.plain.checked &__box {background:nth($cp, 3);}
+
+  &.red {color:nth($cr, 1);}
+  &.red &__box {border-color:nth($cr, 1);}
+  &.red.checked &__box {background:nth($cr, 1);}
+    
+  &.disabled {cursor:not-allowed;color:nth($cp, 3);text-decoration:line-through;}
+  &.disabled &__box {border-color:nth($cp, 3);}
+  &.disabled.checked {color:nth($cgr, 2);}
+  &.disabled.checked &__box {background:nth($cp, 3);}
+
 }

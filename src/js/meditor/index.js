@@ -263,11 +263,12 @@ class MEObject {
 }
 
 Anot.component('meditor', {
-  construct: function(props, state) {
+  __init__: function(props, state, next) {
     if (props.hasOwnProperty('$show')) {
       state.editorVisible = props.$show
       delete props.$show
     }
+    next()
   },
   render: function() {
     let toolbar = (this.toolbar || DEFAULT_TOOLBAR).map(it => tool(it)).join('')

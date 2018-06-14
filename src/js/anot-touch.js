@@ -1981,17 +1981,18 @@ const _Anot = (function() {
       $emit.call(this.$up, this.$pathname)
     },
     set: function(index, val) {
-      if (index >>> 0 === index && this[index] !== val) {
-        if (index > this.length) {
-          throw Error(index + 'set方法的第一个参数不能大于原数组长度')
-        }
+      index = index >>> 0
+      if (index > this.length) {
+        throw Error(index + 'set方法的第一个参数不能大于原数组长度')
+      }
+      if (this[index] !== val) {
         $emit.call(this.$up, this.$pathname + '.*', [val, this[index]])
         this.splice(index, 1, val)
       }
     },
     contains: function(el) {
       //判定是否包含
-      return this.indexOf(el) !== -1
+      return this.indexOf(el) > -1
     },
     ensure: function(el) {
       if (!this.contains(el)) {
@@ -2008,11 +2009,9 @@ const _Anot = (function() {
       return this.removeAt(this.indexOf(el))
     },
     removeAt: function(index) {
+      index = index >>> 0
       //移除指定索引上的元素
-      if (index >>> 0 === index) {
-        return this.splice(index, 1)
-      }
-      return []
+      return this.splice(index, 1)
     },
     size: function() {
       //取得数组长度，这个函数可以同步视图，length不能
@@ -3747,7 +3746,7 @@ const _Anot = (function() {
   var componentQueue = []
   var widgetList = []
   var componentHooks = {
-    construct: noop,
+    __init__: noop,
     componentWillMount: noop,
     componentDidMount: noop,
     childComponentDidMount: noop,
@@ -3834,10 +3833,20 @@ const _Anot = (function() {
             parentVm.$watch(valueKey, function(val) {
               parentVm.$fire('component!' + $id + '!value', val)
             })
-            hooks.watch.value = hooks.watch.value ? [hooks.watch.value] : []
-            hooks.watch.value.push(function(val) {
-              parentVm[valueKey] = val
-            })
+            if (Array.isArray(state.value)) {
+              hooks.watch['value.length'] = hooks.watch['value.length']
+                ? [hooks.watch['value.length']]
+                : []
+              hooks.watch['value.length'].push(function(val) {
+                parentVm[valueKey] = this.value.$model
+              })
+            } else {
+              hooks.watch.value = hooks.watch.value ? [hooks.watch.value] : []
+              hooks.watch.value.push(function(val) {
+                parentVm[valueKey] = val
+              })
+            }
+
             delete props[':value']
           }
 
@@ -3850,7 +3859,15 @@ const _Anot = (function() {
           Object.assign(hooks.props, props)
           Object.assign(hooks.state, state)
 
-          hooks.construct.call(elem, hooks.props, hooks.state)
+          var __READY__ = false
+
+          hooks.__init__.call(elem, hooks.props, hooks.state, function next() {
+            __READY__ = true
+          })
+
+          if (!__READY__) {
+            return
+          }
 
           hooks.$id = $id
 
@@ -3863,7 +3880,7 @@ const _Anot = (function() {
             render
           } = hooks
 
-          delete hooks.construct
+          delete hooks.__init__
           delete hooks.componentWillMount
           delete hooks.componentDidMount
           delete hooks.childComponentDidMount
