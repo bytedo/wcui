@@ -41,41 +41,40 @@ export default Anot.component('tree', {
       return null
     }
     return `
-    <ul class="do-tree" :if="list.size()">
-      <li :repeat="list" :class="{open: el.open, dir: el[props.children]}">
-        <em 
-          :class="{
-            'do-icon-txt': !el.open && !el[props.children],
-            'do-icon-folder-close': el[props.children] && !el.open,
-            'do-icon-folder-open': el[props.children] && el.open,
-          }" 
-          :click="__toggle(el)"></em>
-        <span
-          class="checkbox"
-          :class="{'do-icon-get': el.__checked__}"
-          :if="multiCheck"
-          :click="__check(el, null, $event)"></span>
-        <span
-          :click="__select(el)"
-          :class="{active: el[props.id] === currItem}"
-          :text="el[props.label]"></span>
-        <template
-          name="tree"
-          :attr="{
-            'multi-check': multiCheck,
-            list: el[props.children],
-            '@onActive': props.onActive,
-            '@onPick': __check,
-            id: props.id,
-            label: props.label,
-            parent: props.parent,
-            children: props.children,
-          }"></template>
-      </li>
-    </ul>
+    <section class="do-tree__item" :repeat="list" :class="{open: el.open, dir: el[props.children]}">
+      <em 
+        :class="{
+          'do-icon-txt': !el.open && !el[props.children],
+          'do-icon-folder-close': el[props.children] && !el.open,
+          'do-icon-folder-open': el[props.children] && el.open,
+        }" 
+        :click="__toggle(el)"></em>
+      <span
+        class="checkbox"
+        :class="{'do-icon-get': el.__checked__}"
+        :if="multiCheck"
+        :click="__check(el, null, $event)"></span>
+      <span
+        :click="__select(el)"
+        :class="{active: el[props.id] === currItem}"
+        :text="el[props.label]"></span>
+      <anot-tree
+        :attr="{
+          'multi-check': multiCheck,
+          list: el[props.children],
+          '@onActive': props.onActive,
+          '@onPick': __check,
+          id: props.id,
+          label: props.label,
+          parent: props.parent,
+          children: props.children,
+        }"></anot-tree>
+    </section>
     `
   },
   __init__: function(props, state, next) {
+    this.classList.add('do-tree')
+    this.setAttribute(':if', 'list.size()')
     props.id = props.id || 'id'
     props.label = props.label || 'label'
     props.parent = props.parent || 'parent'

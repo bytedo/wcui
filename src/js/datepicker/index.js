@@ -123,78 +123,80 @@ Anot.ui.datepicker = '1.0.0'
 
 export default Anot.component('datepicker', {
   render: function() {
-    return `<div
-      class="do-datepicker do-fn-noselect"
-      :class="{{props.size}}"
-      :css="{width: props.width, height: props.height, 'line-height': props.height + 'px'}"
-      :click="cancelBubble">
+    return `
+    <label class="date-input">
+      <input
+        class="input"
+        type="text"
+        readonly
+        :duplex="value"
+        :focus="onFocus"
+        :css="{'border-radius': props.radius}"
+        :attr-placeholder="props.placeholder || '请选择日期'"
+        :attr-disabled="disabled">
+      <i class="do-icon-calendar icon"></i>
+    </label>
 
-      <label class="date-input">
-        <input
-          class="input"
-          type="text"
-          readonly
-          :duplex="value"
-          :focus="onFocus"
-          :css="{'border-radius': props.radius}"
-          :attr-placeholder="props.placeholder || '请选择日期'"
-          :attr-disabled="disabled">
-        <i class="do-icon-calendar icon"></i>
-      </label>
+    <dl
+      class="calendar-box"
+      :if="showCalendar">
 
-      <dl
-        class="calendar-box"
-        :if="showCalendar">
-
-        <dt class="contrl">
-          <a class="do-icon-dbl-left" :click="turn(1, -1)"></a>
-          <a class="do-icon-left prev-month" :click="turn(0, -1)"></a>
-          <a class="do-icon-right next-month" :click="turn(0, 1)"></a>
-          <a class="do-icon-dbl-right next-year" :click="turn(1, 1)"></a>
-          <span 
-            title="双击回到今天"
-            :dblclick="back2today"
-            :text="calendar.year + '-' + numberFormat(calendar.month)"></span>
-        </dt>
-        <dd class="table">
-          <section class="thead">
-            <span class="td">日</span>
-            <span class="td">一</span>
-            <span class="td">二</span>
-            <span class="td">三</span>
-            <span class="td">四</span>
-            <span class="td">五</span>
-            <span class="td">六</span>
-          </section>
-          <section class="tr do-fn-cl">
-            <span class="td"
-              :class="{weeken:el.weeken, disabled: el.disabled, selected: el.selected}"
-              :repeat="calendar.list"
-              :click="pick(el)"
-              :text="el.day"></span>
-          </section>
-        </dd>
-        <dd class="time" :if="props.showTime">
-          <label>
-            <input type="text" :duplex-number="calendar.hour"> 时
-          </label>
-          <label>
-            <input type="text" :duplex-number="calendar.minute"> 分
-          </label>
-          <label>
-            <input type="text" :duplex-number="calendar.second"> 秒
-          </label>
-          <a href="javascript:;" class="now" :click="now">现在</a>
-        </dd>
-        <dt class="confirm">
-          <a :click="close" class="cancel">取消</a>
-          <a :click="onConfirm" class="ok">确定</a>
-        </dt>
-        <dd class="tips" :if="tips" :text="tips"></dd>
-      </dl>
-    </div>`
+      <dt class="contrl">
+        <a class="do-icon-dbl-left" :click="turn(1, -1)"></a>
+        <a class="do-icon-left prev-month" :click="turn(0, -1)"></a>
+        <a class="do-icon-right next-month" :click="turn(0, 1)"></a>
+        <a class="do-icon-dbl-right next-year" :click="turn(1, 1)"></a>
+        <span 
+          title="双击回到今天"
+          :dblclick="back2today"
+          :text="calendar.year + '-' + numberFormat(calendar.month)"></span>
+      </dt>
+      <dd class="table">
+        <section class="thead">
+          <span class="td">日</span>
+          <span class="td">一</span>
+          <span class="td">二</span>
+          <span class="td">三</span>
+          <span class="td">四</span>
+          <span class="td">五</span>
+          <span class="td">六</span>
+        </section>
+        <section class="tr do-fn-cl">
+          <span class="td"
+            :class="{weeken:el.weeken, disabled: el.disabled, selected: el.selected}"
+            :repeat="calendar.list"
+            :click="pick(el)"
+            :text="el.day"></span>
+        </section>
+      </dd>
+      <dd class="time" :if="props.showTime">
+        <label>
+          <input type="text" :duplex-number="calendar.hour"> 时
+        </label>
+        <label>
+          <input type="text" :duplex-number="calendar.minute"> 分
+        </label>
+        <label>
+          <input type="text" :duplex-number="calendar.second"> 秒
+        </label>
+        <a href="javascript:;" class="now" :click="now">现在</a>
+      </dd>
+      <dt class="confirm">
+        <a :click="close" class="cancel">取消</a>
+        <a :click="onConfirm" class="ok">确定</a>
+      </dt>
+      <dd class="tips" :if="tips" :text="tips"></dd>
+    </dl>`
   },
   __init__: function(props, state, next) {
+    this.classList.add('do-datepicker')
+    this.classList.add('do-fn-noselect')
+    this.classList.add(props.size || 'mini')
+    this.setAttribute(
+      ':css',
+      "{width: props.width, height: props.height, 'line-height': props.height + 'px'}"
+    )
+    this.setAttribute(':click', 'cancelBubble')
     // 日期格式化, 不显示时间时, 默认会调用过滤器的格式'Y-m-d H:i:s'
     if (!props.showTime && !props.format) {
       props.format = 'Y-m-d'

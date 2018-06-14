@@ -3367,6 +3367,7 @@ const _Anot = (function() {
         (attr.specified && !rnoCollect.test(name)) ||
         specifiedVars.includes(name)
       ) {
+        elem.removeAttribute(name)
         if (name.indexOf(ronattr) === 0) {
           name = attr.value.slice(6)
           ret[name] = elem[attr.value]
@@ -3386,7 +3387,6 @@ const _Anot = (function() {
           } else {
             ret[camelizeName] = parseData(attr.value)
           }
-          elem.removeAttribute(name)
         }
       }
     }
@@ -3902,17 +3902,9 @@ const _Anot = (function() {
           globalHooks.componentWillMount.call(null, vmodel)
 
           var slots = null
-          var isTemplate = true
 
-          if (elem.content) {
-            if (elem.content.firstElementChild) {
-              slots = parseSlot(elem.content.children)
-            }
-          } else {
-            isTemplate = false
-            if (elem.firstElementChild) {
-              slots = parseSlot(elem.children)
-            }
+          if (elem.firstElementChild) {
+            slots = parseSlot(elem.children)
           }
 
           Anot.clearHTML(elem)
@@ -3923,27 +3915,6 @@ const _Anot = (function() {
           })
 
           elem.innerHTML = html
-
-          if (isTemplate) {
-            // 组件所使用的标签是template,所以必须要要用子元素替换掉
-            var child = elem.content.firstElementChild
-            var nullComponent = DOC.createComment('empty component')
-            elem.parentNode.replaceChild(child || nullComponent, elem)
-
-            // 空组件直接跳出
-            if (!child) {
-              return
-            }
-
-            child.msResolved = 1
-            var cssText = elem.style.cssText
-            var className = elem.className
-            elem = host.element = child
-            elem.style && (elem.style.cssText += ';' + cssText)
-            if (className) {
-              Anot(elem).addClass(className)
-            }
-          }
 
           hideProperty(vmodel, '$elem', elem)
 
@@ -4013,9 +3984,6 @@ const _Anot = (function() {
   function isWidget(el) {
     //如果是组件,则返回组件的名字
     var name = el.nodeName.toLowerCase()
-    if (name === 'template' && el.getAttribute('name')) {
-      return el.getAttribute('name')
-    }
     if (/^anot-([a-z][a-z0-9\-]*)$/.test(name)) {
       return RegExp.$1
     }

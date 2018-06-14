@@ -7,7 +7,7 @@
  */
 @import "var.scss";
 
-.do-datepicker { position:relative;width:100%; height:100%;color:nth($cgr, 1);font-size:14px;
+.do-datepicker { position:relative;display:inline-block;width:100%; height:100%;color:nth($cgr, 1);font-size:14px;
 
   &.mini {width:155px;height:30px;line-height:30px;}
   &.medium {width:175px;height:35px;line-height:35px;}

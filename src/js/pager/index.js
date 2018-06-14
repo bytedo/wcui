@@ -87,11 +87,14 @@ const tmpls = {
   jumper: `<div class="input-box">前往
       <input type="text" :duplex="inputPage" :keyup="setPage(null, $event)"> 页
     </div>`,
-  slot: `<slot name="extra" />`
+  slot: ''
 }
 
 export default Anot.component('pager', {
   __init__: function(props, state, next) {
+    this.classList.add('do-pager')
+    this.classList.add('do-fn-noselect')
+    this.setAttribute(':class', "{{classList.join(' ')}}")
     props.theme = +props.theme || 1
     if (props.simpleMode) {
       props.theme = 1
@@ -138,18 +141,13 @@ export default Anot.component('pager', {
     layout = layout.map(it => {
       if (it === 'slot') {
         if (slots && slots.extra) {
-          return slots.extra
+          return slots.extra[0]
         }
       } else {
         return tmpls[it] || ''
       }
     })
-    return `
-    <div
-      class="do-pager do-fn-noselect"
-      :class="{{classList.join(' ')}}">
-      ${layout.join('\n')}
-    </div>`
+    return layout.join('\n')
   },
   componentWillMount: function() {
     const { currPage, totalPage, props } = this

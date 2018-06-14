@@ -9,19 +9,22 @@
 @import '../../css/var.scss';
 
 
-.do-tree {overflow:hidden;overflow-y:auto;position:relative;width:100%;height:100%;line-height:36px;font-size:15px;color:nth($cgr, 1);
+.do-tree {overflow:hidden;overflow-y:auto;position:relative;display:inline-block;width:100%;height:100%;line-height:36px;font-size:15px;color:nth($cgr, 1);
   
-  ul {width:100%;height:auto;}
-  li {overflow:hidden; min-height:35px;margin:1px 0; white-space:nowrap; text-overflow:ellipsis}
+  &__item {overflow:hidden; min-height:35px;margin:1px 0; white-space:nowrap; text-overflow:ellipsis;
+ 
+    .do-tree {display:none;margin-left:20px;}
 
-  li ul {display:none;margin-left:20px;}
-  li.open>ul {display:block;}
+    em,span {display:inline-block;cursor:pointer;color:nth($cgr, 2);}
+    em {float:left;padding:0 5px;font-size:20px;}
 
-  li em,
-  li span {display:inline-block;cursor:pointer;color:nth($cgr, 2);}
-  li em {float:left;padding:0 5px;font-size:20px;}
-  li span:hover {color:nth($cgr, 2);}
-  li span.active {color:nth($cgr, 3);font-weight:bold;}
-  li span.checkbox {float:left;position:relative;width:20px;height:20px;margin:8px 5px 8px 0;line-height:18px;border:1px solid nth($cgr, 1);border-radius:3px; font-size:20px;text-align:center;
+    span {
+
+      &:hover {color:nth($cgr, 2);}
+      &.active {color:nth($cgr, 3);font-weight:bold;}
+      &.checkbox {float:left;position:relative;width:20px;height:20px;margin:8px 5px 8px 0;line-height:18px;border:1px solid nth($cgr, 1);border-radius:3px; font-size:20px;text-align:center;}
+    }
   }
+  &__item.open>.do-tree {display:block;}
+  
 }

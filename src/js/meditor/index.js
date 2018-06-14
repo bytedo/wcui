@@ -264,9 +264,19 @@ class MEObject {
 
 Anot.component('meditor', {
   __init__: function(props, state, next) {
+    this.classList.add('do-meditor')
+    this.classList.add('do-meditor__font')
+
+    this.setAttribute(':visible', 'editorVisible')
+    this.setAttribute(':css', '{height: height}')
+    this.setAttribute(':class', '{fullscreen: fullscreen, preview: preview}')
     if (props.hasOwnProperty('$show')) {
       state.editorVisible = props.$show
       delete props.$show
+    }
+    if (props.height && props.height > 180) {
+      state.height = props.height
+      delete props.height
     }
     next()
   },
@@ -276,23 +286,18 @@ Anot.component('meditor', {
     delete this.toolbar
 
     return `
-    <div 
-      class="do-meditor do-meditor__font" 
-      :visible="editorVisible"
-      :class="{fullscreen: fullscreen, preview: preview}">
-      <div class="tool-bar do-fn-noselect">${toolbar}</div>
-      <textarea 
-        ref="editor"
-        class="editor-body" 
-        spellcheck="false" 
-        :attr="{disabled: disabled}"
-        :duplex="plainTxt"></textarea>
-      <content
-        ref="preview"
-        class="md-preview do-marked-theme" 
-        :visible="preview" 
-        :html="htmlTxt"></content>
-    </div>
+    <div class="tool-bar do-fn-noselect">${toolbar}</div>
+    <textarea 
+      ref="editor"
+      class="editor-body" 
+      spellcheck="false" 
+      :attr="{disabled: disabled}"
+      :duplex="plainTxt"></textarea>
+    <content
+      ref="preview"
+      class="md-preview do-marked-theme" 
+      :visible="preview" 
+      :html="htmlTxt"></content>
     `
   },
   componentDidMount: function(vm, elem) {
@@ -360,6 +365,7 @@ Anot.component('meditor', {
     }
   },
   state: {
+    height: 180,
     disabled: false, //禁用编辑器
     fullscreen: false, //是否全屏
     preview: true, //是否显示预览

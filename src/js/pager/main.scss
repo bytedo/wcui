@@ -8,7 +8,7 @@
 
 @import "var.scss";
 
-.do-pager {height:auto;text-align:center;font-size:14px;color: nth($cgr, 1);
+.do-pager {display:block;height:auto;text-align:center;font-size:14px;color: nth($cgr, 1);
 
   &.mini {line-height:30px;
     .button,.page {min-width:30px;height:30px}
