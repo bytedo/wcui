@@ -1760,10 +1760,14 @@
             v.$fire && v.$fire.apply(v, [ee, a])
           }
           // component! 这是一个特殊的标识,可以直接修改子组件的state值
+          // 且只针对指定子组件有效
         } else if (path.indexOf('component!') === 0) {
-          var ee = path.slice(10)
+          var ee = path.slice(10).split('!')
           for (var i in $vmodel.$children) {
-            $vmodel.$children[i][ee] = a
+            if ($vmodel.$children[i].$id === ee[0]) {
+              $vmodel.$children[i][ee[1]] = a
+              break
+            }
           }
         } else {
           $emit.call($vmodel, path, [a])
@@ -1787,7 +1791,14 @@
     if (watches) {
       delete watches.props
       for (var key in watches) {
-        $watch.call($vmodel, key, watches[key])
+        if (Array.isArray(watches[key])) {
+          var tmp
+          while ((tmp = watches[key].pop())) {
+            $watch.call($vmodel, key, tmp)
+          }
+        } else {
+          $watch.call($vmodel, key, watches[key])
+        }
       }
     }
 
@@ -3361,7 +3372,8 @@
 
   var rnoCollect = /^(:\S+|data-\S+|on[a-z]+|id|style|class)$/
   var ronattr = '__fn__'
-  var specifiedVars = [':disabled', ':loading']
+  var specifiedVars = [':disabled', ':loading', ':value']
+  var filterTypes = ['html', 'text', 'attr', 'data']
   function getOptionsFromTag(elem, vmodels) {
     var attributes = aslice.call(elem.attributes, 0)
     var ret = {}
@@ -3435,7 +3447,7 @@
                   (directives[type].priority || type.charCodeAt(0) * 10) +
                   (Number(param.replace(/\D/g, '')) || 0)
               }
-              if (type === 'html' || type === 'text' || type === 'attr') {
+              if (filterTypes.includes(type)) {
                 var filters = getToken(value).filters
                 binding.expr = binding.expr.replace(filters, '')
                 binding.filters = filters
@@ -3799,6 +3811,7 @@
             //如果还没有解析完,就延迟一下 #1155
             return
           }
+          hooks.watch = hooks.watch || {}
           var parentVm = host.vmodels[0]
           var state = {}
           var props = getOptionsFromTag(elem, host.vmodels)
@@ -3815,17 +3828,32 @@
             var disabledKey = props[':disabled']
             state.disabled = parentVm[disabledKey]
             parentVm.$watch(disabledKey, function(val) {
-              parentVm.$fire('component!disabled', val)
+              parentVm.$fire('component!' + $id + '!disabled', val)
             })
+
             delete props[':disabled']
           }
           if (props.hasOwnProperty(':loading')) {
             var loadingKey = props[':loading']
             state.loading = parentVm[loadingKey]
             parentVm.$watch(loadingKey, function(val) {
-              parentVm.$fire('component!loading', val)
+              parentVm.$fire('component!' + $id + '!loading', val)
             })
             delete props[':loading']
+          }
+
+          // :value可实现双向同步值
+          if (props.hasOwnProperty(':value')) {
+            var valueKey = props[':value']
+            state.value = parentVm[valueKey]
+            parentVm.$watch(valueKey, function(val) {
+              parentVm.$fire('component!' + $id + '!value', val)
+            })
+            hooks.watch.value = hooks.watch.value ? [hooks.watch.value] : []
+            hooks.watch.value.push(function(val) {
+              parentVm[valueKey] = val
+            })
+            delete props[':value']
           }
 
           delete props.uuid
@@ -4158,11 +4186,6 @@
     }
   })
 
-  //这几个指令都可以使用插值表达式，如:src="aaa/{{b}}/{{c}}.html"
-  'css,include,data'.replace(rword, function(name) {
-    directives[name] = attrDir
-  })
-
   //类名定义， :class="xx:yy"  :class="{xx: yy}" :class="xx" :class="{{xx}}"
   Anot.directive('class', {
     init: function(binding) {
@@ -4277,6 +4300,7 @@
   //兼容2种写法 :data-xx="yy", :data="{xx: yy}"
   Anot.directive('data', {
     priority: 100,
+    init: directives.attr.init,
     update: function(val) {
       var obj = val
       if (typeof obj === 'object' && obj !== null) {

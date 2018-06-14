@@ -8,14 +8,28 @@
 import './style.scss'
 const log = console.log
 
-export default Anot.component('button', {
+Anot.ui.form = '0.1.0'
+// 按钮
+Anot.component('button', {
   construct(props, state) {
-    log(props)
     state.text = this.textContent
     state.style = { 'border-radius': props.radius }
     this.classList.add('do-fn-noselect')
     this.classList.add('do-button')
     this.setAttribute(':click', 'onClick')
+    this.setAttribute(':class', '{disabled: disabled}')
+    this.setAttribute(':css', 'style')
+
+    this.classList.add(props.color || 'grey')
+    if (props.size) {
+      this.classList.add(props.size)
+    }
+    if (props.hasOwnProperty('disabled')) {
+      state.disabled = true
+    }
+    delete props.disabled
+    delete props.color
+    delete props.size
   },
   render() {
     let icon = ''
@@ -25,26 +39,113 @@ export default Anot.component('button', {
     return `${icon}<span class="do-button__text" :text="text"></span>`
   },
   state: {
-    state: '',
+    text: '',
     disabled: false,
-    foo: true,
     style: {}
   },
   props: {
     click: Anot.PropsTypes.isFunction()
   },
   skip: ['style'],
-  componentDidMount() {
-    Anot(this.$elem).css(this.style)
-  },
+
   watch: {},
   methods: {
     onClick() {
-      // log(this)
       if (this.disabled) {
         return
       }
-      log('hello world, button')
+      if (typeof this.props.click === 'function') {
+        this.props.click()
+      }
     }
   }
 })
+
+// 单选按钮
+Anot.component('radio', {
+  construct(props, state) {
+    state.text = this.textContent
+    state.checked = state.value === props.label
+    if (props.hasOwnProperty('disabled')) {
+      state.disabled = true
+    }
+    this.classList.add('do-radio')
+    this.classList.add('do-fn-noselect')
+
+    if (!state.disabled) {
+      this.classList.add(props.color || 'grey')
+    }
+    this.setAttribute(':class', '{disabled: disabled, checked: checked}')
+    this.setAttribute(':click', 'onClick')
+
+    delete props.disabled
+    delete props.color
+  },
+  render() {
+    return `
+      <span class="do-radio__box"></span>
+      <span class="do-radio__text" :text="text"></span>
+    `
+  },
+  state: {
+    value: null,
+    text: '',
+    checked: false,
+    disabled: false
+  },
+  watch: {
+    value(val) {
+      this.checked = this.props.label === val
+    }
+  },
+  methods: {
+    onClick() {
+      if (this.disabled) {
+        return
+      }
+      if (!this.checked) {
+        this.checked = true
+        this.value = this.props.label
+      }
+    }
+  }
+})
+
+// 开关
+Anot.component('switch', {
+  construct(props, state) {
+    if (props.hasOwnProperty('disabled')) {
+      state.disabled = true
+    }
+
+    this.classList.add('do-switch')
+    this.classList.add('do-fn-noselect')
+    if (!state.disabled) {
+      this.classList.add(props.color || 'grey')
+    }
+    this.setAttribute(':class', '{disabled: disabled, checked: value}')
+    this.setAttribute(':click', 'onClick')
+
+    delete props.disabled
+    delete props.color
+  },
+  render() {
+    return `
+      <span class="do-switch__label"><i class="do-switch__dot"></i></span>
+    `
+  },
+  state: {
+    value: false,
+    disabled: false
+  },
+  methods: {
+    onClick() {
+      if (this.disabled) {
+        return
+      }
+      this.value = !this.value
+    }
+  }
+})
+
+export default Anot
