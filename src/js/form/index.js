@@ -206,4 +206,73 @@ Anot.component('checkbox', {
   }
 })
 
+// 文本输入框
+Anot.component('input', {
+  __init__(props, state, next) {
+    state.text = this.textContent
+    if (props.hasOwnProperty('disabled')) {
+      state.disabled = true
+    }
+    if (props.iconR) {
+      state.pos = 'right'
+      props.icon = props.iconR
+      delete props.iconR
+    }
+    this.classList.add('do-input')
+    this.classList.add('do-fn-noselect')
+    this.classList.add(props.color || 'grey')
+    if (props.icon) {
+      this.classList.add('icon-' + state.pos)
+    }
+    this.setAttribute(':class', '{disabled: disabled, active: active}')
+    this.setAttribute(
+      ':css',
+      '{width: props.width, height: props.height, lineHeight: props.height + "px"}'
+    )
+
+    delete props.disabled
+    delete props.color
+    next()
+  },
+  render() {
+    let { icon, placeholder } = this.props
+    let holder = `
+      <span 
+        class="do-input__holder"
+        :class="{visible: !value || active}"
+        :text="props.placeholder"></span>`
+    let input = `
+      <input 
+        class="do-input__input"
+        :attr-disabled="disabled"
+        :duplex="value" 
+        :blur="onBlur"
+        :focus="onFocus" />`
+    let ico = icon ? `<i class="do-input__icon do-icon-${icon}"></i>` : ''
+
+    return holder + input + ico
+  },
+  state: {
+    pos: 'left', // icon position
+    value: '',
+    disabled: false,
+    active: false
+  },
+  skip: ['pos'],
+  props: {
+    width: 180,
+    height: 30,
+    placeholder: '',
+    default: ''
+  },
+  methods: {
+    onFocus() {
+      this.active = true
+    },
+    onBlur() {
+      this.active = false
+    }
+  }
+})
+
 export default Anot
