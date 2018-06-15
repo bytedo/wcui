@@ -3773,14 +3773,28 @@
 
   function parseSlot(collections) {
     var arr = aslice.call(collections, 0)
-    var obj = {}
+    var obj = { __extra__: [] }
     arr.forEach(function(elem) {
       var slot = elem.getAttribute('slot')
-      if (slot) {
-        obj[slot] = obj[slot] || []
-        elem.removeAttribute('slot')
-        obj[slot].push(elem.outerHTML)
+      if (isWidget(elem)) {
+        obj.__extra__.push(elem)
+      } else {
+        if (slot) {
+          obj[slot] = obj[slot] || []
+          elem.removeAttribute('slot')
+          obj[slot].push(elem.outerHTML)
+        } else {
+          if (
+            rexpr.test(elem.outerHTML) ||
+            /:[\w-]*=".*"/.test(elem.outerHTML)
+          ) {
+            return
+          }
+          obj.__extra__.push(elem)
+        }
       }
+
+      elem.parentNode.removeChild(elem)
     })
     return obj
   }
@@ -3816,6 +3830,11 @@
           var props = getOptionsFromTag(elem, host.vmodels)
           var $id = props.uuid || generateID(widget)
           var __willpush__ = null
+          var slots = null
+
+          if (elem.firstElementChild) {
+            slots = parseSlot(elem.children)
+          }
 
           if (props.hasOwnProperty('hostPush')) {
             elem.removeAttribute('host-push')
@@ -3875,9 +3894,22 @@
           Object.assign(hooks.state, state)
 
           var __READY__ = false
+          elem.parseExpr = function(str) {
+            str = str.trim()
+            var expr = normalizeExpr(str)
+            if (expr === str) {
+              return str
+            }
+            try {
+              return parseExpr(expr, host.vmodels, {}).apply(0, host.vmodels)
+            } catch (err) {
+              return str
+            }
+          }
 
           hooks.__init__.call(elem, hooks.props, hooks.state, function next() {
             __READY__ = true
+            delete elem.parseExpr
           })
 
           if (!__READY__) {
@@ -3916,12 +3948,6 @@
           componentWillMount.call(vmodel)
           globalHooks.componentWillMount.call(null, vmodel)
 
-          var slots = null
-
-          if (elem.firstElementChild) {
-            slots = parseSlot(elem.children)
-          }
-
           Anot.clearHTML(elem)
           var html = render.call(vmodel, slots) || ''
 
@@ -3930,6 +3956,12 @@
           })
 
           elem.innerHTML = html
+
+          if (slots && slots.__extra__.length) {
+            try {
+              elem.appendChild.apply(elem, slots.__extra__)
+            } catch (err) {}
+          }
 
           hideProperty(vmodel, '$elem', elem)
 
