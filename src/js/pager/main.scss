@@ -78,14 +78,14 @@
     &.skin-2 .curr {background:nth($cgr, 3)}
   }
 
-  &.navy-blue {
-    .page,.button {background:nth($cnb, 1);color: #fff;
+  &.dark {
+    .page,.button {background:nth($cd, 1);color: #fff;
 
-      &:hover {background:nth($cnb, 2)}
-      &:active {background:nth($cnb, 3)}
+      &:hover {background:nth($cd, 2)}
+      &:active {background:nth($cd, 3)}
     }
-    .button[disabled] {background:nth($cnb, 1);}
-    &.skin-2 .curr {background:nth($cnb, 3)}
+    .button[disabled] {background:nth($cd, 1);}
+    &.skin-2 .curr {background:nth($cd, 3)}
   }
 
   &.red {
