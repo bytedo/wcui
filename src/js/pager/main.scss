@@ -20,7 +20,7 @@
     .button,.page {min-width:40px;height:40px}
   }
     
-  .button,.page {display:inline-block;border:0;color: nth($cgr, 1);text-decoration:none;cursor:pointer;vertical-align:top;font-size:14px;font-weight:100;}
+  .button,.page {display:inline-block;border:0;color: nth($cgr, 1);text-decoration:none;cursor:pointer;vertical-align:top;font-size:14px;font-weight:100;appearance:none;}
   .button {font-size:18px;}
   .curr, .disabled {cursor:default;}
   
@@ -46,15 +46,16 @@
 
   &.skin-2 {float:right;width:auto;
       
-      .page,
-      .button,
-      .disabled,
-      .curr {float:left;margin:0;padding:0 5px;color:#fff;}
+    .page,
+    .button,
+    .disabled,
+    .curr {float:left;margin:0;padding:0 5px;color:#fff;}
 
-      .page.disabled {display:none;}
-      .button[disabled] {cursor:not-allowed;}
-      
-      .input-box {display:none;}
+    .page.disabled {display:none;}
+    .button[disabled] {cursor:not-allowed;}
+    
+    .input-box {display:none;}
+    .total-box {display:inline-block;padding:0 8px;}
   }
 
   &.plain {
@@ -75,6 +76,16 @@
     }
     .button[disabled] {background:nth($cgr, 1);}
     &.skin-2 .curr {background:nth($cgr, 3)}
+  }
+
+  &.navy-blue {
+    .page,.button {background:nth($cnb, 1);color: #fff;
+
+      &:hover {background:nth($cnb, 2)}
+      &:active {background:nth($cnb, 3)}
+    }
+    .button[disabled] {background:nth($cnb, 1);}
+    &.skin-2 .curr {background:nth($cnb, 3)}
   }
 
   &.red {

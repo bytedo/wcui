@@ -7,7 +7,7 @@
  */
 @import 'var.scss';
 
-.do-meditor-attach {width:630px;height:300px;cursor:default;color:nth($cgr, 1);
+.do-meditor-attach {width:630px;height:300px;cursor:default;color:nth($cnb, 1);
 
   ::-webkit-scrollbar {width:5px;height:5px;background:nth($cp, 2);}
   ::-webkit-scrollbar:hover {background:nth($cp, 1);}
@@ -34,7 +34,7 @@
 
     .section {display:block;width:100%;height:auto;margin:15px 0;line-height:35px;
 
-      .txt {width:100%;height:45px;padding:0 10px;border:0;border-radius:5px;background:nth($cp, 2);color:nth($cgr, 1);font-size:14px;}
+      .txt {width:100%;height:45px;padding:0 10px;border:0;border-radius:5px;background:nth($cp, 2);color:nth($cnb, 1);font-size:14px;}
       .submit {float:right;width:30%;height:45px;line-height:45px;}
     }
 
@@ -63,7 +63,7 @@
         p {display:block;width:100%;height:30px;line-height:30px;}
       }
 
-      .insert {display:inline-block;padding:3px 5px;line-height:13px;background:nth($cp, 2);color:nth($cgr, 1);cursor:pointer;}
+      .insert {display:inline-block;padding:3px 5px;line-height:13px;background:nth($cp, 2);color:nth($cnb, 1);cursor:pointer;}
       .red {color:#f30;}
     }
 

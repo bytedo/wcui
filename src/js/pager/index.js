@@ -83,7 +83,7 @@ const tmpls = {
     :text="el"
     :click="setPage(el, $event)"></button>`,
   curr: `<button class="page curr" :text="currPage"></button>`,
-  total: `<span class="total-box">共 {{totalPage}} 页 {{totalItems}} 条</span>`,
+  total: `<span class="total-box">共 {{totalPage}} 页 {{totalItem}} 条</span>`,
   jumper: `<div class="input-box">前往
       <input type="text" :duplex="inputPage" :keyup="setPage(null, $event)"> 页
     </div>`,
@@ -107,7 +107,7 @@ export default Anot.component('pager', {
     )
 
     if (props.total) {
-      state.totalItems = +props.total
+      state.totalItem = +props.total
     }
     if (props.pageSize) {
       state.pageSize = +props.pageSize
@@ -164,14 +164,14 @@ export default Anot.component('pager', {
   state: {
     classList: [],
     currPage: 1,
-    totalItems: 1,
+    totalItem: 1,
     pageSize: 20,
     inputPage: 1,
     pageList: []
   },
   computed: {
     totalPage: function() {
-      return Math.ceil(this.totalItems / this.pageSize)
+      return Math.ceil(this.totalItem / this.pageSize)
     }
   },
   props: {
@@ -235,7 +235,7 @@ export default Anot.component('pager', {
       update(1, this)
     },
     setTotalItems: function(num) {
-      this.totalItems = +num
+      this.totalItem = +num
       update(1, this)
     }
   }

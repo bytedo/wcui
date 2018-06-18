@@ -9,20 +9,20 @@
 @import '../../css/var.scss';
 
 
-.do-tree {overflow:hidden;overflow-y:auto;position:relative;display:inline-block;width:100%;height:100%;line-height:36px;font-size:15px;color:nth($cgr, 1);
+.do-tree {overflow:hidden;overflow-y:auto;position:relative;display:inline-block;width:100%;height:100%;line-height:36px;font-size:15px;color:nth($cnb, 1);
   
   &__item {overflow:hidden; min-height:35px;margin:1px 0; white-space:nowrap; text-overflow:ellipsis;
  
     .do-tree {display:none;margin-left:20px;}
 
-    em,span {display:inline-block;cursor:pointer;color:nth($cgr, 2);}
+    em,span {display:inline-block;cursor:pointer;color:nth($cnb, 2);}
     em {float:left;padding:0 5px;font-size:20px;}
 
     span {
 
-      &:hover {color:nth($cgr, 2);}
-      &.active {color:nth($cgr, 3);font-weight:bold;}
-      &.checkbox {float:left;position:relative;width:20px;height:20px;margin:8px 5px 8px 0;line-height:18px;border:1px solid nth($cgr, 1);border-radius:3px; font-size:20px;text-align:center;}
+      &:hover {color:nth($cnb, 2);}
+      &.active {color:nth($cnb, 3);font-weight:bold;}
+      &.checkbox {float:left;position:relative;width:20px;height:20px;margin:8px 5px 8px 0;line-height:18px;border:1px solid nth($cnb, 1);border-radius:3px; font-size:20px;text-align:center;}
     }
   }
   &__item.open>.do-tree {display:block;}
