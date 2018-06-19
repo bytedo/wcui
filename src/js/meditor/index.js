@@ -254,12 +254,6 @@ class MEObject {
   setVal(txt) {
     this.vm.plainTxt = txt || ''
   }
-  show() {
-    this.vm.editorVisible = true
-  }
-  hide() {
-    this.vm.editorVisible = false
-  }
 }
 
 Anot.component('meditor', {
@@ -267,23 +261,33 @@ Anot.component('meditor', {
     this.classList.add('do-meditor')
     this.classList.add('do-meditor__font')
 
-    this.setAttribute(':visible', 'editorVisible')
     this.setAttribute(':css', '{height: height}')
-    this.setAttribute(':class', '{fullscreen: fullscreen, preview: preview}')
-    if (props.hasOwnProperty('$show')) {
-      state.editorVisible = props.$show
-      delete props.$show
+    this.setAttribute(
+      ':class',
+      '{fullscreen: fullscreen, preview: preview, disabled: disabled}'
+    )
+
+    if (props.hasOwnProperty('disabled')) {
+      state.disabled = true
+      delete props.disabled
     }
-    if (props.height && props.height > 180) {
-      state.height = props.height
+    if (props.height) {
+      if (
+        (isFinite(props.height) && props.height > 180) ||
+        /%$/.test(props.height)
+      ) {
+        state.height = props.height
+      }
       delete props.height
     }
     next()
   },
   render: function() {
-    let toolbar = (this.toolbar || DEFAULT_TOOLBAR).map(it => tool(it)).join('')
+    let toolbar = (this.props.toolbar || DEFAULT_TOOLBAR)
+      .map(it => tool(it))
+      .join('')
 
-    delete this.toolbar
+    delete this.props.toolbar
 
     return `
     <div class="tool-bar do-fn-noselect">${toolbar}</div>
@@ -369,7 +373,6 @@ Anot.component('meditor', {
     disabled: false, //禁用编辑器
     fullscreen: false, //是否全屏
     preview: true, //是否显示预览
-    editorVisible: true,
     htmlTxt: '', //用于预览渲染
     plainTxt: '', //纯md文本
     addon // 已有插件
@@ -451,6 +454,9 @@ Anot.component('meditor', {
       }
     },
     onToolClick: function(name, ev) {
+      if (this.disabled) {
+        return
+      }
       if (this.addon[name]) {
         this.addon[name].call(this, ev.target)
       } else {

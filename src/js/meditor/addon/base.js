@@ -467,6 +467,11 @@ const addon = {
   },
   fullscreen: function() {
     this.fullscreen = !this.fullscreen
+    if (this.fullscreen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
     if (typeof this.props.onFullscreen === 'function') {
       this.props.onFullscreen(this.fullscreen)
     }

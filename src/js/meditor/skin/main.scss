@@ -20,7 +20,10 @@
   ::-webkit-scrollbar-thumb {background:nth($cgr, 2);}
   ::-webkit-scrollbar-thumb:hover {background:nth($cgr, 1);}
 
-  
+  &.disabled{border-color:nth($co, 2);
+
+    &::after {position:absolute;left:0;top:0;z-index:100;width:100%;height:100%;content:"";background:rgba(255, 182, 24, 0.07);}
+  }
 
   .tool-bar {overflow:hidden;position:absolute;top:0;left:0;z-index:99;width:100%;height:41px;padding:0 3px;line-height:40px;border-bottom:1px solid nth($cp, 1);background:#fff;color:nth($cd, 1);text-align:center;font-size:24px;
 

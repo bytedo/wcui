@@ -4110,25 +4110,32 @@
     },
     update: function(val) {
       var elem = this.element
-      var obj = val
+      var obj = {}
       var vm = this.vmodels[0]
 
-      if (typeof obj === 'object' && obj !== null) {
-        if (!Anot.isPlainObject(obj)) {
-          if (Date.isDate(obj)) {
-            obj = {}
-            obj[this.param] = val.toUTCString()
+      if (this.param) {
+        if (typeof val === 'object' && val !== null) {
+          if (Array.isArray(val)) {
+            obj[this.param] = val.$model || val
           } else {
-            obj = obj.$model
+            if (Date.isDate(val)) {
+              obj[this.param] = val.toUTCString()
+            } else {
+              obj[this.param] = val.$model || val
+            }
           }
+        } else {
+          obj[this.param] = val
         }
       } else {
-        if (!this.param) {
+        if (!val || typeof val !== 'object' || Array.isArray(val)) {
+          return
+        }
+        if (Date.isDate(val)) {
           return
         }
 
-        obj = {}
-        obj[this.param] = val
+        obj = val.$model || val
       }
 
       for (var i in obj) {
