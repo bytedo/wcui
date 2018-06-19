@@ -3520,7 +3520,7 @@ const _Anot = (function() {
             } else {
               // 非组件才检查 ref属性
               var ref = isRef(elem)
-              if (ref) {
+              if (ref && vmodels.length) {
                 vmodels[0].$refs[ref] = elem
               }
             }
