@@ -55,7 +55,7 @@
     .button[disabled] {cursor:not-allowed;}
     
     .input-box {display:none;}
-    .total-box {display:inline-block;padding:0 8px;}
+    .total-box {float:left;display:inline-block;padding:0 8px;}
   }
 
   &.plain {

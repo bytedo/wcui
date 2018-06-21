@@ -13,6 +13,7 @@ function calculate({ currPage, maxPageShow, totalPage }) {
       : Math.floor(maxPageShow / 2)
 
   if (totalPage < 2) {
+    arr.push(1)
     return arr
   }
   if (currPage - halfPage > 1) {
@@ -56,28 +57,28 @@ function update(currPage, vm) {
 const tmpls = {
   home: `<button class="do-icon-dbl-left button"
     :css="{'border-radius': props.radius}"
-    :attr-disabled="currPage === 1"
+    :attr="{disabled: currPage === 1}"
     :data="{to: parseUrl(1)}"
     :click="setPage(1, $event)"></button>`,
   end: `<button class="do-icon-dbl-right button"
     :css="{'border-radius': props.radius}"
-    :attr-disabled="currPage === totalPage"
+    :attr="{disabled: currPage === totalPage}"
     :data="{to: parseUrl(totalPage)}"
     :click="setPage(totalPage, $event)"></button>`,
   prev: `<button class="do-icon-left button"
     :css="{'border-radius': props.radius}"
-    :attr-disabled="{disabled: currPage < 2}"
+    :attr="{disabled: currPage < 2}"
     :data="{to: parseUrl(currPage - 1)}"
     :click="setPage(currPage - 1, $event)"></button>`,
   next: `<button class="do-icon-right button"
     :css="{'border-radius': props.radius}"
-    :attr-disabled="{disabled: currPage >= totalPage}"
+    :attr="{disabled: currPage >= totalPage}"
     :data="{to: parseUrl(currPage + 1)}"
     :click="setPage(currPage + 1, $event)"></button>`,
   pager: `<button class="page"
     :repeat="pageList"
     :css="{'border-radius': props.radius}"
-    :attr-disabled="{disabled: '...' === el || currPage === el}"
+    :attr="{disabled: '...' === el || currPage === el}"
     :data="{to: parseUrl(el)}"
     :class="{disabled: '...' === el, curr: currPage === el}"
     :text="el"
