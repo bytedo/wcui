@@ -42,10 +42,13 @@ function update(currPage, vm) {
     totalPage,
     props: { maxPageShow }
   } = vm
-  vm.currPage = vm.inputPage = currPage
-  if (typeof vm.props.pageChanged === 'function') {
-    vm.props.pageChanged(currPage)
+  if (vm.currPage !== currPage) {
+    vm.currPage = vm.inputPage = currPage
+    if (typeof vm.props.pageChanged === 'function') {
+      vm.props.pageChanged(currPage)
+    }
   }
+
   vm.pageList.clear()
   if (totalPage > 1) {
     vm.pageList.pushArray(calculate({ currPage, totalPage, maxPageShow }))
@@ -59,22 +62,22 @@ const tmpls = {
     :css="{'border-radius': props.radius}"
     :attr="{disabled: currPage === 1}"
     :data="{to: parseUrl(1)}"
-    :click="setPage(1, $event)"></button>`,
+    :click="go(1, $event)"></button>`,
   end: `<button class="do-icon-dbl-right button"
     :css="{'border-radius': props.radius}"
     :attr="{disabled: currPage === totalPage}"
     :data="{to: parseUrl(totalPage)}"
-    :click="setPage(totalPage, $event)"></button>`,
+    :click="go(totalPage, $event)"></button>`,
   prev: `<button class="do-icon-left button"
     :css="{'border-radius': props.radius}"
     :attr="{disabled: currPage < 2}"
     :data="{to: parseUrl(currPage - 1)}"
-    :click="setPage(currPage - 1, $event)"></button>`,
+    :click="go(currPage - 1, $event)"></button>`,
   next: `<button class="do-icon-right button"
     :css="{'border-radius': props.radius}"
     :attr="{disabled: currPage >= totalPage}"
     :data="{to: parseUrl(currPage + 1)}"
-    :click="setPage(currPage + 1, $event)"></button>`,
+    :click="go(currPage + 1, $event)"></button>`,
   pager: `<button class="page"
     :repeat="pageList"
     :css="{'border-radius': props.radius}"
@@ -82,11 +85,11 @@ const tmpls = {
     :data="{to: parseUrl(el)}"
     :class="{disabled: '...' === el, curr: currPage === el}"
     :text="el"
-    :click="setPage(el, $event)"></button>`,
+    :click="go(el, $event)"></button>`,
   curr: `<button class="page curr" :text="currPage"></button>`,
   total: `<span class="total-box">共 {{totalPage}} 页 {{totalItem}} 条</span>`,
   jumper: `<div class="input-box">前往
-      <input type="text" :duplex="inputPage" :keyup="setPage(null, $event)"> 页
+      <input type="text" :duplex="inputPage" :keyup="go(null, $event)"> 页
     </div>`,
   slot: ''
 }
@@ -186,7 +189,7 @@ export default Anot.component('pager', {
   skip: ['classList'],
   methods: {
     // 格式化页码的URL
-    parseUrl: function(val) {
+    parseUrl(val) {
       val = val >>> 0
       if (val < 1 || !this.props.url || this.currPage === val) {
         return ''
@@ -194,7 +197,7 @@ export default Anot.component('pager', {
       return this.props.url.replace('{id}', val)
     },
     // 设置页码
-    setPage: function(val, ev) {
+    go(val, ev) {
       let { inputPage, totalPage, currPage } = this
       let elem = (ev && ev.target) || null
       if ((elem && elem.disabled) || currPage === val) {
@@ -231,11 +234,19 @@ export default Anot.component('pager', {
         }
       }
     },
-    setPageSize: function(num) {
+    setSize(num) {
+      num = +num
+      if (this.pageSize === num) {
+        return
+      }
       this.pageSize = +num
       update(1, this)
     },
-    setTotalItems: function(num) {
+    setTotal(num) {
+      num = +num
+      if (this.totalItem === num) {
+        return
+      }
       this.totalItem = +num
       update(1, this)
     }
