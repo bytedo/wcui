@@ -43,8 +43,8 @@ function update(currPage, vm) {
     props: { maxPageShow }
   } = vm
   vm.currPage = vm.inputPage = currPage
-  if (typeof vm.props.onPageChange === 'function') {
-    vm.props.onPageChange(currPage)
+  if (typeof vm.props.pageChanged === 'function') {
+    vm.props.pageChanged(currPage)
   }
   vm.pageList.clear()
   if (totalPage > 1) {
@@ -180,7 +180,7 @@ export default Anot.component('pager', {
     maxPageShow: 5,
     simpleMode: !1,
     radius: 3,
-    onPageChange: Anot.PropsTypes.isFunction(),
+    pageChanged: Anot.PropsTypes.isFunction(),
     created: Anot.PropsTypes.isFunction()
   },
   skip: ['classList'],
