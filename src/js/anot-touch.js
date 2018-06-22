@@ -3361,6 +3361,8 @@ const _Anot = (function() {
   function getOptionsFromTag(elem, vmodels) {
     var attributes = aslice.call(elem.attributes, 0)
     var ret = {}
+    var vm = vmodels[0] || {}
+
     for (var i = 0, attr; (attr = attributes[i++]); ) {
       var name = attr.name
       if (
@@ -3376,9 +3378,7 @@ const _Anot = (function() {
           var camelizeName = camelize(name)
           if (camelizeName.indexOf('@') === 0) {
             camelizeName = camelizeName.slice(1)
-            var vm = vmodels[0]
             if (
-              vm &&
               vm.hasOwnProperty(attr.value) &&
               typeof vm[attr.value] === 'function'
             ) {
@@ -4077,7 +4077,7 @@ const _Anot = (function() {
         var outer = (binding.includeReplace = !!Anot(elem).data(
           'includeReplace'
         ))
-        if (Anot(elem).data('includeCache')) {
+        if (Anot(elem).data('cache')) {
           binding.templateCache = {}
         }
         binding.start = DOC.createComment(':include')
@@ -4098,15 +4098,17 @@ const _Anot = (function() {
       var obj = {}
       var vm = this.vmodels[0]
 
+      val = toJson(val)
+
       if (this.param) {
         if (typeof val === 'object' && val !== null) {
           if (Array.isArray(val)) {
-            obj[this.param] = val.$model || val
+            obj[this.param] = val
           } else {
             if (Date.isDate(val)) {
               obj[this.param] = val.toUTCString()
             } else {
-              obj[this.param] = val.$model || val
+              obj[this.param] = val
             }
           }
         } else {
@@ -4120,7 +4122,7 @@ const _Anot = (function() {
           return
         }
 
-        obj = val.$model || val
+        obj = val
       }
 
       for (var i in obj) {
