@@ -863,19 +863,11 @@ Renderer.prototype.html = function(html) {
 
 Renderer.prototype.heading = function(text, level, raw) {
   raw = text.replace(/<[^>]+>|<\/[^>]+>/g, '')
-  return (
-    '<h' +
-    level +
-    ' class="md-head" id="' +
-    raw +
-    '"><a href="#' +
-    raw +
-    '">' +
-    text +
-    '</a></h' +
-    level +
-    '>\n'
-  )
+  return `
+  <h${level} class="md-head" id="${raw}">
+    <span><a href="#${raw}" class="do-icon-pin"></a>${text}</span>
+  </h${level}>
+  `
 }
 
 Renderer.prototype.hr = function() {

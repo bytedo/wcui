@@ -107,7 +107,11 @@ class Router {
           let href =
             target.getAttribute('href') || target.getAttribute('xlink:href')
 
-          if (!href) {
+          if (
+            !href ||
+            /^(http[s]?:|ftp:)?\/\//.test(href) ||
+            /^javascript:/.test(href)
+          ) {
             return
           }
 

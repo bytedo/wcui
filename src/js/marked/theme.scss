@@ -11,10 +11,11 @@
 
   .md-head {position:relative;margin:15px 0;padding-left:30px;font-weight:normal;font-size:17px;}
   h1.md-head {padding-left:0;}
-  .md-head a {position:relative;display:inline-block;padding:0 8px;background:#fff;color:#454545}
-  .md-head a:hover {text-decoration:none;}
-  h1.md-head a {padding-left:0;color:#000;}
-  h2.md-head a {color:#000;}
+  .md-head span {position:relative;display:inline-block;padding:0 8px;background:#fff;color:#454545}
+  .md-head a {padding:0 3px;font-weight:bold;text-decoration:none;}
+  .md-head a:hover {transform:scale(1.2)}
+  h1.md-head span {padding-left:0;color:#000;}
+  h2.md-head span {color:#000;}
 
   h1.md-head {margin:0 0 30px;font-size:25px;}
   h2.md-head {margin:20px 0;font-size:23px;}
@@ -26,10 +27,10 @@
   h5:before,
   h6:before {display:block;position:absolute;left:0;top:50%;width:100%;content:" ";border-bottom:1px solid #ddd;}
 
-  a {text-decoration:none;}
-  a:hover {text-decoration:underline;}
+  a {text-decoration:underline;}
+  a:hover {color:nth($co, 1)}
   p {margin:15px 0;}
-  blockquote.md-quote {margin:10px 0;padding:5px 10px;border-left:5px solid #6bb294;background:#f7f7f7}
+  blockquote.md-quote {margin:10px 0;padding:5px 10px;border-left:5px solid nth($cp, 3);background:nth($cp, 2)}
   blockquote.md-quote p {margin:0;}
   /* 提醒文本 */
   .md-warn,.md-mark {display:inline-block;position:relative;min-height:40px;margin:5px 0;padding:5px 8px 5px 50px;border:1px solid nth($co, 1);border-radius:5px;background:#fffbed;color:nth($co, 3);word-break: break-all;
