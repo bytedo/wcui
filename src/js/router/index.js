@@ -202,8 +202,9 @@ class Router {
       this.path = path
     } else {
       let hash = forceCleanHash ? '' : location.hash
+      let search = forceCleanHash ? '' : location.search
       path = path.replace(/^[/]+?/, '')
-      window.history.pushState({ path }, null, `/${path + hash}`)
+      window.history.pushState({ path }, null, `/${path + search + hash}`)
       this.path = path
       // pushState不会触发popstate事件,所以要手动触发路由检测
       this.__check__()

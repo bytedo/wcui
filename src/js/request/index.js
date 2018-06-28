@@ -33,7 +33,7 @@ try {
 let originAnchor = doc.createElement('a')
 originAnchor.href = location.href
 
-const noBodyMethods = ['GET', 'HEAD']
+const noBodyMethods = ['GET', 'HEAD', 'JSONP']
 const error = {
   10001: 'argument url is required',
   10002: 'method "set" required an object or 2 args',
