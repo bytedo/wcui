@@ -92,7 +92,7 @@
 
     
     /* 特殊类弹层(toast弹层) */
-    &.type-toast {min-width:10px;padding:0;background:transparent;
+    &.type-toast {position:fixed;min-width:10px;padding:0;background:transparent;
 
       .layer-content {min-height:40px;height:40px;padding:0}
 

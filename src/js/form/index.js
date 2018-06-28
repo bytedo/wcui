@@ -225,16 +225,14 @@ Anot.component('input', {
       this.classList.add('icon-' + state.pos)
     }
     this.setAttribute(':class', '{disabled: disabled, active: active}')
-    this.setAttribute(
-      ':css',
-      '{width: props.width, height: props.height, lineHeight: props.height + "px"}'
-    )
+    this.setAttribute(':css', '{width: props.width}')
 
     delete props.disabled
     delete props.color
     next()
   },
   render() {
+    // console.log(this.props)
     let { icon, placeholder } = this.props
     let holder = `
       <span 
@@ -244,7 +242,7 @@ Anot.component('input', {
     let input = `
       <input 
         class="do-input__input"
-        :attr-disabled="disabled"
+        :attr="{disabled: disabled, type: props.type }"
         :duplex="value" 
         :blur="onBlur"
         :focus="onFocus" />`
@@ -260,8 +258,8 @@ Anot.component('input', {
   },
   skip: ['pos'],
   props: {
+    type: 'text',
     width: 180,
-    height: 30,
     placeholder: '',
     default: ''
   },

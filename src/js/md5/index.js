@@ -377,6 +377,7 @@ if (typeof ArrayBuffer !== 'undefined' && !ArrayBuffer.prototype.slice) {
  */
 
 function toUtf8(str) {
+  str += ''
   if (/[\u0080-\uFFFF]/.test(str)) {
     str = unescape(encodeURIComponent(str))
   }

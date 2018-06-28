@@ -246,13 +246,13 @@ class MEObject {
   }
 
   getVal() {
-    return this.vm.plainTxt.trim()
+    return this.vm.value.trim()
   }
   getHtml() {
     return this.vm.__tmp__
   }
   setVal(txt) {
-    this.vm.plainTxt = txt || ''
+    this.vm.value = txt || ''
   }
 }
 
@@ -296,7 +296,7 @@ Anot.component('meditor', {
       class="editor-body" 
       spellcheck="false" 
       :attr="{disabled: disabled}"
-      :duplex="plainTxt"></textarea>
+      :duplex="value"></textarea>
     <content
       ref="preview"
       class="md-preview do-marked-theme" 
@@ -342,7 +342,7 @@ Anot.component('meditor', {
       } else if (txt) {
         this.insert(txt)
       }
-      this.plainTxt = this.$refs.editor.value
+      this.value = this.$refs.editor.value
     })
 
     $editor.bind('scroll', ev => {
@@ -355,16 +355,20 @@ Anot.component('meditor', {
     if (typeof this.props.created === 'function') {
       this.props.created(new MEObject(this))
     }
+    this.compile()
+    if (this.preview) {
+      this.htmlTxt = this.__tmp__
+    }
   },
   watch: {
-    plainTxt: function(val) {
+    value: function(val) {
       this.compile()
       //只有开启实时预览,才会赋值给htmlTxt
       if (this.preview) {
         this.htmlTxt = this.__tmp__
       }
       if (typeof this.props.onUpdate === 'function') {
-        this.props.onUpdate(this.plainTxt, this.__tmp__)
+        this.props.onUpdate(this.value, this.__tmp__)
       }
     }
   },
@@ -374,7 +378,7 @@ Anot.component('meditor', {
     fullscreen: false, //是否全屏
     preview: true, //是否显示预览
     htmlTxt: '', //用于预览渲染
-    plainTxt: '', //纯md文本
+    value: '', //纯md文本
     addon // 已有插件
   },
   props: {
@@ -383,7 +387,7 @@ Anot.component('meditor', {
     onUpdate: Anot.PropsTypes.isFunction(),
     onFullscreen: Anot.PropsTypes.isFunction()
   },
-  skip: ['addon', 'insert', 'selection'],
+  skip: ['addon', 'insert', 'selection', '__tmp__'],
   methods: {
     // 往文本框中插入内容
     insert(val, isSelect) {
@@ -412,7 +416,7 @@ Anot.component('meditor', {
         dom.value += val
         dom.focus()
       }
-      this.plainTxt = dom.value
+      this.value = dom.value
     },
     /**
      * [selection 获取选中的文本]
@@ -465,7 +469,7 @@ Anot.component('meditor', {
     },
 
     compile: function() {
-      let txt = this.plainTxt.trim()
+      let txt = this.value.trim()
 
       if (this.props.safelyCompile) {
         txt = txt

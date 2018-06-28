@@ -3799,6 +3799,14 @@
     return obj
   }
 
+  function parseVmValue(vm, key, val) {
+    if (arguments.length === 2) {
+      return Function('o', 'return o.' + key)(vm)
+    } else if (arguments.length === 3) {
+      Function('o', 'v', 'return o.' + key + ' = v')(vm, val)
+    }
+  }
+
   Anot.components = {}
   Anot.component = function(name, opts) {
     if (opts) {
@@ -3839,12 +3847,12 @@
           if (props.hasOwnProperty('hostPush')) {
             elem.removeAttribute('host-push')
             __willpush__ = props.hostPush
-            props.hostPush = parentVm[__willpush__]
+            props.hostPush = parseVmValue(parentVm, __willpush__)
           }
 
           if (props.hasOwnProperty(':disabled')) {
             var disabledKey = props[':disabled']
-            state.disabled = parentVm[disabledKey]
+            state.disabled = parseVmValue(parentVm, disabledKey)
             parentVm.$watch(disabledKey, function(val) {
               parentVm.$fire('component!' + $id + '!disabled', val)
             })
@@ -3853,7 +3861,7 @@
           }
           if (props.hasOwnProperty(':loading')) {
             var loadingKey = props[':loading']
-            state.loading = parentVm[loadingKey]
+            state.loading = parseVmValue(parentVm, loadingKey)
             parentVm.$watch(loadingKey, function(val) {
               parentVm.$fire('component!' + $id + '!loading', val)
             })
@@ -3863,7 +3871,7 @@
           // :value可实现双向同步值
           if (props.hasOwnProperty(':value')) {
             var valueKey = props[':value']
-            state.value = parentVm[valueKey]
+            state.value = parseVmValue(parentVm, valueKey)
             parentVm.$watch(valueKey, function(val) {
               parentVm.$fire('component!' + $id + '!value', val)
             })
@@ -3872,12 +3880,12 @@
                 ? [hooks.watch['value.length']]
                 : []
               hooks.watch['value.length'].push(function(val) {
-                parentVm[valueKey] = this.value.$model
+                parseVmValue(parentVm, valueKey, this.value.$model)
               })
             } else {
               hooks.watch.value = hooks.watch.value ? [hooks.watch.value] : []
               hooks.watch.value.push(function(val) {
-                parentVm[valueKey] = val
+                parseVmValue(parentVm, valueKey, val)
               })
             }
 
@@ -3941,7 +3949,7 @@
 
           if (__willpush__) {
             hideProperty(vmodel, '$push', function(val) {
-              parentVm[__willpush__] = val
+              parseVmValue(parentVm, __willpush__, val)
             })
           }
 
@@ -4183,7 +4191,8 @@
               obj[i] = !!obj[i]
             }
             if (obj[i] === false) {
-              return elem.removeAttribute(k)
+              elem.removeAttribute(k)
+              continue
             }
           }
 
