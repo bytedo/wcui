@@ -512,6 +512,7 @@
               } catch (err) {
                 return reject(err)
               }
+              resolve(val)
             },
             function(val) {
               try {

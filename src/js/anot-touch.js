@@ -497,6 +497,7 @@ const _Anot = (function() {
               } catch (err) {
                 return reject(err)
               }
+              resolve(val)
             },
             function(val) {
               try {
