@@ -74,6 +74,12 @@
     &.type-3 {max-width:600px;min-width:300px;}
 
 
+    &.type-4 {padding:0;
+
+      .layer-content {padding:0;}
+      .frame-box {width:100%;height:100%;margin:0;padding:0;border:0;resize: none;}
+    }
+
     /* tips类弹层(type 5) */
     &.type-5 {visibility:hidden;position:fixed;z-index:65534;min-width:75px;max-width:600px;padding:10px;line-height:1.5;color:#fff;background:rgba(0,0,0,.5);box-shadow:none;
 

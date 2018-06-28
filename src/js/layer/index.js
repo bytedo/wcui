@@ -10,7 +10,7 @@
 import 'drag/index'
 import './skin/default.scss'
 
-Anot.ui.layer = '1.0.0-base'
+Anot.ui.layer = '1.0.0-normal'
 
 let layerDom = {}
 let layerObj = {}
@@ -196,9 +196,26 @@ class __layer__ {
       }
     }
 
-    //base版没有iframe类型
+    // iframe类型补一个自适应高度的方法
     if (this.init.state.type === 4) {
-      this.init.state.type = 7
+      this.init.methods.autoSize = function() {
+        let { layer, frame } = this.$refs
+        frame.onload = function() {
+          setTimeout(function() {
+            try {
+              let $body = frame.contentWindow.document.body
+              let { clientWidth, clientHeight } = $body
+              Anot(layer).css({
+                width: clientWidth,
+                height: clientHeight,
+                marginLeft: -clientWidth / 2,
+                marginTop: -clientHeight / 2
+              })
+              Anot(frame).css({ height: clientHeight })
+            } catch (err) {}
+          }, 500)
+        }
+      }
     }
     return this
   }
@@ -226,6 +243,10 @@ class __layer__ {
     layBox.classList.add('layer-box')
     layBox.classList.add('skin-' + state.skin)
 
+    if (state.extraClass) {
+      layBox.classList.add(state.extraClass)
+      delete state.extraClass
+    }
     if (typeof state.shift === 'string') {
       layBox.classList.add('__' + state.shift)
     } else {
@@ -376,6 +397,7 @@ class __layer__ {
   }
 
   show() {
+    let vm = this.vm
     let { state, $id } = this.init
     let container = state.container
 
@@ -498,7 +520,7 @@ class __layer__ {
 }
 
 const _layer = {
-  alert: function(content, title, cb) {
+  alert(content, title, cb) {
     let opt = { content, fixed: true }
 
     if (typeof title === 'function') {
@@ -513,7 +535,7 @@ const _layer = {
     }
     return _layer.open(opt)
   },
-  confirm: function(content, title, yescb, nocb) {
+  confirm(content, title, yescb, nocb) {
     let opt = { content, fixed: true, type: 2 }
 
     if (typeof title === 'function') {
@@ -534,7 +556,17 @@ const _layer = {
     }
     return _layer.open(opt)
   },
-  toast: function(txt, type = 'info', timeout = 2500) {
+  frame(url, extra = {}) {
+    let opt = {
+      content: `<iframe ref="frame" class="frame-box" src="${url}"></iframe>`,
+      menubar: false,
+      maskClose: true,
+      type: 4,
+      ...extra
+    }
+    return _layer.open(opt)
+  },
+  toast(txt, type = 'info', timeout = 2500) {
     if (typeof type === 'number') {
       timeout = type
       type = 'info'
@@ -569,7 +601,7 @@ const _layer = {
 
     return _layer.open(opt)
   },
-  loading: function(style, container, cb) {
+  loading(style, container, cb) {
     style = style >>> 0
     style = style < 1 ? 1 : style > 5 ? 5 : style
 
@@ -595,7 +627,7 @@ const _layer = {
       fixed: true
     })
   },
-  tips: function(content, container, opt = {}) {
+  tips(content, container, opt = {}) {
     if (!(container instanceof HTMLElement)) {
       return Anot.error('layer "tips" require a DOM object')
     }
@@ -617,7 +649,7 @@ const _layer = {
     })
     return _layer.open(opt)
   },
-  prompt: function(title, yescb) {
+  prompt(title, yescb) {
     if (typeof yescb !== 'function') {
       return console.error(
         'argument [callback] requires a function, but ' +
@@ -636,7 +668,7 @@ const _layer = {
     return _layer.open(opt)
   },
   close: close,
-  open: function(opt) {
+  open(opt) {
     if (typeof opt === 'string') {
       opt = 'layerwrap-' + opt
       if (!layerObj[opt]) {

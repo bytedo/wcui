@@ -245,7 +245,6 @@ const addon = {
         </ul>`,
       insert: function(val) {
         that.insert(val, false)
-        this.close()
       }
     })
   },
