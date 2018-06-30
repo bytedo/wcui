@@ -194,11 +194,15 @@ function uploadFile(vm, tool) {
               this.uploadQueue[idx].progress = val + '%'
             })
             .then(res => {
-              return res.data
+              if (vm.props.afterUpload) {
+                return vm.props.afterUpload(res)
+              } else {
+                return res.data.url
+              }
             })
         })
-        .then(data => {
-          this.uploadQueue[idx].url = data.url
+        .then(url => {
+          this.uploadQueue[idx].url = url
         })
         .catch(err => {
           Anot.error(err)
@@ -209,10 +213,14 @@ function uploadFile(vm, tool) {
           this.uploadQueue[idx].progress = val + '%'
         })
         .then(res => {
-          return res.data
+          if (vm.props.afterUpload) {
+            return vm.props.afterUpload(res)
+          } else {
+            return res.data.url
+          }
         })
-        .then(data => {
-          this.uploadQueue[idx].url = data.url
+        .then(url => {
+          this.uploadQueue[idx].url = url
         })
         .catch(err => {
           Anot.error(err)
@@ -234,19 +242,30 @@ function uploadScreenshot(vm, blob) {
           return Promise.reject('something wrong with beforeUpload')
         }
         return upload.then(res => {
-          return res.data
+          if (vm.props.afterUpload) {
+            return vm.props.afterUpload(res)
+          } else {
+            return res.data.url
+          }
         })
       })
-      .then(data => {
-        vm.insert(`![截图](${data.url})`)
+      .then(url => {
+        vm.insert(`![截图](${url})`)
+      })
+      .catch(err => {
+        Anot.error(err)
       })
   } else {
     upload
       .then(res => {
-        return res.data
+        if (vm.props.afterUpload) {
+          return vm.props.afterUpload(res)
+        } else {
+          return res.data.url
+        }
       })
-      .then(data => {
-        vm.insert(`![截图](${data.url})`)
+      .then(url => {
+        vm.insert(`![截图](${url})`)
       })
   }
 }
