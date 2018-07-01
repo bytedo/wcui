@@ -3853,8 +3853,20 @@
 
           if (props.hasOwnProperty(':disabled')) {
             var disabledKey = props[':disabled']
+            var disabledKeyReverse = false
+            if (disabledKey.indexOf('!') === 0) {
+              disabledKey = disabledKey.slice(1)
+              disabledKeyReverse = true
+            }
             state.disabled = parseVmValue(parentVm, disabledKey)
+            if (disabledKeyReverse) {
+              state.disabled = !state.disabled
+            }
+
             parentVm.$watch(disabledKey, function(val) {
+              if (disabledKeyReverse) {
+                val = !val
+              }
               parentVm.$fire('component!' + $id + '!disabled', val)
             })
 
@@ -3862,8 +3874,19 @@
           }
           if (props.hasOwnProperty(':loading')) {
             var loadingKey = props[':loading']
+            var loadingKeyReverse = false
+            if (loadingKey.indexOf('!') === 0) {
+              loadingKey = loadingKey.slice(1)
+              loadingKeyReverse = true
+            }
             state.loading = parseVmValue(parentVm, loadingKey)
+            if (loadingKeyReverse) {
+              state.loading = !state.loading
+            }
             parentVm.$watch(loadingKey, function(val) {
+              if (loadingKeyReverse) {
+                val = !val
+              }
               parentVm.$fire('component!' + $id + '!loading', val)
             })
             delete props[':loading']
