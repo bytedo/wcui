@@ -185,7 +185,7 @@ class AnotStore {
   __INSERT__(item, primary) {
     let collection = __STORE__[this.__name__]
     let collectionDict = __STORE__[`${this.__name__}Dict`]
-    let _id = item[primary || `${this.__name__}_id`]
+    let _id = item[primary || 'id']
     let tmp = collectionDict[_id]
     // 已存在, 则直接更新
     if (tmp) {

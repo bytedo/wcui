@@ -170,7 +170,11 @@ class __layer__ {
             }
           }
           if (typeof this.props.yes === 'function') {
-            this.props.yes.call(this, this.prompt, this.$id)
+            let cb = [this.$id]
+            if (this.type === 3) {
+              cb.unshift(this.prompt)
+            }
+            this.props.yes.apply(this, cb)
           } else {
             this.close()
           }
