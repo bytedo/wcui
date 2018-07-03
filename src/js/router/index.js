@@ -26,7 +26,6 @@ function targetIsThisWindow(targetWindow) {
 const DEFAULT_OPTIONS = {
   mode: 'hash', // hash | history
   prefix: /^(#!|#)[\/]?/, //hash前缀正则
-  historyOpen: true, //是否开启hash历史
   allowReload: true //连续点击同一个链接是否重新加载
 }
 const RULE_REGEXP = /(:id)|(\{id\})|(\{id:([A-z\d\,\[\]\{\}\-\+\*\?\!:\^\$]*)\})/g
@@ -34,7 +33,7 @@ const RULE_REGEXP = /(:id)|(\{id\})|(\{id:([A-z\d\,\[\]\{\}\-\+\*\?\!:\^\$]*)\})
 class Router {
   constructor(options) {
     Anot.hideProperty(this, 'table', [])
-    Anot.hideProperty(this, 'history', null)
+    Anot.hideProperty(this, 'last', '')
     Anot.hideProperty(this, 'path', '')
     Anot.hideProperty(this, 'noMatch', null)
     Anot.hideProperty(
@@ -49,9 +48,6 @@ class Router {
   static init(options = {}) {
     if (Anot.router) {
       throw new Error('不允许重复创建Router实例...')
-    }
-    if (!options.allowReload) {
-      options.historyOpen = true
     }
 
     Anot.router = new this(options)
@@ -71,14 +67,14 @@ class Router {
         this.go(path)
         // hash模式要手动触发一下路由检测
         if (mode === 'hash') {
-          this.__check__()
+          this.__check__(path)
         }
       } else {
         // 因为pushState不会触发popstate事件,
         // 所以这里只在hash模式或有ev.state的情况下才会主动触发路由检测
-        this.path = path.replace(/^[/]+?/, '')
+        path = path.replace(/^[/]+?/, '')
         if (mode === 'hash' || ev.state) {
-          this.__check__()
+          this.__check__(path)
         }
       }
     })
@@ -115,12 +111,10 @@ class Router {
             return
           }
 
-          // hash地址,只管修正前缀即可, 会触发popstate事件
-          if (prefix.test(href)) {
-            this.path = href.replace(prefix, '').trim()
-          } else {
-            // 非hash地址,则阻止默认事件, 产并主动触发跳转
-            // 并强制清除hash
+          // hash地址,只管修正前缀即可, 会触发popstate事件,所以这里只处理非hash的情况
+          if (!prefix.test(href)) {
+            // 非hash地址,则需要阻止默认事件
+            // 并主动触发跳转, 同时强制清除hash
             ev.preventDefault()
             this.go(href, true)
           }
@@ -168,18 +162,17 @@ class Router {
   }
 
   // 路由检测
-  __check__() {
-    let { allowReload, historyOpen } = this.options
-    if (!allowReload && this.path === this.history) {
+  __check__(path) {
+    let { allowReload } = this.options
+    if (!allowReload && path === this.last) {
       return
     }
 
-    if (historyOpen) {
-      this.history = this.path
-    }
+    this.last = this.path
+    this.path = path
 
     for (let i = 0, route; (route = this.table[i++]); ) {
-      let args = this.path.match(route.regexp)
+      let args = path.match(route.regexp)
       if (args) {
         args.shift()
         return route.callback.apply(route, args)
@@ -199,15 +192,17 @@ class Router {
         return
       }
       location.hash = '!/' + path
-      this.path = path
     } else {
       let hash = forceCleanHash ? '' : location.hash
       let search = forceCleanHash ? '' : location.search
       path = path.replace(/^[/]+?/, '')
-      window.history.pushState({ path }, null, `/${path + search + hash}`)
-      this.path = path
+      if (forceCleanHash) {
+        window.history.pushState({ path }, null, `/${path + search + hash}`)
+      } else {
+        window.history.replaceState({ path }, null, `/${path + search + hash}`)
+      }
       // pushState不会触发popstate事件,所以要手动触发路由检测
-      this.__check__()
+      this.__check__(path)
     }
   }
 

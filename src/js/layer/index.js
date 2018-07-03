@@ -8,7 +8,7 @@
 'use strict'
 
 import 'drag/index'
-import './skin/default.scss'
+import './skin/normal.scss'
 
 Anot.ui.layer = '1.0.0-normal'
 
@@ -18,7 +18,6 @@ let unique = null // 储存当前打开的1/2/3类型的弹窗
 let lid = 0
 let defconf = {
   type: 1, // 弹窗类型
-  skin: 'default', // 默认主题
   background: '#fff',
   mask: true, // 遮罩
   maskClose: false, // 遮罩点击关闭弹窗
@@ -143,7 +142,6 @@ class __layer__ {
         'area',
         'shift',
         'offset',
-        'skin',
         'mask',
         'maskClose',
         'container',
@@ -245,7 +243,7 @@ class __layer__ {
     }
 
     layBox.classList.add('layer-box')
-    layBox.classList.add('skin-' + state.skin)
+    layBox.classList.add('skin-normal')
 
     if (state.extraClass) {
       layBox.classList.add(state.extraClass)
@@ -605,7 +603,7 @@ const _layer = {
 
     return _layer.open(opt)
   },
-  loading(style, container, cb) {
+  load(style, container, cb) {
     style = style >>> 0
     style = style < 1 ? 1 : style > 5 ? 5 : style
 

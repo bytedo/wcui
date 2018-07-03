@@ -32,7 +32,7 @@
     &.scale {transform:scale(1.02);transition:transform .1s linear;}
 
     /* 默认皮肤 */
-    &.skin-default {padding:15px 10px;border-radius:3px;color:#666;font-size:14px;box-shadow:0 5px 20px rgba(0,0,0,.3); 
+    &.skin-normal {padding:15px 10px;border-radius:3px;color:#666;font-size:14px;box-shadow:0 5px 20px rgba(0,0,0,.3); 
 
 
       /* 弹层标题栏 */
@@ -243,3 +243,10 @@
 
 
 
+@media screen and (max-width:480px) {
+  .do-layer {
+    .layer-box {
+      &.type-1,&.type-2,&.type-3,&.type-4,&.type-7 {width:90%;}
+    }
+  }
+}

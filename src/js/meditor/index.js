@@ -233,10 +233,21 @@ function html2md(str) {
 function tool(name) {
   name = (name + '').trim().toLowerCase()
   name = '|' === name ? 'pipe' : name
-  let event = name === 'pipe' ? '' : `:click="onToolClick('${name}', $event)"`
+
   let title = TOOLBAR[name]
+  let extra = ''
+  switch (name) {
+    case 'preview':
+      extra = ':class="{active: preview}"'
+      break
+    case 'fullscreen':
+      extra = ':class="{active: fullscreen}"'
+      break
+    default:
+      break
+  }
   return `
-  <span title="${title}" class="do-meditor__icon icon-${name}" ${event}></span>`
+  <span title="${title}" class="do-meditor__icon icon-${name}" data-name="${name}" ${extra}></span>`
 }
 
 class MEObject {
@@ -290,7 +301,7 @@ Anot.component('meditor', {
     delete this.props.toolbar
 
     return `
-    <div class="tool-bar do-fn-noselect">${toolbar}</div>
+    <div class="tool-bar do-fn-noselect" :click="onToolClick">${toolbar}</div>
     <textarea 
       ref="editor"
       class="editor-body" 
@@ -376,7 +387,7 @@ Anot.component('meditor', {
     height: 180,
     disabled: false, //禁用编辑器
     fullscreen: false, //是否全屏
-    preview: true, //是否显示预览
+    preview: window.innerWidth > 768, //是否显示预览
     htmlTxt: '', //用于预览渲染
     value: '', //纯md文本
     addon // 已有插件
@@ -457,8 +468,12 @@ Anot.component('meditor', {
         return dom.value.slice(startPos, endPos)
       }
     },
-    onToolClick: function(name, ev) {
-      if (this.disabled) {
+    onToolClick: function(ev) {
+      if (ev.target.tagName.toLowerCase() !== 'span') {
+        return
+      }
+      let name = ev.target.dataset.name
+      if (this.disabled || name === 'pipe') {
         return
       }
       if (this.addon[name]) {
