@@ -66,11 +66,18 @@ Anot.component('button', {
 // 单选按钮
 Anot.component('radio', {
   __init__(props, state, next) {
-    state.text = this.textContent
-    state.checked = state.value === props.label
     if (props.hasOwnProperty('disabled')) {
       state.disabled = true
     }
+    if (props.hasOwnProperty('checked')) {
+      if (state.value === null) {
+        state.value = props.label
+      }
+    }
+
+    state.text = this.textContent
+    state.checked = state.value === props.label
+
     this.classList.add('do-radio')
     this.classList.add('do-fn-noselect')
     this.classList.add(props.color || 'grey')
@@ -93,6 +100,9 @@ Anot.component('radio', {
     text: '',
     checked: false,
     disabled: false
+  },
+  props: {
+    label: ''
   },
   watch: {
     value(val) {
@@ -155,11 +165,15 @@ Anot.component('checkbox', {
       this.parentNode.removeChild(this)
       Anot.error('多选框的传入值必须一个数组', TypeError)
     }
-    state.text = this.textContent
-    state.checked = state.value.indexOf(props.label) > -1
     if (props.hasOwnProperty('disabled')) {
       state.disabled = true
     }
+    if (props.hasOwnProperty('checked')) {
+      Anot.Array.ensure(state.value, props.label)
+    }
+
+    state.text = this.textContent
+    state.checked = state.value.indexOf(props.label) > -1
 
     this.classList.add('do-checkbox')
     this.classList.add('do-fn-noselect')
@@ -184,6 +198,9 @@ Anot.component('checkbox', {
     text: '',
     checked: false,
     disabled: false
+  },
+  props: {
+    label: ''
   },
   methods: {
     onClick() {
