@@ -249,7 +249,6 @@ Anot.component('input', {
     next()
   },
   render() {
-    // console.log(this.props)
     let { icon, placeholder } = this.props
     let holder = `
       <span 
@@ -261,6 +260,7 @@ Anot.component('input', {
         class="do-input__input"
         :attr="{disabled: disabled, type: props.type }"
         :duplex="value" 
+        :keyup="onKeyup"
         :blur="onBlur"
         :focus="onFocus" />`
     let ico = icon ? `<i class="do-input__icon do-icon-${icon}"></i>` : ''
@@ -278,7 +278,8 @@ Anot.component('input', {
     type: 'text',
     width: 180,
     placeholder: '',
-    default: ''
+    default: '',
+    submit: Anot.PropsTypes.isFunction() // on key `ENTER`
   },
   methods: {
     onFocus() {
@@ -286,6 +287,13 @@ Anot.component('input', {
     },
     onBlur() {
       this.active = false
+    },
+    onKeyup(ev) {
+      if (ev.keyCode === 13) {
+        if (typeof this.props.submit === 'function') {
+          this.props.submit()
+        }
+      }
     }
   }
 })

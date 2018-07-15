@@ -36,7 +36,7 @@
 
 
       /* 弹层标题栏 */
-      .layer-title {width:100%;height:43px;padding:0 10px;line-height:43px;font-size:16px;color:nth($cd, 1);}
+      .layer-title {width:100%;height:43px;padding:0 10px;line-height:43px;font-size:16px;color:nth($cd, 2);}
 
       /* 弹层主体内容 */
       .layer-content {position:relative;width:100%;height:auto;min-height:50px;padding:10px;word-break:break-all;word-wrap: break-word;
@@ -45,8 +45,8 @@
           
         .prompt-value {width: 100%;height: 30px;padding: 0 8px;border: 1px solid #ddd;border-radius: 3px;
 
-            &.alert {border-color:nth($cr, 1)}
-            &:focus {border-color:nth($ct, 1)}
+            &.alert {border-color:nth($cr, 2)}
+            &:focus {border-color:nth($ct, 2)}
         }
         .msg-box {line-height:30px;}
       }
@@ -55,14 +55,14 @@
       /* 弹层按钮部分 */
       .layer-ctrl {width:100%;height:40px;padding:5px 0;line-height:30px;font-size:14px;color:#454545;text-align:right;
 
-        a {overflow:hidden;position:relative;display:inline-block;width:auto;min-width:60px;height:30px;margin-left:5px;padding:0 10px;color:nth($ct, 1);text-align:center;cursor:pointer;
+        a {overflow:hidden;position:relative;display:inline-block;width:auto;min-width:60px;height:30px;margin-left:5px;padding:0 10px;color:nth($ct, 2);text-align:center;cursor:pointer;
 
-          &::before {position:absolute;left:-50%;top:-50%;z-index:-1;display:block;width:200%;height:200%;border-radius:50%;background:nth($cp, 2); content:"";opacity:0;transform: scale(0, .0); transition:opacity 1.3s cubic-bezier(0.23, 1, 0.32, 1),transform 1.3s cubic-bezier(0.23, 1, 0.32, 1);}
+          &::before {position:absolute;left:-50%;top:-50%;z-index:-1;display:block;width:200%;height:200%;border-radius:50%;background:nth($cp, 1); content:"";opacity:0;transform: scale(0, .0); transition:opacity 1.3s cubic-bezier(0.23, 1, 0.32, 1),transform 1.3s cubic-bezier(0.23, 1, 0.32, 1);}
             
           &:hover {
             &::before {opacity:1;transform:scale(1, .8);}
           }
-          &:active {background:nth($cp, 1)}
+          &:active {background:nth($cp, 2)}
         }
       }
 
@@ -104,9 +104,9 @@
 
       .toast-box {display:inline-block;position:relative;min-height:40px;padding:5px 12px 5px 50px;line-height:28px;border-radius:3px;word-break: break-all;
 
-        &.style-info {border:1px solid nth($ct, 1);background:#edfbf8;color:nth($ct, 3);}
-        &.style-warn {border:1px solid nth($co, 1);background:#fffbed;color:nth($co, 3);}
-        &.style-deny {border:1px solid nth($cr, 1);background:#fffbed;color:nth($cr, 3);}
+        &.style-info {border:1px solid nth($ct, 2);background:#edfbf8;color:nth($ct, 3);}
+        &.style-warn {border:1px solid nth($co, 2);background:#fffbed;color:nth($co, 3);}
+        &.style-deny {border:1px solid nth($cr, 2);background:#fffbed;color:nth($cr, 3);}
 
         >i {position:absolute;left:12px;top:5px;line-height:28px;font-size:26px;}
       }

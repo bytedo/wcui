@@ -37,17 +37,17 @@
   }
 
   
-  &.teal {color:nth($ct, 1);}
-  &.green {color:nth($cg, 1);}
-  &.blue {color:nth($cb, 1);}
-  &.purple {color:nth($cpp, 1);}
-  &.red {color:nth($cr, 1);}
-  &.orange {color:nth($co, 1);}
+  &.teal {color:nth($ct, 2);}
+  &.green {color:nth($cg, 2);}
+  &.blue {color:nth($cb, 2);}
+  &.purple {color:nth($cpp, 2);}
+  &.red {color:nth($cr, 2);}
+  &.orange {color:nth($co, 2);}
   &.plain {color:nth($cp, 3);}
-  &.grey {color:nth($cgr, 1);}
-  &.dark {color:nth($cd, 1);}
+  &.grey {color:nth($cgr, 2);}
+  &.dark {color:nth($cd, 2);}
 
-  &.disabled {color:nth($cp, 1);cursor:not-allowed;
+  &.disabled {color:nth($cp, 2);cursor:not-allowed;
     
     &::before {display:none;}
   }
@@ -57,57 +57,57 @@
 .do-radio {position:relative;display:inline-block;width:auto;height:30px;padding-right:10px;line-height:30px;text-align:center;cursor:default;font-size:14px;
 
 
-  &__box {float:left;width:20px;height:20px;margin:5px;margin-left:0;border:1px solid nth($cgr, 1);border-radius:50%;}
+  &__box {float:left;width:20px;height:20px;margin:5px;margin-left:0;border:1px solid nth($cgr, 2);border-radius:50%;}
   &.checked &__box::after {display:block;width:14px;height:14px;margin:2px;border-radius:50%;content:""}  
 
-  &.teal &__box  {border-color:nth($ct, 1);
-    &::after {background:nth($ct, 1);}
+  &.teal &__box  {border-color:nth($ct, 2);
+    &::after {background:nth($ct, 2);}
   }
-  &.teal {color:nth($ct, 1);}
+  &.teal {color:nth($ct, 2);}
 
-  &.green &__box  {border-color:nth($cg, 1);
-    &::after {background:nth($cg, 1);}
+  &.green &__box  {border-color:nth($cg, 2);
+    &::after {background:nth($cg, 2);}
   }
-  &.green {color:nth($cg, 1);}
+  &.green {color:nth($cg, 2);}
 
-  &.blue &__box {border-color:nth($cb, 1);
-    &::after {background:nth($cb, 1);}
+  &.blue &__box {border-color:nth($cb, 2);
+    &::after {background:nth($cb, 2);}
   }
-  &.blue {color:nth($cb, 1);}
+  &.blue {color:nth($cb, 2);}
 
-  &.purple &__box {border-color:nth($cpp, 1);
-    &::after {background:nth($cpp, 1);}
+  &.purple &__box {border-color:nth($cpp, 2);
+    &::after {background:nth($cpp, 2);}
   }
-  &.purple {color:nth($cpp, 1);}
+  &.purple {color:nth($cpp, 2);}
 
-  &.red &__box  {border-color:nth($cr, 1);
-    &::after {background:nth($cr, 1);}
+  &.red &__box  {border-color:nth($cr, 2);
+    &::after {background:nth($cr, 2);}
   }
-  &.red {color:nth($cr, 1);}
+  &.red {color:nth($cr, 2);}
 
-  &.orange &__box  {border-color:nth($co, 1);
-    &::after {background:nth($co, 1);}
+  &.orange &__box  {border-color:nth($co, 2);
+    &::after {background:nth($co, 2);}
   }
-  &.orange {color:nth($co, 1);}
+  &.orange {color:nth($co, 2);}
 
   &.plain &__box  {border-color:nth($cp, 3);
     &::after {background:nth($cp, 3);}
   }
   &.plain {color:nth($cp, 3);}
 
-  &.grey &__box  {border-color:nth($cgr, 1);
-    &::after {background:nth($cgr, 1);}
+  &.grey &__box  {border-color:nth($cgr, 2);
+    &::after {background:nth($cgr, 2);}
   }
-  &.grey {color:nth($cgr, 1);}
+  &.grey {color:nth($cgr, 2);}
 
-  &.dark &__box  {border-color:nth($cd, 1);
-    &::after {background:nth($cd, 1);}
+  &.dark &__box  {border-color:nth($cd, 2);
+    &::after {background:nth($cd, 2);}
   }
-  &.dark {color:nth($cd, 1);}
+  &.dark {color:nth($cd, 2);}
 
   
   &.disabled {color:nth($cp, 3);cursor:not-allowed;text-decoration:line-through;}
-  &.disabled.checked {color:nth($cd, 2);}
+  &.disabled.checked {color:nth($cd, 1);}
   &.disabled &__box {border-color:nth($cp, 3);
     &::after {background:nth($cp, 3);}
   }
@@ -127,35 +127,35 @@
 
   &.checked &__dot {left:auto;right:0;}
 
-  &.teal.checked &__dot  {background:nth($ct, 1);}
-  &.teal.checked &__label  {background:nth($ct, 2) + a0;}
+  &.teal.checked &__dot  {background:nth($ct, 2);}
+  &.teal.checked &__label  {background:nth($ct, 1) + a0;}
 
-  &.green.checked &__dot  {background:nth($cg, 1);}
-  &.green.checked &__label  {background:nth($cg, 2) + a0;}
+  &.green.checked &__dot  {background:nth($cg, 2);}
+  &.green.checked &__label  {background:nth($cg, 1) + a0;}
 
-  &.blue.checked &__dot {background:nth($cb, 1);}
-  &.blue.checked &__label {background:nth($cb, 2) + a0;}
+  &.blue.checked &__dot {background:nth($cb, 2);}
+  &.blue.checked &__label {background:nth($cb, 1) + a0;}
 
-  &.purple.checked &__dot {background:nth($cpp, 1);}
-  &.purple.checked &__label {background:nth($cpp, 2) + a0;}
+  &.purple.checked &__dot {background:nth($cpp, 2);}
+  &.purple.checked &__label {background:nth($cpp, 1) + a0;}
 
-  &.red.checked &__dot  {background:nth($cr, 1);}
-  &.red.checked &__label  {background:nth($cr, 2) + a0;}
+  &.red.checked &__dot  {background:nth($cr, 2);}
+  &.red.checked &__label  {background:nth($cr, 1) + a0;}
 
-  &.orange.checked &__dot  {background:nth($co, 1);}
-  &.orange.checked &__label  {background:nth($co, 2) + a0;}
+  &.orange.checked &__dot  {background:nth($co, 2);}
+  &.orange.checked &__label  {background:nth($co, 1) + a0;}
 
   &.plain.checked &__dot  {background:nth($cp, 3);}
   &.plain.checked &__label  {background:nth($cp, 2);}
 
-  &.grey.checked &__dot  {background:nth($cgr, 1);}
-  &.grey.checked &__label  {background:nth($cgr, 2) + a0;}
+  &.grey.checked &__dot  {background:nth($cgr, 2);}
+  &.grey.checked &__label  {background:nth($cgr, 1) + a0;}
 
-  &.dark.checked &__dot  {background:nth($cd, 1);}
-  &.dark.checked &__label  {background:nth($cd, 2) + a0;}
+  &.dark.checked &__dot  {background:nth($cd, 2);}
+  &.dark.checked &__label  {background:nth($cd, 1) + a0;}
 
   &.disabled.checked &__dot  {background:#fff;}
-  &.disabled &__label, &.disabled.checked &__label {background:nth($cp, 2);
+  &.disabled &__label, &.disabled.checked &__label {background:nth($cp, 1);
 
     &::before {display:block;position:absolute;top:6px;width:8px;height:4px;border-radius:2px;background:#fff;content:"";}
   }
@@ -167,57 +167,57 @@
 .do-checkbox {position:relative;display:inline-block;width:auto;height:30px;padding-right:10px;line-height:30px;text-align:center;cursor:default;font-size:14px;
 
 
-  &__box {float:left;width:20px;height:20px;margin:5px;margin-left:0;line-height:18px;border:1px solid nth($cgr, 1);border-radius:3px;font-size:18px;text-align:center;
+  &__box {float:left;width:20px;height:20px;margin:5px;margin-left:0;line-height:18px;border:1px solid nth($cgr, 2);border-radius:3px;font-size:18px;text-align:center;
     
   }
   &.checked &__box {color:#fff;font-weight:bold;}
 
-  &.grey {color:nth($cgr, 1);}
-  &.grey &__box {border-color:nth($cgr, 1);}
-  &.grey.checked &__box {background:nth($cgr, 1);}
+  &.grey {color:nth($cgr, 2);}
+  &.grey &__box {border-color:nth($cgr, 2);}
+  &.grey.checked &__box {background:nth($cgr, 2);}
 
-  &.dark {color:nth($cd, 1);}
-  &.dark &__box {border-color:nth($cd, 1);}
-  &.dark.checked &__box {background:nth($cd, 1);}
+  &.dark {color:nth($cd, 2);}
+  &.dark &__box {border-color:nth($cd, 2);}
+  &.dark.checked &__box {background:nth($cd, 2);}
 
-  &.teal {color:nth($ct, 1);}
-  &.teal &__box {border-color:nth($ct, 1);}
-  &.teal.checked &__box {background:nth($ct, 1);}
+  &.teal {color:nth($ct, 2);}
+  &.teal &__box {border-color:nth($ct, 2);}
+  &.teal.checked &__box {background:nth($ct, 2);}
 
-  &.green {color:nth($cg, 1);}
-  &.green &__box {border-color:nth($cg, 1);}
-  &.green.checked &__box {background:nth($cg, 1);}
+  &.green {color:nth($cg, 2);}
+  &.green &__box {border-color:nth($cg, 2);}
+  &.green.checked &__box {background:nth($cg, 2);}
 
-  &.blue {color:nth($cb, 1);}
-  &.blue &__box {border-color:nth($cb, 1);}
-  &.blue.checked &__box {background:nth($cb, 1);}
+  &.blue {color:nth($cb, 2);}
+  &.blue &__box {border-color:nth($cb, 2);}
+  &.blue.checked &__box {background:nth($cb, 2);}
 
-  &.purple {color:nth($cpp, 1);}
-  &.purple &__box {border-color:nth($cpp, 1);}
-  &.purple.checked &__box {background:nth($cpp, 1);}
+  &.purple {color:nth($cpp, 2);}
+  &.purple &__box {border-color:nth($cpp, 2);}
+  &.purple.checked &__box {background:nth($cpp, 2);}
 
-  &.orange {color:nth($co, 1);}
-  &.orange &__box {border-color:nth($co, 1);}
-  &.orange.checked &__box {background:nth($co, 1);}
+  &.orange {color:nth($co, 2);}
+  &.orange &__box {border-color:nth($co, 2);}
+  &.orange.checked &__box {background:nth($co, 2);}
 
   &.plain {color:nth($cp, 3);}
   &.plain &__box {border-color:nth($cp, 3);}
   &.plain.checked &__box {background:nth($cp, 3);}
 
-  &.red {color:nth($cr, 1);}
-  &.red &__box {border-color:nth($cr, 1);}
-  &.red.checked &__box {background:nth($cr, 1);}
+  &.red {color:nth($cr, 2);}
+  &.red &__box {border-color:nth($cr, 2);}
+  &.red.checked &__box {background:nth($cr, 2);}
     
   &.disabled {cursor:not-allowed;color:nth($cp, 3);text-decoration:line-through;}
   &.disabled &__box {border-color:nth($cp, 3);}
-  &.disabled.checked {color:nth($cd, 2);}
+  &.disabled.checked {color:nth($cd, 1);}
   &.disabled.checked &__box {background:nth($cp, 3);}
 
 }
 
 
 
-.do-input {position:relative;display:inline-block;width:180px;height:30px;line-height:30px;border-bottom:1px solid nth($cp, 1);cursor:default;font-size:14px;
+.do-input {position:relative;display:inline-block;width:180px;height:30px;line-height:30px;border-bottom:1px solid nth($cp, 2);cursor:default;font-size:14px;
 
   &.icon-left {padding-left:30px;}
   &.icon-right {padding-right:30px;}
@@ -226,7 +226,7 @@
 
     &.visible {visibility:visible;}
   }
-  &__input {position:relative;width:100%;height:30px;padding:0 5px;border:0;background:none;font-size:14px;color:nth($cd, 1);}
+  &__input {position:relative;width:100%;height:30px;padding:0 5px;border:0;background:none;font-size:14px;color:nth($cd, 2);}
   &__icon {position:absolute;bottom:0;width:30px;height:30px;text-align:center;font-size:20px;}
 
   &::after {position:absolute;left:50%;bottom:-1px;width:0;height:2px;content:"";transition:left .15s linear,width .15s linear;}
@@ -240,36 +240,36 @@
   &.icon-left &__holder {padding-left:30px;}
   &.icon-right &__holder {padding-right:30px;}
 
-  &.grey {color:nth($cgr, 1);
-    &::after {background:nth($cgr, 2);}
+  &.grey {color:nth($cgr, 2);
+    &::after {background:nth($cgr, 1);}
   }
 
-  &.dark {color:nth($cd, 1);
-    &::after {background:nth($cd, 2);}
+  &.dark {color:nth($cd, 2);
+    &::after {background:nth($cd, 1);}
   }
 
-  &.teal{color:nth($ct, 1);
-    &::after {background:nth($ct, 2);}
+  &.teal{color:nth($ct, 2);
+    &::after {background:nth($ct, 1);}
   }
 
-  &.green {color:nth($cg, 1);
-    &::after {background:nth($cg, 2);}
+  &.green {color:nth($cg, 2);
+    &::after {background:nth($cg, 1);}
   }
 
-  &.red {color:nth($cr, 1);
-    &::after {background:nth($cr, 2);}
+  &.red {color:nth($cr, 2);
+    &::after {background:nth($cr, 1);}
   }
 
-  &.blue {color:nth($cb, 1);
-    &::after {background:nth($cb, 2);}
+  &.blue {color:nth($cb, 2);
+    &::after {background:nth($cb, 1);}
   }
 
-  &.purple {color:nth($cpp, 1);
-    &::after {background:nth($cpp, 2);}
+  &.purple {color:nth($cpp, 2);
+    &::after {background:nth($cpp, 1);}
   }
 
-  &.orange {color:nth($co, 1);
-    &::after {background:nth($co, 2);}
+  &.orange {color:nth($co, 2);
+    &::after {background:nth($co, 1);}
   }
 
   &.disabled {background:#fff8ed;color:nth($cp, 3);}

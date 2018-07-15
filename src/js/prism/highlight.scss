@@ -9,7 +9,7 @@
 @import 'var.scss';
 
 /*代码块*/
-.do-ui-blockcode {position: relative;margin: 15px 0;padding: 8px 0;line-height: 1.5;border-radius:3px;background: nth($cp, 2);
+.do-ui-blockcode {position: relative;margin: 15px 0;padding: 8px 0;line-height: 1.5;border-radius:3px;background: nth($cp, 1);
 
   /*语法高亮*/
   .lang {position: relative;display: block;padding: 0 8px;color: #383a42;word-wrap: break-word;white-space: pre-wrap;font-family: Courier;
@@ -46,4 +46,4 @@
   }
 }
 /*行内代码*/
-.do-ui-inlinecode {display:inline-block;margin:0 2px;padding:0 5px;line-height: 1.5;color:#d14;background: nth($cp, 2);border-radius:3px;font-family: "Courier New";}
+.do-ui-inlinecode {display:inline-block;margin:0 2px;padding:0 5px;line-height: 1.5;color:#d14;background: nth($cp, 1);border-radius:3px;font-family: "Courier New";}

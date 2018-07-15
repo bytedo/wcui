@@ -8,7 +8,7 @@
 
 @import "var.scss";
 
-.do-pager {display:block;height:auto;text-align:center;font-size:14px;color: nth($cgr, 1);
+.do-pager {display:block;height:auto;text-align:center;font-size:14px;color: nth($cgr, 2);
 
   &.mini {line-height:30px;
     .button,.page {min-width:30px;height:30px}
@@ -20,7 +20,7 @@
     .button,.page {min-width:40px;height:40px}
   }
     
-  .button,.page {display:inline-block;border:0;color: nth($cgr, 1);text-decoration:none;cursor:pointer;vertical-align:top;font-size:14px;font-weight:100;appearance:none;}
+  .button,.page {display:inline-block;border:0;color: nth($cgr, 2);text-decoration:none;cursor:pointer;vertical-align:top;font-size:14px;font-weight:100;appearance:none;}
   .button {font-size:18px;}
   .curr, .disabled {cursor:default;}
   
@@ -32,10 +32,10 @@
     .curr {padding:0 8px;margin:0 3px;}
     
     .curr {font-weight:bold;font-size:15px;}
-    .page.disabled {min-width:0;padding:0;background:none;color:nth($cgr, 1);
+    .page.disabled {min-width:0;padding:0;background:none;color:nth($cgr, 2);
       &:hover,&:active {background:none;}
     }
-    .page.curr {background:none;color:nth($cgr, 1);
+    .page.curr {background:none;color:nth($cgr, 2);
       &:hover,&:active {background:none;}
     }
     .button[disabled] {cursor:not-allowed;}
@@ -59,92 +59,92 @@
   }
 
   &.plain {
-    .page,.button {background:nth($cp, 1);color:nth($cgr, 1);
+    .page,.button {background:nth($cp, 2);color:nth($cgr, 2);
 
-      &:hover {background:nth($cp, 2)}
+      &:hover {background:nth($cp, 1)}
       &:active {background:nth($cp, 3)}
     }
-    .button[disabled] {background:nth($cp, 1);}
+    .button[disabled] {background:nth($cp, 2);}
     &.skin-2 .curr {background:nth($cp, 3)}
   }
 
   &.grey {
-    .page,.button {background:nth($cgr, 1);color: #fff;
+    .page,.button {background:nth($cgr, 2);color: #fff;
 
-      &:hover {background:nth($cgr, 2)}
+      &:hover {background:nth($cgr, 1)}
       &:active {background:nth($cgr, 3)}
     }
-    .button[disabled] {background:nth($cgr, 1);}
+    .button[disabled] {background:nth($cgr, 2);}
     &.skin-2 .curr {background:nth($cgr, 3)}
   }
 
   &.dark {
-    .page,.button {background:nth($cd, 1);color: #fff;
+    .page,.button {background:nth($cd, 2);color: #fff;
 
       &:hover {background:nth($cd, 2)}
       &:active {background:nth($cd, 3)}
     }
-    .button[disabled] {background:nth($cd, 1);}
+    .button[disabled] {background:nth($cd, 2);}
     &.skin-2 .curr {background:nth($cd, 3)}
   }
 
   &.red {
-    .page,.button {background:nth($cr, 1);color: #fff;
+    .page,.button {background:nth($cr, 2);color: #fff;
 
-      &:hover {background:nth($cr, 2)}
+      &:hover {background:nth($cr, 1)}
       &:active {background:nth($cr, 3)}
     }
-    .button[disabled] {background:nth($cr, 1);}
+    .button[disabled] {background:nth($cr, 2);}
     &.skin-2 .curr {background:nth($cr, 3)}
   }
 
   &.orange {
-    .page,.button {background:nth($co, 1);color: #fff;
+    .page,.button {background:nth($co, 2);color: #fff;
 
-      &:hover {background:nth($co, 2)}
+      &:hover {background:nth($co, 1)}
       &:active {background:nth($co, 3)}
     }
-    .button[disabled] {background:nth($co, 1);}
+    .button[disabled] {background:nth($co, 2);}
     &.skin-2 .curr {background:nth($co, 3)}
   }
 
   &.green {
-    .page,.button {background:nth($cg, 1);color: #fff;
+    .page,.button {background:nth($cg, 2);color: #fff;
 
-      &:hover {background:nth($cg, 2)}
+      &:hover {background:nth($cg, 1)}
       &:active {background:nth($cg, 3)}
     }
-    .button[disabled] {background:nth($cg, 1);}
+    .button[disabled] {background:nth($cg, 2);}
     &.skin-2 .curr {background:nth($cg, 3)}
   }
 
   &.teal {
-    .page,.button {background:nth($ct, 1);color: #fff;
+    .page,.button {background:nth($ct, 2);color: #fff;
 
-      &:hover {background:nth($ct, 2)}
+      &:hover {background:nth($ct, 1)}
       &:active {background:nth($ct, 3)}
     }
-    .button[disabled] {background:nth($ct, 1);}
+    .button[disabled] {background:nth($ct, 2);}
     &.skin-2 .curr {background:nth($ct, 3)}
   }
 
   &.blue {
-    .page,.button {background:nth($cb, 1);color: #fff;
+    .page,.button {background:nth($cb, 2);color: #fff;
 
-      &:hover {background:nth($cb, 2)}
+      &:hover {background:nth($cb, 1)}
       &:active {background:nth($cb, 3)}
     }
-    .button[disabled] {background:nth($cb, 1);}
+    .button[disabled] {background:nth($cb, 2);}
     &.skin-2 .curr {background:nth($cb, 3)}
   }
 
   &.purple,.button {
-    .page {background:nth($cpp, 1);color: #fff;
+    .page {background:nth($cpp, 2);color: #fff;
 
-      &:hover {background:nth($cpp, 2)}
+      &:hover {background:nth($cpp, 1)}
       &:active {background:nth($cpp, 3)}
     }
-    .button[disabled] {background:nth($cpp, 1);}
+    .button[disabled] {background:nth($cpp, 2);}
     &.skin-2 .curr {background:nth($cpp, 3)}
   }  
 

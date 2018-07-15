@@ -14,18 +14,18 @@
 
 .do-meditor {position:relative;display:block;width:100%;height:100%;padding-top:41px;border:1px solid nth($cp, 3);background:#fff;color:nth($cgr, 3);
 
-  ::-webkit-scrollbar {width:5px;height:5px;background:nth($cp, 2);}
-  ::-webkit-scrollbar:hover {background:nth($cp, 1);}
+  ::-webkit-scrollbar {width:5px;height:5px;background:nth($cp, 1);}
+  ::-webkit-scrollbar:hover {background:nth($cp, 2);}
   ::-webkit-scrollbar-button {display:none;}
-  ::-webkit-scrollbar-thumb {background:nth($cgr, 2);}
-  ::-webkit-scrollbar-thumb:hover {background:nth($cgr, 1);}
+  ::-webkit-scrollbar-thumb {background:nth($cgr, 1);}
+  ::-webkit-scrollbar-thumb:hover {background:nth($cgr, 2);}
 
-  &.disabled{border-color:nth($co, 2);
+  &.disabled{border-color:nth($co, 1);
 
     &::after {position:absolute;left:0;top:0;z-index:100;width:100%;height:100%;content:"";background:rgba(255, 182, 24, 0.07);}
   }
 
-  .tool-bar {overflow:hidden;position:absolute;top:0;left:0;z-index:99;width:100%;height:41px;line-height:40px;border-bottom:1px solid nth($cp, 1);background:#fff;color:nth($cd, 1);text-align:center;font-size:24px;
+  .tool-bar {overflow:hidden;position:absolute;top:0;left:0;z-index:99;width:100%;height:41px;line-height:40px;border-bottom:1px solid nth($cp, 2);background:#fff;color:nth($cd, 2);text-align:center;font-size:24px;
 
     span {float:left;width:40px;height:40px;
 
@@ -79,21 +79,21 @@
 
 
 
-.do-meditor__button {overflow:hidden;position:relative;display:inline-block;width:auto;min-width:60px;height:40px;margin-left:5px;padding:0 10px;line-height:40px;color:nth($ct, 1);text-align:center;
+.do-meditor__button {overflow:hidden;position:relative;display:inline-block;width:auto;min-width:60px;height:40px;margin-left:5px;padding:0 10px;line-height:40px;color:nth($ct, 2);text-align:center;
 
-  &::before {position:absolute;left:-50%;top:-50%;z-index:-1;display:block;width:200%;height:200%;border-radius:50%;background:nth($cp, 2); content:"";opacity:0;transform: scale(0, .0); transition:opacity 1.3s cubic-bezier(0.23, 1, 0.32, 1),transform 1.3s cubic-bezier(0.23, 1, 0.32, 1);}        
+  &::before {position:absolute;left:-50%;top:-50%;z-index:-1;display:block;width:200%;height:200%;border-radius:50%;background:nth($cp, 1); content:"";opacity:0;transform: scale(0, .0); transition:opacity 1.3s cubic-bezier(0.23, 1, 0.32, 1),transform 1.3s cubic-bezier(0.23, 1, 0.32, 1);}        
   &:hover {
     &::before {opacity:1;transform:scale(1, .8);}
   }
-  &:active {background:nth($cp, 1)}
+  &:active {background:nth($cp, 2)}
 }
 
 
 /* 关于编辑器模块*/
 .do-meditor-about {width:400px;padding:10px 20px;
-    pre {width:100%;padding-bottom:15px;line-height:1;font-size:14px;}
-    a {color:#049789}
-    p {margin:0 auto 5px;}
+  pre {width:100%;padding-bottom:15px;line-height:1;font-size:14px;}
+  a {color:nth($ct, 1)}
+  p {margin:0 auto 5px;}
 }
 
 /*表格模块*/
@@ -125,11 +125,11 @@
 }
 
 /*通用输入模块, 链接/图片插入/文件插入/代码块插入*/
-.do-meditor-common {width:360px;height:auto;padding:0 20px;font-size:14px;color:nth($cd, 2);
+.do-meditor-common {width:360px;height:auto;padding:0 20px;font-size:14px;color:nth($cd, 1);
 
   section {width:100%;height: 40px;margin:10px 0;line-height:40px;
 
-    .txt {width:100%;height:40px;padding:0 10px;border:0;border-radius:5px;background:nth($cp, 2);color:nth($cd, 1);font-size:14px;}
+    .txt {width:100%;height:40px;padding:0 10px;border:0;border-radius:5px;background:nth($cp, 1);color:nth($cd, 2);font-size:14px;}
     .label {float: left;width:50%;}
     .submit {float:right;width:30%;}
   }
@@ -139,15 +139,15 @@
   section {display:block;width:100%;height:auto;margin:10px 0;line-height:35px;
   
     .label {float: left;width:80px;}
-    select {float:left;width:200px;height:35px;padding:0 30px 0 10px;border:0;border-radius:0;border-bottom:1px solid nth($cp, 3);background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAMCAMAAABV0m3JAAAADFBMVEUAAAD///+Pj4+JiYkxcGihAAAABHRSTlMAABBwqVQF9wAAADNJREFUeNqlzjEOACAMw8DQ/v/PSE5FFhaEx5usdekBuzRVH0RtCqJYELUFrVjQigX/5jdvzgDh9izlMQAAAABJRU5ErkJggg==) no-repeat right 12px;color:nth($cd, 1);outline:none;-webkit-appearance:none;-moz-appearance: none;@include ts;
+    select {float:left;width:200px;height:35px;padding:0 30px 0 10px;border:0;border-radius:0;border-bottom:1px solid nth($cp, 3);background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAMCAMAAABV0m3JAAAADFBMVEUAAAD///+Pj4+JiYkxcGihAAAABHRSTlMAABBwqVQF9wAAADNJREFUeNqlzjEOACAMw8DQ/v/PSE5FFhaEx5usdekBuzRVH0RtCqJYELUFrVjQigX/5jdvzgDh9izlMQAAAABJRU5ErkJggg==) no-repeat right 12px;color:nth($cd, 2);outline:none;-webkit-appearance:none;-moz-appearance: none;@include ts;
         
       &::-ms-expand {display:none;}
 
-      &:focus {box-shadow:0 0 5px nth($ct, 2)}
+      &:focus {box-shadow:0 0 5px nth($ct, 1)}
     }
-    textarea {width:100%;height:300px;padding:5px 10px;border:0;border-radius:5px;background:nth($cp, 2);font-size:14px;resize:none;outline:none;color:nth($cd, 1);
+    textarea {width:100%;height:300px;padding:5px 10px;border:0;border-radius:5px;background:nth($cp, 1);font-size:14px;resize:none;outline:none;color:nth($cd, 2);
       
-      &:focus {box-shadow:0 0 5px nth($ct, 2)}
+      &:focus {box-shadow:0 0 5px nth($ct, 1)}
     }
     .submit {float:right;width:80px;}
   }
