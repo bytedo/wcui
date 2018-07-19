@@ -202,6 +202,17 @@ Anot.component('checkbox', {
   props: {
     label: ''
   },
+  watch: {
+    'value.*'(val, old, k, kk) {
+      this.checked = this.value.indexOf(this.props.label) > -1
+    },
+    'value.length'(val, old, k, kk) {
+      this.checked = this.value.indexOf(this.props.label) > -1
+    },
+    value(val, old, k, kk) {
+      this.checked = this.value.indexOf(this.props.label) > -1
+    }
+  },
   methods: {
     onClick() {
       if (this.disabled) {
@@ -218,7 +229,6 @@ Anot.component('checkbox', {
       }
       this.checked = true
       this.value.push(label)
-      // this.value = !this.value
     }
   }
 })

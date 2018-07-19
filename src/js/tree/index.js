@@ -11,10 +11,12 @@ import './main.scss'
 
 //储存版本信息
 Anot.ui.tree = '1.0.0'
+const log = console.log
 
 function format(arr, { id, parent, label, children }) {
   let tmp = {}
   let farr = []
+  arr = Anot.deepCopy(arr)
   arr.sort(function(a, b) {
     return a[parent] === b[parent] ? a.sort - b.sort : a[parent] - b[parent]
   })
@@ -36,15 +38,32 @@ function format(arr, { id, parent, label, children }) {
 }
 
 export default Anot.component('tree', {
-  render: function() {
-    if (!this.list.size()) {
-      return null
+  __init__: function(props, state, next) {
+    this.classList.add('do-tree')
+    this.setAttribute(':visible', 'list.size()')
+    props.id = props.id || 'id'
+    props.label = props.label || 'label'
+    props.parent = props.parent || 'parent'
+    props.children = props.children || 'children'
+    if (props.list) {
+      for (let it of props.list) {
+        state.__LIST__.push(it)
+        state.__LIST_DICT__[it[props.id]] = it
+      }
     }
+    state.list = format(props.list || [], props)
+    state.multiCheck = props.hasOwnProperty('multiCheck')
+    delete props.list
+    delete props.multiCheck
+    next()
+  },
+  render: function() {
+    let { multiCheck } = this
     return `
     <section class="do-tree__item" :repeat="list" :class="{open: el.open, dir: el[props.children]}">
       <em 
         :class="{
-          'do-icon-txt': !el.open && !el[props.children],
+          'do-icon-txt': !el[props.children],
           'do-icon-folder-close': el[props.children] && !el.open,
           'do-icon-folder-open': el[props.children] && el.open,
         }" 
@@ -58,12 +77,11 @@ export default Anot.component('tree', {
         :click="__select(el)"
         :class="{active: el[props.id] === currItem}"
         :text="el[props.label]"></span>
-      <anot-tree
+      <anot-tree ${multiCheck ? 'multi-check' : ''}
         :attr="{
-          'multi-check': multiCheck,
           list: el[props.children],
-          '@onActive': props.onActive,
-          '@onPick': __check,
+          '@itemClick': props.itemClick,
+          '@itemPicked': __check,
           id: props.id,
           label: props.label,
           parent: props.parent,
@@ -72,19 +90,7 @@ export default Anot.component('tree', {
     </section>
     `
   },
-  __init__: function(props, state, next) {
-    this.classList.add('do-tree')
-    this.setAttribute(':if', 'list.size()')
-    props.id = props.id || 'id'
-    props.label = props.label || 'label'
-    props.parent = props.parent || 'parent'
-    props.children = props.children || 'children'
-    state.list = format(props.list || [], props)
-    state.multiCheck = !!props.multiCheck
-    delete props.list
-    delete props.multiCheck
-    next()
-  },
+
   componentDidMount: function() {
     this.list.forEach(it => {
       if (it.__checked__) {
@@ -96,20 +102,22 @@ export default Anot.component('tree', {
     }
   },
   state: {
+    __LIST__: [],
+    __LIST_DICT__: {},
     list: [],
     multiCheck: false,
     currItem: -1,
     checkedItems: {}
   },
-  skip: ['checkedItems'],
+  skip: ['checkedItems', '__LIST__', '__LIST_DICT__'],
   props: {
     id: '',
     label: '',
     parent: '',
     children: '',
     created: Anot.PropsTypes.isFunction(),
-    onActive: Anot.PropsTypes.isFunction(),
-    onPick: Anot.PropsTypes.isFunction()
+    itemClick: Anot.PropsTypes.isFunction(),
+    itemPicked: Anot.PropsTypes.isFunction()
   },
   methods: {
     // 子目录的开关
@@ -128,17 +136,17 @@ export default Anot.component('tree', {
       // return
       let item = null
       let arr = []
-      let vm, id, onPick, checkedItems
+      let vm, id, itemPicked, checkedItems
 
       if (this.props) {
         vm = this
         id = this.props.id
-        onPick = this.props.onPick
+        itemPicked = this.props.itemPicked
         checkedItems = this.checkedItems
       } else {
         vm = this.$up
         id = vm.props.id
-        onPick = vm.props.onPick
+        itemPicked = vm.props.itemPicked
         checkedItems = vm.checkedItems
       }
 
@@ -164,23 +172,28 @@ export default Anot.component('tree', {
           }
         }
       }
-      if (typeof onPick === 'function') {
-        onPick(item, arr)
+      if (typeof itemPicked === 'function') {
+        itemPicked(item, arr)
       }
     },
     // 单个条目的点击选择
     __select: function(el) {
-      let { id, onActive } = this.props
+      let { id, itemClick } = this.props
       this.currItem = el[id]
-      if (typeof onActive === 'function') {
-        onActive(el.$model)
+      if (typeof itemClick === 'function') {
+        itemClick(this.__LIST_DICT__[el[id]])
+        // itemClick(el.$model)
       }
     },
     // 以给定的列表重置组件渲染
-    resetWith: function(arr) {
+    resetWith: function(arr = []) {
       this.checked = {}
       this.list.clear()
-      this.list.pushArray(format(arr || []))
+      for (let it of arr) {
+        this.__LIST__.push(it)
+        this.__LIST_DICT__[it[this.props.id]] = it
+      }
+      this.list.pushArray(format(arr || [], this.props))
     }
   }
 })

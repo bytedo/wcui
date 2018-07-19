@@ -22,7 +22,7 @@
 
       &:hover {color:nth($cd, 1);}
       &.active {color:nth($cd, 3);font-weight:bold;}
-      &.checkbox {float:left;position:relative;width:20px;height:20px;margin:8px 5px 8px 0;line-height:18px;border:1px solid nth($cd, 2);border-radius:3px; font-size:20px;text-align:center;}
+      &.checkbox {float:left;position:relative;width:18px;height:18px;margin:8px 5px 8px 0;line-height:16px;border:1px solid nth($cd, 2);border-radius:3px; font-size:16px;text-align:center;}
     }
   }
   &__item.open>.do-tree {display:block;}

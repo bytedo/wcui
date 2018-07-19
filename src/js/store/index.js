@@ -118,7 +118,7 @@ class AnotStore {
   }
 
   // 查询多条记录,返回数组
-  getAll({ filter, limit = [] }) {
+  getAll({ filter, limit = [] } = {}) {
     const collection = __STORE__[this.__name__]
     let result = []
     let forceLimited = false // 强制限制查询结果集
@@ -171,7 +171,7 @@ class AnotStore {
   }
 
   // 查询总数
-  count({ filter }) {
+  count({ filter } = {}) {
     if (filter) {
       if (this.__LAST_QUERY__ === JSON.stringify(filter)) {
         return this.__QUERY_HISTORY__.length

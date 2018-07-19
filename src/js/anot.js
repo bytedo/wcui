@@ -1724,8 +1724,10 @@ const _Anot = (function() {
     hideProperty($vmodel, '$active', false)
     hideProperty($vmodel, '$pathname', old ? old.$pathname : '')
     hideProperty($vmodel, '$accessors', accessors)
+    hideProperty($vmodel, '$events', {})
     hideProperty($vmodel, '$refs', {})
     hideProperty($vmodel, '$children', [])
+    hideProperty($vmodel, '$components', [])
     hideProperty($vmodel, 'hasOwnProperty', trackBy)
     hideProperty($vmodel, '$mounted', mounted)
     if (options.watch) {
@@ -1744,16 +1746,6 @@ const _Anot = (function() {
           for (var i in $vmodel.$children) {
             var v = $vmodel.$children[i]
             v.$fire && v.$fire.apply(v, [ee, a])
-          }
-          // component! 这是一个特殊的标识,可以直接修改子组件的state值
-          // 且只针对指定子组件有效
-        } else if (path.indexOf('component!') === 0) {
-          var ee = path.slice(10).split('!')
-          for (var i in $vmodel.$children) {
-            if ($vmodel.$children[i].$id === ee[0]) {
-              $vmodel.$children[i][ee[1]] = a
-              break
-            }
           }
         } else {
           $emit.call($vmodel, path, [a])
@@ -1987,8 +1979,9 @@ const _Anot = (function() {
         throw Error(index + 'set方法的第一个参数不能大于原数组长度')
       }
       if (this[index] !== val) {
-        $emit.call(this.$up, this.$pathname + '.*', [val, this[index]])
+        var old = this[index]
         this.splice(index, 1, val)
+        $emit.call(this.$up, this.$pathname + '.*', [val, old, null, index])
       }
     },
     contains: function(el) {
@@ -3545,11 +3538,11 @@ const _Anot = (function() {
     }
   }
 
-  function scanTag(elem, vmodels, node) {
+  function scanTag(elem, vmodels) {
     //扫描顺序  skip(0) --> anot(1) --> :if(10) --> :repeat(90)
     //--> :if-loop(110) --> :attr(970) ...--> :duplex(2000)垫后
     var skip = elem.getAttribute('skip')
-    node = elem.getAttributeNode('anot')
+    var node = elem.getAttributeNode('anot')
     var vm = vmodels.concat()
     if (typeof skip === 'string') {
       return
@@ -3566,7 +3559,10 @@ const _Anot = (function() {
       elem.removeAttribute(node.name) //removeAttributeNode不会刷新xx[anot]样式规则
       createSignalTower(elem, newVmodel)
       hideProperty(newVmodel, '$elem', elem)
+
       if (vmodels.length) {
+        newVmodel.$up = vmodels[0]
+        vmodels[0].$children.push(newVmodel)
         var props = {}
         attrs.forEach(function(attr) {
           if (/^:/.test(attr.name)) {
@@ -3787,7 +3783,13 @@ const _Anot = (function() {
 
   function parseVmValue(vm, key, val) {
     if (arguments.length === 2) {
-      return Function('o', 'return o.' + key)(vm)
+      var oval = Function('o', 'return o.' + key)(vm)
+      if (oval && typeof oval === 'object') {
+        try {
+          return oval.$model
+        } catch (err) {}
+      }
+      return oval
     } else if (arguments.length === 3) {
       Function('o', 'v', 'return o.' + key + ' = v')(vm, val)
     }
@@ -3852,7 +3854,7 @@ const _Anot = (function() {
               if (disabledKeyReverse) {
                 val = !val
               }
-              parentVm.$fire('component!' + $id + '!disabled', val)
+              Anot.vmodels[$id].disabled = val
             })
 
             delete props[':disabled']
@@ -3872,7 +3874,7 @@ const _Anot = (function() {
               if (loadingKeyReverse) {
                 val = !val
               }
-              parentVm.$fire('component!' + $id + '!loading', val)
+              Anot.vmodels[$id].loading = val
             })
             delete props[':loading']
           }
@@ -3880,22 +3882,43 @@ const _Anot = (function() {
           // :value可实现双向同步值
           if (props.hasOwnProperty(':value')) {
             var valueKey = props[':value']
+            var valueWatcher = function() {
+              var val = parseVmValue(parentVm, valueKey)
+              Anot.vmodels[$id].value = val
+            }
+            var childValueWatcher = function() {
+              var val = this.value
+              if (val && typeof val === 'object') {
+                val = val.$model || val
+              }
+              parseVmValue(parentVm, valueKey, val)
+            }
             state.value = parseVmValue(parentVm, valueKey)
-            parentVm.$watch(valueKey, function(val) {
-              parentVm.$fire('component!' + $id + '!value', val)
-            })
-            if (Array.isArray(state.value)) {
-              hooks.watch['value.length'] = hooks.watch['value.length']
-                ? [hooks.watch['value.length']]
-                : []
-              hooks.watch['value.length'].push(function(val) {
-                parseVmValue(parentVm, valueKey, this.value.$model)
-              })
+
+            parentVm.$watch(valueKey, valueWatcher)
+            parentVm.$watch(valueKey + '.*', valueWatcher)
+            parentVm.$watch(valueKey + '.length', valueWatcher)
+
+            if (hooks.watch.value) {
+              hooks.watch.value = [hooks.watch.value]
             } else {
-              hooks.watch.value = hooks.watch.value ? [hooks.watch.value] : []
-              hooks.watch.value.push(function(val) {
-                parseVmValue(parentVm, valueKey, val)
-              })
+              hooks.watch.value = []
+            }
+            if (hooks.watch['value.length']) {
+              hooks.watch['value.length'] = [hooks.watch['value.length']]
+            } else {
+              hooks.watch['value.length'] = []
+            }
+            if (hooks.watch['value.*']) {
+              hooks.watch['value.*'] = [hooks.watch['value.*']]
+            } else {
+              hooks.watch['value.*'] = []
+            }
+            if (Array.isArray(state.value)) {
+              hooks.watch['value.*'].push(childValueWatcher)
+              hooks.watch['value.length'].push(childValueWatcher)
+            } else {
+              hooks.watch.value.push(childValueWatcher)
             }
 
             delete props[':value']
@@ -3952,7 +3975,7 @@ const _Anot = (function() {
 
           var vmodel = Anot(hooks)
           delete vmodel.$mounted
-          parentVm.$children.push(vmodel)
+          parentVm.$components.push(vmodel)
 
           elem.msResolved = 1 //防止二进扫描此元素
 
@@ -3991,7 +4014,7 @@ const _Anot = (function() {
             if (ev.childReady) {
               dependencies += ev.childReady
               if (vmodel !== ev.vm) {
-                vmodel.$children.push(ev.vm)
+                vmodel.$components.push(ev.vm)
                 ev.vm.$up = vmodel
                 if (ev.childReady === -1) {
                   children++
