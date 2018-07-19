@@ -3348,7 +3348,7 @@ const _Anot = (function() {
     return a.priority - b.priority
   }
 
-  var rnoCollect = /^(:\S+|data-\S+|on[a-z]+|id|style|class)$/
+  var rnoCollect = /^(:\S+|data-\S+|on[a-z]+|style|class)$/
   var ronattr = '__fn__'
   var specifiedVars = [':disabled', ':loading', ':value']
   var filterTypes = ['html', 'text', 'attr', 'data']
@@ -3501,6 +3501,8 @@ const _Anot = (function() {
             var widget = isWidget(elem)
 
             if (widget) {
+              elem.removeAttribute(':if')
+              elem.removeAttribute(':if-loop')
               componentQueue.push({
                 element: elem,
                 vmodels: vmodels,
@@ -3821,7 +3823,7 @@ const _Anot = (function() {
             return
           }
           hooks.watch = hooks.watch || {}
-          var parentVm = host.vmodels[0]
+          var parentVm = host.vmodels.concat().pop()
           var state = {}
           var props = getOptionsFromTag(elem, host.vmodels)
           var $id = props.uuid || generateID(widget)
@@ -3974,8 +3976,12 @@ const _Anot = (function() {
           delete hooks.componentWillUnmount
 
           var vmodel = Anot(hooks)
+          hideProperty(vmodel, '__WIDGET__', name)
           delete vmodel.$mounted
           parentVm.$components.push(vmodel)
+          if (parentVm.__WIDGET__ === name) {
+            vmodel.$up = parentVm
+          }
 
           elem.msResolved = 1 //防止二进扫描此元素
 
@@ -4014,8 +4020,6 @@ const _Anot = (function() {
             if (ev.childReady) {
               dependencies += ev.childReady
               if (vmodel !== ev.vm) {
-                vmodel.$components.push(ev.vm)
-                ev.vm.$up = vmodel
                 if (ev.childReady === -1) {
                   children++
                   childComponentDidMount.call(vmodel, ev.vm)

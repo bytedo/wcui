@@ -13,7 +13,7 @@ import './main.scss'
 Anot.ui.tree = '1.0.0'
 const log = console.log
 
-function format(arr, { id, parent, label, children }) {
+function format(arr, { id, parent, label }) {
   let tmp = {}
   let farr = []
   arr = Anot.deepCopy(arr)
@@ -31,8 +31,8 @@ function format(arr, { id, parent, label, children }) {
     if (!parentItem) {
       return farr.push(tmp[it[id]])
     }
-    parentItem[children] = parentItem[children] || []
-    parentItem[children].push(it)
+    parentItem.children = parentItem.children || []
+    parentItem.children.push(it)
   })
   return farr
 }
@@ -40,17 +40,15 @@ function format(arr, { id, parent, label, children }) {
 export default Anot.component('tree', {
   __init__: function(props, state, next) {
     this.classList.add('do-tree')
-    this.setAttribute(':visible', 'list.size()')
-    props.id = props.id || 'id'
-    props.label = props.label || 'label'
-    props.parent = props.parent || 'parent'
-    props.children = props.children || 'children'
+    // this.setAttribute(':visible', 'list.size()')
+
     if (props.list) {
       for (let it of props.list) {
         state.__LIST__.push(it)
         state.__LIST_DICT__[it[props.id]] = it
       }
     }
+    state.value = state.value || []
     state.list = format(props.list || [], props)
     state.multiCheck = props.hasOwnProperty('multiCheck')
     delete props.list
@@ -59,34 +57,38 @@ export default Anot.component('tree', {
   },
   render: function() {
     let { multiCheck } = this
+
     return `
-    <section class="do-tree__item" :repeat="list" :class="{open: el.open, dir: el[props.children]}">
+    <section class="do-tree__item" :repeat="list" :class="{open: el.open, dir: el.children}">
       <em 
         :class="{
-          'do-icon-txt': !el[props.children],
-          'do-icon-folder-close': el[props.children] && !el.open,
-          'do-icon-folder-open': el[props.children] && el.open,
+          'do-icon-txt': !el.children,
+          'do-icon-folder-close': el.children && !el.open,
+          'do-icon-folder-open': el.children && el.open,
         }" 
         :click="__toggle(el)"></em>
       <span
         class="checkbox"
-        :class="{'do-icon-get': el.__checked__}"
+        :class="{'do-icon-get': value.includes(el[props.id])}"
         :if="multiCheck"
         :click="__check(el, null, $event)"></span>
       <span
         :click="__select(el)"
         :class="{active: el[props.id] === currItem}"
         :text="el[props.label]"></span>
-      <anot-tree ${multiCheck ? 'multi-check' : ''}
-        :attr="{
-          list: el[props.children],
-          '@itemClick': props.itemClick,
-          '@itemPicked': __check,
-          id: props.id,
-          label: props.label,
-          parent: props.parent,
-          children: props.children,
-        }"></anot-tree>
+
+      <div class="sub-tree" :if-loop="el.children">
+        <anot-tree ${multiCheck ? 'multi-check' : ''}
+          :value="value"
+          :attr="{
+            list: el.children,
+            '@itemClick': props.itemClick,
+            '@itemPicked': __check,
+            id: props.id,
+            label: props.label,
+            parent: props.parent,
+          }"></anot-tree>
+      </div>
     </section>
     `
   },
@@ -105,16 +107,16 @@ export default Anot.component('tree', {
     __LIST__: [],
     __LIST_DICT__: {},
     list: [],
+    value: [],
     multiCheck: false,
     currItem: -1,
     checkedItems: {}
   },
   skip: ['checkedItems', '__LIST__', '__LIST_DICT__'],
   props: {
-    id: '',
-    label: '',
-    parent: '',
-    children: '',
+    id: 'id',
+    label: 'label',
+    parent: 'parent',
     created: Anot.PropsTypes.isFunction(),
     itemClick: Anot.PropsTypes.isFunction(),
     itemPicked: Anot.PropsTypes.isFunction()
@@ -122,7 +124,7 @@ export default Anot.component('tree', {
   methods: {
     // 子目录的开关
     __toggle: function(obj) {
-      if (!obj[this.props.children]) {
+      if (!obj.children) {
         return
       }
       obj.open = !obj.open

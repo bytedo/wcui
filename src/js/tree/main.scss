@@ -13,7 +13,7 @@
   
   &__item {overflow:hidden; min-height:35px;margin:1px 0; white-space:nowrap; text-overflow:ellipsis;
  
-    .do-tree {display:none;margin-left:20px;}
+    .sub-tree {display:none;margin-left:20px;}
 
     em,span {display:inline-block;cursor:pointer;color:nth($cd, 1);}
     em {float:left;padding:0 5px;font-size:20px;}
@@ -25,6 +25,6 @@
       &.checkbox {float:left;position:relative;width:18px;height:18px;margin:8px 5px 8px 0;line-height:16px;border:1px solid nth($cd, 2);border-radius:3px; font-size:16px;text-align:center;}
     }
   }
-  &__item.open>.do-tree {display:block;}
+  &__item.open>.sub-tree {display:block;}
   
 }
