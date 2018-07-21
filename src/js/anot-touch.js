@@ -227,14 +227,11 @@ const _Anot = (function() {
           } else {
             var _parent = $elem
             while ((_parent = _parent.parentNode)) {
-              if (_parent.anotctrl) {
+              if (_parent.__VM__) {
                 break
               }
             }
-            scanTag(
-              $elem.parentNode,
-              _parent ? [VMODELS[_parent.anotctrl]] : []
-            )
+            scanTag($elem.parentNode, _parent ? [_parent.__VM__] : [])
           }
         }
       })
@@ -3283,10 +3280,6 @@ const _Anot = (function() {
     })
   }
 
-  function createSignalTower(elem, vmodel) {
-    elem.anotctrl = elem.anotctrl || vmodel.$id
-  }
-
   function getBindingCallback(elem, name, vmodels) {
     var callback = elem.getAttribute(name)
     if (callback) {
@@ -3559,7 +3552,8 @@ const _Anot = (function() {
       vm = [newVmodel]
 
       elem.removeAttribute(node.name) //removeAttributeNode不会刷新xx[anot]样式规则
-      createSignalTower(elem, newVmodel)
+      // 挂载VM对象到相应的元素上
+      elem.__VM__ = newVmodel
       hideProperty(newVmodel, '$elem', elem)
 
       if (vmodels.length) {
@@ -3827,17 +3821,10 @@ const _Anot = (function() {
           var state = {}
           var props = getOptionsFromTag(elem, host.vmodels)
           var $id = props.uuid || generateID(widget)
-          var __willpush__ = null
           var slots = null
 
           if (elem.firstElementChild) {
             slots = parseSlot(elem.children)
-          }
-
-          if (props.hasOwnProperty('hostPush')) {
-            elem.removeAttribute('host-push')
-            __willpush__ = props.hostPush
-            props.hostPush = parseVmValue(parentVm, __willpush__)
           }
 
           if (props.hasOwnProperty(':disabled')) {
@@ -3891,7 +3878,7 @@ const _Anot = (function() {
             var childValueWatcher = function() {
               var val = this.value
               if (val && typeof val === 'object') {
-                val = val.$model || val
+                val = val.$model
               }
               parseVmValue(parentVm, valueKey, val)
             }
@@ -3978,18 +3965,20 @@ const _Anot = (function() {
           var vmodel = Anot(hooks)
           hideProperty(vmodel, '__WIDGET__', name)
           delete vmodel.$mounted
-          parentVm.$components.push(vmodel)
-          if (parentVm.__WIDGET__ === name) {
-            vmodel.$up = parentVm
+
+          // 对象组件的子父vm关系, 只存最顶层的$components对象中,
+          // 而子vm, 无论向下多少级, 他们的$up对象也只存最顶层的组件vm
+          var __pvm__ = parentVm
+          while (__pvm__.$up && __pvm__.$up.__WIDGET__ === name) {
+            __pvm__ = __pvm__.$up
           }
+          __pvm__.$components.push(vmodel)
+          if (__pvm__.__WIDGET__ === name) {
+            vmodel.$up = __pvm__
+          }
+          __pvm__ = undefined
 
           elem.msResolved = 1 //防止二进扫描此元素
-
-          if (__willpush__) {
-            hideProperty(vmodel, '$push', function(val) {
-              parseVmValue(parentVm, __willpush__, val)
-            })
-          }
 
           componentWillMount.call(vmodel)
           globalHooks.componentWillMount.call(null, vmodel)
@@ -4051,6 +4040,7 @@ const _Anot = (function() {
               }
             }
           })
+          elem.__VM__ = vmodel
           scanTag(elem, [vmodel])
           Anot.vmodels[vmodel.$id] = vmodel
           if (!elem.childNodes.length) {
