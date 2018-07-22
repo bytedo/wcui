@@ -3824,7 +3824,6 @@
           }
 
           var dependencies = 1
-          var globalHooks = componentHooks
 
           //===========收集各种配置=======
           if (elem.getAttribute(':attr-uuid')) {
@@ -3838,6 +3837,10 @@
           var $id = props.uuid || generateID(widget)
           var slots = null
 
+          // 对象组件的子父vm关系, 只存最顶层的$components对象中,
+          while (parentVm.$up && parentVm.$up.__WIDGET__ === name) {
+            parentVm = parentVm.$up
+          }
           if (elem.firstElementChild) {
             slots = parseSlot(elem.children)
           }
@@ -3899,10 +3902,6 @@
             }
             state.value = parseVmValue(parentVm, valueKey)
 
-            parentVm.$watch(valueKey, valueWatcher)
-            parentVm.$watch(valueKey + '.*', valueWatcher)
-            parentVm.$watch(valueKey + '.length', valueWatcher)
-
             if (hooks.watch.value) {
               hooks.watch.value = [hooks.watch.value]
             } else {
@@ -3918,7 +3917,11 @@
             } else {
               hooks.watch['value.*'] = []
             }
+
+            parentVm.$watch(valueKey, valueWatcher)
             if (Array.isArray(state.value)) {
+              parentVm.$watch(valueKey + '.*', valueWatcher)
+              parentVm.$watch(valueKey + '.length', valueWatcher)
               hooks.watch['value.*'].push(childValueWatcher)
               hooks.watch['value.length'].push(childValueWatcher)
             } else {
@@ -3978,25 +3981,31 @@
           delete hooks.componentWillUnmount
 
           var vmodel = Anot(hooks)
+          Anot.vmodels[vmodel.$id] = vmodel
           hideProperty(vmodel, '__WIDGET__', name)
+          hideProperty(vmodel, '$recycle', function() {
+            for (var i in this.$events) {
+              var ev = this.$events[i] || []
+              var len = ev.length
+              while (len--) {
+                if (ev[len].type === null || ev[len].type === 'user-watcher') {
+                  ev.splice(len, 1)
+                }
+              }
+            }
+          })
           delete vmodel.$mounted
 
           // 对象组件的子父vm关系, 只存最顶层的$components对象中,
           // 而子vm, 无论向下多少级, 他们的$up对象也只存最顶层的组件vm
-          var __pvm__ = parentVm
-          while (__pvm__.$up && __pvm__.$up.__WIDGET__ === name) {
-            __pvm__ = __pvm__.$up
+          parentVm.$components.push(vmodel)
+          if (parentVm.__WIDGET__ === name) {
+            vmodel.$up = parentVm
           }
-          __pvm__.$components.push(vmodel)
-          if (__pvm__.__WIDGET__ === name) {
-            vmodel.$up = __pvm__
-          }
-          __pvm__ = undefined
 
           elem.msResolved = 1 //防止二进扫描此元素
 
           componentWillMount.call(vmodel)
-          globalHooks.componentWillMount.call(null, vmodel)
 
           Anot.clearHTML(elem)
           var html = render.call(vmodel, slots) || ''
@@ -4014,16 +4023,18 @@
           }
 
           hideProperty(vmodel, '$elem', elem)
+          elem.__VM__ = vmodel
 
           Anot.fireDom(elem, 'datasetchanged', {
             vm: vmodel,
             childReady: 1
           })
+
           var children = 0
           var removeFn = Anot.bind(elem, 'datasetchanged', function(ev) {
             if (ev.childReady) {
               dependencies += ev.childReady
-              if (vmodel !== ev.vm) {
+              if (vmodel.$id !== ev.vm.$id) {
                 if (ev.childReady === -1) {
                   children++
                   childComponentDidMount.call(vmodel, ev.vm)
@@ -4035,7 +4046,6 @@
               var timer = setTimeout(function() {
                 clearTimeout(timer)
                 componentDidMount.call(vmodel)
-                globalHooks.componentDidMount(null, vmodel)
               }, children ? Math.max(children * 17, 100) : 17)
 
               Anot.unbind(elem, 'datasetchanged', removeFn)
@@ -4043,8 +4053,9 @@
               host.rollback = function() {
                 try {
                   componentWillUnmount.call(vmodel)
-                  globalHooks.componentWillUnmount.call(null, vmodel)
                 } catch (e) {}
+                parentVm.$recycle && parentVm.$recycle()
+                Anot.Array.remove(parentVm.$components, vmodel)
                 delete Anot.vmodels[vmodel.$id]
               }
               injectDisposeQueue(host, widgetList)
@@ -4055,9 +4066,9 @@
               }
             }
           })
-          elem.__VM__ = vmodel
+
           scanTag(elem, [vmodel])
-          Anot.vmodels[vmodel.$id] = vmodel
+
           if (!elem.childNodes.length) {
             Anot.fireDom(elem, 'datasetchanged', {
               vm: vmodel,
