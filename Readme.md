@@ -1,4 +1,4 @@
-![doui](https://attach.cdn.doui.cc/screenshot_276.jpg)
+![doui](https://attach.cdn.doui.cc/screenshot_276.jpg?t=20180722)
 
 ## Anot 框架
 > `Anot` 是`Anot not only templateEngine`的缩写。
@@ -11,12 +11,12 @@
 
 ## 开发环境及生产环境
 ```bash
-# 开发环境
+# 开发环境, 仅编译,不压缩
 npm start
 
-# 生产环境
+# 生产环境, 编译且压缩
 npm run prod
 
-# 不编译,只压缩
+# 不编译,只压缩, 适用于chrome61+, FF60+, Safari10.1+, EDGE16+
 npm run next
 ```
