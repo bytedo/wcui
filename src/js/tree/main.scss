@@ -9,9 +9,9 @@
 @import '../../css/var.scss';
 
 
-.do-tree {overflow:hidden;overflow-y:auto;position:relative;display:block;width:100%;height:100%;line-height:34px;font-size:15px;color:nth($cd, 2);
+.do-tree {overflow:hidden;overflow-y:auto;position:relative;display:block;width:100%;height:100%;line-height:30px;font-size:15px;color:nth($cd, 2);
   
-  &__item {overflow:hidden; min-height:34px;
+  &__item {overflow:hidden; min-height:30px;
  
     .sub-tree {display:none;width:100%;padding-left:20px;}
 
@@ -22,7 +22,7 @@
 
       &:hover {color:nth($cd, 1);}
       &.active {color:nth($cd, 3);font-weight:bold;}
-      &.checkbox {float:left;position:relative;width:18px;height:18px;margin:8px 5px 8px 0;line-height:16px;border:1px solid nth($cd, 2);border-radius:3px; font-size:16px;text-align:center;}
+      &.checkbox {float:left;position:relative;width:18px;height:18px;margin:6px 5px 6px 0;line-height:16px;border:1px solid nth($cd, 2);border-radius:3px; font-size:16px;text-align:center;}
       &.label { white-space:nowrap; text-overflow:ellipsis;}
     }
   }

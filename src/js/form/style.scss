@@ -167,9 +167,7 @@
 .do-checkbox {position:relative;display:inline-block;width:auto;height:30px;padding-right:10px;line-height:30px;text-align:center;cursor:default;font-size:14px;
 
 
-  &__box {float:left;width:20px;height:20px;margin:5px;margin-left:0;line-height:18px;border:1px solid nth($cgr, 2);border-radius:3px;font-size:18px;text-align:center;
-    
-  }
+  &__box {float:left;width:18px;height:18px;margin:6px;margin-left:0;line-height:16px;border:1px solid nth($cgr, 2);border-radius:3px;font-size:16px;text-align:center;}
   &.checked &__box {color:#fff;font-weight:bold;}
 
   &.grey {color:nth($cgr, 2);}

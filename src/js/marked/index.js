@@ -837,24 +837,25 @@ Renderer.prototype.blockquote = function(quote) {
   return '<blockquote class="md-quote">\n' + quote + '</blockquote>\n'
 }
 Renderer.prototype.mark = function(mark, t) {
-  return (
-    '<section><mark class="' +
-    (t ? 'md-warn' : 'md-mark') +
-    '">\n' +
-    mark +
-    '</mark></section>\n'
-  )
+  return `<section>
+    <mark class="${t ? 'md-warn' : 'md-mark'}">
+      <i class="do-icon-${t ? 'warn' : 'unmute'}"></i>
+      ${mark}
+    </mark>
+  </section>
+  `
 }
 
 Renderer.prototype.task = function(task, t) {
-  task = t ? '<del>' + task + '</del>' : task
-  return (
-    '<section><label class="do-ui-checkbox"><input type="checkbox" ' +
-    (t ? 'checked' : '') +
-    ' disabled />' +
-    task +
-    '</label></section>\n'
-  )
+  return `<section>
+    <label class="md-task ${t ? 'done' : ''}">
+      <span class="md-task__box">
+        ${t ? '<i class="do-icon-get"></i>' : ''}
+      </span>
+      <span class="md-task__text">${task}</span>
+    </label>
+  </section>
+  `
 }
 
 Renderer.prototype.html = function(html) {
@@ -1365,6 +1366,14 @@ marked.InlineLexer = InlineLexer
 marked.inlineLexer = InlineLexer.output
 
 marked.parse = marked
+
+marked.safe = function(txt) {
+  txt = txt
+    .trim()
+    .replace(/<script([^>]*?)>/g, '&lt;script$1&gt;')
+    .replace(/<\/script>/g, '&lt;/script&gt;')
+  return marked(txt)
+}
 
 window.marked = marked
 

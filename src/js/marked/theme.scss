@@ -30,17 +30,28 @@
   a {text-decoration:underline;}
   a:hover {color:nth($co, 2)}
   p {margin:15px 0;}
-  blockquote.md-quote {margin:10px 0;padding:5px 10px;border-left:5px solid nth($cp, 3);background:nth($cp, 1)}
-  blockquote.md-quote p {margin:0;}
+  blockquote {
+    &.md-quote {margin:10px 0;padding:5px 10px;border-left:5px solid nth($cp, 3);background:nth($cp, 1);
+
+      p {margin:0;}
+    }
+  }
   /* 提醒文本 */
-  .md-warn,.md-mark {display:inline-block;position:relative;min-height:40px;margin:5px 0;padding:5px 8px 5px 50px;border:1px solid nth($co, 2);border-radius:5px;background:#fffbed;color:nth($co, 3);word-break: break-all;
+  .md-warn,.md-mark {display:inline-block;position:relative;padding:3px 8px 3px 35px;border:1px solid nth($co, 2);border-radius:5px;background:#fffbed;color:nth($co, 3);word-break: break-all;
 
     p {margin:0!important;}
-    &::before {position:absolute;left:15px;top:5px;font:20px/1.5 "ui font";color:nth($cr, 2);content:"\e6f6";}
+    i {position:absolute;left:8px;top:7px;line-height:1;font-size:20px;color:nth($cr, 2);}
   }
   .md-mark {border-color:nth($ct, 1);color:nth($ct, 3);background:#edfbf8;
+    i {color:nth($ct, 3);}
+  }
+  .md-task {position:relative;display:inline-block;width:auto;height:30px;padding-right:10px;line-height:30px;text-align:center;cursor:default;font-size:14px;
 
-    &::before {color:nth($ct, 3);content:"\e657";}
+    &__box {float:left;width:18px;height:18px;margin:6px;margin-left:0;line-height:1;border:1px solid nth($cgr, 1);border-radius:3px;font-size:16px;text-align:center;}
+    &.done {
+      .md-task__box {color:nth($cgr, 1);border-color:nth($cp, 3);background:nth($cp, 3);}
+      .md-task__text {color:nth($cgr, 1);text-decoration:line-through;}
+    }
   }
   table {width:100%;
     thead tr {height:45px;line-height:45px;background:#f7f7f7}
