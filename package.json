@@ -18,7 +18,8 @@
   ],
   "author": "yutent",
   "license": "MIT",
-  "dependencies": {
+  "dependencies": {},
+  "devDependencies": {
     "autoprefixer": "^7.2.6",
     "babel-core": "^6.26.3",
     "babel-plugin-transform-decorators-legacy": "^1.3.5",
