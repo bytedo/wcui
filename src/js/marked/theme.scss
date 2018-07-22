@@ -45,7 +45,7 @@
   .md-mark {border-color:nth($ct, 1);color:nth($ct, 3);background:#edfbf8;
     i {color:nth($ct, 3);}
   }
-  .md-task {position:relative;display:inline-block;width:auto;height:30px;padding-right:10px;line-height:30px;text-align:center;cursor:default;font-size:14px;
+  .md-task {position:relative;display:inline-block;width:auto;height:30px;padding-right:10px;line-height:30px;text-align:center;cursor:default;
 
     &__box {float:left;width:18px;height:18px;margin:6px;margin-left:0;line-height:1;border:1px solid nth($cgr, 1);border-radius:3px;font-size:16px;text-align:center;}
     &.done {
