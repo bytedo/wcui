@@ -57,7 +57,7 @@ Anot.component('button', {
         return
       }
       if (typeof this.props.click === 'function') {
-        this.props.click()
+        this.props.click(this.props.prop)
       }
     }
   }
@@ -299,6 +299,9 @@ Anot.component('input', {
       this.active = false
     },
     onKeyup(ev) {
+      if (this.disabled) {
+        return
+      }
       if (ev.keyCode === 13) {
         if (typeof this.props.submit === 'function') {
           this.props.submit()

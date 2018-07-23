@@ -3365,6 +3365,10 @@ const _Anot = (function() {
           var camelizeName = camelize(name)
           if (camelizeName.indexOf('@') === 0) {
             camelizeName = camelizeName.slice(1)
+            attr.value = attr.value.replace(/\(.*\)$/, '')
+            if (vm.$id.slice(0, 11) === '$proxy$each') {
+              vm = vm.$up
+            }
             if (
               vm.hasOwnProperty(attr.value) &&
               typeof vm[attr.value] === 'function'

@@ -106,6 +106,7 @@ export default Anot.component('tree', {
     }
   },
   state: {
+    expand: false,
     __LIST_DICT__: {},
     list: [],
     value: null,

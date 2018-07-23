@@ -28,6 +28,7 @@ const DEFAULT_OPTIONS = {
   prefix: /^(#!|#)[\/]?/, //hash前缀正则
   allowReload: true //连续点击同一个链接是否重新加载
 }
+const LINKS = []
 const RULE_REGEXP = /(:id)|(\{id\})|(\{id:([A-z\d\,\[\]\{\}\-\+\*\?\!:\^\$]*)\})/g
 
 class Router {
@@ -170,7 +171,13 @@ class Router {
 
     this.last = this.path
     this.path = path
-
+    LINKS.forEach(vm => {
+      if (vm.rule.test(this.path)) {
+        vm.active = true
+      } else {
+        vm.active = false
+      }
+    })
     for (let i = 0, route; (route = this.table[i++]); ) {
       let args = path.match(route.regexp)
       if (args) {
@@ -220,11 +227,19 @@ class Router {
 
 Anot.component('link', {
   __init__(props, state, next) {
+    if (!Anot.router) {
+      return Anot.error('使用<anot-link />前,请先初始化路由')
+    }
     let { mode } = Anot.router.options
     if (!props.to) {
       return
     }
-
+    this.setAttribute(':class', '{active: active}')
+    state.rule = Anot.router.__parseRule__(
+      props.to.replace(/^[\/]+|[\/]+$|\s+/g, ''),
+      {}
+    ).regexp
+    props.label = props.label || this.textContent
     if (mode === 'hash') {
       state.link = '#!' + props.to
     } else {
@@ -236,8 +251,14 @@ Anot.component('link', {
   render() {
     return '<a :attr-href="link" :text="props.label"></a>'
   },
+  skip: ['rule'],
+  componentDidMount() {
+    this.active = this.rule.test(Anot.router.path)
+    LINKS.push(this)
+  },
   state: {
-    link: ''
+    link: '',
+    active: false
   },
   props: {
     label: ''
