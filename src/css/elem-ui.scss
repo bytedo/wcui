@@ -10,7 +10,7 @@
 
 
 /*--------各种按钮---------*/
-.do-ui-button {display:inline-block;padding:2px 5px;border:1px solid #ddd;border-radius:3px;text-align:center;font-size:12px;background:none;cursor:pointer;@include ts;
+.do-ui-button {display:inline-block;height:16px;padding:2px 5px;line-height:12px;border:1px solid #ddd;border-radius:3px;text-align:center;font-size:12px;background:none;cursor:pointer;@include ts;
 
   &.medium {min-width:100px;height:35px;padding:0 8px;line-height:35px;border-radius:5px;font-size:15px}
   &.large {min-width:150px;height:50px;padding:0 13px;line-height:50px;border-radius:5px;font-size:18px;}
