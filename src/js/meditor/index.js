@@ -357,9 +357,11 @@ Anot.component('meditor', {
     })
 
     $editor.bind('scroll', ev => {
-      let syncTop =
-        ev.target.scrollTop / ev.target.scrollHeight * preview.scrollHeight
-
+      let st = ev.target.scrollTop
+      let sh = ev.target.scrollHeight
+      let ch = ev.target.clientHeight
+      let psh = preview.scrollHeight
+      let syncTop = st / (sh - ch) * (psh - ch)
       preview.scrollTop = syncTop
     })
     //编辑器成功加载的回调

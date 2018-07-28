@@ -36,7 +36,7 @@ blockquote, q {quotes: none;}
 blockquote::before, blockquote::after,
 q::before, q::after {content: '';content: none;}
 table {border-collapse: collapse;border-spacing: 0;}
-a:focus,input,button:focus,input:focus {outline:none;}
+a:focus,input,textarea,button:focus,input:focus,textarea:focus {outline:none;}
 ::-moz-focus-inner {
     border:none;outline:none;
 }
