@@ -39,9 +39,7 @@
       .layer-title {width:100%;height:43px;padding:0 10px;line-height:43px;font-size:16px;color:nth($cd, 2);}
 
       /* 弹层主体内容 */
-      .layer-content {position:relative;width:100%;height:auto;min-height:50px;padding:10px;word-break:break-all;word-wrap: break-word;
-
-          // .msg-icon {position:absolute;left:10px;top:10px;width:50px;height:auto;line-height:40px;font-size:35px;text-align:center;}
+      .layer-content {position:relative;width:100%;height:auto;min-height:50px;word-break:break-all;word-wrap: break-word;
           
         .prompt-value {width: 100%;height: 30px;padding: 0 8px;border: 1px solid #ddd;border-radius: 3px;
 
@@ -71,12 +69,14 @@
     /* ;alert/confirm/prompt 3类弹层 */
     &.type-1,
     &.type-2,
-    &.type-3 {max-width:600px;min-width:300px;}
+    &.type-3 {max-width:600px;min-width:300px;
+      
+      .layer-content {padding:10px;}
+    }
 
 
     &.type-4 {padding:0;
 
-      .layer-content {padding:0;}
       .frame-box {display:block;width:100%;height:100%;margin:0;padding:0;border:0;resize: none;}
     }
 
@@ -89,7 +89,7 @@
       i.offset-top-left {right:5px;bottom:-14px;border-top:8px solid rgba(0,0,0,.5);}
       i.offset-bottom-left {right:5px;top:-14px;border-bottom:8px solid rgba(0,0,0,.5);}
 
-      .layer-content {min-height:20px;margin:0;padding:0}
+      .layer-content {min-height:20px;margin:0;}
     }
 
     
@@ -100,7 +100,7 @@
     /* 特殊类弹层(toast弹层) */
     &.type-toast {position:fixed;min-width:10px;padding:0;background:transparent;
 
-      .layer-content {min-height:40px;height:40px;padding:0}
+      .layer-content {min-height:40px;height:40px;}
 
       .toast-box {display:inline-block;position:relative;min-height:40px;padding:5px 12px 5px 50px;line-height:28px;border-radius:3px;word-break: break-all;
 
@@ -209,7 +209,7 @@
   i.offset-top-left {right:5px;bottom:-14px;border-top:8px solid rgba(0,0,0,.5);}
   i.offset-bottom-left {right:5px;top:-14px;border-bottom:8px solid rgba(0,0,0,.5);}
 
-  .layer-content {min-height:20px;margin:0;padding:0}
+  .layer-content {min-height:20px;margin:0;}
 }
 
 
