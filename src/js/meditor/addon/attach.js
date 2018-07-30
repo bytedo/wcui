@@ -74,7 +74,7 @@ const fixCont = function(vm, tool) {
     limit = (vm.props.uploadSizeLimit / (1024 * 1024)).toFixed(2)
   }
   return `
-  <dl class="do-meditor-attach do-meditor__font">
+  <dl class="do-meditor-attach">
     <dt class="tab-box" :drag="do-layer" data-limit="window">
       <span class="item" :class="active:tab === 1" :click="switchTab(1)">
         ${LANG[tool][0]}

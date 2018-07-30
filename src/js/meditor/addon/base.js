@@ -49,7 +49,7 @@ const addon = {
         left: offset.left - $doc.scrollLeft()
       },
       content: `
-      <ul class="do-meditor-h1 do-fn-noselect do-meditor__font">
+      <ul class="do-meditor-h1 do-fn-noselect">
         <li :click="insert(1)" class="h1"><i class="do-meditor__icon icon-h1"></i>一级标题</li>
         <li :click="insert(2)" class="h2"><i class="do-meditor__icon icon-h2"></i>二级标题</li>
         <li :click="insert(3)" class="h3"><i class="do-meditor__icon icon-h3"></i>三级标题</li>
@@ -140,7 +140,7 @@ const addon = {
         left: offset.left - $doc.scrollLeft()
       },
       content: `
-      <div class="do-meditor-common do-meditor__font">
+      <div class="do-meditor-common">
         <section>
           <input class="txt" :duplex="linkName" placeholder="链接文字"/>
         </section>
@@ -360,7 +360,7 @@ const addon = {
         left: offset.left - $doc.scrollLeft()
       },
       content: `
-      <div class="do-meditor-common do-meditor__font">
+      <div class="do-meditor-common">
         <section>
           <input class="txt" :duplex="imgAlt" placeholder="图片描述"/>
         </section>
@@ -438,7 +438,7 @@ const addon = {
         this.close()
       },
       content: `
-      <div class="do-meditor-codeblock do-meditor__font">
+      <div class="do-meditor-codeblock">
         <section class="do-fn-cl">
           <span class="label">语言类型</span>
           <select :duplex="lang">
@@ -485,7 +485,7 @@ const addon = {
       offset: [offset.top + 37 - $doc.scrollTop()],
       shift: { top: offset.top - $doc.scrollTop() },
       content:
-        '<div class="do-meditor-about do-meditor__font">' +
+        '<div class="do-meditor-about">' +
         '<pre>' +
         ' __  __ _____    _ _ _\n' +
         '|  \\/  | ____|__| (_) |_ ___  _ __\n' +

@@ -270,7 +270,6 @@ class MEObject {
 Anot.component('meditor', {
   __init__: function(props, state, next) {
     this.classList.add('do-meditor')
-    this.classList.add('do-meditor__font')
 
     this.setAttribute(':css', '{height: height}')
     this.setAttribute(

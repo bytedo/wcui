@@ -143,7 +143,7 @@ Anot.directive('drag', {
       //拖拽前回调
       if (_this.beforedrag) {
         let result = _this.beforedrag.call(
-          _this.vmodels,
+          _this.vmodels[0],
           target,
           ox + dx,
           oy + dy
@@ -224,7 +224,7 @@ Anot.directive('drag', {
 
         //拖拽过程的回调
         if (_this.dragging) {
-          _this.dragging.call(_this.vmodels, target, fox, foy)
+          _this.dragging.call(_this.vmodels[0], target, fox, foy)
         }
       })
       let upfn = $doc.bind('mouseup', function(ev) {
@@ -234,7 +234,7 @@ Anot.directive('drag', {
         target.style.transitionDuration = cssTransition
         //结束回调
         if (_this.dragged) {
-          _this.dragged.call(_this.vmodels, target, fox, foy)
+          _this.dragged.call(_this.vmodels[0], target, fox, foy)
         }
       })
     })
