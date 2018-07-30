@@ -89,7 +89,7 @@
 .do-ui-radio,
 .do-ui-checkbox {display:inline-block;position:relative;width:auto;height:auto;padding:0 5px 0 35px;line-height:35px;color:nth($cd, 1);font-size:14px;
 
-  >input {position:absolute;left:7px;top:7px;width:21px;height:21px;border-radius:50%;border:1px solid nth($cp, 3);appearance:none;
+  >input {position:absolute;left:7px;top:7px;width:21px;height:21px;border-radius:50%;border:1px solid nth($cp, 3);background:#fff;appearance:none;
 
     &:checked {box-shadow:0 0 5px nth($cb, 1);}
     &:checked::after {display:block;width:13px;height:13px;margin:3px;border-radius:50%;background:nth($cgr, 1);content:""}

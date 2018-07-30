@@ -4569,7 +4569,7 @@
               ? 'checkbox'
               : elem.type === 'radio'
                 ? 'radio'
-                : /^change/.test(elem.getAttribute('data-duplex-event'))
+                : /^change/.test(elem.getAttribute('data-event'))
                   ? 'change'
                   : 'input'
       }
@@ -4585,7 +4585,7 @@
         }
       })
       function callback(value) {
-        binding.changed.call(this, value, binding)
+        binding.changed.call(this, value)
       }
       var composing = false
       function compositionStart() {
@@ -4700,10 +4700,6 @@
         binding = this,
         curValue
       if (!this.init) {
-        for (var i in Anot.vmodels) {
-          var v = Anot.vmodels[i]
-          v.$fire('anot-duplex-init', binding)
-        }
         var cpipe = binding.pipe || (binding.pipe = pipe)
         cpipe(null, binding, 'init')
         this.init = 1
@@ -4781,8 +4777,8 @@
     },
     number: {
       get: function(val, binding) {
-        var number = val - 0
-        if (-val === -number) {
+        var number = +val
+        if (+val === number) {
           return number
         }
         return 0

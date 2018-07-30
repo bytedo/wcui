@@ -38,10 +38,10 @@
     }
   }
   /* 提醒文本 */
-  .md-warn,.md-mark {display:inline-block;position:relative;padding:3px 8px 3px 35px;border:1px solid nth($co, 2);border-radius:5px;background:#fffbed;color:nth($co, 3);word-break: break-all;
+  .md-warn,.md-mark {display:inline-block;position:relative;min-height:35px;margin:3px 0;padding:3px 8px 3px 35px;line-height:27px;border:1px solid nth($co, 2);border-radius:5px;background:#fffbed;color:nth($co, 3);word-break: break-all;
 
     p {margin:0!important;}
-    i {position:absolute;left:8px;top:7px;line-height:1;font-size:20px;color:nth($cr, 2);}
+    i {position:absolute;left:8px;top:6px;line-height:1;font-size:20px;color:nth($cr, 2);}
   }
   .md-mark {border-color:nth($ct, 1);color:nth($ct, 3);background:#edfbf8;
     i {color:nth($ct, 3);}
