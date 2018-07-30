@@ -306,10 +306,12 @@ Anot.component('meditor', {
       class="editor-body" 
       spellcheck="false" 
       :attr="{disabled: disabled}"
+      :css="{'padding-bottom': padding}"
       :duplex="value"></textarea>
     <content
       ref="preview"
       class="md-preview do-marked-theme" 
+      :css="{'padding-bottom': padding}"
       :visible="preview" 
       :html="htmlTxt"></content>
     `
@@ -367,6 +369,7 @@ Anot.component('meditor', {
     if (typeof this.props.created === 'function') {
       this.props.created(new MEObject(this))
     }
+    this.padding = (this.$elem.clientHeight / 2) >>> 0
     this.compile()
     if (this.preview) {
       this.htmlTxt = this.__tmp__
@@ -385,6 +388,7 @@ Anot.component('meditor', {
     }
   },
   state: {
+    padding: 90,
     height: 180,
     disabled: false, //禁用编辑器
     fullscreen: false, //是否全屏

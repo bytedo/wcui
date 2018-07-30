@@ -34,9 +34,9 @@
     }
   }
 
-  .editor-body{overflow:hidden;overflow-y:auto;float:left;width:100%;height:100%;padding:5px 5px 50px;line-height:1.5;border:0;outline:none;resize:none;color:nth($cgr, 1);background:#fff;font-size:13px;}
+  .editor-body{overflow:hidden;overflow-y:auto;float:left;width:100%;height:100%;padding:5px 5px 90px;line-height:1.5;border:0;outline:none;resize:none;color:nth($cgr, 1);background:#fff;font-size:13px;font-family:Menlo,Monaco,Consolas,"Courier New",monospace;}
   
-  .md-preview {float:right;overflow:hidden;overflow-y:auto;display:block;width:50%;height:100%;padding:10px 10px 50px;line-height:1.5;border-left:1px solid nth($cp, 2);color:nth($cd, 1);font-size:14px;background:#fff;}
+  .md-preview {float:right;overflow:hidden;overflow-y:auto;display:block;width:50%;height:100%;padding:10px 10px 90px;line-height:1.5;border-left:1px solid nth($cp, 2);color:nth($cd, 1);font-size:14px;background:#fff;}
 
 
 
