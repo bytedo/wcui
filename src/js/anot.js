@@ -92,14 +92,7 @@ const _Anot = (function() {
 
   function generateID(mark) {
     mark = (mark && mark + '-') || 'anot-'
-    return (
-      mark +
-      Math.random()
-        .toString(16)
-        .slice(-4) +
-      '-' +
-      ++bindingID
-    )
+    return mark + (++bindingID).toString(16)
   }
 
   var Anot = function(el) {
@@ -2108,7 +2101,7 @@ const _Anot = (function() {
   function createTrack(n) {
     var ret = []
     for (var i = 0; i < n; i++) {
-      ret[i] = generateID('$proxy$each')
+      ret[i] = generateID('proxy-each')
     }
     return ret
   }
@@ -3070,7 +3063,7 @@ const _Anot = (function() {
     return ret
   }
 
-  var rproxy = /(\$proxy\$[a-z]+)\-[\-0-9a-f]+$/
+  var rproxy = /(proxy\-[a-z]+)\-[\-0-9a-f]+$/
   var variablePool = new Cache(218)
   //缓存求值函数，以便多次利用
   var evaluatorPool = new Cache(128)
@@ -3366,7 +3359,7 @@ const _Anot = (function() {
           if (camelizeName.indexOf('@') === 0) {
             camelizeName = camelizeName.slice(1)
             attr.value = attr.value.replace(/\(.*\)$/, '')
-            if (vm.$id.slice(0, 11) === '$proxy$each') {
+            if (vm.$id.slice(0, 10) === 'proxy-each') {
               vm = vm.$up
             }
             if (
@@ -5950,7 +5943,7 @@ const _Anot = (function() {
         force: force
       }
     )
-    proxy.$id = generateID('$proxy$each')
+    proxy.$id = generateID('proxy-each')
     return proxy
   }
 
@@ -5983,7 +5976,7 @@ const _Anot = (function() {
         force: force
       }
     )
-    proxy.$id = generateID('$proxy$with')
+    proxy.$id = generateID('proxy-with')
     return proxy
   }
 
@@ -5991,7 +5984,7 @@ const _Anot = (function() {
     var proxy = cache[key]
     if (proxy) {
       var proxyPool =
-        proxy.$id.indexOf('$proxy$each') === 0 ? eachProxyPool : withProxyPool
+        proxy.$id.indexOf('proxy-each') === 0 ? eachProxyPool : withProxyPool
       proxy.$outer = {}
 
       for (var i in proxy.$events) {
