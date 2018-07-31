@@ -67,7 +67,7 @@ export default Anot.component('tree', {
     let { multiCheck } = this
 
     return `
-    <section class="do-tree__item" :repeat="list" :class="{open: el.__open__, dir: el.children}">
+    <section class="do-tree__item" :for="list" :class="{open: el.__open__, dir: el.children}">
       <em 
         :class="{
           'do-icon-txt': !el.children,

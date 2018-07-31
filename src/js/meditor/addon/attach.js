@@ -122,7 +122,7 @@ const fixCont = function(vm, tool) {
             <span class="col">操作</span>
           </li>
           <li class="tbody">
-            <p :repeat="uploadQueue">
+            <p :for="uploadQueue">
               <span 
                 class="col do-fn-ell" 
                 :text="el.name" 
@@ -137,7 +137,7 @@ const fixCont = function(vm, tool) {
         <ul class="list-box">
           <li 
             class="item" 
-            :repeat="attachList"
+            :for="attachList"
             :layer-tips="el.name"
             :click="insert(el)">
 

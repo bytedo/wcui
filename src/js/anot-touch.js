@@ -1554,7 +1554,7 @@ const _Anot = (function() {
   }
 
   //一些不需要被监听的属性
-  var $$skipArray = oneObject(
+  var kernelProps = oneObject(
     '$id,$watch,$fire,$events,$model,$active,$pathname,$up,$ups,$track,$accessors'
   )
 
@@ -1565,6 +1565,11 @@ const _Anot = (function() {
     options = options || {}
     options.watch = true
     return observeObject(source, options)
+  }
+
+  function isSkip(k) {
+    return
+    k.charAt(0) === '$' || k.slice(0, 2) === '__' || kernelProps[k]
   }
 
   //监听对象属性值的变化(注意,数组元素不是数组的属性),通过对劫持当前对象的访问器实现
@@ -1591,7 +1596,7 @@ const _Anot = (function() {
     var hasOwn = {}
     var skip = []
     var simple = []
-    var $skipArray = {}
+    var userSkip = {}
     // 提取 source中的配置项, 并删除相应字段
     var state = source.state
     var computed = source.computed
@@ -1607,7 +1612,7 @@ const _Anot = (function() {
     delete source.watch
 
     if (source.skip) {
-      $skipArray = oneObject(source.skip)
+      userSkip = oneObject(source.skip)
       delete source.skip
     }
 
@@ -1620,14 +1625,13 @@ const _Anot = (function() {
       }
       for (name in state) {
         var value = state[name]
-        if (!$$skipArray[name]) {
+        if (!kernelProps[name]) {
           hasOwn[name] = true
         }
         if (
           typeof value === 'function' ||
           (value && value.nodeName && value.nodeType > 0) ||
-          (!force[name] &&
-            (name.charAt(0) === '$' || $$skipArray[name] || $skipArray[name]))
+          (!force[name] && (isSkip(name) || userSkip[name]))
         ) {
           skip.push(name)
         } else if (isComputed(value)) {
@@ -1954,7 +1958,7 @@ const _Anot = (function() {
   }
 
   /*********************************************************************
-   *          监控数组（:repeat配合使用）                     *
+   *          监控数组（:for配合使用）                     *
    **********************************************************************/
 
   var arrayMethods = ['push', 'pop', 'shift', 'unshift', 'splice']
@@ -3386,7 +3390,7 @@ const _Anot = (function() {
       for (var i = 0, attr; (attr = attributes[i++]); ) {
         var name = attr.name
         if (uniq[name]) {
-          //IE8下:repeat,:with BUG
+          //IE8下:for BUG
           continue
         }
         uniq[name] = 1
@@ -3465,7 +3469,7 @@ const _Anot = (function() {
     }
   }
 
-  var rnoscanAttrBinding = /^if|widget|repeat$/
+  var rnoscanAttrBinding = /^if|for$/
   var rnoscanNodeBinding = /^html|include$/
 
   function scanNodeList(elem, vmodels) {
@@ -3531,7 +3535,7 @@ const _Anot = (function() {
   }
 
   function scanTag(elem, vmodels) {
-    //扫描顺序  skip(0) --> anot(1) --> :if(10) --> :repeat(90)
+    //扫描顺序  skip(0) --> anot(1) --> :if(10) --> :for(90)
     //--> :if-loop(110) --> :attr(970) ...--> :duplex(2000)垫后
     var skip = elem.getAttribute('skip')
     var node = elem.getAttributeNode('anot')
@@ -5555,7 +5559,7 @@ const _Anot = (function() {
     }
   })
 
-  Anot.directive('repeat', {
+  Anot.directive('for', {
     priority: 90,
     init: function(binding) {
       var type = binding.type
@@ -5564,9 +5568,14 @@ const _Anot = (function() {
 
       var elem = binding.element
       if (elem.nodeType === 1) {
+        var vars = binding.expr.split(' in ')
+        binding.expr = vars.pop()
+        if (vars.length) {
+          vars = vars.pop().split(/\s+/)
+        }
+        binding.vars = vars
         elem.removeAttribute(binding.name)
         effectBinding(elem, binding)
-        binding.param = binding.param || 'el'
         var rendered = getBindingCallback(
           elem,
           'data-rendered',
@@ -5600,12 +5609,28 @@ const _Anot = (function() {
       var binding = this
       var xtype = this.xtype
 
+      if (xtype === 'array') {
+        if (!this.vars.length) {
+          this.vars.push('$index', 'el')
+        } else if (this.vars.length === 1) {
+          this.vars.unshift('$index')
+        }
+        this.param = this.vars[1]
+      } else {
+        this.param = '__el__'
+        if (!this.vars.length) {
+          this.vars.push('$key', '$val')
+        } else if (this.vars.length === 1) {
+          this.vars.push('$val')
+        }
+      }
+
       this.enterCount += 1
       var init = !oldValue
       if (init) {
         binding.$outer = {}
-        var check0 = '$key'
-        var check1 = '$val'
+        var check0 = this.vars[0]
+        var check1 = this.vars[1]
         if (xtype === 'array') {
           check0 = '$first'
           check1 = '$last'
@@ -5670,9 +5695,12 @@ const _Anot = (function() {
             }
           } else {
             action = 'append'
-            proxy.$key = keyOrId
-            proxy.$val = value[keyOrId] //key
-            proxy[param] = { $key: proxy.$key, $val: proxy.$val }
+            proxy[check0] = keyOrId
+            proxy[check1] = value[keyOrId] //key
+            var tmp = {}
+            tmp[check0] = proxy[check0]
+            tmp[check1] = proxy[check1]
+            proxy[param] = tmp
           }
           this.cache[keyOrId] = proxy
           var node = proxy.$anchor || (proxy.$anchor = elem.cloneNode(false))
@@ -5702,8 +5730,9 @@ const _Anot = (function() {
         if (xtype === 'array') {
           proxy.$first = i === 0
           proxy.$last = i === length - 1
+          proxy[this.vars[0]] = proxy.$index
         } else {
-          proxy.$val = toJson(value[keyOrId]) //这里是处理vm.object = newObject的情况
+          proxy[check1] = toJson(value[keyOrId]) //这里是处理vm.object = newObject的情况
         }
         proxies.push(proxy)
       }
@@ -5777,7 +5806,7 @@ const _Anot = (function() {
         }
       }
 
-      //repeat --> duplex
+      // :for --> duplex
       ;(function(args) {
         _parent.args = args
         if (_parent.msRendered) {
@@ -5890,13 +5919,16 @@ const _Anot = (function() {
         binding.$repeat.removeAt(proxy.$index)
       }
       var param = binding.param
-      proxy.$watch(param, function(a) {
+      proxy.$watch(param, function(val) {
         var index = proxy.$index
-        binding.$repeat[index] = a
+        binding.$repeat[index] = val
       })
     } else {
-      proxy.$watch('$val', function fn(a) {
-        binding.$repeat[proxy.$key] = a
+      var __k__ = binding.vars[0]
+      var __v__ = binding.vars[1]
+      proxy.$up.$watch(binding.expr + '.' + proxy[__k__], function(val) {
+        proxy[binding.param][__v__] = val
+        proxy[__v__] = val
       })
     }
   }
@@ -5914,12 +5946,14 @@ const _Anot = (function() {
       }
     }
     if (!proxy) {
-      proxy = eachProxyFactory(itemName)
+      proxy = eachProxyFactory(data)
     }
     return proxy
   }
 
-  function eachProxyFactory(itemName) {
+  function eachProxyFactory(data) {
+    var itemName = data.param || 'el'
+    var __k__ = data.vars[0]
     var source = {
       $outer: {},
       $index: 0,
@@ -5930,12 +5964,14 @@ const _Anot = (function() {
       $last: false,
       $remove: Anot.noop
     }
+    source[__k__] = 0
     source[itemName] = NaN
     var force = {
       $last: 1,
       $first: 1,
       $index: 1
     }
+    force[__k__] = 1
     force[itemName] = 1
     var proxy = modelFactory(
       { state: source },
@@ -5950,26 +5986,28 @@ const _Anot = (function() {
   var withProxyPool = []
 
   function withProxyAgent(data) {
-    var itemName = data.param || 'el'
-    return withProxyPool.pop() || withProxyFactory(itemName)
+    return withProxyPool.pop() || withProxyFactory(data)
   }
 
-  function withProxyFactory(itemName) {
+  function withProxyFactory(data) {
+    var itemName = data.param || '__el__'
+    var __k__ = data.vars[0]
+    var __v__ = data.vars[1]
     var source = {
-      $key: '',
-      $val: NaN,
       $index: 0,
       $oldIndex: 0,
       $outer: {},
       $anchor: null
     }
+    source[__k__] = ''
+    source[__v__] = NaN
     source[itemName] = NaN
     var force = {
-      $key: 1,
-      $val: 1,
+      __el__: 1,
       $index: 1
     }
-    force[itemName] = 1
+    force[__k__] = 1
+    force[__v__] = 1
     var proxy = modelFactory(
       { state: source },
       {

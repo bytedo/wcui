@@ -79,7 +79,7 @@ const tmpls = {
     :data="{to: parseUrl(currPage + 1)}"
     :click="go(currPage + 1, $event)"></button>`,
   pager: `<button class="page"
-    :repeat="pageList"
+    :for="pageList"
     :css="{'border-radius': props.radius}"
     :attr="{disabled: '...' === el || currPage === el}"
     :data="{to: parseUrl(el)}"

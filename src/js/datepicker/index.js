@@ -164,7 +164,7 @@ export default Anot.component('datepicker', {
         <section class="tr do-fn-cl">
           <span class="td"
             :class="{weeken:el.weeken, disabled: el.disabled, selected: el.selected}"
-            :repeat="calendar.list"
+            :for="calendar.list"
             :click="pick(el)"
             :text="el.day"></span>
         </section>

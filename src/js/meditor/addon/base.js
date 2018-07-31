@@ -239,7 +239,7 @@ const addon = {
       },
       content: `
         <ul class="do-meditor-face">
-          <li class="item" :repeat="arr">
+          <li class="item" :for="arr">
             <span :html="el" :click="insert(el)"></span>
           </li>
         </ul>`,
@@ -273,9 +273,9 @@ const addon = {
       }),
       content: `
       <ul class="do-meditor-table" ref="table">
-        <li :repeat="matrix">
+        <li :for="matrix">
           <span 
-            :repeat-o="el" 
+            :for="o in el" 
             :class="{active: o.v}" 
             :data="{x: $index, y: $outer.$index}"></span>
         </li>
@@ -442,7 +442,7 @@ const addon = {
         <section class="do-fn-cl">
           <span class="label">语言类型</span>
           <select :duplex="lang">
-            <option :repeat="$lang" :attr-value="el.id">{{el.name || el.id}}</option>
+            <option :for="$lang" :attr-value="el.id">{{el.name || el.id}}</option>
           </select>
         </section>
         <section>
