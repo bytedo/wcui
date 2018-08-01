@@ -54,13 +54,13 @@
       .md-task__text {color:nth($cgr, 1);text-decoration:line-through;}
     }
   }
-  table {width:100%;
-    thead tr {height:45px;line-height:45px;background:nth($cp, 1)}
-    thead th {padding:0 8px;border:0;}
-    tbody tr {height:43px;line-height:42px;@include ts(all, .3s);
+  table {width:100%;line-height:25px;
+    thead tr {height:45px;background:nth($cp, 1)}
+    thead th {padding:10px 8px;border:0;}
+    tbody tr {height:auto;@include ts(all, .3s);
       &:hover {background:#ecf6fd}
     }
-    tbody td {padding:0 8px;border-bottom:1px solid nth($cp, 2)}
+    tbody td {padding:9px 8px;border-bottom:1px solid nth($cp, 2)}
   }
 
   hr {margin:30px 0;border-bottom:0;}

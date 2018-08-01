@@ -4424,6 +4424,9 @@ const _Anot = (function() {
       if (!['INPUT', 'TEXTAREA'].includes(elem.nodeName)) {
         return
       }
+      if (elem.msBinded) {
+        return
+      }
       if (this.target) {
         this.target.result[elem.expr] = { key: elem.expr }
       }
@@ -4485,27 +4488,34 @@ const _Anot = (function() {
         }
 
         if (code === 0 && opt.eq) {
-          var eqEl = document.querySelector('#' + opt.eq)
-          txt = val !== eqEl.value ? 10031 : 0
+          var eqVal = parseVmValue(_this.vmodels[0], opt.eq)
+          code = val !== eqVal ? 10031 : 0
         }
 
         target.result[elem.expr].code = code
-        target.result[elem.expr].passed = opt.require ? code === 0 : true
+        target.result[elem.expr].passed = opt.require
+          ? code === 0
+          : val
+            ? code === 0
+            : true
 
-        var done
+        var passed = true
         for (var k in target.result) {
           if (!target.result[k].passed) {
-            done = true
+            passed = false
             target.event(target.result[k])
             break
           }
         }
-        if (!done) {
+        if (passed) {
           target.event(true)
         }
       }
-
       Anot(elem).bind('blur', checked)
+      this.rollback = function() {
+        Anot(elem).unbind('blur', checked)
+      }
+      elem.msBinded = true
       checked()
     }
   })
