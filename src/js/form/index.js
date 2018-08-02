@@ -12,6 +12,7 @@ Anot.ui.form = '0.1.0'
 // 按钮
 Anot.component('button', {
   __init__(props, state, next) {
+    state.text = this.text()
     state.style = { 'border-radius': props.radius }
     this.classList.add('do-fn-noselect')
     this.classList.add('do-button')
@@ -33,7 +34,6 @@ Anot.component('button', {
     next()
   },
   render(slots) {
-    this.text = slots.__extra__.join('')
     let icon = ''
     if (this.props.icon) {
       icon = `<i class="do-button__icon do-icon-${this.props.icon}"></i>`
@@ -75,7 +75,7 @@ Anot.component('radio', {
       }
     }
 
-    state.text = this.textContent
+    state.text = this.text()
     state.checked = state.value === props.label
 
     this.classList.add('do-radio')
@@ -172,7 +172,7 @@ Anot.component('checkbox', {
       Anot.Array.ensure(state.value, props.label)
     }
 
-    state.text = this.textContent
+    state.text = this.text()
     state.checked = state.value.indexOf(props.label) > -1
 
     this.classList.add('do-checkbox')
@@ -236,7 +236,6 @@ Anot.component('checkbox', {
 // 文本输入框
 Anot.component('input', {
   __init__(props, state, next) {
-    state.text = this.textContent
     if (props.hasOwnProperty('disabled')) {
       state.disabled = true
     }

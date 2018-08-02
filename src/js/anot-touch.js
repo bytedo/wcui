@@ -3495,6 +3495,7 @@ const _Anot = (function() {
             var widget = isWidget(elem)
 
             if (widget) {
+              elem.setAttribute('is-widget', '')
               elem.removeAttribute(':if')
               elem.removeAttribute(':if-loop')
               componentQueue.push({
@@ -3833,7 +3834,7 @@ const _Anot = (function() {
           var state = {}
           var props = getOptionsFromTag(elem, host.vmodels)
           var $id = props.uuid || generateID(widget)
-          var slots = null
+          var slots = { __extra__: [] }
 
           // 对象组件的子父vm关系, 只存最顶层的$components对象中,
           while (parentVm.$up && parentVm.$up.__WIDGET__ === name) {
@@ -3842,6 +3843,11 @@ const _Anot = (function() {
 
           if (elem.childNodes.length) {
             slots = parseSlot(elem.childNodes, host.vmodels)
+          }
+          var txtContent = slots.__extra__.join('')
+          delete slots.__extra__
+          elem.text = function() {
+            return txtContent
           }
 
           if (props.hasOwnProperty(':disabled')) {
@@ -3932,6 +3938,7 @@ const _Anot = (function() {
 
           delete props.uuid
           delete props.name
+          delete props.isWidget
 
           hooks.props = hooks.props || {}
           hooks.state = hooks.state || {}
@@ -3943,6 +3950,8 @@ const _Anot = (function() {
 
           hooks.__init__.call(elem, hooks.props, hooks.state, function next() {
             __READY__ = true
+
+            delete elem.text
           })
 
           if (!__READY__) {
@@ -4002,12 +4011,6 @@ const _Anot = (function() {
 
           elem.innerHTML = html
 
-          if (slots && slots.__extra__.length) {
-            try {
-              elem.appendChild.apply(elem, slots.__extra__)
-            } catch (err) {}
-          }
-
           hideProperty(vmodel, '$elem', elem)
           elem.__VM__ = vmodel
 
@@ -4031,6 +4034,7 @@ const _Anot = (function() {
             if (dependencies === 0) {
               var timer = setTimeout(function() {
                 clearTimeout(timer)
+                elem.removeAttribute('is-widget')
                 componentDidMount.call(vmodel)
               }, children ? Math.max(children * 17, 100) : 17)
 

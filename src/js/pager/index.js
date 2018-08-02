@@ -145,7 +145,7 @@ export default Anot.component('pager', {
     layout = layout.map(it => {
       if (it === 'slot') {
         if (slots && slots.extra) {
-          return slots.extra[0]
+          return slots.extra.join('')
         }
       } else {
         return tmpls[it] || ''

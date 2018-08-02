@@ -239,7 +239,7 @@ Anot.component('link', {
       props.to.replace(/^[\/]+|[\/]+$|\s+/g, ''),
       {}
     ).regexp
-    props.label = props.label || this.textContent
+    props.label = props.label || this.text()
     if (mode === 'hash') {
       state.link = '#!' + props.to
     } else {
