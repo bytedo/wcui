@@ -12,7 +12,6 @@ Anot.ui.form = '0.1.0'
 // 按钮
 Anot.component('button', {
   __init__(props, state, next) {
-    state.text = this.parseExpr(this.textContent)
     state.style = { 'border-radius': props.radius }
     this.classList.add('do-fn-noselect')
     this.classList.add('do-button')
@@ -33,7 +32,8 @@ Anot.component('button', {
 
     next()
   },
-  render() {
+  render(slots) {
+    this.text = slots.__extra__.join('')
     let icon = ''
     if (this.props.icon) {
       icon = `<i class="do-button__icon do-icon-${this.props.icon}"></i>`

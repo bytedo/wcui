@@ -3765,29 +3765,41 @@
     }
   }
 
-  function parseSlot(collections) {
+  function parseSlot(collections, vms) {
     var arr = aslice.call(collections, 0)
     var obj = { __extra__: [] }
     arr.forEach(function(elem) {
-      var slot = elem.getAttribute('slot')
-      if (isWidget(elem)) {
-        obj.__extra__.push(elem)
-      } else {
-        if (slot) {
-          obj[slot] = obj[slot] || []
-          elem.removeAttribute('slot')
-          obj[slot].push(elem.outerHTML)
-        } else {
-          if (
-            rexpr.test(elem.outerHTML) ||
-            /:[\w-]*=".*"/.test(elem.outerHTML)
-          ) {
-            return
-          }
-          obj.__extra__.push(elem)
-        }
-      }
+      switch (elem.nodeType) {
+        case 1:
+          var slot = elem.getAttribute('slot')
 
+          if (slot) {
+            obj[slot] = obj[slot] || []
+            elem.removeAttribute('slot')
+            obj[slot].push(elem.outerHTML)
+          } else {
+            var txt = elem.outerHTML
+            if (isWidget(elem) || /:[\w-]*=".*"/.test(txt)) {
+              break
+            }
+            if (rexpr.test(txt)) {
+              var expr = normalizeExpr(txt)
+              txt = parseExpr(expr, vms, {}).apply(0, vms)
+            }
+
+            obj.__extra__.push(txt)
+          }
+
+          break
+        case 3:
+          var txt = elem.textContent.trim()
+          if (txt) {
+            obj.__extra__.push(txt)
+          }
+          break
+        default:
+          break
+      }
       elem.parentNode.removeChild(elem)
     })
     return obj
@@ -3842,8 +3854,9 @@
           while (parentVm.$up && parentVm.$up.__WIDGET__ === name) {
             parentVm = parentVm.$up
           }
-          if (elem.firstElementChild) {
-            slots = parseSlot(elem.children)
+
+          if (elem.childNodes.length) {
+            slots = parseSlot(elem.childNodes, host.vmodels)
           }
 
           if (props.hasOwnProperty(':disabled')) {
@@ -3942,22 +3955,9 @@
           Object.assign(hooks.state, state)
 
           var __READY__ = false
-          elem.parseExpr = function(str) {
-            str = str.trim()
-            var expr = normalizeExpr(str)
-            if (expr === str) {
-              return str
-            }
-            try {
-              return parseExpr(expr, host.vmodels, {}).apply(0, host.vmodels)
-            } catch (err) {
-              return str
-            }
-          }
 
           hooks.__init__.call(elem, hooks.props, hooks.state, function next() {
             __READY__ = true
-            delete elem.parseExpr
           })
 
           if (!__READY__) {
