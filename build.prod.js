@@ -28,29 +28,25 @@ const jsOpt = {
   ]
 }
 const cssOpt = {
-  includePaths: ['src/css/'],
+  // includePaths: ['src/css/'],
   outputStyle: 'compressed'
 }
 
 const compileJs = (entry, output) => {
-  if (/touch\.patch/.test(entry)) {
-    return
-  }
   let t1 = Date.now()
-  let tmpOpt = jsOpt
-  let code = ''
-  if (!/anot/.test(entry)) {
-    code = babel.transformFileSync(entry, jsOpt).code
-  } else {
-    code = fs.cat(entry).toString()
+  try {
+    let { code } = babel.transformFileSync(entry, jsOpt)
+    code = uglify.minify(code).code.replace(/\.scss/g, '.css')
+
+    log(
+      '编译JS: %s, 耗时 %s ms',
+      chalk.green(entry),
+      chalk.yellow(Date.now() - t1)
+    )
+    fs.echo(code, output)
+  } catch (err) {
+    return log(err)
   }
-  code = uglify.minify(code).code.replace(/\.scss/g, '.css')
-  log(
-    '编译JS: %s, 耗时 %s ms',
-    chalk.green(entry),
-    chalk.yellow(Date.now() - t1)
-  )
-  fs.echo(code, output)
 }
 
 const compileCss = (entry, output) => {
@@ -66,59 +62,52 @@ const compileCss = (entry, output) => {
   })
 }
 
-const compileHtm = (entry, output) => {
-  let t1 = Date.now()
-  let htm = fs.cat(entry).toString('utf8')
-  htm = htm.replace(/[\r\n\t]+/g, ' ').replace(/\s{2,}/g, ' ')
-  log(
-    '压缩HTML: %s, 耗时 %s ms',
-    chalk.green(entry),
-    chalk.yellow(Date.now() - t1)
-  )
-  fs.echo(htm, output)
-}
-
 /*=======================================================*/
 /*=====                                               ===*/
 /*=======================================================*/
-
-const jsFiles = fs.ls('./src/js/', true)
-const cssFiles = fs.ls('./src/css/', true)
 
 if (fs.isdir(buildDir)) {
   fs.rm(buildDir, true)
   log(chalk.cyan('清除旧目录 dist/'))
 }
+fs.mkdir(buildDir)
 
-// css目录
-cssFiles.forEach(file => {
-  if (/\.scss$/.test(file)) {
-    let entry = file
-    let output = file.replace('src/css', 'dist/css').replace(/scss$/, 'css')
-
-    compileCss(entry, output)
-  }
+let list = fs.ls('./node_modules/anot/dist/')
+list.forEach(it => {
+  fs.cp(it, path.resolve(buildDir, path.parse(it).base))
 })
 
-// js目录的处理要复杂一点
-jsFiles.forEach(file => {
-  let entry = file
-  let output = file.replace(/src\/js/, 'dist/js').replace(/scss$/, 'css')
-  let ext = file.slice(file.lastIndexOf('.') + 1)
+log('复制anot框架文件完成...')
 
-  switch (ext) {
-    case 'js':
+/*----------------------------------------------*/
+/*----------------------------------------------*/
+/*----------------------------------------------*/
+
+let files = fs.ls(sourceDir, true)
+files = files.map(it => {
+  let file = path.parse(it)
+  if (!file.ext || file.base === '.DS_Store' || file.base === 'var.scss') {
+    return null
+  }
+  return { path: it, ext: file.ext, name: file.base }
+})
+
+files.forEach(file => {
+  if (!file) {
+    return
+  }
+  let entry = file.path
+  let output = file.path.replace('src/', 'dist/')
+
+  switch (file.ext) {
+    case '.js':
       compileJs(entry, output)
       break
-    case 'scss':
+    case '.scss':
+      output = output.replace(/\.scss$/, '.css')
       compileCss(entry, output)
       break
-    case 'htm':
-      compileHtm(entry, output)
-      break
     default:
-      if (!fs.isdir(entry)) {
-        fs.cp(entry, output)
-      }
+      fs.cp(entry, output)
   }
 })

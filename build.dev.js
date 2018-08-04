@@ -28,104 +28,75 @@ const jsOpt = {
   ]
 }
 const cssOpt = {
-  includePaths: ['src/css/'],
+  // includePaths: ['src/css/'],
   outputStyle: 'compressed'
 }
 
 const compileJs = (entry, output) => {
-  if (/touch\.patch/.test(entry)) {
-    return
-  }
-  setTimeout(() => {
-    if (/anot/.test(entry)) {
-      fs.cp(entry, output)
-    } else {
-      try {
-        let { code } = babel.transformFileSync(entry, jsOpt)
-        code = code.replace(/\.scss/g, '.css')
-        fs.echo(code, output)
-      } catch (err) {
-        return log(err)
-      }
-    }
-  }, 100)
   log('编译JS: %s', chalk.green(entry))
+  try {
+    let { code } = babel.transformFileSync(entry, jsOpt)
+    code = code.replace(/\.scss/g, '.css')
+    fs.echo(code, output)
+  } catch (err) {
+    return log(err)
+  }
 }
 
 const compileCss = (entry, output) => {
-  setTimeout(() => {
-    try {
-      const { css } = scss.renderSync({ ...cssOpt, file: entry })
-      prefixer.process(css, { from: '', to: '' }).then(result => {
-        fs.echo(result.css, output)
-      })
-    } catch (err) {
-      log(err)
-    }
-  }, 100)
   log('编译scss: %s', chalk.green(entry))
-}
-
-const compileHtm = (entry, output) => {
-  setTimeout(() => {
-    let htm = fs.cat(entry).toString('utf8')
-    htm = htm.replace(/[\r\n\t]+/g, ' ').replace(/\s{2,}/g, ' ')
-    fs.echo(htm, output)
-  }, 100)
-  log('压缩HTML: %s', chalk.green(entry))
+  try {
+    const { css } = scss.renderSync({ ...cssOpt, file: entry })
+    prefixer.process(css, { from: '', to: '' }).then(result => {
+      fs.echo(result.css, output)
+    })
+  } catch (err) {
+    log(err)
+  }
 }
 
 /*=======================================================*/
 /*=====                                               ===*/
 /*=======================================================*/
 
-const jsFiles = fs.ls('./src/js/', true)
-const cssFiles = fs.ls('./src/css/', true)
-
-// 字体文件直接复制
-chokidar.watch(path.join(sourceDir, 'font/')).on('all', (act, file) => {
-  if (act === 'add' || act === 'change') {
-    let output = file.replace('src/font/', 'dist/font/')
-    fs.cp(file, output)
-  }
-})
-
-// css目录
-chokidar.watch(path.resolve(sourceDir, 'css/')).on('all', (act, file) => {
-  if (act === 'add' || act === 'change') {
-    if (/\.scss$/.test(file)) {
-      let output = file
-        .replace('src/css/', 'dist/css/')
-        .replace('.scss', '.css')
-
-      compileCss(file, output)
-    }
-  }
-})
-
-// js目录的处理要复杂一点
 chokidar
-  .watch(path.resolve(sourceDir, 'js/'))
+  .watch(sourceDir)
   .on('all', (act, file) => {
+    return
     if (act === 'add' || act === 'change') {
-      let output = file.replace('src/js/', 'dist/js/')
-      let ext = file.slice(file.lastIndexOf('.') + 1)
-      switch (ext) {
-        case 'js':
-          compileJs(file, output)
+      let entry = file
+      let output = file.replace('src/', 'dist/')
+
+      file = path.parse(entry)
+      if (!file.ext || file.base === '.DS_Store' || file.base === 'var.scss') {
+        return
+      }
+
+      switch (file.ext) {
+        case '.js':
+          compileJs(entry, output)
           break
-        case 'scss':
-          output = output.replace(/scss$/, 'css')
-          compileCss(file, output)
-          break
-        case 'htm':
-          compileHtm(file, output)
+        case '.scss':
+          output = output.replace(/\.scss$/, '.css')
+          compileCss(entry, output)
           break
         default:
-          fs.cp(file, output)
+          fs.cp(entry, output)
       }
     }
   })
   .on('ready', () => {
     log(chalk.red('预处理完成,监听文件变化中,请勿关闭本窗口...'))
+  })
+
+chokidar
+  .watch(path.resolve('./node_modules/anot/dist/'))
+  .on('all', (act, file) => {
+    if (act === 'add' || act === 'change') {
+      log('复制: %s', chalk.green(file))
+      fs.cp(file, path.resolve(buildDir, path.parse(file).base))
+    }
+  })
+  .on('ready', () => {
+    log('复制anot框架文件完成...')
   })
