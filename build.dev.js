@@ -28,7 +28,6 @@ const jsOpt = {
   ]
 }
 const cssOpt = {
-  // includePaths: ['src/css/'],
   outputStyle: 'compressed'
 }
 
@@ -62,7 +61,6 @@ const compileCss = (entry, output) => {
 chokidar
   .watch(sourceDir)
   .on('all', (act, file) => {
-    return
     if (act === 'add' || act === 'change') {
       let entry = file
       let output = file.replace('src/', 'dist/')

@@ -12,7 +12,6 @@ const sourceDir = path.resolve(__dirname, 'src')
 const buildDir = path.resolve(__dirname, 'dist')
 
 const cssOpt = {
-  // includePaths: ['src/css/'],
   outputStyle: 'compressed'
 }
 

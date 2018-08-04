@@ -28,7 +28,6 @@ const jsOpt = {
   ]
 }
 const cssOpt = {
-  // includePaths: ['src/css/'],
   outputStyle: 'compressed'
 }
 
