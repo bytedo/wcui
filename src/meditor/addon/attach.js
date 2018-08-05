@@ -7,7 +7,7 @@
 
 'use strict'
 
-import 'layer/index'
+import '../../layer/index'
 import 'css/meditor__attach.scss'
 
 const $doc = Anot(document)

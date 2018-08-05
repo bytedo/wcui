@@ -7,8 +7,8 @@
 
 'use strict'
 
-import 'prism/base'
-import 'marked/index'
+import '../prism/base'
+import '../marked/index'
 import addon from './addon/base'
 import 'css/meditor.scss'
 
@@ -403,7 +403,7 @@ Anot.component('meditor', {
     onUpdate: Anot.PropsTypes.isFunction(),
     onFullscreen: Anot.PropsTypes.isFunction()
   },
-  skip: ['addon', 'insert', 'selection', '__tmp__'],
+  skip: ['addon', 'insert', 'selection'],
   methods: {
     // 往文本框中插入内容
     insert(val, isSelect) {

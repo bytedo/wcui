@@ -7,7 +7,7 @@
 
 'use strict'
 
-import 'drag/index'
+import '../drag/index'
 import 'css/layer-normal.scss'
 
 Anot.ui.layer = '1.0.0-normal'

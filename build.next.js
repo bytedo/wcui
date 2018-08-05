@@ -30,9 +30,12 @@ const compileJs = (entry, output) => {
   let { code } = uglify.minify(buf)
   code = code
     .replace(/\.scss/g, '.css')
-    .replace(/import"([a-z0-9/.]*)(?<!\.css)"/g, 'import "$1.js"')
-    .replace(/import ([\w]*) from"([a-z0-9/.]*)"/g, 'import $1 from "$2.js"')
-    .replace(/import"(([a-z0-9/.]*\.css))"/g, 'importCss("/$1")')
+    .replace(/import"([a-z0-9\/\.\-_]*)(?<!\.css)"/g, 'import "$1.js"')
+    .replace(
+      /import ([\w]*) from"([a-z0-9\/\.\-_]*)"/g,
+      'import $1 from "$2.js"'
+    )
+    .replace(/import"([a-z0-9\/\.\-_]*\.css)"/g, 'importCss("/$1")')
   log(
     '编译JS: %s, 耗时 %s ms',
     chalk.green(entry),

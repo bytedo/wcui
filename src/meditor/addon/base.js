@@ -6,7 +6,7 @@
  */
 
 'use strict'
-import 'layer/index'
+import '../../layer/index'
 
 function objArr(num) {
   let arr = []
