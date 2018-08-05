@@ -278,7 +278,7 @@ function showDialog(elem, vm, tool) {
     menubar: false,
     fixed: true,
     maskClose: true,
-    offset: [offset.top + 40 - $doc.scrollTop()],
+    offset: [offset.top + 35 - $doc.scrollTop()],
     shift: {
       top: offset.top - $doc.scrollTop()
     },

@@ -4,12 +4,18 @@ const log = console.log
 const fs = require('iofs')
 const path = require('path')
 const scss = require('node-sass')
-
+const postcss = require('postcss')
+const autoprefixer = require('autoprefixer')
 const chalk = require('chalk')
 const uglify = require('uglify-es')
 
 const sourceDir = path.resolve(__dirname, 'src')
 const buildDir = path.resolve(__dirname, 'dist')
+const prefixer = postcss().use(
+  autoprefixer({
+    browsers: ['ff > 58', 'Chrome > 61']
+  })
+)
 
 const cssOpt = {
   outputStyle: 'compressed'
@@ -39,12 +45,14 @@ const compileCss = (entry, output) => {
   let t1 = Date.now()
   const { css } = scss.renderSync({ ...cssOpt, file: entry })
 
-  log(
-    '编译scss: %s, 耗时 %s ms',
-    chalk.green(entry),
-    chalk.yellow(Date.now() - t1)
-  )
-  fs.echo(css, output)
+  prefixer.process(css, { from: '', to: '' }).then(result => {
+    log(
+      '编译scss: %s, 耗时 %s ms',
+      chalk.green(entry),
+      chalk.yellow(Date.now() - t1)
+    )
+    fs.echo(result.css, output)
+  })
 }
 
 /*=======================================================*/

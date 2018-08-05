@@ -39,7 +39,7 @@ const addon = {
         this.close()
       },
       offset: [
-        offset.top + 40 - $doc.scrollTop(),
+        offset.top + 35 - $doc.scrollTop(),
         'auto',
         'auto',
         offset.left - $doc.scrollLeft()
@@ -130,7 +130,7 @@ const addon = {
         this.close()
       },
       offset: [
-        offset.top + 40 - $doc.scrollTop(),
+        offset.top + 35 - $doc.scrollTop(),
         'auto',
         'auto',
         offset.left - $doc.scrollLeft()
@@ -228,7 +228,7 @@ const addon = {
         '🙏'
       ],
       offset: [
-        offset.top + 40 - $doc.scrollTop(),
+        offset.top + 35 - $doc.scrollTop(),
         'auto',
         'auto',
         offset.left - $doc.scrollLeft()
@@ -259,7 +259,7 @@ const addon = {
       maskClose: true,
       maskColor: 'rgba(255,255,255,0)',
       offset: [
-        offset.top + 40 - $doc.scrollTop(),
+        offset.top + 35 - $doc.scrollTop(),
         'auto',
         'auto',
         offset.left - $doc.scrollLeft()
@@ -350,7 +350,7 @@ const addon = {
         this.close()
       },
       offset: [
-        offset.top + 40 - $doc.scrollTop(),
+        offset.top + 35 - $doc.scrollTop(),
         'auto',
         'auto',
         offset.left - $doc.scrollLeft()
@@ -482,7 +482,7 @@ const addon = {
       title: '关于编辑器',
       maskClose: true,
       maskColor: 'rgba(255,255,255,0)',
-      offset: [offset.top + 37 - $doc.scrollTop()],
+      offset: [offset.top + 35 - $doc.scrollTop()],
       shift: { top: offset.top - $doc.scrollTop() },
       content:
         '<div class="do-meditor-about">' +

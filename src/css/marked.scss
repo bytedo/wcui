@@ -27,7 +27,7 @@
   h5:before,
   h6:before {display:block;position:absolute;left:0;top:50%;width:100%;content:" ";border-bottom:1px solid #ddd;}
 
-  a {text-decoration:underline;}
+  a {text-decoration:underline;color:nth($cgr, 1)}
   a:hover {color:nth($co, 2)}
   p {margin:15px 0;}
   img {max-width:100%;}
