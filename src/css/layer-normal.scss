@@ -191,7 +191,7 @@
 
   }
 
-  &.mask {position:fixed;z-index:65534;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,.3);
+  &.mask {position:fixed;z-index:65534;left:0;top:0;width:100%;height:100%;background:transparent;
 
     &.shift {transition: all .5s ease-out;}
     &.inner {position:absolute;}

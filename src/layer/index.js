@@ -58,16 +58,11 @@ const close = function(id) {
       layerDom[id][1].classList.add('shift')
       layerDom[id][0].style.opacity = ''
       layerDom[id][1].style.opacity = 0
-      setTimeout(
-        (_ => {
-          return function() {
-            document.body.removeChild(layerDom[_][0])
-            delete layerDom[_]
-            delete Anot.vmodels[_]
-          }
-        })(id),
-        200
-      )
+      setTimeout(function() {
+        layerDom[id][0].parentNode.removeChild(layerDom[id][0])
+        delete layerDom[id]
+        delete Anot.vmodels[id]
+      }, 200)
     } catch (err) {}
   }
   document.body.style.overflow = ''
@@ -510,12 +505,12 @@ class __layer__ {
 
           // 为loading类型时,自动关闭同时触发回调
           if (state.type === 6) {
-            this.vm.props.yes($id)
+            this.vm.props.yes.call(this.vm, $id)
           }
         }, state.timeout)
       } else if (state.type === 6) {
         // loading类型, 非自动关闭时, 主动触发回调
-        this.vm.props.yes($id)
+        this.vm.props.yes.call(this.vm, $id)
       }
     }
   }

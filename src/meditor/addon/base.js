@@ -31,7 +31,6 @@ const addon = {
       type: 7,
       menubar: false,
       maskClose: true,
-      maskColor: 'rgba(255,255,255,0)',
       fixed: true,
       insert: function(level) {
         wrap = wrap.replace(/^(#{1,6} )?/, '#'.repeat(level) + ' ')
@@ -113,7 +112,6 @@ const addon = {
       type: 7,
       menubar: false,
       maskClose: true,
-      maskColor: 'rgba(255,255,255,0)',
       fixed: true,
       link: '',
       linkName: wrap,
@@ -188,7 +186,6 @@ const addon = {
       title: '插入表情',
       fixed: true,
       maskClose: true,
-      maskColor: 'rgba(255,255,255,0)',
       arr: [
         '😀',
         '😅',
@@ -257,7 +254,6 @@ const addon = {
       title: '0行 x 0列',
       fixed: true,
       maskClose: true,
-      maskColor: 'rgba(255,255,255,0)',
       offset: [
         offset.top + 35 - $doc.scrollTop(),
         'auto',
@@ -336,7 +332,6 @@ const addon = {
       type: 7,
       menubar: false,
       maskClose: true,
-      maskColor: 'rgba(255,255,255,0)',
       fixed: true,
       img: '',
       imgAlt: wrap,
@@ -481,7 +476,6 @@ const addon = {
       type: 7,
       title: '关于编辑器',
       maskClose: true,
-      maskColor: 'rgba(255,255,255,0)',
       offset: [offset.top + 35 - $doc.scrollTop()],
       shift: { top: offset.top - $doc.scrollTop() },
       content:
