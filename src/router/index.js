@@ -79,9 +79,6 @@ class Router {
       }
     })
 
-    // 部分情况下, 这里的onload没有触发, 需要手动再触发一下
-    Anot.fireDom(window, 'load')
-
     //劫持页面上所有点击事件，如果事件源来自链接或其内部，
     //并且它不会跳出本页，并且以"#/"或"#!/"开头，那么触发go方法
     Anot.bind(document, 'click', ev => {
@@ -224,6 +221,10 @@ class Router {
     } else {
       this.__add__(rule, callback)
     }
+    // 因为先初始化,才开始监听路由规则
+    // 所以会导致wondow load的时候, 规则还没生效, 而生效之后,load已经结束
+    // 所以这里需要手动再触发一次load
+    Anot.fireDom(window, 'load')
   }
 }
 
