@@ -63,7 +63,6 @@ class Router {
       let path = mode === 'hash' ? location.hash : location.pathname
 
       path = path.replace(prefix, '').trim()
-
       if (ev.type === 'load') {
         this.go(path)
         // hash模式要手动触发一下路由检测
@@ -79,6 +78,9 @@ class Router {
         }
       }
     })
+
+    // 部分情况下, 这里的onload没有触发, 需要手动再触发一下
+    Anot.fireDom(window, 'load')
 
     //劫持页面上所有点击事件，如果事件源来自链接或其内部，
     //并且它不会跳出本页，并且以"#/"或"#!/"开头，那么触发go方法
