@@ -384,10 +384,11 @@ const addon = {
   },
   blockcode: function(elem) {
     let that = this
+    let offset = Anot(elem).offset()
     layer.open({
       type: 7,
       title: '添加代码块',
-      $lang: [
+      __lang__: [
         { id: 'asp' },
         { id: 'actionscript', name: 'ActionScript(3.0)/Flash/Flex' },
         { id: 'bash', name: 'Bash/Shell/Bat' },
@@ -426,6 +427,8 @@ const addon = {
       lang: 'javascript',
       code: '',
       maskClose: true,
+      offset: [offset.top + 35 - $doc.scrollTop()],
+      shift: { top: offset.top - $doc.scrollTop() },
       insert: function() {
         let val = `\n\`\`\`${this.lang}\n${this.code ||
           '// 在此输入代码'}\n\`\`\`\n`
@@ -437,7 +440,7 @@ const addon = {
         <section class="do-fn-cl">
           <span class="label">语言类型</span>
           <select :duplex="lang">
-            <option :for="$lang" :attr-value="el.id">{{el.name || el.id}}</option>
+            <option :for="__lang__" :attr-value="el.id">{{el.name || el.id}}</option>
           </select>
         </section>
         <section>

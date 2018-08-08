@@ -10,10 +10,10 @@
 
 
 /*--------各种按钮---------*/
-.do-ui-button {display:inline-block;height:16px;padding:2px 5px;line-height:12px;border-radius:3px;text-align:center;font-size:12px;background:nth($cp, 2);color:nth($cgr, 1);cursor:pointer;@include ts;
+.do-ui-button {display:inline-block;height:16px;padding:2px 5px;line-height:12px;border-radius:2px;text-align:center;font-size:12px;background:nth($cp, 2);color:nth($cgr, 1);cursor:pointer;@include ts;
 
-  &.medium {min-width:80px;height:30px;padding:0 8px;line-height:30px;border-radius:5px;font-size:14px}
-  &.large {min-width:130px;height:45px;padding:0 13px;line-height:45px;border-radius:5px;font-size:18px;}
+  &.medium {min-width:80px;height:30px;padding:0 8px;line-height:30px;font-size:14px}
+  &.large {min-width:130px;height:45px;padding:0 13px;line-height:45px;border-radius:3px;font-size:18px;}
 
   &:hover {background:nth($cp, 1);}
   &:active {background:nth($cp, 3);}
