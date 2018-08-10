@@ -398,7 +398,7 @@ Anot.component('meditor', {
     addon // 已有插件
   },
   props: {
-    safelyCompile: true,
+    safeMode: true,
     created: Anot.PropsTypes.isFunction(),
     onUpdate: Anot.PropsTypes.isFunction(),
     onFullscreen: Anot.PropsTypes.isFunction()
@@ -491,7 +491,7 @@ Anot.component('meditor', {
     compile: function() {
       let txt = this.value.trim()
 
-      if (this.props.safelyCompile) {
+      if (this.props.safeMode) {
         txt = txt
           .replace(/<script([^>]*?)>/g, '&lt;script$1&gt;')
           .replace(/<\/script>/g, '&lt;/script&gt;')

@@ -9,7 +9,30 @@ import 'css/marked.scss'
  * Block-Level Grammar
  */
 
-var block = {
+class Fixer {
+  constructor(exp, sign) {
+    this.exp = exp
+    this.sign = sign
+  }
+  replace(key, val) {
+    if (key) {
+      val = val.source || val
+      val = val.replace(/(^|[^\[])\^/g, '$1')
+      this.exp = this.exp.replace(key, val)
+    }
+    return this
+  }
+
+  done() {
+    return new RegExp(this.exp, this.sign)
+  }
+}
+
+function replace(exp, sign) {
+  return new Fixer(exp.source, sign || '')
+}
+
+const block = {
   newline: /^\n+/,
   code: /^( {4}[^\n]+\n*)+/,
   fences: noop,
@@ -30,14 +53,19 @@ var block = {
 
 block.bullet = /(?:[*+-]|\d+\.)/
 block.item = /^( *)(bull) [^\n]*(?:\n(?!\1bull )[^\n]*)*/
-block.item = replace(block.item, 'gm')(/bull/g, block.bullet)()
+block.item = replace(block.item, 'gm')
+  .replace(/bull/g, block.bullet)
+  .done()
 
-block.list = replace(block.list)(/bull/g, block.bullet)(
-  'hr',
-  '\\n+(?=\\1?(?:[-*_] *){3,}(?:\\n+|$))'
-)('def', '\\n+(?=' + block.def.source + ')')()
+block.list = replace(block.list)
+  .replace(/bull/g, block.bullet)
+  .replace('hr', '\\n+(?=\\1?(?:[-*_] *){3,}(?:\\n+|$))')
+  .replace('def', '\\n+(?=' + block.def.source + ')')
+  .done()
 
-block.blockquote = replace(block.blockquote)('def', block.def)()
+block.blockquote = replace(block.blockquote)
+  .replace('def', block.def)
+  .done()
 
 block._tag =
   '(?!(?:' +
@@ -45,18 +73,21 @@ block._tag =
   '|var|samp|kbd|sub|sup|i|b|u|mark|ruby|rt|rp|bdi|bdo' +
   '|span|br|wbr|ins|del|img)\\b)\\w+(?!:/|[^\\w\\s@]*@)\\b'
 
-block.html = replace(block.html)('comment', /<!--[\s\S]*?-->/)(
-  'closed',
-  /<(tag)[\s\S]+?<\/\1>/
-)('closing', /<tag(?:"[^"]*"|'[^']*'|[^'">])*?>/)(/tag/g, block._tag)()
+block.html = replace(block.html)
+  .replace('comment', /<!--[\s\S]*?-->/)
+  .replace('closed', /<(tag)[\s\S]+?<\/\1>/)
+  .replace('closing', /<tag(?:"[^"]*"|'[^']*'|[^'">])*?>/)
+  .replace(/tag/g, block._tag)
+  .done()
 
-block.paragraph = replace(block.paragraph)('hr', block.hr)(
-  'heading',
-  block.heading
-)('lheading', block.lheading)('blockquote', block.blockquote)(
-  'tag',
-  '<' + block._tag
-)('def', block.def)()
+block.paragraph = replace(block.paragraph)
+  .replace('hr', block.hr)
+  .replace('heading', block.heading)
+  .replace('lheading', block.lheading)
+  .replace('blockquote', block.blockquote)
+  .replace('tag', '<' + block._tag)
+  .replace('def', block.def)
+  .done()
 
 /**
  * Normal Block Grammar
@@ -74,14 +105,16 @@ block.gfm = merge({}, block.normal, {
   heading: /^ *(#{1,6}) +([^\n]+?) *#* *(?:\n+|$)/
 })
 
-block.gfm.paragraph = replace(block.paragraph)(
-  '(?!',
-  '(?!' +
-    block.gfm.fences.source.replace('\\1', '\\2') +
-    '|' +
-    block.list.source.replace('\\1', '\\3') +
-    '|'
-)()
+block.gfm.paragraph = replace(block.paragraph)
+  .replace(
+    '(?!',
+    '(?!' +
+      block.gfm.fences.source.replace('\\1', '\\2') +
+      '|' +
+      block.list.source.replace('\\1', '\\3') +
+      '|'
+  )
+  .done()
 
 /**
  * GFM + Tables Block Grammar
@@ -133,7 +166,7 @@ Lexer.lex = function(src, options) {
 Lexer.prototype.lex = function(src) {
   src = src
     .replace(/\r\n|\r/g, '\n')
-    .replace(/\t/g, '    ')
+    .replace(/\t/g, '  ')
     .replace(/\u00a0/g, ' ')
     .replace(/\u2424/g, '\n')
 
@@ -283,15 +316,6 @@ Lexer.prototype.token = function(src, top, bq) {
         mark: cap[1] === '!',
         text: cap[2]
       })
-      /*            var sign = cap[2] === '!'
-            cap = cap[0].replace(/^ *;;;[\!]? ?/gm, '');
-
-            this.token(cap, top, true);
-
-            this.tokens.push({
-                type: 'mark_end',
-                mark: sign
-            });*/
 
       continue
     }
@@ -492,12 +516,14 @@ var inline = {
 inline._inside = /(?:\[[^\]]*\]|[^\[\]]|\](?=[^\[]*\]))*/
 inline._href = /\s*<?([\s\S]*?)>?(?:\s+['"]([\s\S]*?)['"])?\s*/
 
-inline.link = replace(inline.link)('inside', inline._inside)(
-  'href',
-  inline._href
-)()
+inline.link = replace(inline.link)
+  .replace('inside', inline._inside)
+  .replace('href', inline._href)
+  .done()
 
-inline.reflink = replace(inline.reflink)('inside', inline._inside)()
+inline.reflink = replace(inline.reflink)
+  .replace('inside', inline._inside)
+  .done()
 
 /**
  * Normal Inline Grammar
@@ -519,10 +545,15 @@ inline.pedantic = merge({}, inline.normal, {
  */
 
 inline.gfm = merge({}, inline.normal, {
-  escape: replace(inline.escape)('])', '~|])')(),
+  escape: replace(inline.escape)
+    .replace('])', '~|])')
+    .done(),
   url: /^(https?:\/\/[^\s<]+[^<.,:;"')\]\s])/,
   del: /^~~(?=\S)([\s\S]*?\S)~~/,
-  text: replace(inline.text)(']|', '~]|')('|', '|https?://|')()
+  text: replace(inline.text)
+    .replace(']|', '~]|')
+    .replace('|', '|https?://|')
+    .done()
 })
 
 /**
@@ -530,8 +561,12 @@ inline.gfm = merge({}, inline.normal, {
  */
 
 inline.breaks = merge({}, inline.gfm, {
-  br: replace(inline.br)('{2,}', '*')(),
-  text: replace(inline.gfm.text)('{2,}', '*')()
+  br: replace(inline.br)
+    .replace('{2,}', '*')
+    .done(),
+  text: replace(inline.gfm.text)
+    .replace('{2,}', '*')
+    .done()
 })
 
 /**
@@ -859,6 +894,7 @@ Renderer.prototype.task = function(task, t) {
 }
 
 Renderer.prototype.html = function(html) {
+  html = html.replace(/<br>/g, '')
   return html
 }
 
@@ -866,13 +902,13 @@ Renderer.prototype.heading = function(text, level, raw) {
   raw = text.replace(/<[^>]+>|<\/[^>]+>/g, '')
   return `
   <h${level} class="md-head" id="${raw}">
-    <span><a href="#${raw}" class="do-icon-pin"></a>${text}</span>
+    <span><a href="#${raw}" class="do-icon-link"></a>${text}</span>
   </h${level}>
   `
 }
 
 Renderer.prototype.hr = function() {
-  return this.options.xhtml ? '<hr/>\n' : '<hr>\n'
+  return '<hr>'
 }
 
 Renderer.prototype.list = function(body, ordered) {
@@ -881,11 +917,12 @@ Renderer.prototype.list = function(body, ordered) {
 }
 
 Renderer.prototype.listitem = function(text) {
-  return '<li>' + text + '</li>\n'
+  return '<li>' + text + '</li>'
 }
 
 Renderer.prototype.paragraph = function(text) {
-  return '<p>' + text + '</p>\n'
+  text = text.replace(/<br>/g, '').replace(/<p><\/p>/g, '')
+  return '<p>' + text + '</p>'
 }
 
 Renderer.prototype.table = function(header, body) {
@@ -928,7 +965,7 @@ Renderer.prototype.codespan = function(txt) {
 }
 
 Renderer.prototype.br = function() {
-  return this.options.xhtml ? '<br/>' : '<br>'
+  return '<br>'
 }
 
 Renderer.prototype.del = function(text) {
@@ -974,12 +1011,12 @@ Renderer.prototype.image = function(href, title, text) {
   if (title) {
     out += ' title="' + title + '"'
   }
-  out += this.options.xhtml ? '/>' : '>'
+  out += '>'
   return out
 }
 
 Renderer.prototype.text = function(text) {
-  return text
+  return text.trim()
 }
 
 /**
@@ -1200,18 +1237,6 @@ function unescape(html) {
   })
 }
 
-function replace(regex, opt) {
-  regex = regex.source
-  opt = opt || ''
-  return function self(name, val) {
-    if (!name) return new RegExp(regex, opt)
-    val = val.source || val
-    val = val.replace(/(^|[^\[])\^/g, '$1')
-    regex = regex.replace(name, val)
-    return self
-  }
-}
-
 function noop() {}
 noop.exec = noop
 
@@ -1345,9 +1370,7 @@ marked.defaults = {
   highlight: null,
   langPrefix: 'lang-',
   smartypants: false,
-  headerPrefix: '',
-  renderer: new Renderer(),
-  xhtml: false
+  renderer: new Renderer()
 }
 
 /**
