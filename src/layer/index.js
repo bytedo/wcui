@@ -12,6 +12,31 @@ import 'css/layer-normal.scss'
 
 Anot.ui.layer = '1.0.0-normal'
 
+const LANGUAGES = {
+  en: {
+    TITLE: 'Dialog',
+    YES_BTN: 'OK',
+    NO_BTN: 'Cancel',
+    ERROR: 'The layer instance is not exists',
+    NEED_CONTAINER: 'layer "tips" require a DOM object as container'
+  },
+  zh: {
+    TITLE: '提示',
+    YES_BTN: '确定',
+    NO_BTN: '取消',
+    ERROR: '要关闭的layer实例不存在',
+    NEED_CONTAINER: 'tips类型需要指定一个元素节点作为容器'
+  },
+  'zh-TW': {
+    TITLE: '提示',
+    YES_BTN: '確定',
+    NO_BTN: '取消',
+    ERROR: '要關閉的layer實例不存在',
+    NEED_CONTAINER: 'tips类型需要指定一個元素節點作爲容器'
+  }
+}
+LANGUAGES['zh-CN'] = LANGUAGES.zh
+const lang = LANGUAGES[Anot.language || navigator.language || 'en']
 let layerDom = {}
 let layerObj = {}
 let unique = null // 储存当前打开的1/2/3类型的弹窗
@@ -24,13 +49,13 @@ let defconf = {
   maskColor: null, // 遮罩背景色
   radius: '0px', // 弹窗圆角半径
   area: ['auto', 'auto'],
-  title: '提示', // 弹窗主标题(在工具栏上的)
+  title: lang.TITLE, // 弹窗主标题(在工具栏上的)
   menubar: true, // 是否显示菜单栏
   content: '', // 弹窗的内容
   fixed: false, // 是否固定不可拖拽
   shift: 'cc', // 弹窗出来的初始位置,用于出场动画
   offset: [], // 弹窗出来后的坐标, 为数组,可有4个值,依次是 上右下左
-  btns: ['确定', '取消'] // 弹窗的2个按钮的文字
+  btns: [lang.YES_BTN, lang.NO_BTN] // 弹窗的2个按钮的文字
 }
 const $doc = Anot(document)
 const uuid = function() {
@@ -38,7 +63,7 @@ const uuid = function() {
 }
 const close = function(id) {
   if (typeof id !== 'string' && typeof id !== 'number') {
-    return Anot.error('要关闭的layer实例不存在')
+    return Anot.error(lang.ERROR)
   }
   if (/^layerwrap\-/.test(id) || layerObj['layerwrap-' + id]) {
     try {
@@ -626,7 +651,7 @@ const _layer = {
   },
   tips(content, container, opt = {}) {
     if (!(container instanceof HTMLElement)) {
-      return Anot.error('layer "tips" require a DOM object')
+      return Anot.error(lang.NEED_CONTAINER)
     }
 
     if (!opt.background) {
@@ -669,7 +694,7 @@ const _layer = {
     if (typeof opt === 'string') {
       opt = 'layerwrap-' + opt
       if (!layerObj[opt]) {
-        throw new Error('layer实例不存在')
+        throw new Error(lang.ERROR)
       } else {
         //只能显示一个实例
         if (layerObj[opt].show) {
@@ -813,7 +838,6 @@ Anot.directive('layer', {
           tips.style.visibility = 'hidden'
         }, 100)
       })
-      // _layer.tips(val, this.element)
     }
   }
 })

@@ -41,7 +41,8 @@ const LANGUAGES = {
     ERROR: {
       TYPE: '文件类型错误',
       SIZE: '文件体积过大',
-      EMPTY: '描述和地址不能为空'
+      EMPTY: '描述和地址不能为空',
+      UNDEFINED: '在node-webkit中saveAttach回调必须定义'
     }
   },
   en: {
@@ -73,65 +74,14 @@ const LANGUAGES = {
     ERROR: {
       TYPE: 'Forbidden type',
       SIZE: 'Too large',
-      EMPTY: 'Alt text and address can not be null'
+      EMPTY: 'Alt text and address can not be null',
+      UNDEFINED: 'Function saveAttach is not defined'
     }
   }
 }
 LANGUAGES['zh-CN'] = LANGUAGES.zh
 LANGUAGES['zh-TW'] = LANGUAGES.zh
 const lang = LANGUAGES[Anot.language || navigator.language || 'en']
-
-class Uploader {
-  constructor(url) {
-    this.url = url
-    this.xhr = new XMLHttpRequest()
-    this.form = new FormData()
-  }
-
-  field(key, val) {
-    this.form.append(key, val)
-    return this
-  }
-  onProgress(fn) {
-    this.progress = fn
-    return this
-  }
-  then(cb) {
-    if (!this.url) {
-      Anot.error('invalid upload url')
-    }
-    let defer = Promise.defer()
-
-    this.xhr.open('POST', this.url, true)
-    this.xhr.upload.addEventListener(
-      'progress',
-      evt => {
-        if (evt.lengthComputable && this.progress) {
-          let res = Math.round(evt.loaded * 100 / evt.total)
-          this.progress(res)
-        }
-      },
-      false
-    )
-
-    this.xhr.onreadystatechange = () => {
-      if (this.xhr.readyState === 4) {
-        if (this.xhr.status >= 200 && this.xhr.status < 205) {
-          let res = this.xhr.responseText
-          try {
-            res = JSON.parse(res)
-          } catch (err) {}
-          defer.resolve(cb(res))
-        } else {
-          defer.reject(this.xhr)
-        }
-      }
-    }
-
-    this.xhr.send(this.form)
-    return defer.promise
-  }
-}
 
 const fixCont = function(vm, tool) {
   let limit = false
@@ -240,56 +190,21 @@ function uploadFile(vm, tool) {
       })
       continue
     }
-    let idx = this.uploadQueue.length
     let fixName = new Date().format('YmdHis') + ext
-    let attach = { name: it.name, fixName, progress: '0%', url: '' }
-    let upload = new Uploader(vm.props.uploadUrl).field('file', it)
+    let attach = { name: it.name, fixName, progress: '100%', url: '' }
 
-    this.uploadQueue.push(attach)
-
-    if (vm.props.beforeUpload) {
+    if (vm.props.saveAttach) {
       vm.props
-        .beforeUpload(attach, upload)
-        .then(next => {
-          if (!next) {
-            return Promise.reject('something wrong with beforeUpload')
-          }
-          return upload
-            .onProgress(val => {
-              this.uploadQueue[idx].progress = val + '%'
-            })
-            .then(res => {
-              if (vm.props.afterUpload) {
-                return vm.props.afterUpload(res)
-              } else {
-                return res.data.url
-              }
-            })
-        })
+        .saveAttach(attach, it)
         .then(url => {
-          this.uploadQueue[idx].url = url
+          attach.url = url
+          this.uploadQueue.push(attach)
         })
         .catch(err => {
           Anot.error(err)
         })
     } else {
-      upload
-        .onProgress(val => {
-          this.uploadQueue[idx].progress = val + '%'
-        })
-        .then(res => {
-          if (vm.props.afterUpload) {
-            return vm.props.afterUpload(res)
-          } else {
-            return res.data.url
-          }
-        })
-        .then(url => {
-          this.uploadQueue[idx].url = url
-        })
-        .catch(err => {
-          Anot.error(err)
-        })
+      layer.toast(lang.ERROR.UNDEFINED, 'error')
     }
   }
 }
@@ -297,23 +212,10 @@ function uploadFile(vm, tool) {
 function uploadScreenshot(vm, blob) {
   let name = new Date().format('YmdHis') + '.jpg'
   let attach = { name, url: '' }
-  let upload = new Uploader(vm.props.uploadUrl).field('file', blob)
 
-  if (vm.props.beforeUpload) {
+  if (vm.props.saveAttach) {
     vm.props
-      .beforeUpload(attach, upload)
-      .then(next => {
-        if (!next) {
-          return Promise.reject('something wrong with beforeUpload')
-        }
-        return upload.then(res => {
-          if (vm.props.afterUpload) {
-            return vm.props.afterUpload(res)
-          } else {
-            return res.data.url
-          }
-        })
-      })
+      .saveAttach(attach, blob)
       .then(url => {
         vm.insert(`![${lang.SCREENSHOT}](${url})`)
       })
@@ -321,17 +223,7 @@ function uploadScreenshot(vm, blob) {
         Anot.error(err)
       })
   } else {
-    upload
-      .then(res => {
-        if (vm.props.afterUpload) {
-          return vm.props.afterUpload(res)
-        } else {
-          return res.data.url
-        }
-      })
-      .then(url => {
-        vm.insert(`![${lang.SCREENSHOT}](${url})`)
-      })
+    layer.toast(lang.ERROR.UNDEFINED, 'error')
   }
 }
 
@@ -459,30 +351,13 @@ const plugin = {
               ctx.clearRect(0, 0, canvas.width, canvas.height)
               ctx.drawImage(this, 0, 0, canvas.width, canvas.height)
 
-              // chrome, Firefox, 以及支持toBlob 设置图片质量
-              if (canvas.toBlob && (window.chrome || window.sidebar)) {
-                canvas.toBlob(
-                  function(obj) {
-                    uploadScreenshot(ME.vm, obj)
-                  },
-                  'image/jpeg',
-                  0.8
-                )
-              } else {
-                // IE和Safari的toBlob方法还不支持图片质量的设定
-                // 需要先转base64再转回Blob
-                let base64 = canvas.toDataURL('image/jpeg', 0.8)
-                let buf = atob(base64.split(',')[1])
-                let intArr = new Uint8Array(buf.length)
-                let obj = null
-
-                for (let i = 0; i < buf.length; i++) {
-                  intArr[i] = buf.charCodeAt(i)
-                }
-                obj = new Blob([intArr], { type: 'image/jpeg' })
-
-                uploadScreenshot(ME.vm, obj)
-              }
+              canvas.toBlob(
+                obj => {
+                  uploadScreenshot(ME.vm, obj)
+                },
+                'image/jpeg',
+                0.8
+              )
             }
             img.src = this.result
           }

@@ -12,6 +12,136 @@ import '../marked/index'
 import addon from './addon/base'
 import 'css/meditor.scss'
 
+const LANGUAGES = {
+  en: {
+    NAME: 'Open Source Markdown Editor',
+    TOOLBAR: {
+      PIPE: '',
+      H1: 'Header',
+      QUOTE: 'Quote text',
+      BOLD: 'Font-bold',
+      ITALIC: 'Font-italic',
+      THROUGH: 'Font-through',
+      UNORDERED: 'Unordered list',
+      ORDERED: 'Ordered list',
+      LINK: 'Hyperlink',
+      HR: 'Line',
+      TIME: 'Insert current time',
+      FACE: 'Face',
+      TABLE: 'Insert table',
+      IMAGE: 'Upload Pictures',
+      FILE: 'Upload Files',
+      INLINECODE: 'Inline code',
+      BLOCKCODE: 'Block code',
+      PREVIEW: 'Preview',
+      FULLSCREEN: 'Fullscreen',
+      ABOUT: 'About MEditor'
+    },
+    HEADERS: {
+      H1: '#{1}',
+      H2: '#{2}',
+      H3: '#{3}',
+      H4: '#{4}',
+      H5: '#{5}',
+      H6: '#{6}'
+    },
+    PLACEHOLDER: 'Type here',
+    LINK: {
+      ALT: 'Link text',
+      URL: 'Link address',
+      ERROR: 'Link address and text can not be null'
+    },
+    IMAGE: {
+      ALT: 'Image alt text',
+      URL: 'Image address'
+    },
+    TARGET: {
+      BLANK: 'New window open',
+      SELF: 'Current window open'
+    },
+    BTN: {
+      YES: 'OK'
+    },
+    TABLE: {
+      ROW: 'row',
+      COLUMN: 'column',
+      THEAD: 'thead'
+    },
+    LAYER: {
+      FACE_TITLE: 'Insert Face',
+      ABOUT_TITLE: 'About MEditor'
+    },
+    CODE: {
+      OTHER: 'Other language'
+    }
+  },
+  zh: {
+    NAME: '开源在线Markdown编辑器',
+    TOOLBAR: {
+      PIPE: '',
+      H1: '标题',
+      QUOTE: '引用文本',
+      BOLD: '粗体',
+      ITALIC: '斜体',
+      THROUGH: '删除线',
+      UNORDERED: '无序列表',
+      ORDERED: '有序列表',
+      LINK: '超链接',
+      HR: '横线',
+      TIME: '插入当前时间',
+      FACE: '表情',
+      TABLE: '插入表格',
+      IMAGE: '插入图片',
+      FILE: '插入附件',
+      INLINECODE: '行内代码',
+      BLOCKCODE: '代码块',
+      PREVIEW: '预览',
+      FULLSCREEN: '全屏',
+      ABOUT: '关于编辑器'
+    },
+    HEADERS: {
+      H1: '一级标题',
+      H2: '二级标题',
+      H3: '三级标题',
+      H4: '四级标题',
+      H5: '五级标题',
+      H6: '六级标题'
+    },
+    PLACEHOLDER: '在此输入文本',
+    LINK: {
+      ALT: '链接文字',
+      URL: '链接地址',
+      ERROR: '链接文字和地址不能为空'
+    },
+    IMAGE: {
+      ALT: '图片描述',
+      URL: '图片地址'
+    },
+    TARGET: {
+      BLANK: '新窗口打开',
+      SELF: '本窗口打开'
+    },
+    BTN: {
+      YES: '确定'
+    },
+    TABLE: {
+      ROW: '行',
+      COLUMN: '列',
+      THEAD: '表头'
+    },
+    LAYER: {
+      FACE_TITLE: '插入表情',
+      ABOUT_TITLE: '关于编辑器'
+    },
+    CODE: {
+      OTHER: '其他语言'
+    }
+  }
+}
+LANGUAGES['zh-CN'] = LANGUAGES.zh
+LANGUAGES['zh-TW'] = LANGUAGES.zh
+const lang = LANGUAGES[Anot.language || navigator.language || 'en']
+
 marked.setOptions({
   highlight: function(code, lang) {
     return Prism.highlight(code, Prism.languages[lang])
@@ -28,31 +158,9 @@ if (!String.prototype.repeat) {
   }
 }
 
-Anot.ui.meditor = '1.0.0'
+Anot.ui.meditor = { version: '1.0.0', author: 'yutent', lang }
 const log = console.log
-// 工具栏title
-const TOOLBAR = {
-  pipe: '',
-  h1: '标题',
-  quote: '引用文本',
-  bold: '粗体',
-  italic: '斜体',
-  through: '删除线',
-  unordered: '无序列表',
-  ordered: '有序列表',
-  link: '超链接',
-  hr: '横线',
-  time: '插入当前时间',
-  face: '表情',
-  table: '插入表格',
-  image: '插入图片',
-  file: '插入附件',
-  inlinecode: '行内代码',
-  blockcode: '代码块',
-  preview: '预览',
-  fullscreen: '全屏',
-  about: '关于编辑器'
-}
+
 const DEFAULT_TOOLBAR = [
   'h1',
   'quote',
@@ -234,7 +342,7 @@ function tool(name) {
   name = (name + '').trim().toLowerCase()
   name = '|' === name ? 'pipe' : name
 
-  let title = TOOLBAR[name]
+  let title = lang.TOOLBAR[name.toUpperCase()]
   let extra = ''
   switch (name) {
     case 'preview':

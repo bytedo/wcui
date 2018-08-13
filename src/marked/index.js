@@ -726,7 +726,9 @@ InlineLexer.prototype.output = function(src) {
     // br
     if ((cap = this.rules.br.exec(src))) {
       src = src.substring(cap[0].length)
-      out += this.renderer.br()
+      if (!/<[\/]?([a-z0-9\-])+[^>]*>/.test(src)) {
+        out += this.renderer.br()
+      }
       continue
     }
 
@@ -921,25 +923,24 @@ Renderer.prototype.listitem = function(text) {
 }
 
 Renderer.prototype.paragraph = function(text) {
-  text = text.replace(/<br>/g, '').replace(/<p><\/p>/g, '')
   return '<p>' + text + '</p>'
 }
 
 Renderer.prototype.table = function(header, body) {
   return (
-    '<table>\n' +
-    '<thead>\n' +
+    '<table>' +
+    '<thead>' +
     header +
-    '</thead>\n' +
-    '<tbody>\n' +
+    '</thead>' +
+    '<tbody>' +
     body +
-    '</tbody>\n' +
-    '</table>\n'
+    '</tbody>' +
+    '</table>'
   )
 }
 
 Renderer.prototype.tablerow = function(content) {
-  return '<tr>\n' + content + '</tr>\n'
+  return '<tr>' + content + '</tr>'
 }
 
 Renderer.prototype.tablecell = function(content, flags) {
@@ -947,7 +948,7 @@ Renderer.prototype.tablecell = function(content, flags) {
   var tag = flags.align
     ? '<' + type + ' style="text-align:' + flags.align + '">'
     : '<' + type + '>'
-  return tag + content + '</' + type + '>\n'
+  return tag + content + '</' + type + '>'
 }
 
 // span level renderer
@@ -1016,7 +1017,7 @@ Renderer.prototype.image = function(href, title, text) {
 }
 
 Renderer.prototype.text = function(text) {
-  return text.trim()
+  return text
 }
 
 /**
