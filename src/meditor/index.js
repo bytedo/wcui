@@ -140,7 +140,7 @@ const LANGUAGES = {
 }
 LANGUAGES['zh-CN'] = LANGUAGES.zh
 LANGUAGES['zh-TW'] = LANGUAGES.zh
-const lang = LANGUAGES[Anot.language || navigator.language || 'en']
+const lang = LANGUAGES[Anot.language || navigator.language] || LANGUAGES.en
 
 marked.setOptions({
   highlight: function(code, lang) {
