@@ -155,12 +155,12 @@
   &.dark.checked &__label  {background:nth($cd, 1) + a0;}
 
   &.disabled.checked &__dot  {background:#fff;}
-  &.disabled &__label, &.disabled.checked &__label {background:nth($cp, 1);
+  &.disabled &__label, &.disabled.checked &__label {
 
-    &::before {display:block;position:absolute;top:6px;width:8px;height:4px;border-radius:2px;background:#fff;content:"";}
+    &::before {display:block;position:absolute;top:5px;width:8px;height:4px;border-radius:2px;background:#fff;content:"";}
   }
-  &.disabled &__label::before {right:7px;}
-  &.disabled.checked &__label::before {left:7px;}
+  &.disabled &__label::before {right:5px;}
+  &.disabled.checked &__label::before {left:5px;}
 }
 
 

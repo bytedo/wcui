@@ -128,6 +128,12 @@ Anot.component('switch', {
     if (props.hasOwnProperty('disabled')) {
       state.disabled = true
     }
+    if (props.hasOwnProperty('checked')) {
+      if (state.value === null) {
+        state.value = true
+      }
+    }
+    state.value = !!state.value
 
     this.classList.add('do-switch')
     this.classList.add('do-fn-noselect')
@@ -145,7 +151,7 @@ Anot.component('switch', {
     `
   },
   state: {
-    value: false,
+    value: null,
     disabled: false
   },
   methods: {

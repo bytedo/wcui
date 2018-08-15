@@ -36,7 +36,8 @@ const LANGUAGES = {
   }
 }
 LANGUAGES['zh-CN'] = LANGUAGES.zh
-const lang = LANGUAGES[Anot.language || navigator.language] || LANGUAGES.en
+const lang =
+  LANGUAGES[window.__ENV_LANG__ || navigator.language] || LANGUAGES.en
 let layerDom = {}
 let layerObj = {}
 let unique = null // 储存当前打开的1/2/3类型的弹窗

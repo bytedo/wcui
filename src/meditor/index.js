@@ -140,7 +140,8 @@ const LANGUAGES = {
 }
 LANGUAGES['zh-CN'] = LANGUAGES.zh
 LANGUAGES['zh-TW'] = LANGUAGES.zh
-const lang = LANGUAGES[Anot.language || navigator.language] || LANGUAGES.en
+const lang =
+  LANGUAGES[window.__ENV_LANG__ || navigator.language] || LANGUAGES.en
 
 marked.setOptions({
   highlight: function(code, lang) {
@@ -507,6 +508,7 @@ Anot.component('meditor', {
   },
   props: {
     safeMode: true,
+    revise: Anot.PropsTypes.isFunction(),
     created: Anot.PropsTypes.isFunction(),
     onUpdate: Anot.PropsTypes.isFunction(),
     onFullscreen: Anot.PropsTypes.isFunction()
@@ -606,6 +608,9 @@ Anot.component('meditor', {
       }
       //只解析,不渲染
       this.__tmp__ = marked(txt)
+      if (typeof this.props.revise === 'function') {
+        this.__tmp__ = this.props.revise(this.__tmp__)
+      }
     }
   }
 })
