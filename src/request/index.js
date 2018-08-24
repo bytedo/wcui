@@ -438,10 +438,11 @@ class _Request {
       }
     }
 
-    // 2.3 如果不是跨域请求，则自动加上一条header信息，用以标识这是ajax请求
-    if (!this.opt.crossDomain) {
+    // 2.3 如果不是JSONP，则自动加上一条header信息，用以标识这是ajax请求
+    if (this.opt.method !== 'JSONP') {
       this.set('X-Requested-With', 'XMLHttpRequest')
-    } else {
+    }
+    if (this.opt.crossDomain) {
       supportCors && (this.xhr.withCredentials = true)
     }
 
