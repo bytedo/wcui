@@ -51,6 +51,9 @@ function parse$And(it) {
   }
   result = result.slice(0, -4)
 
+  if (!result) {
+    result = 'true'
+  }
   return result
 }
 

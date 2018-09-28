@@ -57,7 +57,7 @@
 
   &:focus {background:#fff;border-color:nth($cd, 2);}
     
-  &::-webkit-input-placeholder {color:nth($cp, 3);}
+  &::placeholder {color:nth($cgr, 1);}
   &:disabled {border-color:transparent;background:#fff8ed;color:nth($cgr, 1);cursor:not-allowed;}
 
 }
@@ -71,7 +71,7 @@
 
 
 /* select框 */
-.do-ui-select  {position:relative;width:auto;height:30px;color:nth($cgr, 1);
+.do-ui-select  {position:relative;display:inline-block;width:auto;min-width:100px;height:30px;color:nth($cgr, 1);
 
   select {width:100%;height:100%;padding:5px 13px;line-height:1;background:nth($cp, 1);border-radius:5px;appearance:none;border:2px solid transparent;outline:none;color: nth($cd, 2);font-size:13px;
 
