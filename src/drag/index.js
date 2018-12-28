@@ -234,7 +234,7 @@ Anot.directive('drag', {
         target.style.transitionDuration = cssTransition
         //结束回调
         if (_this.dragged) {
-          _this.dragged.call(_this.vmodels[0], target, fox, foy)
+          _this.dragged.call(_this.vmodels[0], target, fox, foy, cst[4], cst[5])
         }
       })
     })

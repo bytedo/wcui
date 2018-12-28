@@ -262,7 +262,7 @@ class AnotStore {
   }
 
   // 删除集合中单条数据
-  remove(id) {
+  remove(_id) {
     let collection = __STORE__[this.__name__]
     let collectionDict = __STORE__[`${this.__name__}Dict`]
 
