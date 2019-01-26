@@ -119,7 +119,7 @@
       .dot-box {position:absolute;display:block;}
       
       /* 常规的转动 */
-      &.style-1,&.style-2 {
+      &.style-1 {
 
         .dot-box {width:70%;height:70%;margin:15%;line-height:70px;font-size:70px;text-align:center;
           
@@ -130,12 +130,10 @@
       &.style-1 {
         .dot-box {animation: circle .8s infinite linear;}
       }
-      &.style-2 {
-        .dot-box {animation: round .6s infinite linear;}
-      }
+  
       
       /* 频谱波动 */
-      &.style-3 {height:50px;
+      &.style-2 {height:50px;
 
         .dot-box{width:100%;height:100%;
             
@@ -150,7 +148,7 @@
       }
 
       /* 缓动圆圈 */
-      &.style-4 {
+      &.style-3 {
 
         .dot-box{width:60%;height:60%;margin:20%;
           
@@ -167,7 +165,7 @@
       }
 
       /* 矩阵 */
-      &.style-5 {
+      &.style-4 {
 
         .dot-box{width:90%;height:90%;margin:5%;
             
@@ -220,13 +218,6 @@
 
 @keyframes circle2 {
   70%,to {transform: rotate(405deg);}
-}
-
-@keyframes round {
-  from,24.99%, to {transform:rotate(0deg)}
-  25%,49.99% {transform:rotate(90deg)}
-  50%,74.99% {transform:rotate(180deg)}
-  75%,99.99% {transform:rotate(270deg)}
 }
 
 

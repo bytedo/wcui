@@ -125,10 +125,9 @@ class __layer__ {
     //loading的子元素数量
     return {
       1: 1,
-      2: 1,
+      2: 5,
       3: 5,
-      4: 5,
-      5: 9
+      4: 9
     }
   }
 
@@ -334,11 +333,7 @@ class __layer__ {
       <div class="loading style-${style}">
         <span class="dot-box">
           ${repeat(
-            style === 1
-              ? '<i class="do-icon-loading"></i>'
-              : style === 2
-                ? '<i class="do-icon-app2"></i>'
-                : '<i></i>',
+            style === 1 ? '<i class="do-icon-loading"></i>' : '<i></i>',
             this.dot[style]
           )}
         </span>
@@ -626,7 +621,7 @@ const _layer = {
   },
   load(style, container, cb) {
     style = style >>> 0
-    style = style < 1 ? 1 : style > 5 ? 5 : style
+    style = style < 1 ? 1 : style > 4 ? 4 : style
 
     if (typeof container === 'function') {
       cb = container

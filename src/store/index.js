@@ -256,9 +256,8 @@ class AnotStore {
     let tmp = collectionDict[_id]
     let idx = collection.indexOf(tmp)
 
-    Object.assign(tmp, data)
-    collection.splice(idx, 1, tmp)
-    collectionDict[_id] = tmp
+    collection.splice(idx, 1, data)
+    collectionDict[_id] = data
   }
 
   // 删除集合中单条数据
