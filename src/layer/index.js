@@ -12,6 +12,8 @@ import 'css/layer-normal.scss'
 
 Anot.ui.layer = '1.0.0-normal'
 
+const log = console.log
+
 const LANGUAGES = {
   en: {
     TITLE: 'Dialog',
@@ -54,8 +56,8 @@ let defconf = {
   menubar: true, // 是否显示菜单栏
   content: '', // 弹窗的内容
   fixed: false, // 是否固定不可拖拽
-  shift: 'cc', // 弹窗出来的初始位置,用于出场动画
-  offset: [], // 弹窗出来后的坐标, 为数组,可有4个值,依次是 上右下左
+  shift: {}, // 弹窗出来的初始位置,用于出场动画
+  offset: {}, // 弹窗出来后的坐标, 为数组,可有4个值,依次是 上右下左
   btns: [lang.YES_BTN, lang.NO_BTN] // 弹窗的2个按钮的文字
 }
 const $doc = Anot(document)
@@ -94,21 +96,17 @@ const close = function(id) {
   document.body.style.overflow = ''
 }
 
-const repeat = function(str, num) {
-  let idx = 0
-  let result = ''
-  while (idx < num) {
-    result += str
-    idx++
+const fixOffset = function(offset) {
+  for (let i in offset) {
+    if (offset[i] === 'auto' || (!offset[i] && offset[i] !== 0)) {
+      delete offset[i]
+    } else {
+      if (isFinite(offset[i])) {
+        offset[i] += 'px'
+      }
+    }
   }
-  return result
-}
-const fixOffset = function(val) {
-  if (!val && val !== 0) {
-    return 'auto'
-  } else {
-    return val
-  }
+  return offset
 }
 
 /* type: { // 弹窗类型对应的id值
@@ -223,19 +221,13 @@ class __layer__ {
       this.init.methods.autoSize = function() {
         let { layer, frame } = this.$refs
         frame.onload = function() {
-          setTimeout(function() {
-            try {
-              let $body = frame.contentWindow.document.body
-              let { clientWidth, clientHeight } = $body
-              Anot(layer).css({
-                width: clientWidth,
-                height: clientHeight,
-                marginLeft: -clientWidth / 2,
-                marginTop: -clientHeight / 2
-              })
-              Anot(frame).css({ height: clientHeight })
-            } catch (err) {}
-          }, 500)
+          try {
+            let $body = frame.contentWindow.document.body
+            let { clientWidth, clientHeight } = $body
+
+            layer.style.cssText += `width: ${clientWidth}px;height: ${clientHeight}px;`
+            frame.style.cssText += `height: ${clientHeight}px;`
+          } catch (err) {}
         }
       }
     }
@@ -269,9 +261,8 @@ class __layer__ {
       layBox.classList.add(state.extraClass)
       delete state.extraClass
     }
-    if (typeof state.shift === 'string') {
-      layBox.classList.add('__' + state.shift)
-    } else {
+    if (state.shift) {
+      fixOffset(state.shift)
       for (let k in state.shift) {
         let val = state.shift[k]
         val += isFinite(val) ? 'px' : ''
@@ -332,10 +323,9 @@ class __layer__ {
     return `
       <div class="loading style-${style}">
         <span class="dot-box">
-          ${repeat(
-            style === 1 ? '<i class="do-icon-loading"></i>' : '<i></i>',
-            this.dot[style]
-          )}
+        ${(style === 1 ? '<i class="do-icon-loading"></i>' : '<i></i>').repeat(
+          this.dot[style]
+        )}
         </span>
       </div>
     `
@@ -421,11 +411,13 @@ class __layer__ {
 
     setTimeout(function() {
       let style = { background: state.background }
-      let css = getComputedStyle(layerDom[$id][1])
+
+      let $dom1 = Anot(layerDom[$id][1])
 
       // tips类型, 弹层的定位要在指定的容器上
       if (state.type === 5) {
-        // only type[tips] can define `color`
+        let css = getComputedStyle(layerDom[$id][1])
+        // 只有tips类型可以定义 `color`
         style.color = state.color
         style.opacity = 1
         let $container = Anot(container)
@@ -463,7 +455,7 @@ class __layer__ {
           }
 
           $arrow.classList.add('offset-' + arrowOffset.join('-'))
-          Anot(layerDom[$id][1]).css(tmpStyle)
+          $dom1.css(tmpStyle)
         })
         $container.bind('mouseleave', () => {
           setTimeout(() => {
@@ -477,37 +469,19 @@ class __layer__ {
       } else {
         let offsetStyle = { opacity: 1 }
         if (state.offset) {
-          offsetStyle.top = fixOffset(state.offset[0])
-          offsetStyle.right = fixOffset(state.offset[1])
-          offsetStyle.bottom = fixOffset(state.offset[2])
-          offsetStyle.left = fixOffset(state.offset[3])
-          //左右都为auto时,改为居中
-          if (offsetStyle.left === 'auto' && offsetStyle.right === 'auto') {
-            offsetStyle.left = '50%'
-            style.marginLeft = -parseInt(css.width) / 2
-          }
-          //上下都为auto时,同样改为居中
-          if (offsetStyle.top === 'auto' && offsetStyle.bottom === 'auto') {
-            offsetStyle.top = '50%'
-            style.marginTop = -parseInt(css.height) / 2
-          }
-        } else {
-          style = Object.assign(style, {
-            marginLeft: -parseInt(css.width) / 2,
-            marginTop: -parseInt(css.height) / 2
-          })
-        }
-        Anot(layerDom[$id][1]).css(style)
+          fixOffset(state.offset)
 
+          Object.assign(offsetStyle, state.offset)
+        }
+        $dom1.css(style)
         setTimeout(() => {
           document.body.style.overflow = 'hidden'
           layerDom[$id][1].classList.add('shift')
           setTimeout(_ => {
-            Anot(layerDom[$id][1]).css(offsetStyle)
+            $dom1.css(offsetStyle)
             setTimeout(_ => {
               try {
                 layerDom[$id][1].classList.remove('shift')
-                layerDom[$id][1].classList.remove('__' + state.shift)
               } catch (err) {}
             }, 500)
           }, 50)
@@ -610,9 +584,9 @@ const _layer = {
       menubar: false,
       mask: false,
       type: 7,
-      shift: 'tc',
+      shift: { top: 0 },
       timeout,
-      offset: [50, 'auto'],
+      offset: { top: 50 },
       fixed: true,
       toast: true // toast模式
     }
@@ -641,7 +615,6 @@ const _layer = {
       yes: cb,
       menubar: false,
       background: 'none',
-      shift: 'ct',
       fixed: true
     })
   },
@@ -729,7 +702,6 @@ Anot.directive('layer', {
   },
   update: function(val) {
     if (!val) {
-      console.error(this)
       return console.error(
         `SyntaxError: Unexpected [${this.name}=${this.expr}]`
       )
@@ -743,9 +715,14 @@ Anot.directive('layer', {
       if (state.hasOwnProperty('area')) {
         state.area = state.area.split(',')
       }
-      if (state.hasOwnProperty('offset')) {
-        state.offset = state.offset.split(',')
+      if (state.hasOwnProperty('shift')) {
+        state.shift = fixOffset(new Function(`return ${state.shift}`)())
       }
+
+      if (state.hasOwnProperty('offset')) {
+        state.offset = fixOffset(new Function(`return ${state.offset}`)())
+      }
+
       if (state.hasOwnProperty('btns')) {
         state.btns = state.btns.split(',')
       }
@@ -772,13 +749,22 @@ Anot.directive('layer', {
       let tips = document.createElement('div')
       let cont = document.createElement('span')
       let arrow = document.createElement('i')
+      let $container = Anot(this.element)
+      let { position } = getComputedStyle(this.element)
+
       tips.className = 'do-layer__tips'
       cont.className = 'layer-content'
       arrow.className = 'arrow'
       cont.textContent = val
       tips.appendChild(cont)
       tips.appendChild(arrow)
+
+      if (position === 'static') {
+        this.element.style.position = 'relative'
+      }
       this.element.appendChild(tips)
+
+      let style = {}
 
       if (state.color) {
         style.color = state.color
@@ -787,39 +773,39 @@ Anot.directive('layer', {
         style.background = state.background
       }
 
-      let style = {}
-      let css = getComputedStyle(tips)
-      let $container = Anot(this.element)
       let cw = $container.innerWidth()
       let ch = $container.innerHeight()
-      let ol = $container.offset().left - $doc.scrollLeft()
-      let ot = $container.offset().top - $doc.scrollTop()
 
-      let layw = parseInt(css.width)
-      let layh = parseInt(css.height)
       let arrowOffset = ['top']
 
+      // log(tips, layw, layh)
       Anot(tips).css(style)
 
       $container.bind('mouseenter', ev => {
         let tmpStyle = { visibility: 'visible' }
-        ol = $container.offset().left - $doc.scrollLeft()
-        ot = $container.offset().top - $doc.scrollTop()
+        let layw = tips.clientWidth
+        let layh = tips.clientHeight
+        let { left, top } = $container.offset()
+        let ol = left - $doc.scrollLeft()
+        let ot = top - $doc.scrollTop()
 
-        if (ot + 18 < layh) {
+        // 判断位置是以确定出现 在上还是在下
+        if (ot < layh + 8) {
           arrowOffset[0] = 'bottom'
           arrow.style.borderBottomColor = state.background
-          tmpStyle.top = ot + ch + 8
+          tmpStyle.bottom = ''
+          tmpStyle.top = ch + 8
         } else {
           arrow.style.borderTopColor = state.background
-          tmpStyle.top = ot - layh - 8
+          tmpStyle.top = ''
+          tmpStyle.bottom = ch + 8
         }
 
         if (ol + cw * 0.7 + layw > window.innerWidth) {
-          tmpStyle.left = ol + cw * 0.3 - layw
+          tmpStyle.left = cw * 0.3 - layw
           arrowOffset[1] = 'left'
         } else {
-          tmpStyle.left = ol + cw * 0.7
+          tmpStyle.left = cw * 0.7
         }
 
         arrow.classList.add('offset-' + arrowOffset.join('-'))

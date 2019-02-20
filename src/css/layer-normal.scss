@@ -9,23 +9,15 @@
 @import "var.scss";
 
 
-.do-layer {width:auto;height:auto;
+.do-layer {display:flex;justify-content:center;align-items:center;width:auto;height:auto;
 
   a {text-decoration:none;}
 
   
-  .layer-box {position:absolute;z-index:65535;opacity:0;
+  .layer-box {flex:0 auto;position:absolute;z-index:65535;opacity:0;
     
     &.shift {transition: all .5s ease-out;}
 
-    &.__tc {top:0;left:50%;}
-    &.__tl {top:0;left:0;}
-    &.__tr {top:0;left:100%;}
-    &.__ct {top:50%;left:50%;}
-    &.__cc {top:47.5%;left:50%;}
-    &.__bc {top:100%;left:50%;}
-    &.__bl {top:100%;left:0;}
-    &.__br {top:100%;left:100%;}
 
     
 
@@ -94,7 +86,10 @@
 
     
     /* loading类弹层 */
-    &.type-6 {z-index:65539;box-shadow:none;background:transparent;}
+    &.type-6 {z-index:65539;box-shadow:none;background:transparent;
+    
+      .layer-content {display:flex;justify-content:center;align-items:center;}
+    }
 
     
     /* 特殊类弹层(toast弹层) */
@@ -121,23 +116,19 @@
       /* 常规的转动 */
       &.style-1 {
 
-        .dot-box {width:70%;height:70%;margin:15%;line-height:70px;font-size:70px;text-align:center;
+        .dot-box {width:70%;height:70%;margin:15%;line-height:70px;font-size:70px;text-align:center;animation: circle .8s infinite linear;
           
           i {display:block;width:100%;height:100%;}
         }
       }
-
-      &.style-1 {
-        .dot-box {animation: circle .8s infinite linear;}
-      }
   
       
       /* 频谱波动 */
-      &.style-2 {height:50px;
+      &.style-2 {height:40px;
 
-        .dot-box{width:100%;height:100%;
+        .dot-box{display:flex;justify-content:center;width:100%;height:100%;
             
-          i {float:left;display:block;width:10px;height:100%;margin:0 5px;background:nth($ct, 3);animation: bounce 1s infinite ease-in-out;transform:scaleY(.6);
+          i {float:left;display:block;width:6px;height:100%;margin:0 3px;background:nth($ct, 3);animation: bounce 1s infinite ease-in-out;transform:scaleY(.6);
 
             &:nth-child(2) {animation-delay:.1s;}
             &:nth-child(3) {animation-delay:.2s;}
@@ -148,11 +139,11 @@
       }
 
       /* 缓动圆圈 */
-      &.style-3 {
+      &.style-3 {width:50px;height:50px;
 
-        .dot-box{width:60%;height:60%;margin:20%;
+        .dot-box{width:100%;height:100%;
           
-          i {position:absolute;display:block;width:60px;height:60px;animation: circle2 2s infinite ease-in-out;transform: rotate(45deg);
+          i {position:absolute;display:block;width:100%;height:100%;animation: circle2 2s infinite ease-in-out;transform: rotate(45deg);opacity:.5;
                   
             &::before {display:block;width:8px;height:8px;background:nth($ct, 3);border-radius:50%;content:""}
 
@@ -165,11 +156,11 @@
       }
 
       /* 矩阵 */
-      &.style-4 {
+      &.style-4 {width:60px;height:60px;
 
-        .dot-box{width:90%;height:90%;margin:5%;
+        .dot-box{
             
-          i {float:left;display:block;width:30px;height:30px;background:nth($ct, 3);animation: grid 1.5s infinite linear;
+          i {float:left;display:block;width:20px;height:20px;background:nth($ct, 3);animation: grid 1.5s infinite linear;
                   
             &:nth-child(4),
             &:nth-child(8) {animation-delay:.2s;}
@@ -189,6 +180,9 @@
 
   }
 
+
+
+
   &.mask {position:fixed;z-index:65534;left:0;top:0;width:100%;height:100%;background:transparent;
 
     &.shift {transition: all .5s ease-out;}
@@ -199,7 +193,7 @@
 
 
 /* 指令式的tips */
-.do-layer__tips {visibility:hidden;position:fixed;z-index:65534;min-width:75px;max-width:600px;padding:10px;line-height:1.5;border-radius:3px;font-size:14px;color:#fff;background:rgba(0,0,0,.5);
+.do-layer__tips {visibility:hidden;position:absolute;z-index:65534;min-width:75px;max-width:600px;padding:10px;line-height:1.5;border-radius:3px;font-size:14px;color:#fff;background:rgba(0,0,0,.5);
 
   i.arrow {position:absolute;width:0;height:0;border:6px solid transparent;content: ""}
   i.offset-top {left:5px;bottom:-14px;border-top:8px solid rgba(0,0,0,.5);}
@@ -217,12 +211,12 @@
 }
 
 @keyframes circle2 {
-  70%,to {transform: rotate(405deg);}
+  70%,to {transform: rotate(405deg);opacity:1}
 }
 
 
 @keyframes bounce {
-  25% {transform: scaleY(1.3);}
+  25% {transform: scaleY(1);}
   50% {transform: scaleY(.6);}
 }
 

@@ -1,21 +1,17 @@
 {
   "name": "doui-anot",
-  "version": "0.0.1",
+  "version": "2.0.0",
   "description": "基于Anot框架的doUI组件库。支持IE10+,及现代浏览器。",
   "main": "index.js",
   "scripts": {
     "start": "node ./build.dev.js",
-    "prod": "node ./build.prod.js",
-    "next": "node ./build.next.js"
+    "prod": "node ./build.prod.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/yutent/doui.git"
   },
-  "keywords": [
-    "doui",
-    "Anot"
-  ],
+  "keywords": ["doui", "Anot"],
   "author": "yutent",
   "license": "MIT",
   "dependencies": {},
@@ -32,6 +28,7 @@
     "iofs": "^1.1.0",
     "node-sass": "^4.9.0",
     "postcss": "^6.0.22",
-    "uglify-es": "^3.3.9"
+    "uglify-es": "^3.3.9",
+    "anot": "^2.0.0"
   }
 }

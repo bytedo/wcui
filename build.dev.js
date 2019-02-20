@@ -14,38 +14,29 @@ const sourceDir = path.resolve(__dirname, 'src')
 const buildDir = path.resolve(__dirname, 'dist')
 const prefixer = postcss().use(
   autoprefixer({
-    browsers: ['ie > 9', 'iOS > 8', 'Android >= 4.4', 'ff > 38', 'Chrome > 38']
+    browsers: ['ff > 61', 'Chrome > 63']
   })
 )
-const jsOpt = {
-  presets: ['es2015'],
-  plugins: [
-    'transform-es2015-modules-amd',
-    'transform-decorators-legacy',
-    'transform-object-rest-spread',
-    ['transform-es2015-classes', { loose: true }],
-    ['transform-es2015-for-of', { loose: true }]
-  ]
-}
-const cssOpt = {
-  outputStyle: 'compressed'
-}
 
 const compileJs = (entry, output) => {
   log('编译JS: %s', chalk.green(entry))
-  try {
-    let { code } = babel.transformFileSync(entry, jsOpt)
-    code = code.replace(/\.scss/g, '.css')
-    fs.echo(code, output)
-  } catch (err) {
-    return log(err)
-  }
+  let buf = fs.cat(entry).toString()
+  let code = buf
+    .replace(/\.scss/g, '.css')
+    .replace(/import '([a-z0-9\/\.\-_]*)(?<!\.css)'/g, 'import "$1.js"')
+    .replace(
+      /import ([\w]*) from '([a-z0-9\/\.\-_]*)'/g,
+      'import $1 from "$2.js"'
+    )
+    .replace(/import '([a-z0-9\/\.\-_]*\.css)'/g, 'importCss("/$1")')
+
+  fs.echo(code, output)
 }
 
 const compileCss = (entry, output) => {
   log('编译scss: %s', chalk.green(entry))
   try {
-    const { css } = scss.renderSync({ ...cssOpt, file: entry })
+    const { css } = scss.renderSync({ file: entry })
     prefixer.process(css, { from: '', to: '' }).then(result => {
       fs.echo(result.css, output)
     })
