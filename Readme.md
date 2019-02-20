@@ -1,4 +1,4 @@
-![doui](https://attach.cdn.doui.cc/screenshot_276.jpg?t=20180722)
+![doui](./slogan.jpg)
 
 ## Anot 框架
 > `Anot` 是`Anot not only templateEngine`的缩写。
@@ -7,6 +7,11 @@
 
 ## doUI 组件库
 > doUI组件库是基于`Anot`框架开发的一套高效,轻量,可定制的现代化组件库。
+>> 2.x版进行了大量重构, 专门适配支持 type=module的浏览器(着重于electron/node-webkit)。移除了原先对低版本浏览器的兼容代码, 更加高效。
+
+
+##  亮点
+> 框架有着最简洁的API,学习成本为市面上所有的组件/框架中是最低的。 而`Anot`框架也是目前市面上所有的mvvm框架中**最接近原生体验的**。
 
 
 ## 开发环境及生产环境
@@ -17,6 +22,4 @@ npm start
 # 生产环境, 编译且压缩
 npm run prod
 
-# 不编译,只压缩, 适用于chrome61+, FF60+, Safari10.1+, EDGE16+
-npm run next
 ```
