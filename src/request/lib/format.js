@@ -8,10 +8,11 @@
 'use strict'
 
 function serialize(p, obj, q) {
-  var k
+  let k
   if (Array.isArray(obj)) {
     obj.forEach(function(it, i) {
-      k = p ? p + '[' + (Array.isArray(it) ? i : '') + ']' : i
+      k = p ? `${p}[${Array.isArray(it) ? i : ''}]` : i
+      // k = p ? p + '[' + (Array.isArray(it) ? i : '') + ']' : i
       if (typeof it === 'object') {
         serialize(k, it, q)
       } else {
@@ -19,8 +20,9 @@ function serialize(p, obj, q) {
       }
     })
   } else {
-    for (var i in obj) {
-      k = p ? p + '[' + i + ']' : i
+    for (let i in obj) {
+      k = p ? `${p}[${i}]` : i
+      // k = p ? p + '[' + i + ']' : i
       if (typeof obj[i] === 'object') {
         serialize(k, obj[i], q)
       } else {
@@ -30,12 +32,12 @@ function serialize(p, obj, q) {
   }
 }
 
-var toS = Object.prototype.toString
-var doc = window.document
-var encode = encodeURIComponent
-var decode = decodeURIComponent
+const toS = Object.prototype.toString
+const doc = window.document
+const encode = encodeURIComponent
+const decode = decodeURIComponent
 
-var TagHooks = function() {
+const TagHooks = function() {
   this.option = doc.createElement('select')
   this.thead = doc.createElement('table')
   this.td = doc.createElement('tr')
@@ -49,37 +51,34 @@ var TagHooks = function() {
   this.optgroup = this.option
   this.tbody = this.tfoot = this.colgroup = this.caption = this.thead
   this.th = this.td
-}
-
-var Format = function() {
-  var _this = this
-
-  this.tagHooks = new TagHooks()
 
   'circle,defs,ellipse,image,line,path,polygon,polyline,rect,symbol,text,use'.replace(
     /,/g,
-    function(m) {
-      _this.tagHooks[m] = _this.tagHooks.g //处理svg
+    m => {
+      this[m] = this.g //处理svg
     }
   )
+}
 
-  this.rtagName = /<([\w:]+)/
-  this.rxhtml = /<(?!area|br|col|embed|hr|img|input|link|meta|param)(([\w:]+)[^>]*)\/>/gi
-  this.scriptTypes = {
+const Helper = {
+  tagHooks: new TagHooks(),
+  rtagName: /<([\w:]+)/,
+  rxhtml: /<(?!area|br|col|embed|hr|img|input|link|meta|param)(([\w:]+)[^>]*)\/>/gi,
+  scriptTypes: {
     'text/javascript': 1,
     'text/ecmascript': 1,
     'application/ecmascript': 1,
     'application/javascript': 1
-  }
-  this.rhtml = /<|&#?\w+;/
+  },
+  rhtml: /<|&#?\w+;/
 }
 
-Format.prototype = {
+export default {
   parseJS: function(code) {
     code = (code + '').trim()
     if (code) {
       if (code.indexOf('use strict') === 1) {
-        var script = doc.createElement('script')
+        let script = doc.createElement('script')
         script.text = code
         doc.head.appendChild(script).parentNode.removeChild(script)
       } else {
@@ -105,27 +104,29 @@ Format.prototype = {
     return xml
   },
   parseHTML: function(html) {
-    var fragment = doc.createDocumentFragment().cloneNode(false)
+    let fragment = doc.createDocumentFragment().cloneNode(false)
 
-    if (typeof html !== 'string') return fragment
+    if (typeof html !== 'string') {
+      return fragment
+    }
 
-    if (!this.rhtml.test(html)) {
+    if (!Helper.rhtml.test(html)) {
       fragment.appendChild(document.createTextNode(html))
       return fragment
     }
 
-    html = html.replace(this.rxhtml, '<$1></$2>').trim()
-    var tag = (this.rtagName.exec(html) || ['', ''])[1].toLowerCase()
-    var wrap = this.tagHooks[tag] || this.tagHooks._default
-    var firstChild = null
+    html = html.replace(Helper.rxhtml, '<$1></$2>').trim()
+    let tag = (Helper.rtagName.exec(html) || ['', ''])[1].toLowerCase()
+    let wrap = Helper.tagHooks[tag] || Helper.tagHooks._default
+    let firstChild = null
 
     //使用innerHTML生成的script节点不会触发请求与执行text属性
     wrap.innerHTML = html
-    var script = wrap.getElementsByTagName('script')
+    let script = wrap.getElementsByTagName('script')
     if (script.length) {
-      for (var i = 0, el; (el = script[i++]); ) {
-        if (this.scriptTypes[el.type]) {
-          var tmp = doc.createElement('script').cloneNode(false)
+      for (let i = 0, el; (el = script[i++]); ) {
+        if (Helper.scriptTypes[el.type]) {
+          let tmp = doc.createElement('script').cloneNode(false)
           el.attributes.forEach(function(attr) {
             tmp.setAttribute(attr.name, attr.value)
           })
@@ -142,11 +143,15 @@ Format.prototype = {
     return fragment
   },
   param: function(obj) {
-    if (!obj || typeof obj === 'string' || typeof obj === 'number') return obj
+    if (!obj || typeof obj === 'string' || typeof obj === 'number') {
+      return obj
+    }
 
-    var arr = []
-    var q = function(k, v) {
-      if (/native code/.test(v)) return
+    let arr = []
+    let q = function(k, v) {
+      if (/native code/.test(v)) {
+        return
+      }
 
       v = typeof v === 'function' ? v() : v
       v = toS.call(v) !== '[object File]' ? encode(v) : v
@@ -154,18 +159,20 @@ Format.prototype = {
       arr.push(encode(k) + '=' + v)
     }
 
-    if (typeof obj === 'object') serialize('', obj, q)
+    if (typeof obj === 'object') {
+      serialize('', obj, q)
+    }
 
     return arr.join('&')
   },
   parseForm: function(form) {
-    var data = {}
-    for (var i = 0, field; (field = form.elements[i++]); ) {
+    let data = {}
+    for (let i = 0, field; (field = form.elements[i++]); ) {
       switch (field.type) {
         case 'select-one':
         case 'select-multiple':
           if (field.name.length && !field.disabled) {
-            for (var j = 0, opt; (opt = field.options[j++]); ) {
+            for (let j = 0, opt; (opt = field.options[j++]); ) {
               if (opt.selected) {
                 data[field.name] = opt.value || opt.text
               }
@@ -193,18 +200,5 @@ Format.prototype = {
       }
     }
     return data
-  },
-  merge: function(a, b) {
-    if (typeof a !== 'object' || typeof b !== 'object')
-      throw new TypeError('argument must be an object')
-
-    if (Object.assign) return Object.assign(a, b)
-
-    for (var i in b) {
-      a[i] = b[i]
-    }
-    return a
   }
 }
-
-export default new Format()

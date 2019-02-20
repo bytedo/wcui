@@ -10,37 +10,23 @@ import Format from './lib/format'
 
 // 本地协议/头 判断正则
 const rlocalProtocol = /^(?:about|app|app-storage|.+-extension|file|res|widget):$/
-const rheaders = /^(.*?):[ \t]*([^\r\n]*)\r?$/gm
-const encode = encodeURIComponent
-const decode = decodeURIComponent
-const toS = Object.prototype.toString
-const win = window
-const doc = win.document
+const log = console.log
 
 const noop = function(e, res) {
   this.defer.resolve(res)
 }
-const Xhr = function() {
-  return new XMLHttpRequest()
-}
-const supportCors = 'withCredentials' in Xhr()
 
 let isLocal = false
 try {
   isLocal = rlocalProtocol.test(location.ptyperotocol)
 } catch (e) {}
 
-let originAnchor = doc.createElement('a')
+let originAnchor = document.createElement('a')
 originAnchor.href = location.href
 
-const noBodyMethods = ['GET', 'HEAD', 'JSONP']
-const error = {
+const NOBODY_METHODS = ['GET', 'HEAD', 'JSONP']
+const ERROR = {
   10001: 'argument url is required',
-  10002: 'method "set" required an object or 2 args',
-  10003: 'method "send" can not call by different way',
-  10004: 'method "send" arguments error',
-  10005: 'method "send" required an object/string or 2 args',
-  10006: 'method "field" required an object or 2 args',
   10011: 'Promise  required a callback',
   10012: 'Parse error',
   10104: 'Request pending...',
@@ -48,7 +34,10 @@ const error = {
   10204: 'no content',
   10304: 'not modified',
   10500: 'Internal Server Error',
-  10504: 'Connected timeout',
+  10504: 'Connected timeout'
+}
+
+const FORM_TYPES = {
   form: 'application/x-www-form-urlencoded; charset=UTF-8',
   json: 'application/json; charset=UTF-8',
   text: 'text/plain; charset=UTF-8'
@@ -78,14 +67,18 @@ const convert = {
 }
 
 class _Request {
-  constructor(url = '', method = 'GET') {
+  constructor(url = '', method = 'GET', param = {}) {
     if (!url) {
       throw new Error(error[10001])
     }
+
+    // url规范化
+    url = url.replace(/#.*$/, '').replace(/^\/\//, location.protocol + '//')
+
     method = method.toUpperCase()
 
     this.transport = Object.create(null)
-    this.xhr = Xhr()
+    this.xhr = new XMLHttpRequest()
     this.defer = Promise.defer()
     this.opt = {
       url,
@@ -98,472 +91,189 @@ class _Request {
         .toString(16)
         .slice(2)
     }
+    return this.__open__(param)
   }
 
-  _formData() {
-    if (this.opt.form) {
-      let data = Format.parseForm(this.opt.form)
-      Format.merge(this.opt.data, data)
+  __open__(param) {
+    // 1»» 配置头信息
+    if (param.headers) {
+      Object.assign(this.opt.headers, param.headers)
     }
 
-    let form = new FormData()
-    for (let i in this.opt.data) {
-      let el = this.opt.data[i]
-      if (Array.isArray(el)) {
-        el.forEach(function(it) {
-          form.append(i + '[]', it)
-        })
-      } else {
-        form.append(i, this.opt.data[i])
-      }
-    }
-    return form
-  }
-
-  _jsonp(cb) {
-    win[cb] = function(val) {
-      delete win[cb]
-      request.cache[cb] = val
-    }
-  }
-
-  _dispatch(isTimeout) {
-    if (!this.transport) {
-      return this.defer.reject(error[10104])
-    }
-
-    let result = {
-      response: {
-        url: this.opt.url,
-        headers: { 'content-type': '' }
-      },
-      request: {
-        url: this.opt.url,
-        headers: this.opt.headers
-      },
-      status: isTimeout === null ? 504 : 200,
-      statusText: isTimeout === null ? 'Connected timeout' : 'ok',
-      text: '',
-      body: '',
-      error: null
-    }
-
-    //状态为4,既已成功, 则清除超时
-    clearTimeout(this.opt.timeoutID)
-
-    if (this.transport.nodeType && this.opt.method === 'JSONP') {
-      //移除script
-      this.transport.parentNode.removeChild(this.transport)
-
-      //超时返回
-      if (!isTimeout) {
-        let exec =
-          !this.transport.readyState ||
-          this.transport.readyState === 'loaded' ||
-          this.transport.readyState === 'complete'
-
-        if (exec) {
-          result.body = convert.jsonp(this.opt.data.callback)
-          result.text = JSON.stringify(result.body)
-        }
-      }
-      this.defer.resolve(result)
-    } else {
-      //成功的回调
-      let isSucc = isTimeout
-        ? false
-        : this.transport.status >= 200 && this.transport.status < 400
-
-      let headers =
-        (!isTimeout && this.transport.getAllResponseHeaders().split('\n')) || []
-
-      //处理返回的Header
-      headers.forEach(function(it, i) {
-        it = it.trim()
-        if (it) {
-          it = it.split(':')
-          result.response.headers[it.shift().toLowerCase()] = it
-            .join(':')
-            .trim()
-        }
-      })
-
-      if (isSucc) {
-        result.status = this.transport.status
-        if (result.status === 204) {
-          result.statusText = error[10204]
-        } else if (result.status === 304) {
-          result.statusText = error[10304]
-        }
-      } else {
-        result.status = isTimeout ? 504 : this.transport.status || 500
-        result.statusText = isTimeout
-          ? error[10504]
-          : this.transport.statusText || error[10500]
-        result.error = new Error(result.statusText)
-      }
-
-      try {
-        //处理返回的数据
-        var dataType = result.response.headers['content-type'].match(
-          /json|xml|script|html/i
-        ) || ['text']
-
-        dataType = dataType[0].toLowerCase()
-        result.text = isTimeout
-          ? ''
-          : this.transport.responseText || this.transport.responseXML
-
-        result.body = convert[dataType](
-          result.text,
-          !isTimeout && this.transport.responseXML
-        )
-      } catch (err) {
-        result.error = err
-        result.statusText = error[10012]
-      }
-
-      if (result.status >= 200 && result.status < 400) {
-        this.defer.resolve(result)
-      } else {
-        this.defer.reject(result)
-      }
-    }
-    delete this.transport
-    delete this.opt
-    delete this.xhr
-  }
-
-  // 设置表单类型, 支持3种, form(即x-www-form-urlencoded)/json/text
-  type(type) {
-    // 如果已经是带附件上传的表单,不再支持修改表单类型
-    if (this.opt.formType === 'form-data') {
-      return this
-    }
-
-    this.opt.formType = type || 'form'
-
-    // 不是POST方式, 强制为x-www-form-urlencoded
-    if (type === 'form' || noBodyMethods.indexOf(this.opt.method) > -1) {
-      this.set('content-type', error.form)
-    } else if (type === 'json') {
-      this.set('content-type', error.json)
-    } else {
-      this.set('content-type', error.text)
-    }
-
-    return this
-  }
-
-  //设置头信息
-  set(key, val) {
-    // 已经发起请求之后,不再允许追加头信息了
-    if (!this.transport) {
-      return this
-    }
-
-    let obj = {}
-
-    if (arguments.length === 1) {
-      if (typeof key !== 'object') {
-        this.defer.reject(error[10002])
-        return this
-      }
-      obj = key
-    } else if (arguments.length === 2) {
-      if (typeof key === 'string' && val !== undefined) {
-        obj[key] = val
+    // 2»» 设置表单类型, 其中 form-data不能手动设置
+    let hasAttach = false
+    if (param.formType) {
+      switch (param.formType) {
+        case 'form':
+          this.__set__('form')
+          break
+        case 'json':
+          this.__set__('json')
+          break
+        case 'form-data':
+          this.opt.method = 'POST'
+          hasAttach = true
+          break
+        default:
+          if (NOBODY_METHODS.includes(this.opt.method)) {
+            this.__set__('form')
+          } else {
+            this.__set__('text')
+          }
       }
     } else {
-      this.defer.reject(error[10002])
-      return this
-    }
-    for (let k in obj) {
-      // 全转小写,避免重复写入
-      let v = obj[k]
-      k = k.toLowerCase()
-      this.opt.headers[k] = v
-    }
-    return this
-  }
-
-  // 设置请求数据(POST方式会放入body, GET则拼接到url上)
-  send(key, val) {
-    if (!this.transport) {
-      return this
+      this.__set__('form')
     }
 
-    if (arguments.length === 1) {
-      if (typeof key === 'string') {
-        this.opt.data = key
-      } else if (typeof key === 'object') {
-        if (typeof this.opt.data !== 'object') {
-          this.defer.reject(error[10003])
-          return this
-        }
-        Format.merge(this.opt.data, key)
-      } else {
-        this.defer.reject(error[10004])
-      }
-    } else if (arguments.length === 2) {
-      if (typeof key !== 'string') {
-        this.defer.reject(error[10004])
-        return this
-      }
-      if (val === undefined) {
-        delete this.opt.data[key]
-      } else {
-        this.opt.data[key] = val
-      }
-    } else {
-      this.defer.reject(error[10005])
-    }
-
-    return this
-  }
-
-  //该方法用于 form-data类型的post请求的参数设置
-  field(key, val) {
-    if (!this.transport) {
-      return this
-    }
-
-    // 此类型优先级最高
-    this.opt.formType = 'form-data'
-    this.opt.method = 'POST'
-    if (!this.opt.data || typeof this.opt.data !== 'object') {
-      this.opt.data = {}
-    }
-
-    if (arguments.length === 1 && typeof key === 'object') {
-      Format.merge(this.opt.data, key)
-    } else if (arguments.length === 2) {
-      this.opt.data[key] = val
-    } else {
-      this.defer.reject(error[10006])
-    }
-    return this
-  }
-
-  //设置缓存
-  cache(bool) {
-    if (!this.transport) {
-      return this
-    }
-
-    if (noBodyMethods.indexOf(this.opt.method) > -1) {
-      this.opt.cache = !!bool
-    }
-
-    return this
-  }
-
-  //取消网络请求
-  abort() {
-    delete this.transport
-    if (!this.opt.form) {
-      this.xhr.abort()
-    }
-
-    return this
-  }
-
-  //超时设置, 单位毫秒
-  timeout(time) {
-    if (typeof time !== 'number' || time < 1) {
-      return this
-    }
-
-    this.opt.timeout = time
-    return this
-  }
-
-  form(form) {
-    if (typeof form === 'object' && form.nodeName === 'FORM') {
-      this.opt.method = 'POST'
-      this.opt.form = form
-    }
-
-    return this
-  }
-
-  then(cb) {
-    if (typeof cb !== 'function') {
-      this.defer.reject(error[10011])
-      return this.defer.promise
-    }
-
-    // 回调已执行, 或已取消, 则直接返回, 防止重复执行
-    if (!this.transport) {
-      return this.defer.promise
-    }
-
-    // ------------------------------------------
-    // 1. url规范化
-    // ------------------------------------------
-    this.opt.url = this.opt.url
-      .replace(/#.*$/, '')
-      .replace(/^\/\//, location.protocol + '//')
-
-    // ------------------------------------------
-    // 2. 处理跨域
-    // ------------------------------------------
-    // 2.1 判断是否跨域
-    if (typeof this.opt.crossDomain !== 'boolean') {
-      var anchor = doc.createElement('a')
-      try {
-        anchor.href = this.opt.url
-        // IE7及以下浏览器 '1'[0]的结果是 undefined
-        // IE7下需要获取绝对路径
-        var absUrl = !'1'[0] ? anchor.getAttribute('href', 4) : anchor.href
-        anchor.href = absUrl
-        anchor.async = true
-        this.opt.crossDomain =
-          originAnchor.protocol !== anchor.protocol ||
-          originAnchor.host !== anchor.host
-      } catch (e) {
-        this.opt.crossDomain = true
+    // 3»» 设置缓存
+    if (param.cache) {
+      if (NOBODY_METHODS.includes(this.opt.method)) {
+        this.opt.cache = true
       }
     }
 
-    // 2.2 进一步处理跨域配置
+    // 4»» 设置超时时间(毫秒)
+    param.timeout = param.timeout >>> 0
+    if (param.timeout > 0) {
+      this.opt.timeout = param.timeout
+    }
+
+    // 5»» 请求的内容
+    if (param.data) {
+      let type = typeof param.data
+
+      switch (type) {
+        case 'number':
+        case 'string':
+          this.__set__('text')
+          this.opt.data = param.data
+          break
+        case 'object':
+          // 解析表单DOM
+          if (param.data.nodeName === 'FORM') {
+            hasAttach = true
+            this.opt.method = 'POST'
+            delete this.opt.headers['content-type']
+            this.opt.data = this.__parseForm__(param.data)
+          } else if (param.data.constructor === FormData) {
+            hasAttach = true
+            // 如果是一个 FormData对象
+            // 则直接改为POST
+            this.opt.method = 'POST'
+            delete this.opt.headers['content-type']
+            this.opt.data = param.data
+          } else {
+            // 有附件,则改为FormData
+            if (hasAttach) {
+              let form = new FormData()
+              for (let i in param.data) {
+                let el = param.data[i]
+                if (Array.isArray(el)) {
+                  el.forEach(function(it) {
+                    form.append(i + '[]', it)
+                  })
+                } else {
+                  form.append(i, param.data[i])
+                }
+              }
+              this.opt.data = form
+            } else {
+              this.opt.data = param.data
+            }
+          }
+      }
+    }
+
+    // 6»» 处理跨域
+    try {
+      let ancher = document.createElement('a')
+      ancher.href = this.opt.url
+
+      this.opt.crossDomain =
+        originAnchor.protocol !== anchor.protocol ||
+        originAnchor.host !== anchor.host
+    } catch (err) {
+      this.opt.crossDomain = true
+    }
+
+    // 6.1»» 进一步处理跨域
     if (this.opt.method === 'JSONP') {
-      //如果没有跨域，自动转回xhr GET
-      if (!this.opt.crossDomain) {
-        this.opt.method = 'GET'
+      // 如果非跨域,则转回 xhr GET
+      if (this.opt.crossDomain) {
+        this.opt.data.callback =
+          this.opt.data.callback || `jsonp${request.cid++}`
       } else {
-        this.opt.data['callback'] =
-          this.opt.data['callback'] || 'jsonp' + request.cid++
-        this._jsonp(this.opt.data['callback']) //创建临时处理方法
+        this.opt.method = 'GET'
       }
     }
 
-    // 2.3 如果不是JSONP，则自动加上一条header信息，用以标识这是ajax请求
+    // 6.2»»
+    // 如果不是JSONP，则自动加上一条header信息，用以标识这是ajax请求
+    // 如果是跨域,在支持Cors时, 自动加上支持(这一步会需要服务端额外返回一些headers)
     if (this.opt.method !== 'JSONP') {
-      this.set('X-Requested-With', 'XMLHttpRequest')
+      this.opt.headers['X-Requested-With'] = 'XMLHttpRequest'
     }
     if (this.opt.crossDomain) {
       supportCors && (this.xhr.withCredentials = true)
     }
 
-    // ------------------------------------------
-    // 3. 解析 data
-    // ------------------------------------------
-    this.opt.param = Format.param(this.opt.data)
+    // 7»» 根据method类型, 处理g表单数据
 
-    // ------------------------------------------
-    // 4. 修正默认表单类型
-    // ------------------------------------------
-    if (!this.opt.formType) {
-      this.type('form')
-    }
-
-    // ------------------------------------------
-    // 5. 根据method类型,处理body
-    // ------------------------------------------
-    let hasBody = noBodyMethods.indexOf(this.opt.method) < 0 //是否为post请求
-    if (!hasBody) {
-      //GET请求直接把参数拼接到url上
-      if (this.opt.param) {
-        this.opt.url += (/\?/.test(this.opt.url) ? '&' : '?') + this.opt.param
-      }
-      //加随机值,避免缓存
-      if (this.opt.cache === false) {
-        this.opt.url +=
-          (/\?/.test(this.opt.url) ? '&' : '?') + '_=' + Math.random()
-      }
-    } else {
-      if (this.opt.formType === 'form-data') {
-        delete this.opt.headers['content-type']
-        this.opt.param = this._formData()
-      } else if (this.opt.formType !== 'form') {
-        if (typeof this.opt.data === 'object') {
-          this.opt.data = JSON.stringify(this.opt.data)
-        }
-        this.opt.param = this.opt.data
+    // 是否允许发送body
+    let allowBody = !NOBODY_METHODS.includes(this.opt.method)
+    if (allowBody) {
+      if (!hasAttach && typeof this.opt.data === 'object') {
+        this.opt.data = JSON.stringify(this.opt.data)
       }
     }
 
-    // ------------------------------------------
-    // 6. 构造并发起请求
-    // ------------------------------------------
-    // 6.1 jsonp
-    if (this.opt.method === 'JSONP') {
-      // 6.1.1 构造script并插入
-      this.transport = doc.createElement('script')
-      this.transport.onerror = this.transport.onload = () => {
-        this._dispatch()
-      }
-      this.transport.src = this.opt.url
-      doc.head.insertBefore(this.transport, doc.head.firstChild)
-
-      // 6.1.2 超时处理
-      if (this.opt.timeout && this.opt.timeout > 0) {
-        this.opt.timeoutID = setTimeout(() => {
-          this.transport.onerror = this.transport.onload = null
-          this._dispatch(true)
-        }, this.opt.timeout)
-      }
-    } else {
-      this.transport = this.xhr
-      // 6.2 非jsonp
-      // 6.2.1 监听http状态
-      this.xhr.onreadystatechange = ev => {
-        if (this.opt.timeout && this.opt.timeout > 0) {
-          this.opt['time' + this.xhr.readyState] = ev.timeStamp
-          if (this.xhr.readyState === 4) {
-            this.opt.isTimeout =
-              this.opt.time4 - this.opt.time1 > this.opt.timeout
-          }
-        }
-
-        if (this.xhr.readyState !== 4) {
-          return
-        }
-
-        this._dispatch(this.opt.isTimeout)
+    // 取消网络请求
+    this.opt.abort = () => {
+      delete this.transport
+      if (!this.opt.form) {
+        this.xhr.abort()
       }
 
-      // 6.2.2 初始化xhr提交
-      this.xhr.open(this.opt.method, this.opt.url, true)
-
-      // 6.2.3 设置头信息
-      for (var i in this.opt.headers) {
-        this.xhr.setRequestHeader(i, this.opt.headers[i])
-      }
-
-      // 6.2.4 发起网络请求
-      this.xhr.send(this.opt.param)
-
-      // 6.2.5 超时处理
-      if (this.opt.timeout && this.opt.timeout > 0) {
-        this.xhr.timeout = this.opt.timeout
-      }
+      return this
     }
 
-    return this.defer.promise.then(res => {
-      return cb(res)
-    })
+    this.defer.resolve(this.opt)
+    return this.defer.promise
+  }
+
+  __set__(type) {
+    this.opt.headers['content-type'] = FORM_TYPES[type]
+  }
+
+  _jsonp(cb) {
+    window[cb] = function(val) {
+      delete window[cb]
+      request.cache[cb] = val
+    }
   }
 }
 
-if (!win.request) {
-  win.request = {
-    get(url) {
-      return new _Request(url, 'GET')
+if (!window.request) {
+  window.request = {
+    get(url, param) {
+      return new _Request(url, 'GET', param)
     },
-    post(url) {
-      return new _Request(url, 'POST')
+    post(url, param) {
+      return new _Request(url, 'POST', param)
     },
-    jsonp(url) {
-      return new _Request(url, 'JSONP')
+    upload(url, param) {
+      param.formType = 'form-data'
+      return this.post(url, param)
     },
-    open(url, method = 'GET') {
-      return new _Request(url, method)
+    jsonp(url, param) {
+      return new _Request(url, 'JSONP', param)
+    },
+    open(url, method = 'GET', param) {
+      return new _Request(url, method, param)
     },
     cache: {},
     cid: 0,
-    version: '1.1.0-normal'
+    version: '2.0.0-normal'
   }
   Anot.ui.request = request.version
 }
