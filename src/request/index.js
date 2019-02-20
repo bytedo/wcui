@@ -7,6 +7,7 @@
 
 'use strict'
 import Format from './lib/format'
+import format from './lib/format'
 
 // 本地协议/头 判断正则
 const rlocalProtocol = /^(?:about|app|app-storage|.+-extension|file|res|widget):$/
@@ -24,8 +25,8 @@ try {
 let originAnchor = document.createElement('a')
 originAnchor.href = location.href
 
-const NOBODY_METHODS = ['GET', 'HEAD', 'JSONP']
-const ERROR = {
+const NOBODY_METHODS = ['GET', 'HEAD']
+const ERRORS = {
   10001: 'argument url is required',
   10011: 'Promise  required a callback',
   10012: 'Parse error',
@@ -58,18 +59,13 @@ const convert = {
   },
   script(val) {
     return Format.parseJS(val)
-  },
-  jsonp(name) {
-    var json = request.cache[name]
-    delete request.cache[name]
-    return json
   }
 }
 
 class _Request {
   constructor(url = '', method = 'GET', param = {}) {
     if (!url) {
-      throw new Error(error[10001])
+      throw new Error(ERRORS[10001])
     }
 
     // url规范化
@@ -77,19 +73,13 @@ class _Request {
 
     method = method.toUpperCase()
 
-    this.transport = Object.create(null)
     this.xhr = new XMLHttpRequest()
     this.defer = Promise.defer()
     this.opt = {
       url,
       method,
-      form: null,
       data: {},
-      headers: {},
-      timeoutID: 0,
-      uuid: Math.random()
-        .toString(16)
-        .slice(2)
+      headers: {}
     }
     return this.__open__(param)
   }
@@ -151,32 +141,25 @@ class _Request {
         case 'object':
           // 解析表单DOM
           if (param.data.nodeName === 'FORM') {
-            hasAttach = true
-            this.opt.method = 'POST'
-            delete this.opt.headers['content-type']
-            this.opt.data = this.__parseForm__(param.data)
-          } else if (param.data.constructor === FormData) {
-            hasAttach = true
+            this.opt.method = param.data.method.toUpperCase() || 'POST'
+
+            this.opt.data = Format.parseForm(param.data)
+            hasAttach = this.opt.data.constructor === FormData
+
+            if (hasAttach) {
+              delete this.opt.headers['content-type']
+            }
             // 如果是一个 FormData对象
             // 则直接改为POST
+          } else if (param.data.constructor === FormData) {
+            hasAttach = true
             this.opt.method = 'POST'
             delete this.opt.headers['content-type']
             this.opt.data = param.data
           } else {
             // 有附件,则改为FormData
             if (hasAttach) {
-              let form = new FormData()
-              for (let i in param.data) {
-                let el = param.data[i]
-                if (Array.isArray(el)) {
-                  el.forEach(function(it) {
-                    form.append(i + '[]', it)
-                  })
-                } else {
-                  form.append(i, param.data[i])
-                }
-              }
-              this.opt.data = form
+              this.opt.data = Format.mkFormData(param.data)
             } else {
               this.opt.data = param.data
             }
@@ -196,25 +179,14 @@ class _Request {
       this.opt.crossDomain = true
     }
 
-    // 6.1»» 进一步处理跨域
-    if (this.opt.method === 'JSONP') {
-      // 如果非跨域,则转回 xhr GET
-      if (this.opt.crossDomain) {
-        this.opt.data.callback =
-          this.opt.data.callback || `jsonp${request.cid++}`
-      } else {
-        this.opt.method = 'GET'
-      }
-    }
-
-    // 6.2»»
-    // 如果不是JSONP，则自动加上一条header信息，用以标识这是ajax请求
+    // 6.1»»
+    // 自动加上一条header信息，用以标识这是ajax请求
     // 如果是跨域,在支持Cors时, 自动加上支持(这一步会需要服务端额外返回一些headers)
-    if (this.opt.method !== 'JSONP') {
-      this.opt.headers['X-Requested-With'] = 'XMLHttpRequest'
-    }
+
+    this.opt.headers['X-Requested-With'] = 'XMLHttpRequest'
+
     if (this.opt.crossDomain) {
-      supportCors && (this.xhr.withCredentials = true)
+      this.xhr.withCredentials = true
     }
 
     // 7»» 根据method类型, 处理g表单数据
@@ -222,14 +194,62 @@ class _Request {
     // 是否允许发送body
     let allowBody = !NOBODY_METHODS.includes(this.opt.method)
     if (allowBody) {
-      if (!hasAttach && typeof this.opt.data === 'object') {
-        this.opt.data = JSON.stringify(this.opt.data)
+      if (!hasAttach) {
+        if (param.formType === 'json') {
+          this.opt.data = JSON.stringify(this.opt.data)
+        } else {
+          this.opt.data = Format.param(this.opt.data)
+        }
       }
+    } else {
+      // 否则拼接到url上
+      this.opt.data = Format.param(this.opt.data)
+
+      this.opt.url += (/\?/.test(this.opt.url) ? '&' : '?') + this.opt.data
+
+      if (this.opt.cache === false) {
+        this.opt.url +=
+          (/\?/.test(this.opt.url) ? '&' : '?') + '_=' + Math.random()
+      }
+    }
+
+    // 8»» 构造请求
+    // response ready
+    this.xhr.onreadystatechange = ev => {
+      if (this.opt.timeout > 0) {
+        this.opt['time' + this.xhr.readyState] = ev.timeStamp
+        if (this.xhr.readyState === 4) {
+          this.opt.isTimeout =
+            this.opt.time4 - this.opt.time1 > this.opt.timeout
+        }
+      }
+
+      if (this.xhr.readyState !== 4) {
+        return
+      }
+
+      this.__dispatch__(this.opt.isTimeout)
+    }
+
+    // 8.1»» 初始化xhr
+    this.xhr.open(this.opt.method, this.opt.url, true)
+
+    // 8.2»» 设置头信息
+    for (var i in this.opt.headers) {
+      this.xhr.setRequestHeader(i, this.opt.headers[i])
+    }
+
+    // 8.3»» 发起网络请求
+    this.xhr.send(this.opt.data)
+
+    // 8.4»» 超时处理
+    if (this.opt.timeout && this.opt.timeout > 0) {
+      this.xhr.timeout = this.opt.timeout
     }
 
     // 取消网络请求
     this.opt.abort = () => {
-      delete this.transport
+      delete this.xhr
       if (!this.opt.form) {
         this.xhr.abort()
       }
@@ -237,7 +257,7 @@ class _Request {
       return this
     }
 
-    this.defer.resolve(this.opt)
+    // this.defer.resolve(this.opt)
     return this.defer.promise
   }
 
@@ -245,11 +265,83 @@ class _Request {
     this.opt.headers['content-type'] = FORM_TYPES[type]
   }
 
-  _jsonp(cb) {
-    window[cb] = function(val) {
-      delete window[cb]
-      request.cache[cb] = val
+  __dispatch__(isTimeout) {
+    let result = {
+      response: {
+        url: this.opt.url,
+        headers: { 'content-type': '' }
+      },
+      request: {
+        url: this.opt.url,
+        headers: this.opt.headers
+      },
+      status: isTimeout === null ? 504 : 200,
+      statusText: isTimeout === null ? 'Connected timeout' : 'ok',
+      text: '',
+      body: '',
+      error: null
     }
+
+    //成功的回调
+    let isSucc = isTimeout
+      ? false
+      : this.xhr.status >= 200 && this.xhr.status < 400
+
+    let headers =
+      (!isTimeout && this.xhr.getAllResponseHeaders().split('\n')) || []
+
+    //处理返回的Header
+    headers.forEach(function(it, i) {
+      it = it.trim()
+      if (it) {
+        it = it.split(':')
+        result.response.headers[it.shift().toLowerCase()] = it.join(':').trim()
+      }
+    })
+
+    if (isSucc) {
+      result.status = this.xhr.status
+      if (result.status === 204) {
+        result.statusText = ERRORS[10204]
+      } else if (result.status === 304) {
+        result.statusText = ERRORS[10304]
+      }
+    } else {
+      result.status = isTimeout ? 504 : this.xhr.status || 500
+      result.statusText = isTimeout
+        ? ERRORS[10504]
+        : this.xhr.statusText || ERRORS[10500]
+      result.error = new Error(result.statusText)
+    }
+
+    try {
+      //处理返回的数据
+      var dataType = result.response.headers['content-type'].match(
+        /json|xml|script|html/i
+      ) || ['text']
+
+      dataType = dataType[0].toLowerCase()
+      result.text = isTimeout
+        ? ''
+        : this.xhr.responseText || this.xhr.responseXML
+
+      result.body = convert[dataType](
+        result.text,
+        !isTimeout && this.xhr.responseXML
+      )
+    } catch (err) {
+      result.error = err
+      result.statusText = ERRORS[10012]
+    }
+
+    if (result.status >= 200 && result.status < 400) {
+      this.defer.resolve(result)
+    } else {
+      this.defer.reject(result)
+    }
+
+    delete this.opt
+    delete this.xhr
   }
 }
 
@@ -265,14 +357,9 @@ if (!window.request) {
       param.formType = 'form-data'
       return this.post(url, param)
     },
-    jsonp(url, param) {
-      return new _Request(url, 'JSONP', param)
-    },
     open(url, method = 'GET', param) {
       return new _Request(url, method, param)
     },
-    cache: {},
-    cid: 0,
     version: '2.0.0-normal'
   }
   Anot.ui.request = request.version

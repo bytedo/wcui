@@ -142,6 +142,63 @@ export default {
 
     return fragment
   },
+  parseForm: function(form) {
+    let data = {}
+    let hasAttach = false
+    for (let i = 0, field; (field = form.elements[i++]); ) {
+      switch (field.type) {
+        case 'select-one':
+        case 'select-multiple':
+          if (field.name.length && !field.disabled) {
+            for (let j = 0, opt; (opt = field.options[j++]); ) {
+              if (opt.selected) {
+                data[field.name] = opt.value || opt.text
+              }
+            }
+          }
+          break
+        case 'file':
+          if (field.name.length && !field.disabled) {
+            data[field.name] = field.files[0]
+            hasAttach = true
+          }
+          break
+        case undefined:
+        case 'submit':
+        case 'reset':
+        case 'button':
+          break //按钮啥的, 直接忽略
+        case 'radio':
+        case 'checkbox':
+          // 只处理选中的
+          if (!field.checked) break
+        default:
+          if (field.name.length && !field.disabled) {
+            data[field.name] = field.value
+          }
+      }
+    }
+    // 如果有附件, 改为FormData
+    if (hasAttach) {
+      return this.mkFormData(data)
+    } else {
+      return data
+    }
+  },
+  mkFormData(data) {
+    let form = new FormData()
+    for (let i in data) {
+      let el = data[i]
+      if (Array.isArray(el)) {
+        el.forEach(function(it) {
+          form.append(i + '[]', it)
+        })
+      } else {
+        form.append(i, data[i])
+      }
+    }
+    return form
+  },
   param: function(obj) {
     if (!obj || typeof obj === 'string' || typeof obj === 'number') {
       return obj
@@ -164,41 +221,5 @@ export default {
     }
 
     return arr.join('&')
-  },
-  parseForm: function(form) {
-    let data = {}
-    for (let i = 0, field; (field = form.elements[i++]); ) {
-      switch (field.type) {
-        case 'select-one':
-        case 'select-multiple':
-          if (field.name.length && !field.disabled) {
-            for (let j = 0, opt; (opt = field.options[j++]); ) {
-              if (opt.selected) {
-                data[field.name] = opt.value || opt.text
-              }
-            }
-          }
-          break
-        case 'file':
-          if (field.name.length && !field.disabled) {
-            data[field.name] = field.files[0]
-          }
-          break
-        case undefined:
-        case 'submit':
-        case 'reset':
-        case 'button':
-          break //按钮啥的, 直接忽略
-        case 'radio':
-        case 'checkbox':
-          // 只处理选中的
-          if (!field.checked) break
-        default:
-          if (field.name.length && !field.disabled) {
-            data[field.name] = field.value
-          }
-      }
-    }
-    return data
   }
 }
