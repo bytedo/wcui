@@ -27,13 +27,13 @@ originAnchor.href = location.href
 
 const NOBODY_METHODS = ['GET', 'HEAD']
 const ERRORS = {
-  10001: 'argument url is required',
-  10011: 'Promise  required a callback',
+  10001: 'Argument url is required',
   10012: 'Parse error',
+  10100: 'Request canceled',
   10104: 'Request pending...',
-  10200: 'ok',
-  10204: 'no content',
-  10304: 'not modified',
+  10200: 'Ok',
+  10204: 'No content',
+  10304: 'Not modified',
   10500: 'Internal Server Error',
   10504: 'Connected timeout'
 }
@@ -78,19 +78,33 @@ class _Request {
     this.opt = {
       url,
       method,
+      headers: {},
       data: {},
-      headers: {}
+      dataType: 'text',
+      withCredentials: false // 跨域选项,是否验证凭证
     }
-    return this.__open__(param)
+
+    Object.assign(param, this.__INIT__)
+    // 取消网络请求
+    this.defer.promise.abort = () => {
+      this.cancel = true
+      this.xhr.abort()
+    }
+    this.__next__(param)
+    return this.defer.promise
   }
 
-  __open__(param) {
-    // 1»» 配置头信息
+  __next__(param) {
+    /* -------------------------------------------------------------- */
+    /* ------------------------  1»» 配置头信息  ---------------------- */
+    /* -------------------------------------------------------------- */
     if (param.headers) {
       Object.assign(this.opt.headers, param.headers)
     }
 
-    // 2»» 设置表单类型, 其中 form-data不能手动设置
+    /* -------------------------------------------------------------- */
+    /* ---------  2»» 设置表单类型, 其中 form-data不能手动设置  ---------- */
+    /* -------------------------------------------------------------- */
     let hasAttach = false
     if (param.formType) {
       switch (param.formType) {
@@ -115,20 +129,26 @@ class _Request {
       this.__set__('form')
     }
 
-    // 3»» 设置缓存
+    /* -------------------------------------------------------------- */
+    /* -------------------  3»» 设置缓存  ---------------------------- */
+    /* -------------------------------------------------------------- */
     if (param.cache) {
       if (NOBODY_METHODS.includes(this.opt.method)) {
         this.opt.cache = true
       }
     }
 
-    // 4»» 设置超时时间(毫秒)
+    /* -------------------------------------------------------------- */
+    /* -------------------  4»» 设置超时时间(毫秒) --------------------- */
+    /* -------------------------------------------------------------- */
     param.timeout = param.timeout >>> 0
     if (param.timeout > 0) {
       this.opt.timeout = param.timeout
     }
 
-    // 5»» 请求的内容
+    /* -------------------------------------------------------------- */
+    /* --------------------------  5»» 请求的内容 --------------------- */
+    /* -------------------------------------------------------------- */
     if (param.data) {
       let type = typeof param.data
 
@@ -167,30 +187,37 @@ class _Request {
       }
     }
 
-    // 6»» 处理跨域
+    /* -------------------------------------------------------------- */
+    /* --------------------------  6»» 处理跨域  --------------------- */
+    /* -------------------------------------------------------------- */
+    if (param.withCredentials) {
+      this.opt.withCredentials = true
+    }
     try {
-      let ancher = document.createElement('a')
-      ancher.href = this.opt.url
+      let anchor = document.createElement('a')
+      anchor.href = this.opt.url
 
       this.opt.crossDomain =
         originAnchor.protocol !== anchor.protocol ||
         originAnchor.host !== anchor.host
-    } catch (err) {
-      this.opt.crossDomain = true
-    }
+    } catch (err) {}
 
-    // 6.1»»
-    // 自动加上一条header信息，用以标识这是ajax请求
-    // 如果是跨域,在支持Cors时, 自动加上支持(这一步会需要服务端额外返回一些headers)
-
-    this.opt.headers['X-Requested-With'] = 'XMLHttpRequest'
+    // 6.1»» 进一步处理跨域
+    // 非跨域或跨域但支持Cors时自动加上一条header信息，用以标识这是ajax请求
+    // 如果是跨域,开启Cors会需要服务端额外返回一些headers
 
     if (this.opt.crossDomain) {
-      this.xhr.withCredentials = true
+      if (this.opt.withCredentials) {
+        this.xhr.withCredentials = true
+        this.opt.headers['X-Requested-With'] = 'XMLHttpRequest'
+      }
+    } else {
+      this.opt.headers['X-Requested-With'] = 'XMLHttpRequest'
     }
 
-    // 7»» 根据method类型, 处理g表单数据
-
+    /* -------------------------------------------------------------- */
+    /* ------------- 7»» 根据method类型, 处理g表单数据  ---------------- */
+    /* -------------------------------------------------------------- */
     // 是否允许发送body
     let allowBody = !NOBODY_METHODS.includes(this.opt.method)
     if (allowBody) {
@@ -213,7 +240,19 @@ class _Request {
       }
     }
 
-    // 8»» 构造请求
+    /* -------------------------------------------------------------- */
+    /* -------------       8»» 设置响应的数据类型       ---------------- */
+    /* -------------------------------------------------------------- */
+    // arraybuffer | blob | document | json | text
+    if (param.dataType) {
+      this.opt.dataType = param.dataType.toLowerCase()
+    }
+    this.xhr.responseType = this.opt.dataType
+
+    /* -------------------------------------------------------------- */
+    /* -------------           9»» 构造请求           ---------------- */
+    /* -------------------------------------------------------------- */
+
     // response ready
     this.xhr.onreadystatechange = ev => {
       if (this.opt.timeout > 0) {
@@ -231,34 +270,21 @@ class _Request {
       this.__dispatch__(this.opt.isTimeout)
     }
 
-    // 8.1»» 初始化xhr
+    // 9.1»» 初始化xhr
     this.xhr.open(this.opt.method, this.opt.url, true)
 
-    // 8.2»» 设置头信息
-    for (var i in this.opt.headers) {
+    // 9.2»» 设置头信息
+    for (let i in this.opt.headers) {
       this.xhr.setRequestHeader(i, this.opt.headers[i])
     }
 
-    // 8.3»» 发起网络请求
+    // 9.3»» 发起网络请求
     this.xhr.send(this.opt.data)
 
-    // 8.4»» 超时处理
+    // 9.4»» 超时处理
     if (this.opt.timeout && this.opt.timeout > 0) {
       this.xhr.timeout = this.opt.timeout
     }
-
-    // 取消网络请求
-    this.opt.abort = () => {
-      delete this.xhr
-      if (!this.opt.form) {
-        this.xhr.abort()
-      }
-
-      return this
-    }
-
-    // this.defer.resolve(this.opt)
-    return this.defer.promise
   }
 
   __set__(type) {
@@ -267,37 +293,44 @@ class _Request {
 
   __dispatch__(isTimeout) {
     let result = {
-      response: {
-        url: this.opt.url,
-        headers: { 'content-type': '' }
-      },
-      request: {
-        url: this.opt.url,
-        headers: this.opt.headers
-      },
-      status: isTimeout === null ? 504 : 200,
-      statusText: isTimeout === null ? 'Connected timeout' : 'ok',
+      status: 200,
+      statusText: 'ok',
       text: '',
       body: '',
       error: null
     }
 
-    //成功的回调
-    let isSucc = isTimeout
-      ? false
-      : this.xhr.status >= 200 && this.xhr.status < 400
+    // 主动取消
+    if (this.cancel) {
+      return this.__cancel__(result)
+    }
 
-    let headers =
-      (!isTimeout && this.xhr.getAllResponseHeaders().split('\n')) || []
+    // 超时
+    if (isTimeout) {
+      return this.__timeout__(result)
+    }
 
-    //处理返回的Header
-    headers.forEach(function(it, i) {
+    // 是否请求成功(resful规范)
+    let isSucc = this.xhr.status >= 200 && this.xhr.status < 400
+
+    let headers = this.xhr.getAllResponseHeaders().split('\n') || []
+    let contentType = ''
+
+    //处理返回的 Header, 拿到content-type
+    for (let it of headers) {
       it = it.trim()
       if (it) {
         it = it.split(':')
-        result.response.headers[it.shift().toLowerCase()] = it.join(':').trim()
+        let tmp = it.shift().toLowerCase()
+        if (tmp === 'content-type') {
+          contentType = it
+            .join(':')
+            .trim()
+            .toLowerCase()
+          break
+        }
       }
-    })
+    }
 
     if (isSucc) {
       result.status = this.xhr.status
@@ -307,60 +340,96 @@ class _Request {
         result.statusText = ERRORS[10304]
       }
     } else {
-      result.status = isTimeout ? 504 : this.xhr.status || 500
-      result.statusText = isTimeout
-        ? ERRORS[10504]
-        : this.xhr.statusText || ERRORS[10500]
+      result.status = this.xhr.status || 500
+      result.statusText = this.xhr.statusText || ERRORS[10500]
       result.error = new Error(result.statusText)
     }
+    // log(this.opt.dataType, this.xhr)
+    switch (this.opt.dataType) {
+      case 'arraybuffer':
+      case 'blob':
+      case 'document':
+      case 'json':
+        result.text = result.body = this.xhr.response
+        break
+      // text
+      default:
+        try {
+          //处理返回的数据
+          let dataType = contentType.match(/json|xml|script|html/)
 
-    try {
-      //处理返回的数据
-      var dataType = result.response.headers['content-type'].match(
-        /json|xml|script|html/i
-      ) || ['text']
+          dataType = (dataType && dataType[0].toLowerCase()) || 'text'
 
-      dataType = dataType[0].toLowerCase()
-      result.text = isTimeout
-        ? ''
-        : this.xhr.responseText || this.xhr.responseXML
-
-      result.body = convert[dataType](
-        result.text,
-        !isTimeout && this.xhr.responseXML
-      )
-    } catch (err) {
-      result.error = err
-      result.statusText = ERRORS[10012]
+          result.text = this.xhr.response
+          result.body = convert[dataType](result.text, this.xhr.response)
+        } catch (err) {
+          result.error = err
+          result.statusText = ERRORS[10012]
+        }
+        break
     }
+    this.__success__(isSucc, result)
+  }
 
-    if (result.status >= 200 && result.status < 400) {
+  __success__(isSucc, result) {
+    if (isSucc) {
       this.defer.resolve(result)
     } else {
       this.defer.reject(result)
     }
-
-    delete this.opt
     delete this.xhr
+    delete this.opt
+    delete this.defer
+  }
+
+  __cancel__(result) {
+    result.status = 0
+    result.statusText = ERRORS[10100]
+    result.error = new Error(ERRORS[10100])
+
+    this.defer.reject(result)
+
+    delete this.xhr
+    delete this.opt
+    delete this.defer
+  }
+
+  __timeout__(result) {
+    result.status = 504
+    result.statusText = ERRORS[10504]
+    result.error = new Error(ERRORS[10504])
+
+    this.defer.reject(result)
+
+    delete this.xhr
+    delete this.opt
+    delete this.defer
   }
 }
 
 if (!window.request) {
   window.request = {
-    get(url, param) {
+    get(url, param = {}) {
       return new _Request(url, 'GET', param)
     },
-    post(url, param) {
+    post(url, param = {}) {
       return new _Request(url, 'POST', param)
     },
-    upload(url, param) {
+    upload(url, param = {}) {
       param.formType = 'form-data'
       return this.post(url, param)
     },
-    open(url, method = 'GET', param) {
+    download(url, param = {}) {
+      param.dataType = 'blob'
+      return this.get(url, param)
+    },
+    open(url, method = 'GET', param = {}) {
       return new _Request(url, method, param)
     },
-    version: '2.0.0-normal'
+    version: '2.0.0-normal',
+    init(param = {}) {
+      this.__INIT__ = param
+    }
   }
   Anot.ui.request = request.version
 }
