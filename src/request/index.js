@@ -84,13 +84,12 @@ class _Request {
       withCredentials: false // 跨域选项,是否验证凭证
     }
 
-    Object.assign(param, this.__INIT__)
     // 取消网络请求
     this.defer.promise.abort = () => {
       this.cancel = true
       this.xhr.abort()
     }
-    this.__next__(param)
+    this.__next__(Object.assign({}, this.__INIT__, param))
     return this.defer.promise
   }
 
