@@ -89,7 +89,7 @@ class _Request {
       this.cancel = true
       this.xhr.abort()
     }
-    this.__next__(Object.assign({}, this.__INIT__, param))
+    this.__next__(Object.assign({}, request.__INIT__, param))
     return this.defer.promise
   }
 
@@ -423,6 +423,10 @@ if (!window.request) {
       return this.get(url, param)
     },
     open(url, method = 'GET', param = {}) {
+      if (typeof method === 'object') {
+        param = method
+        method = 'GET'
+      }
       return new _Request(url, method, param)
     },
     version: '2.0.0-normal',
