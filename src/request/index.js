@@ -7,7 +7,6 @@
 
 'use strict'
 import Format from './lib/format'
-import format from './lib/format'
 
 // 本地协议/头 判断正则
 const rlocalProtocol = /^(?:about|app|app-storage|.+-extension|file|res|widget):$/

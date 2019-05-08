@@ -81,17 +81,19 @@ const close = function(id) {
     } catch (err) {}
   } else {
     unique = null
-    try {
+    if (layerDom[id]) {
       layerDom[id][0].classList.add('shift')
       layerDom[id][1].classList.add('shift')
       layerDom[id][0].style.opacity = ''
       layerDom[id][1].style.opacity = 0
       setTimeout(function() {
-        layerDom[id][0].parentNode.removeChild(layerDom[id][0])
-        delete layerDom[id]
-        delete Anot.vmodels[id]
+        try {
+          layerDom[id][0].parentNode.removeChild(layerDom[id][0])
+          delete layerDom[id]
+          delete Anot.vmodels[id]
+        } catch (err) {}
       }, 200)
-    } catch (err) {}
+    }
   }
   document.body.style.overflow = ''
 }

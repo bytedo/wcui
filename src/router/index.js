@@ -36,6 +36,7 @@ class Router {
     Anot.hideProperty(this, 'table', [])
     Anot.hideProperty(this, 'last', '')
     Anot.hideProperty(this, 'path', '')
+    Anot.hideProperty(this, 'ready', false)
     Anot.hideProperty(this, 'noMatch', null)
     Anot.hideProperty(
       this,
@@ -60,6 +61,13 @@ class Router {
     let { mode, prefix } = this.options
 
     Anot.bind(window, 'load, popstate', ev => {
+      if (ev.type === 'load') {
+        if (this.ready) {
+          return
+        }
+        this.ready = true
+      }
+
       let path = mode === 'hash' ? location.hash : location.pathname
 
       path = path.replace(prefix, '').trim()

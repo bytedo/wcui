@@ -1,6 +1,6 @@
 {
   "name": "doui-anot",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "基于Anot框架的doUI组件库。支持IE10+,及现代浏览器。",
   "main": "index.js",
   "scripts": {
@@ -16,6 +16,7 @@
   "license": "MIT",
   "dependencies": {},
   "devDependencies": {
+    "anot": "^2.0.0",
     "autoprefixer": "^7.2.6",
     "babel-core": "^6.26.3",
     "babel-plugin-transform-decorators-legacy": "^1.3.5",
@@ -26,9 +27,8 @@
     "chalk": "^2.4.1",
     "chokidar": "^1.7.0",
     "iofs": "^1.1.0",
-    "node-sass": "^4.9.0",
+    "node-sass": "^4.11.0",
     "postcss": "^6.0.22",
-    "uglify-es": "^3.3.9",
-    "anot": "^2.0.0"
+    "uglify-es": "^3.3.9"
   }
 }

@@ -308,7 +308,7 @@ export default Anot.component('datepicker', {
     size: 'mini', //默认规格,mini, medium, large
     format: '', // 日期显示格式
     created: Anot.PropsTypes.isFunction(),
-    onDatePicked: Anot.PropsTypes.isFunction()
+    datePicked: Anot.PropsTypes.isFunction()
   },
   skip: ['max', 'min', 'last', 'timer'],
   watch: {
@@ -448,10 +448,10 @@ export default Anot.component('datepicker', {
       this.close()
       if (
         this.calendar.day > 0 &&
-        typeof this.props.onDatePicked === 'function'
+        typeof this.props.datePicked === 'function'
       ) {
         // 返回一个格式化后的值和一个Date对象
-        this.props.onDatePicked(this.value, this.last.pick)
+        this.props.datePicked(this.value, this.last.pick, this.$elem)
       }
     }
   }
