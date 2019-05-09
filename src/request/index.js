@@ -230,7 +230,9 @@ class _Request {
       // 否则拼接到url上
       this.opt.data = Format.param(this.opt.data)
 
-      this.opt.url += (/\?/.test(this.opt.url) ? '&' : '?') + this.opt.data
+      if (this.opt.data) {
+        this.opt.url += (/\?/.test(this.opt.url) ? '&' : '?') + this.opt.data
+      }
 
       if (this.opt.cache === false) {
         this.opt.url +=

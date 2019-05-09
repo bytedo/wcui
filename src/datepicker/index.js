@@ -220,6 +220,7 @@ export default Anot.component('datepicker', {
 
     <dl
       class="calendar-box"
+      :css="{top: top, left: left}"
       :if="showCalendar">
 
       <dt class="contrl">
@@ -290,6 +291,8 @@ export default Anot.component('datepicker', {
     value: '', // 用于显示在输入框里的日期变量
     max: { year: 0, month: 0, day: 1 },
     min: { year: 0, month: 0, day: 1 },
+    top: 0,
+    left: 0,
     calendar: {
       // list: [1],
       // year: '',
@@ -367,7 +370,10 @@ export default Anot.component('datepicker', {
       return num
     },
     // 输入框获取焦点时，显示日历
-    onFocus: function() {
+    onFocus: function(ev) {
+      let { top, left } = Anot(ev.target).offset()
+      this.top = top + 30
+      this.left = left
       this.showCalendar = !0
     },
     back2today: function() {
