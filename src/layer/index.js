@@ -174,11 +174,13 @@ class __layer__ {
             this.$refs.layer.classList.remove('scale')
           }, 100)
         },
-        onMaskClick: function() {
-          if (this.type < 4 && !this.maskClose) {
-            this.shake()
-          } else {
-            this.maskClose && this.close()
+        onMaskClick: function(ev) {
+          if (ev.target === ev.currentTarget) {
+            if (this.type < 4 && !this.maskClose) {
+              this.shake()
+            } else {
+              this.maskClose && this.close()
+            }
           }
         },
         handleConfirm: function() {
@@ -206,10 +208,10 @@ class __layer__ {
         },
         close: function() {
           close(this.$id)
-        },
-        cancelBubble: function(ev) {
-          ev.cancelBubble = true
         }
+        // cancelBubble: function(ev) {
+        //   ev.cancelBubble = true
+        // }
       },
       mounted: function() {
         if (typeof this.props.success === 'function') {
@@ -279,7 +281,7 @@ class __layer__ {
     }
 
     layBox.setAttribute('ref', 'layer')
-    layBox.setAttribute(':click', 'cancelBubble')
+    // layBox.setAttribute(':click', 'cancelBubble')
 
     // 暂时隐藏,避免修正定位时,能看到闪一下
     layBox.style.cssText += 'border-radius:' + state.radius + 'px'

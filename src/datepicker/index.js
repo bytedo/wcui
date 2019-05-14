@@ -243,11 +243,11 @@ export default Anot.component('datepicker', {
           <span class="td">五</span>
           <span class="td">六</span>
         </section>
-        <section class="tr do-fn-cl">
+        <section class="tr do-fn-cl" :click="pick">
           <span class="td"
             :class="{weeken:el.weeken, disabled: el.disabled, selected: el.selected}"
             :for="calendar.list"
-            :click="pick(el)"
+            :data-idx="$index"
             :text="el.day"></span>
         </section>
       </dd>
@@ -263,9 +263,9 @@ export default Anot.component('datepicker', {
         </label>
         <a href="javascript:;" class="now" :click="now">现在</a>
       </dd>
-      <dt class="confirm">
+      <dt class="confirm" :if="props.showTime">
         <a :click="close" class="cancel">取消</a>
-        <a :click="onConfirm" class="ok">确定</a>
+        <a :click="confirmPick" class="ok">确定</a>
       </dt>
       <dd class="tips" :if="tips" :text="tips"></dd>
     </dl>`
@@ -411,13 +411,22 @@ export default Anot.component('datepicker', {
       this.calendar.month = month
       this.resetCalendarTable()
     },
-    pick: function(item) {
+    pick: function(ev) {
+      if (ev.target === ev.currentTarget) {
+        return
+      }
+      let item = this.calendar.list[ev.target.dataset.idx]
+
       if (item.disabled) {
         return
       }
 
       this.calendar.day = item.day
       changeStyle(this.calendar, item.day)
+
+      if (!this.props.showTime) {
+        this.confirmPick()
+      }
     },
     updateTime: function() {
       let { year, month, day, hour, minute, second } = this.calendar
@@ -449,7 +458,7 @@ export default Anot.component('datepicker', {
     close: function() {
       this.showCalendar = false
     },
-    onConfirm: function() {
+    confirmPick: function() {
       this.updateTime()
       this.close()
       if (
