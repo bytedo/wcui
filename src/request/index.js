@@ -18,7 +18,7 @@ const noop = function(e, res) {
 
 let isLocal = false
 try {
-  isLocal = rlocalProtocol.test(location.ptyperotocol)
+  isLocal = rlocalProtocol.test(location.protocol)
 } catch (e) {}
 
 let originAnchor = document.createElement('a')
@@ -68,7 +68,13 @@ class _Request {
     }
 
     // url规范化
-    url = url.replace(/#.*$/, '').replace(/^\/\//, location.protocol + '//')
+    url = url.replace(/#.*$/, '')
+
+    if (request.BASE_URL) {
+      if (!/^([a-z]+:|\/\/)/.test(url)) {
+        url = request.BASE_URL + url
+      }
+    }
 
     method = method.toUpperCase()
 

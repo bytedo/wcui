@@ -138,45 +138,41 @@ export default Anot.component('datepicker', {
 
     //获取初始值
     let defVal = state.value || null
-    if (!defVal) {
-      if (props.minDate) {
-        defVal = props.minDate
-      } else if (props.maxDate) {
-        defVal = props.maxDate
-      }
-    }
-    // 修正默认值, 如果不是Date对象, 则转为Date对象
-    if (defVal) {
-      if (!Date.isDate(defVal)) {
-        defVal = new Date(defVal)
-      }
-    } else {
-      defVal = new Date()
-    }
 
     if (props.minDate) {
       if (!Date.isDate(props.minDate)) {
         props.minDate = new Date(props.minDate)
       }
-      if (defVal <= props.minDate) {
-        defVal = props.minDate
-      }
-      state.min.year = props.minDate.getFullYear()
-      state.min.month = props.minDate.getMonth() + 1
-      state.min.day = props.minDate.getDate()
     }
 
     if (props.maxDate) {
       if (!Date.isDate(props.maxDate)) {
         props.maxDate = new Date(props.maxDate)
       }
-      if (defVal >= props.maxDate) {
+    }
+
+    if (defVal) {
+      // 修正默认值, 如果不是Date对象, 则转为Date对象
+      if (!Date.isDate(defVal)) {
+        defVal = new Date(defVal)
+      }
+    } else {
+      defVal = new Date()
+      if (props.minDate && defVal < props.minDate) {
+        defVal = props.minDate
+      }
+      if (props.maxDate && defVal > props.maxDate) {
         defVal = props.maxDate
       }
-      state.max.year = props.maxDate.getFullYear()
-      state.max.month = props.maxDate.getMonth() + 1
-      state.max.day = props.maxDate.getDate()
     }
+
+    state.min.year = props.minDate.getFullYear()
+    state.min.month = props.minDate.getMonth() + 1
+    state.min.day = props.minDate.getDate()
+
+    state.max.year = props.maxDate.getFullYear()
+    state.max.month = props.maxDate.getMonth() + 1
+    state.max.day = props.maxDate.getDate()
 
     state.last = {
       year: defVal.getFullYear(),
