@@ -1,0 +1,99 @@
+<template>
+  <svg class="icon" viewBox="0 0 1024 1024"></svg>
+</template>
+
+<style lang="scss">
+:host {
+  display: inline-block;
+  color: nth($cd, 2);
+}
+:host(:not([is])) {
+  display: none;
+}
+.icon {
+  display: block;
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+  overflow: hidden;
+
+  &.load {
+    animation: load 1.5s linear infinite;
+  }
+
+  circle {
+    stroke: currentColor;
+    animation: circle 1.5s ease-in-out infinite;
+  }
+}
+
+@keyframes circle {
+  0% {
+    stroke-dasharray: 0, 3812px;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 1906px, 3812px;
+    stroke-dashoffset: -287px;
+  }
+  100% {
+    stroke-dasharray: 1906px, 3812px;
+    stroke-dashoffset: -2393px;
+  }
+}
+
+@keyframes load {
+  to {
+    transform: rotate(360deg);
+  }
+}
+</style>
+
+<script>
+import SVG_DICT from './svg'
+
+const log = console.log
+
+export default class Icon {
+  props = {
+    is: ''
+  }
+
+  constructor() {
+    /* render */
+
+    this.__ICO__ = this.root.lastElementChild
+    this.drawPath()
+  }
+
+  // 绘制图标
+  drawPath() {
+    var { is } = this.props
+    var path = SVG_DICT[is]
+    if (!this.__ICO__) {
+      return
+    }
+    if (is && path) {
+      this.__ICO__.innerHTML = is === 'loading' ? path : `<path d="${path}" />`
+
+      this.__ICO__.classList.toggle('load', is === 'loading')
+    }
+  }
+
+  set is(val) {
+    this.props.is = val
+    this.drawPath()
+  }
+
+  watch(name, old, val) {
+    switch (name) {
+      case 'is':
+        this.is = val
+        if (!val) {
+          this.removeAttribute('is')
+        }
+        break
+    }
+  }
+}
+</script>

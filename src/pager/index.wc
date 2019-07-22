@@ -1,0 +1,232 @@
+<template>
+  <svg
+    aria-hidden="true"
+    style="overflow:hidden;position: absolute;width:0;height:0"
+  >
+    ${iconList.map( _ => `
+    <symbol id="icon-${_.key}" viewBox="0 0 1024 1024">
+      <path d="${_.path}" />
+    </symbol>
+    ` ).join('')}
+  </svg>
+
+  <section class="tool-bar">
+    ${this._parseTools()}
+  </section>
+  <div class="font-layer">
+    <span data-size="6">大号字体</span>
+    <span data-size="5">中号字体</span>
+    <span data-size="3">小号字体</span>
+  </div>
+  <div class="color-layer">
+    <span data-color="#f3f5fb"></span>
+    <span data-color="#dae1e9"></span>
+    <span data-color="#62778d"></span>
+    <span data-color="#58d68d"></span>
+    <span data-color="#3fc2a7"></span>
+    <span data-color="#52a3de"></span>
+    <span data-color="#ac61ce"></span>
+    <span data-color="#ffb618"></span>
+    <span data-color="#e67e22"></span>
+    <span data-color="#ff5061"></span>
+    <span data-color="#ff0000"></span>
+    <span data-color="#000000"></span>
+  </div>
+  <div class="link-layer">
+    <input placeholder="请输入链接地址" />
+    <span>插入</span>
+  </div>
+  <div contenteditable="true" class="editor" spellcheck="false"></div>
+</template>
+
+<script>
+  export default class DoButton extends HTMLElement {
+    constructor() {
+      super()
+
+      this.root = this.attachShadow({ mode: 'open' })
+
+      this.root.innerHTML = `/*html*/`
+    }
+  }
+</script>
+
+<style>
+  * {
+    box-sizing: border-box;
+  }
+  :host {
+    position: relative;
+    display: flex;
+    flex-flow: column wrap;
+    min-width: 200px;
+    min-height: 100px;
+    border: 1px solid #e7e8eb;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+  .tool-bar {
+    display: flex;
+    height: 34px;
+    padding: 5px;
+    line-height: 24px;
+    border-bottom: 1px solid #e7e8eb;
+  }
+  .tool-bar span {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 24px;
+    height: 24px;
+    margin: 0 3px;
+    border-radius: 3px;
+  }
+  .tool-bar span:hover {
+    background: #f7f8fb;
+  }
+  .tool-bar span input {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+  }
+
+  .tool-bar .icon {
+    overflow: hidden;
+    width: 70%;
+    height: 70%;
+    fill: currentColor;
+    color: #62778d;
+  }
+
+  .editor {
+    flex: 1;
+    overflow: hidden;
+    overflow-y: auto;
+    max-height: 360px;
+    padding: 5px 8px;
+    font-size: 14px;
+    outline: none;
+  }
+  .editor img {
+    max-width: 100%;
+  }
+
+  .font-layer,
+  .color-layer,
+  .link-layer {
+    visibility: hidden;
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 99;
+    width: 80px;
+    padding: 5px 0;
+    line-height: 25px;
+    background: #fff;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+    font-size: 13px;
+    user-select: none;
+    opacity: 0;
+    transition: all ease-in-out 0.2s;
+  }
+  .font-layer.fadein {
+    visibility: visible;
+    top: 34px;
+    opacity: 1;
+  }
+  .font-layer span {
+    display: block;
+    padding: 0 8px;
+  }
+  .font-layer span:hover {
+    background: #f7f8fb;
+  }
+
+  .color-layer {
+    display: flex;
+    flex-flow: row wrap;
+    left: 30px;
+    width: 96px;
+  }
+  .color-layer.fadein {
+    visibility: visible;
+    top: 34px;
+    opacity: 1;
+  }
+  .color-layer span {
+    width: 20px;
+    height: 20px;
+    margin: 2px;
+    background: #f30;
+  }
+  .color-layer span:nth-child(1) {
+    background: #f3f5fb;
+  }
+  .color-layer span:nth-child(2) {
+    background: #dae1e9;
+  }
+  .color-layer span:nth-child(3) {
+    background: #62778d;
+  }
+  .color-layer span:nth-child(4) {
+    background: #58d68d;
+  }
+  .color-layer span:nth-child(5) {
+    background: #3fc2a7;
+  }
+  .color-layer span:nth-child(6) {
+    background: #52a3de;
+  }
+  .color-layer span:nth-child(7) {
+    background: #ac61ce;
+  }
+  .color-layer span:nth-child(8) {
+    background: #ffb618;
+  }
+  .color-layer span:nth-child(9) {
+    background: #e67e22;
+  }
+  .color-layer span:nth-child(10) {
+    background: #ff5061;
+  }
+  .color-layer span:nth-child(11) {
+    background: #ff0000;
+  }
+  .color-layer span:nth-child(12) {
+    background: #000000;
+  }
+
+  .link-layer {
+    display: flex;
+    align-items: center;
+    left: 330px;
+    width: 180px;
+    padding: 8px;
+  }
+  .link-layer input {
+    width: 120px;
+    height: 20px;
+    margin-right: 8px;
+    padding: 0 5px;
+    border: 1px solid #e7e8eb;
+    outline: none;
+  }
+  .link-layer span {
+    height: 20px;
+    padding: 0 5px;
+    line-height: 20px;
+    border-radius: 4px;
+    background: #dae1e9;
+    text-align: center;
+    font-size: 12px;
+  }
+
+  .link-layer.fadein {
+    visibility: visible;
+    top: 34px;
+    opacity: 1;
+  }
+</style>

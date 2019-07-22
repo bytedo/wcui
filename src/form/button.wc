@@ -1,0 +1,170 @@
+<template>
+  <label>
+    <wc-icon class="icon"></wc-icon>
+    <slot></slot>
+  </label>
+</template>
+
+<style lang="scss">
+:host {
+  overflow: hidden;
+  display: inline-block;
+  user-select: none;
+  color: nth($cd, 2);
+  background: #fff;
+  vertical-align: top;
+
+  label {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 60px;
+    min-height: 33px;
+    padding: 0 5px;
+    height: 100%;
+    font-size: 14px;
+    border: 1px solid nth($cp, 3);
+    border-radius: 3px;
+    cursor: pointer;
+  }
+
+  label.mini {
+    height: 20px;
+  }
+
+  .icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 3px;
+  }
+
+  &([size="mini"]) label {
+    min-width: 50px;
+    height: 20px;
+    font-size: 12px;
+  }
+}
+
+:host([loading]) label,
+:host([disabled]) label {
+  cursor: not-allowed;
+  color: nth($cp, 3);
+  wc-icon {
+    color: nth($cp, 3);
+  }
+}
+</style>
+
+<script>
+import '../icon/index'
+
+const log = console.log
+
+export default class Button {
+  props = {
+    icon: '',
+    size: 'small',
+    color: 'red',
+    loading: false,
+    disabled: false
+  }
+
+  constructor() {
+    /* render */
+
+    this.__BTN__ = this.root.children[1]
+    this.__ICO__ = this.__BTN__.children[0]
+  }
+
+  get loading() {
+    return this.props.loading
+  }
+
+  set loading(val) {
+    var type = typeof val
+
+    if (val === this.props.loading) {
+      return
+    }
+
+    if ((type === 'boolean' && val) || type !== 'boolean') {
+      this.props.loading = true
+      this.__ICO__.setAttribute('is', 'loading')
+      this.setAttribute('loading', '')
+    } else {
+      this.props.loading = false
+      this.__ICO__.setAttribute('is', this.props.icon)
+      this.removeAttribute('loading')
+    }
+  }
+
+  get disabled() {
+    return this.props.disabled
+  }
+
+  set disabled(val) {
+    var type = typeof val
+
+    if (val === this.props.disabled) {
+      return
+    }
+    if ((type === 'boolean' && val) || type !== 'boolean') {
+      this.props.disabled = true
+      this.setAttribute('disabled', '')
+    } else {
+      this.props.disabled = false
+      this.removeAttribute('disabled')
+    }
+  }
+
+  mounted() {
+    this.__BTN__.addEventListener(
+      'click',
+      ev => {
+        if (this.props.loading || this.props.disabled) {
+          // 阻止事件冒泡, 避免用户自己绑定click事件不受这2个值的限制
+          ev.cancelBubble = true
+          return
+        }
+        this.dispatchEvent(new CustomEvent('active'))
+      },
+      false
+    )
+  }
+
+  unmount() {
+    log(this)
+  }
+
+  watch(name, old, val) {
+    if (old === val) {
+      return
+    }
+    switch (name) {
+      case 'icon':
+        this.props.icon = val
+        if (val) {
+          if (!this.props.loading) {
+            this.__ICO__.setAttribute('is', val)
+          }
+        } else {
+          this.removeAttribute('icon')
+          this.__ICO__.removeAttribute('is')
+        }
+        break
+
+      case 'size':
+        this.props.size = val || 'small'
+        this.__BTN__.classList.add(this.props.size)
+        break
+
+      case 'loading':
+      case 'disabled':
+        if (val === '') {
+          this[name] = true
+        }
+        break
+    }
+  }
+}
+</script>

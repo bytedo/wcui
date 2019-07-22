@@ -1,48 +1,135 @@
 #! /usr/bin/env node
 
+require('es.shim')
 const log = console.log
 const fs = require('iofs')
 const path = require('path')
 const babel = require('babel-core')
 const scss = require('node-sass')
 const chokidar = require('chokidar')
-const postcss = require('postcss')
-const autoprefixer = require('autoprefixer')
 const chalk = require('chalk')
 
 const sourceDir = path.resolve(__dirname, 'src')
 const buildDir = path.resolve(__dirname, 'dist')
-const prefixer = postcss().use(
-  autoprefixer({
-    browsers: ['ff > 61', 'Chrome > 63']
-  })
-)
 
-const compileJs = (entry, output) => {
+const VERSION = require('./package.json').version
+const BUILD_DATE = new Date().format()
+
+const BASE_SCSS = `
+$ct: #3fc2a7 #19b491 #16967a;
+$cg: #58d68d #2ecc71 #27ae60;
+$cpp: #ac61ce #9b59b6 #8e44ad;
+$cb: #52a3de #2d8dd6 #2776b1;
+$cr: #ff5061 #eb3b48 #ce3742;
+$co: #ffb618 #f39c12 #e67e22;
+$cp: #f3f5fb #e8ebf4 #dae1e9;
+$cgr: #aabac3 #90a3ae #7e909a;
+$cd: #62778d #526273 #425064;
+
+@mixin ts($c: all, $t: .2s, $m: ease-in-out){
+  transition:$c $t $m;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;padding: 0;
+} 
+::before,
+::after{box-sizing:border-box;}
+`
+
+function compileJs(entry, output) {
   log('编译JS: %s', chalk.green(entry))
   let buf = fs.cat(entry).toString()
   let code = buf
-    .replace(/\.scss/g, '.css')
-    .replace(/import '([a-z0-9\/\.\-_]*)(?<!\.css)'/g, 'import "$1.js"')
+    .replace(/import '([a-z0-9\/\.\-_]*)'/g, 'import "$1.js"')
     .replace(
       /import ([\w]*) from '([a-z0-9\/\.\-_]*)'/g,
       'import $1 from "$2.js"'
     )
-    .replace(/import '([a-z0-9\/\.\-_]*\.css)'/g, 'importCss("/$1")')
 
   fs.echo(code, output)
 }
 
-const compileCss = (entry, output) => {
-  log('编译scss: %s', chalk.green(entry))
+// 编译样式
+function compileScss(code = '') {
   try {
-    const { css } = scss.renderSync({ file: entry })
-    prefixer.process(css, { from: '', to: '' }).then(result => {
-      fs.echo(result.css, output)
-    })
+    return scss.renderSync({ data: BASE_SCSS + code }).css
   } catch (err) {
     log(err)
   }
+}
+
+function mkWCFile({ style, html, js }) {
+  style = compileScss(style)
+
+  let name, props
+
+  js = js.replace(/props = (\{[\w\W]*?\})/, function(s, m) {
+    props = m
+    var attr = new Function(
+      `var props = ${m}, attr = []; for(var i in props){attr.push(i)}; return attr`
+    )()
+    return `static get observedAttributes() {
+        return ${JSON.stringify(attr)}
+      }
+      `
+  })
+
+  js = js
+    .replace(/class ([\w]+)/, function(s, m) {
+      name = m
+      return `${s} extends HTMLElement `
+    })
+    .replace(/import '([a-z0-9\/\.\-_]*)'/g, 'import "$1.js"')
+    .replace(
+      /import ([\w]*) from '([a-z0-9\/\.\-_]*)'/g,
+      'import $1 from "$2.js"'
+    )
+    .replace(
+      '/* render */',
+      `
+      super()
+      this.root = this.attachShadow({ mode: 'open' })
+      this.props = ${props}
+
+      this.root.innerHTML = \`<style>${style}</style>${html}\`
+      `
+    )
+    .replace('mounted', 'connectedCallback')
+    .replace('unmount', 'disconnectedCallback')
+    .replace('watch', 'attributeChangedCallback')
+    .replace('adopted', 'adoptedCallback')
+
+  return `/**
+ *
+ * @authors yutent (yutent@doui.cc)
+ * @date    ${BUILD_DATE}
+ * @version v${VERSION}
+ * 
+ */
+
+'use strict'
+
+${js}
+
+customElements.define('wc-${name.toLowerCase()}', ${name})
+`
+}
+
+const compileWC = (entry, output) => {
+  log('编译wc: %s', chalk.green(entry))
+  let code = fs.cat(entry).toString()
+  let style = code.match(/<style[^>]*?>([\w\W]*?)<\/style>/)
+  let html = code.match(/<template>([\w\W]*?)<\/template>/)
+  let js = code.match(/<script>([\w\W]*?)<\/script>/)
+
+  style = style ? style[1] : ''
+  html = html ? html[1] : ''
+  js = js ? js[1] : ''
+
+  let result = mkWCFile({ style, html, js })
+  fs.echo(result, output)
 }
 
 /*=======================================================*/
@@ -65,9 +152,9 @@ chokidar
         case '.js':
           compileJs(entry, output)
           break
-        case '.scss':
-          output = output.replace(/\.scss$/, '.css')
-          compileCss(entry, output)
+        case '.wc':
+          output = output.replace(/\.wc$/, '.js')
+          compileWC(entry, output)
           break
         default:
           fs.cp(entry, output)
