@@ -1,8 +1,8 @@
 <template>
-  <label>
+  <button>
     <wc-icon class="icon"></wc-icon>
     <slot></slot>
-  </label>
+  </button>
 </template>
 
 <style lang="scss">
@@ -11,66 +11,250 @@
   display: inline-block;
   user-select: none;
   color: nth($cd, 2);
-  background: #fff;
-  vertical-align: top;
+  cursor: pointer;
 
-  label {
+  button {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-width: 60px;
-    min-height: 33px;
+    min-width: 32px;
+    height: 32px;
     padding: 0 5px;
-    height: 100%;
     font-size: 14px;
     border: 1px solid nth($cp, 3);
-    border-radius: 3px;
-    cursor: pointer;
-  }
+    border-radius: 4px;
+    background: #fff;
+    outline: none;
+    color: inherit;
+    cursor: inherit;
 
-  label.mini {
-    height: 20px;
+    &:hover {
+      background: nth($cp, 1);
+    }
+
+    &:active {
+      border-color: nth($cgr, 1);
+    }
   }
 
   .icon {
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     margin-right: 3px;
-  }
-
-  &([size="mini"]) label {
-    min-width: 50px;
-    height: 20px;
-    font-size: 12px;
   }
 }
 
-:host([loading]) label,
-:host([disabled]) label {
-  cursor: not-allowed;
-  color: nth($cp, 3);
-  wc-icon {
-    color: nth($cp, 3);
+:host([round]) button {
+  border-radius: 21px;
+}
+:host([circle]) {
+  button {
+    border-radius: 50%;
+    padding: 0;
   }
+  .icon {
+    margin-right: 0;
+  }
+}
+
+:host([size='large']) {
+  button {
+    min-width: 120px;
+    height: 42px;
+    font-size: 16px;
+  }
+  .icon {
+    width: 20px;
+    height: 20px;
+  }
+}
+:host([size='large'][circle]) {
+  button {
+    min-width: 42px;
+  }
+}
+:host([size='medium']) {
+  button {
+    min-width: 90px;
+    height: 36px;
+    font-size: 14px;
+  }
+  .icon {
+    width: 18px;
+    height: 18px;
+  }
+}
+:host([size='medium'][circle]) {
+  button {
+    min-width: 36px;
+  }
+}
+:host([size='mini']) {
+  button {
+    min-width: 20px;
+    height: 20px;
+    font-size: 12px;
+  }
+  .icon {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+:host([loading]),
+:host([disabled]) {
+  cursor: not-allowed;
+  color: nth($cgr, 1);
+  .icon {
+    color: nth($cgr, 1);
+  }
+  button {
+    opacity: 0.6;
+    background: #fff;
+  }
+}
+
+:host([color]) {
+  color: #fff;
+  button {
+    border-color: transparent;
+  }
+  .icon {
+    color: #fff;
+  }
+}
+
+:host([color='red']) button {
+  background: nth($cr, 2);
+  &:hover {
+    background: nth($cr, 1);
+  }
+  &:active {
+    background: nth($cr, 3);
+  }
+}
+:host([color='red'][loading]) button,
+:host([color='red'][disabled]) button {
+  background: nth($cr, 1);
+}
+
+:host([color='blue']) button {
+  background: nth($cb, 2);
+  &:hover {
+    background: nth($cb, 1);
+  }
+  &:active {
+    background: nth($cb, 3);
+  }
+}
+:host([color='blue'][loading]) button,
+:host([color='blue'][disabled]) button {
+  background: nth($cb, 1);
+}
+
+:host([color='green']) button {
+  background: nth($cg, 2);
+  &:hover {
+    background: nth($cg, 1);
+  }
+  &:active {
+    background: nth($cg, 3);
+  }
+}
+:host([color='green'][loading]) button,
+:host([color='green'][disabled]) button {
+  background: nth($cg, 1);
+}
+
+:host([color='teal']) button {
+  background: nth($ct, 2);
+  &:hover {
+    background: nth($ct, 1);
+  }
+  &:active {
+    background: nth($ct, 3);
+  }
+}
+:host([color='teal'][loading]) button,
+:host([color='teal'][disabled]) button {
+  background: nth($ct, 1);
+}
+
+:host([color='orange']) button {
+  background: nth($co, 2);
+  &:hover {
+    background: nth($co, 1);
+  }
+  &:active {
+    background: nth($co, 3);
+  }
+}
+:host([color='orange'][loading]) button,
+:host([color='orange'][disabled]) button {
+  background: nth($co, 1);
+}
+
+:host([color='dark']) button {
+  background: nth($cd, 2);
+  &:hover {
+    background: nth($cd, 1);
+  }
+  &:active {
+    background: nth($cd, 3);
+  }
+}
+:host([color='dark'][loading]) button,
+:host([color='dark'][disabled]) button {
+  background: nth($cd, 1);
+}
+
+:host([color='purple']) button {
+  background: nth($cpp, 2);
+  &:hover {
+    background: nth($cpp, 1);
+  }
+  &:active {
+    background: nth($cpp, 3);
+  }
+}
+:host([color='purple'][loading]) button,
+:host([color='purple'][disabled]) button {
+  background: nth($cpp, 1);
+}
+
+:host([color='grey']) button {
+  background: nth($cgr, 2);
+  &:hover {
+    background: nth($cgr, 1);
+  }
+  &:active {
+    background: nth($cgr, 3);
+  }
+}
+:host([color='grey'][loading]) button,
+:host([color='grey'][disabled]) button {
+  background: nth($cgr, 1);
 }
 </style>
 
 <script>
 import '../icon/index'
 
-const log = console.log
-
 export default class Button {
   props = {
     icon: '',
-    size: 'small',
-    color: 'red',
+    autofocus: '',
     loading: false,
     disabled: false
   }
 
   constructor() {
     /* render */
+
+    // 圆形按钮不允许文字
+    if (this.hasAttribute('circle')) {
+      this.textContent = ''
+    }
 
     this.__BTN__ = this.root.children[1]
     this.__ICO__ = this.__BTN__.children[0]
@@ -118,22 +302,19 @@ export default class Button {
   }
 
   mounted() {
-    this.__BTN__.addEventListener(
-      'click',
-      ev => {
-        if (this.props.loading || this.props.disabled) {
-          // 阻止事件冒泡, 避免用户自己绑定click事件不受这2个值的限制
-          ev.cancelBubble = true
-          return
-        }
-        this.dispatchEvent(new CustomEvent('active'))
-      },
-      false
-    )
+    this._handleClick = ev => {
+      if (this.props.loading || this.props.disabled) {
+        // 阻止事件冒泡, 避免用户自己绑定click事件不受这2个值的限制
+        ev.cancelBubble = true
+        return
+      }
+      this.dispatchEvent(new CustomEvent('active'))
+    }
+    this.__BTN__.addEventListener('click', this._handleClick, false)
   }
 
   unmount() {
-    log(this)
+    this.__BTN__.removeEventListener('click', this._handleClick)
   }
 
   watch(name, old, val) {
@@ -153,9 +334,10 @@ export default class Button {
         }
         break
 
-      case 'size':
-        this.props.size = val || 'small'
-        this.__BTN__.classList.add(this.props.size)
+      case 'autofocus':
+        setTimeout(_ => {
+          this.__BTN__.focus()
+        }, 10)
         break
 
       case 'loading':

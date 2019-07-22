@@ -19,7 +19,7 @@ const BASE_SCSS = `
 $ct: #3fc2a7 #19b491 #16967a;
 $cg: #58d68d #2ecc71 #27ae60;
 $cpp: #ac61ce #9b59b6 #8e44ad;
-$cb: #52a3de #2d8dd6 #2776b1;
+$cb: #66b1ff #409eff #3a8ee6;
 $cr: #ff5061 #eb3b48 #ce3742;
 $co: #ffb618 #f39c12 #e67e22;
 $cp: #f3f5fb #e8ebf4 #dae1e9;
@@ -110,6 +110,8 @@ function mkWCFile({ style, html, js }) {
  */
 
 'use strict'
+
+const log = console.log
 
 ${js}
 
