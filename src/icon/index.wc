@@ -40,35 +40,35 @@
   width: 20px;
   height: 20px;
 }
-:host([color='red']) .icon {
+:host([color='red']) {
   color: nth($cr, 2);
 }
 
-:host([color='blue']) .icon {
+:host([color='blue']) {
   color: nth($cb, 2);
 }
 
-:host([color='green']) .icon {
+:host([color='green']) {
   color: nth($cg, 2);
 }
 
-:host([color='teal']) .icon {
+:host([color='teal']) {
   color: nth($ct, 2);
 }
 
-:host([color='orange']) .icon {
+:host([color='orange']) {
   color: nth($co, 2);
 }
 
-:host([color='dark']) .icon {
+:host([color='dark']) {
   color: nth($cd, 2);
 }
 
-:host([color='purple']) .icon {
+:host([color='purple']) {
   color: nth($cpp, 2);
 }
 
-:host([color='grey']) .icon {
+:host([color='grey']) {
   color: nth($cgr, 2);
 }
 
