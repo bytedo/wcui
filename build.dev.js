@@ -63,7 +63,8 @@ function compileScss(code = '') {
 function mkWCFile({ style, html, js }) {
   style = compileScss(style)
 
-  let name, props
+  let name = ''
+  let props = ''
 
   js = js.replace(/props = (\{[\w\W]*?\})/, function(s, m) {
     props = m

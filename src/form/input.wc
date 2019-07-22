@@ -1,0 +1,70 @@
+<template>
+  <label>
+    <slot name="left"></slot>
+    <input />
+    <wc-icon></wc-icon>
+    <slot class="append" name="append"></slot>
+  </label>
+</template>
+
+<style lang="scss">
+:host {
+  display: inline-block;
+  user-select: none;
+  color: nth($cd, 2);
+}
+
+label {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 32px;
+  height: 32px;
+  font-size: 14px;
+  border: 1px solid nth($cp, 3);
+  border-radius: 4px;
+  background: #fff;
+  color: inherit;
+  cursor: inherit;
+
+  input,
+  textarea {
+    padding: 0 5px;
+    border: 0;
+    border-radius: inherit;
+    color: inherit;
+    font-size: inherit;
+    background: none;
+    outline: none;
+    box-shadow: none;
+  }
+  .append {
+    display: inherit;
+    width: auto;
+    height: 30px;
+    padding: 0 18px;
+    border-left: 1px solid nth($cp, 3);
+    border-radius: 0 4px 4px 0;
+    background: nth($cp, 1);
+  }
+}
+</style>
+
+<script>
+import '../icon/index'
+
+export default class Input {
+  props = {
+    value: '',
+    defaultValue: '',
+    placeholder: ''
+  }
+  constructor() {
+    /* render */
+
+    this.__OUTER__ = this.root.children[1]
+    this.__INPUT__ = this.__OUTER__.children[1]
+    this.__ICO__ = this.__OUTER__.children[2]
+  }
+}
+</script>
