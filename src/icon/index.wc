@@ -5,16 +5,14 @@
 <style lang="scss">
 :host {
   display: inline-block;
-  width: 32px;
-  height: 32px;
   color: nth($cd, 2);
 }
 :host(:not([is])) {
   display: none;
 }
 .icon {
-  width: inherit;
-  height: inherit;
+  width: var(--size, 32px);
+  height: var(--size, 32px);
   fill: currentColor;
   vertical-align: -0.1em;
 
