@@ -239,6 +239,7 @@
 
 <script>
 import '../icon/index'
+const IS_FIREFOX = !!window.sidebar
 
 export default class Button {
   props = {
@@ -335,9 +336,13 @@ export default class Button {
         break
 
       case 'autofocus':
-        setTimeout(_ => {
-          this.__BTN__.focus()
-        }, 10)
+        this.__BTN__.setAttribute('autofocus', '')
+        // 辣鸡火狐, 要触发一下focus, 才能聚焦
+        if (IS_FIREFOX) {
+          setTimeout(_ => {
+            this.__BTN__.focus()
+          }, 10)
+        }
         break
 
       case 'loading':
