@@ -1,0 +1,111 @@
+<template>
+  <slot></slot>
+  <img />
+</template>
+
+<style lang="scss">
+:host {
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--size, 32px);
+  height: var(--size, 32px);
+  line-height: 1;
+  font-size: var(--size, 32px);
+  border-radius: 4px;
+  background: nth($cp, 2);
+  color: nth($cd, 1);
+  user-select: none;
+  -moz-user-select: none;
+
+  img {
+    display: none;
+    width: 100%;
+    height: 100%;
+  }
+  slot {
+    display: block;
+    transform: scale(0.8);
+  }
+}
+
+:host([src]),
+:host([hash]) {
+  slot {
+    display: none;
+  }
+  img {
+    display: block;
+  }
+}
+
+:host([size='large']) {
+  width: 50px;
+  height: 50px;
+  font-size: 36px;
+}
+
+:host([size='medium']) {
+  width: 40px;
+  height: 40px;
+  font-size: 28px;
+}
+
+:host([size='mini']) {
+  width: 24px;
+  height: 24px;
+  font-size: 16px;
+}
+
+:host([circle]) {
+  border-radius: 50%;
+}
+</style>
+
+<script>
+export default class Avatar {
+  props = {
+    hash: '', //哈希头像
+    src: '', // 地址头像
+    fit: '' // 头像填充方式  fill, contain, cover, scale-down
+  }
+
+  constructor() {
+    /* render */
+    this.__IMG__ = this.root.lastElementChild
+  }
+
+  drawHash() {
+    var { hash } = this.props
+
+    if (hash) {
+    }
+  }
+
+  watch(name, old, val) {
+    if (old === val) {
+      return
+    }
+    switch (name) {
+      case 'src':
+        this.removeAttribute('hash')
+        this.__IMG__.src = val || './def.jpg'
+        break
+      case 'hash':
+        this.removeAttribute('src')
+        this.props.hash = val
+
+        this.drawHash()
+
+        break
+
+      case 'fit':
+        if (val) {
+          this.__IMG__.style['object-fit'] = val
+        }
+        break
+    }
+  }
+}
+</script>
