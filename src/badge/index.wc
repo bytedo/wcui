@@ -1,0 +1,67 @@
+<template>
+  <slot></slot>
+  <span class="dot"></span>
+</template>
+
+<style lang="scss">
+:host {
+  display: inline-block;
+  position: relative;
+  height: 0;
+}
+.dot {
+  position: absolute;
+  right: 0;
+  top: 0;
+  display: block;
+  min-width: 10px;
+  min-height: 10px;
+  line-height: 1;
+  font-size: 12px;
+  border: 1px solid #fff;
+  border-radius: 16px;
+  background: nth($cr, 1);
+  color: #fff;
+  text-align: center;
+  transform: translateX(100%) translateY(-50%);
+}
+
+:host([label]) {
+  .dot {
+    right: 10px;
+    min-width: 18px;
+    padding: 2px 4px;
+  }
+}
+</style>
+
+<script>
+export default class Badge {
+  props = {
+    label: ''
+  }
+
+  constructor() {
+    /* render */
+    this.__DOT__ = this.root.lastElementChild
+  }
+
+  watch(name, old, val) {
+    if (old === val) {
+      return
+    }
+    switch (name) {
+      case 'label':
+        var num = Number(val)
+        if (num === num) {
+          if (num > 99) {
+            val = '99+'
+          }
+        }
+        this.props.label = val
+        this.__DOT__.textContent = val
+        break
+    }
+  }
+}
+</script>

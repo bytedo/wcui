@@ -308,7 +308,6 @@ export default class Input {
   }
 
   set value(val) {
-    this.props.value = val
     this.__INPUT__.value = val
   }
 

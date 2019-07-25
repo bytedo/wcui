@@ -15,7 +15,6 @@
   width: var(--size, 32px);
   height: var(--size, 32px);
   fill: currentColor;
-  vertical-align: -0.1em;
 
   &.load {
     animation: load 1.5s linear infinite;
