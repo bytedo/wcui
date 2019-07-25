@@ -11,6 +11,7 @@
   display: none;
 }
 .icon {
+  display: block;
   width: var(--size, 32px);
   height: var(--size, 32px);
   fill: currentColor;

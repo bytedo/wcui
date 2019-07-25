@@ -8,6 +8,7 @@
 <style lang="scss">
 :host {
   display: inline-block;
+  line-height: 1;
   font-size: 14px;
 
   label {

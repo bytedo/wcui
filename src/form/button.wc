@@ -39,8 +39,7 @@
   }
 
   .icon {
-    width: 18px;
-    height: 18px;
+    --size: 18px;
     margin-right: 3px;
   }
 }
@@ -65,8 +64,7 @@
     font-size: 16px;
   }
   .icon {
-    width: 20px;
-    height: 20px;
+    --size: 20px;
   }
 }
 :host([size='large'][circle]) {
@@ -78,11 +76,6 @@
   button {
     min-width: 90px;
     height: 36px;
-    font-size: 14px;
-  }
-  .icon {
-    width: 18px;
-    height: 18px;
   }
 }
 :host([size='medium'][circle]) {
@@ -97,8 +90,7 @@
     font-size: 12px;
   }
   .icon {
-    width: 14px;
-    height: 14px;
+    --size: 14px;
   }
 }
 
