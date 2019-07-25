@@ -387,7 +387,7 @@ export default class Input {
     // 回车事件
     this._handleSubmit = ev => {
       if (this.disabled || this.readonly) {
-        ev.cancelBubble = true
+        ev.stopPropagation()
         return
       }
       // up: 38, down: 40

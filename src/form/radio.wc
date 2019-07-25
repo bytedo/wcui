@@ -1,31 +1,43 @@
 <template>
   <label>
     <span class="dot"></span>
+    <slot></slot>
   </label>
 </template>
 
 <style lang="scss">
 :host {
   display: inline-block;
+  font-size: 14px;
 
   label {
     display: flex;
-    width: 38px;
-    height: 22px;
-    padding: 3px;
-    margin: 5px;
-    border-radius: 21px;
-    background: nth($cp, 3);
+    justify-content: center;
+    align-items: center;
+    min-width: 32px;
+    height: 32px;
+    padding: 0 5px;
+    user-select: none;
+    -moz-user-select: none;
     cursor: inherit;
+    color: nth($cgr, 3);
 
-    &.checked {
-      flex-direction: row-reverse;
-      background: nth($cgr, 3);
+    &.checked .dot::after {
+      display: block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: nth($cgr, 1);
+      content: '';
     }
   }
+
   .dot {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
+    padding: 2px;
+    margin-right: 3px;
+    border: 1px solid nth($cgr, 1);
     border-radius: 50%;
     background: #fff;
   }
@@ -69,37 +81,80 @@
 }
 
 :host([color='red']) label.checked {
-  background: nth($cr, 1);
+  color: nth($cr, 1);
+  .dot {
+    border-color: nth($cr, 1);
+  }
+  .dot::after {
+    background: nth($cr, 1);
+  }
 }
 
 :host([color='blue']) label.checked {
-  background: nth($cb, 1);
+  color: nth($cb, 1);
+  .dot {
+    border-color: nth($cb, 1);
+  }
+  .dot::after {
+    background: nth($cb, 1);
+  }
 }
 
 :host([color='green']) label.checked {
-  background: nth($cg, 1);
+  color: nth($cg, 1);
+  .dot {
+    border-color: nth($cg, 1);
+  }
+  .dot::after {
+    background: nth($cg, 1);
+  }
 }
 
 :host([color='teal']) label.checked {
-  background: nth($ct, 1);
+  color: nth($ct, 1);
+  .dot {
+    border-color: nth($ct, 1);
+  }
+  .dot::after {
+    background: nth($ct, 1);
+  }
 }
 
 :host([color='orange']) label.checked {
-  background: nth($co, 1);
+  color: nth($co, 1);
+  .dot {
+    border-color: nth($co, 1);
+  }
+  .dot::after {
+    background: nth($co, 1);
+  }
 }
 
 :host([color='dark']) label.checked {
-  background: nth($cd, 1);
+  color: nth($cd, 1);
+  .dot {
+    border-color: nth($cd, 1);
+  }
+  .dot::after {
+    background: nth($cd, 1);
+  }
 }
 
 :host([color='purple']) label.checked {
-  background: nth($cpp, 1);
+  color: nth($cpp, 1);
+  .dot {
+    border-color: nth($cpp, 1);
+  }
+  .dot::after {
+    background: nth($cpp, 1);
+  }
 }
 </style>
 
 <script>
-export default class Switch {
+export default class Radio {
   props = {
+    label: '',
     checked: false,
     disabled: false
   }
@@ -110,11 +165,11 @@ export default class Switch {
   }
 
   get value() {
-    return this.props.checked
+    return this.props.label
   }
 
   set value(val) {
-    this.checked = val
+    this.checked = this.props.label === val
   }
 
   get checked() {
@@ -149,11 +204,8 @@ export default class Switch {
     this.addEventListener(
       'click',
       ev => {
-        if (this.disabled) {
-          return
-        }
-        if (!this.disabled) {
-          this.checked = !this.checked
+        if (!this.disabled && !this.checked) {
+          this.checked = true
           this.dispatchEvent(new CustomEvent('input'))
         }
       },
@@ -166,6 +218,10 @@ export default class Switch {
       return
     }
     switch (name) {
+      case 'label':
+        this.props.label = val
+        break
+
       case 'checked':
       case 'disabled':
         if (val === '') {

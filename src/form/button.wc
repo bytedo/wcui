@@ -10,6 +10,7 @@
   overflow: hidden;
   display: inline-block;
   user-select: none;
+  -moz-user-select: none;
   color: nth($cd, 2);
   cursor: pointer;
 
@@ -306,7 +307,7 @@ export default class Button {
     this._handleClick = ev => {
       if (this.props.loading || this.props.disabled) {
         // 阻止事件冒泡, 避免用户自己绑定click事件不受这2个值的限制
-        ev.cancelBubble = true
+        ev.stopPropagation()
         return
       }
       this.dispatchEvent(new CustomEvent('active'))
