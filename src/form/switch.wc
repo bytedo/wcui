@@ -1,0 +1,174 @@
+<template>
+  <label>
+    <span class="dot"></span>
+  </label>
+</template>
+
+<style lang="scss">
+:host {
+  display: inline-block;
+
+  label {
+    display: flex;
+    width: 38px;
+    height: 22px;
+    padding: 3px;
+    margin: 5px;
+    border-radius: 21px;
+    background: nth($cp, 3);
+    cursor: inherit;
+
+    &.checked {
+      flex-direction: row-reverse;
+      background: nth($cgr, 3);
+    }
+  }
+  .dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #fff;
+  }
+}
+
+:host([disabled]) {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+:host([size='large']) {
+  label {
+    width: 58px;
+    height: 32px;
+  }
+  .dot {
+    width: 26px;
+    height: 26px;
+  }
+}
+:host([size='medium']) {
+  label {
+    width: 50px;
+    height: 28px;
+  }
+  .dot {
+    width: 22px;
+    height: 22px;
+  }
+}
+:host([size='mini']) {
+  label {
+    width: 22px;
+    height: 14px;
+    padding: 2px;
+  }
+  .dot {
+    width: 10px;
+    height: 10px;
+  }
+}
+
+:host([color='red']) label.checked {
+  background: nth($cr, 1);
+}
+
+:host([color='blue']) label.checked {
+  background: nth($cb, 1);
+}
+
+:host([color='green']) label.checked {
+  background: nth($cg, 1);
+}
+
+:host([color='teal']) label.checked {
+  background: nth($ct, 1);
+}
+
+:host([color='orange']) label.checked {
+  background: nth($co, 1);
+}
+
+:host([color='dark']) label.checked {
+  background: nth($cd, 1);
+}
+
+:host([color='purple']) label.checked {
+  background: nth($cpp, 1);
+}
+</style>
+
+<script>
+export default class Switch {
+  props = {
+    checked: false,
+    disabled: false
+  }
+  constructor() {
+    /* render */
+
+    this.__SWITCH__ = this.root.lastElementChild
+  }
+
+  get type() {
+    return 'radio'
+  }
+
+  get checked() {
+    return this.props.checked
+  }
+
+  set checked(val) {
+    this.props.checked = !!val
+    this.__SWITCH__.classList.toggle('checked', this.props.checked)
+  }
+
+  get disabled() {
+    return this.props.disabled
+  }
+
+  set disabled(val) {
+    var type = typeof val
+
+    if (val === this.props.disabled) {
+      return
+    }
+    if ((type === 'boolean' && val) || type !== 'boolean') {
+      this.props.disabled = true
+      this.setAttribute('disabled', '')
+    } else {
+      this.props.disabled = false
+      this.removeAttribute('disabled')
+    }
+  }
+
+  mounted() {
+    this.__SWITCH__.addEventListener(
+      'click',
+      ev => {
+        ev.preventDefault()
+        if (!this.disabled) {
+          this.checked = !this.checked
+        }
+      },
+      false
+    )
+  }
+
+  watch(name, old, val) {
+    if (old === val) {
+      return
+    }
+    switch (name) {
+      case 'checked':
+        this.checked = !!val
+        break
+
+      case 'disabled':
+        if (val === '') {
+          this.disabled = true
+        }
+        break
+    }
+  }
+}
+</script>

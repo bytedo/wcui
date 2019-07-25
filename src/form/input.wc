@@ -324,26 +324,29 @@ export default class Input {
 
   // 移动光标选择下拉选项
   _moveSelect(ev) {
-    ev.preventDefault()
-    var step = ev.keyCode === 38 ? -1 : 1
-    var items = Array.from(this.__LIST__.firstElementChild.children)
-    if (this.props.mvidx === null) {
-      this.props.mvidx = 0
-    } else {
-      this.props.mvidx += step
-    }
-    if (this.props.mvidx < 0) {
-      this.props.mvidx = 0
-    } else if (this.props.mvidx > items.length - 1) {
-      this.props.mvidx = items.length - 1
-    }
-    items.forEach((it, i) => {
-      if (i === this.props.mvidx) {
-        it.setAttribute('focus', '')
+    var { list } = this.props
+    if (list && list.length) {
+      ev.preventDefault()
+      var step = ev.keyCode === 38 ? -1 : 1
+      var items = Array.from(this.__LIST__.firstElementChild.children)
+      if (this.props.mvidx === null) {
+        this.props.mvidx = 0
       } else {
-        it.removeAttribute('focus')
+        this.props.mvidx += step
       }
-    })
+      if (this.props.mvidx < 0) {
+        this.props.mvidx = 0
+      } else if (this.props.mvidx > items.length - 1) {
+        this.props.mvidx = items.length - 1
+      }
+      items.forEach((it, i) => {
+        if (i === this.props.mvidx) {
+          it.setAttribute('focus', '')
+        } else {
+          it.removeAttribute('focus')
+        }
+      })
+    }
   }
 
   // 触发列表选择
@@ -466,7 +469,7 @@ export default class Input {
     if (type === 'text') {
       this.__INPUT__.addEventListener('input', this._handleChange, false)
       this.__INPUT__.addEventListener('focus', this._parseSuggestion, false)
-      // this.__INPUT__.addEventListener('blur', this._handleBlur, false)
+      this.__INPUT__.addEventListener('blur', this._handleBlur, false)
       this.__LIST__.addEventListener('click', this._handleSelect, false)
     }
   }
