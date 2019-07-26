@@ -14,8 +14,7 @@
   line-height: 1;
   font-size: var(--size, 32px);
   border-radius: 4px;
-  background: nth($cp, 2);
-  color: nth($cd, 1);
+  color: #fff;
   user-select: none;
   -moz-user-select: none;
 
@@ -38,6 +37,28 @@
   img {
     display: block;
   }
+}
+
+:host([color='red']) {
+  background: #ff5061;
+}
+:host([color='teal']) {
+  background: #3fc2a7;
+}
+:host([color='purple']) {
+  background: #ac61ce;
+}
+:host([color='green']) {
+  background: #58d68d;
+}
+:host([color='orange']) {
+  background: #ffb618;
+}
+:host([color='dark']) {
+  background: #62778d;
+}
+:host([color='blue']) {
+  background: #66b1ff;
 }
 
 :host([size='large']) {
@@ -64,6 +85,82 @@
 </style>
 
 <script>
+const COLORS = [
+  '#3fc2a7', //teal
+  '#58d68d', //green
+  '#ac61ce', // purple
+  '#66b1ff', //blue
+  '#ff5061', //red
+  '#ffb618', // orange
+  '#62778d' //dark
+]
+const COLOR_NAME = ['teal', 'green', 'purple', 'blue', 'red', 'orange', 'dark']
+var canvas = document.createElement('canvas')
+var ctx = canvas.getContext('2d')
+var size = 500
+canvas.width = size
+canvas.height = size
+
+function sum(arr) {
+  var n = 0
+  arr.forEach(a => (n += a))
+  return n
+}
+
+function createImage(hash) {
+  if (!hash) {
+    return './def.jpg'
+  }
+
+  var bg = COLORS[parseInt(hash.slice(-1), 16) % 7]
+  var color = '#fff'
+  var fixColor = color
+  var lens = hash.slice(0, 8).split('')
+  var pos1 = hash.slice(8, 16).split('')
+  var pos2 = hash.slice(16, 24).split('')
+  var step = size / 10
+
+  lens = lens.map(c => {
+    c = parseInt(c, 16)
+    return c % 8
+  })
+  pos1 = pos1.map(c => {
+    c = parseInt(c, 16)
+    return c % 4
+  })
+  pos2 = pos2.map(c => {
+    c = parseInt(c, 16)
+    return c % 4
+  })
+
+  fixColor = sum(lens) > 32 ? bg : color
+
+  ctx.fillStyle = bg
+  ctx.fillRect(0, 0, size, size)
+
+  for (var i = 1; i < 9; i++) {
+    var xl = lens[i - 1]
+    var xp1 = pos1[i - 1]
+    var xp2 = pos2[i - 1]
+
+    if (xl + xp1 > 8) {
+      xl = 8 - xp1
+    }
+    ctx.fillStyle = color
+    ctx.fillRect((xp1 + 1) * step, i * step, xl * step, step)
+
+    ctx.fillStyle = color
+    ctx.fillRect((9 - xp1 - xl) * step, i * step, xl * step, step)
+
+    ctx.fillStyle = fixColor
+    ctx.fillRect((xp2 + 1) * step, i * step, step, step)
+
+    ctx.fillStyle = fixColor
+    ctx.fillRect((8 - xp2) * step, i * step, step, step)
+  }
+
+  return canvas.toDataURL('image/webp')
+}
 export default class Avatar {
   props = {
     hash: '', //哈希头像
@@ -74,13 +171,9 @@ export default class Avatar {
   constructor() {
     /* render */
     this.__IMG__ = this.root.lastElementChild
-  }
-
-  drawHash() {
-    var { hash } = this.props
-
-    if (hash) {
-    }
+    var text = this.textContent.slice(0, 1)
+    this.setAttribute('color', COLOR_NAME[text.charCodeAt(0) % 7])
+    this.textContent = text
   }
 
   watch(name, old, val) {
@@ -94,10 +187,7 @@ export default class Avatar {
         break
       case 'hash':
         this.removeAttribute('src')
-        this.props.hash = val
-
-        this.drawHash()
-
+        this.__IMG__.src = createImage(val)
         break
 
       case 'fit':

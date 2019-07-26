@@ -33,6 +33,24 @@
     padding: 2px 4px;
   }
 }
+:host([color='dark']) .dot {
+  background: nth($cd, 1);
+}
+:host([color='green']) .dot {
+  background: nth($cg, 1);
+}
+:host([color='blue']) .dot {
+  background: nth($cb, 1);
+}
+:host([color='orange']) .dot {
+  background: nth($co, 1);
+}
+:host([color='purple']) .dot {
+  background: nth($cpp, 1);
+}
+:host([color='teal']) .dot {
+  background: nth($ct, 1);
+}
 </style>
 
 <script>
