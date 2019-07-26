@@ -1,232 +1,237 @@
 <template>
-  <svg
-    aria-hidden="true"
-    style="overflow:hidden;position: absolute;width:0;height:0"
-  >
-    ${iconList.map( _ => `
-    <symbol id="icon-${_.key}" viewBox="0 0 1024 1024">
-      <path d="${_.path}" />
-    </symbol>
-    ` ).join('')}
-  </svg>
-
-  <section class="tool-bar">
-    ${this._parseTools()}
-  </section>
-  <div class="font-layer">
-    <span data-size="6">大号字体</span>
-    <span data-size="5">中号字体</span>
-    <span data-size="3">小号字体</span>
+  <div class="layout">
+    <button data-page="1" class="home">|<</button>
+    <button data-page="prev" class="prev"><</button>
+    <div class="pager"></div>
+    <button data-page="next" class="next">></button>
+    <button data-page="end" class="end">>|</button>
   </div>
-  <div class="color-layer">
-    <span data-color="#f3f5fb"></span>
-    <span data-color="#dae1e9"></span>
-    <span data-color="#62778d"></span>
-    <span data-color="#58d68d"></span>
-    <span data-color="#3fc2a7"></span>
-    <span data-color="#52a3de"></span>
-    <span data-color="#ac61ce"></span>
-    <span data-color="#ffb618"></span>
-    <span data-color="#e67e22"></span>
-    <span data-color="#ff5061"></span>
-    <span data-color="#ff0000"></span>
-    <span data-color="#000000"></span>
-  </div>
-  <div class="link-layer">
-    <input placeholder="请输入链接地址" />
-    <span>插入</span>
-  </div>
-  <div contenteditable="true" class="editor" spellcheck="false"></div>
 </template>
 
-<script>
-  export default class DoButton extends HTMLElement {
-    constructor() {
-      super()
+<style lang="scss">
+:host {
+  display: block;
+  line-height: 1;
+  color: nth($cd, 1);
+  font-size: 14px;
+  user-select: none;
+  -moz-user-select: none;
 
-      this.root = this.attachShadow({ mode: 'open' })
-
-      this.root.innerHTML = `/*html*/`
-    }
-  }
-</script>
-
-<style>
-  * {
-    box-sizing: border-box;
-  }
-  :host {
-    position: relative;
-    display: flex;
-    flex-flow: column wrap;
-    min-width: 200px;
-    min-height: 100px;
-    border: 1px solid #e7e8eb;
-    border-radius: 4px;
-    font-size: 14px;
-  }
-  .tool-bar {
-    display: flex;
-    height: 34px;
-    padding: 5px;
-    line-height: 24px;
-    border-bottom: 1px solid #e7e8eb;
-  }
-  .tool-bar span {
-    position: relative;
-    overflow: hidden;
+  .layout {
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 24px;
-    height: 24px;
-    margin: 0 3px;
-    border-radius: 3px;
-  }
-  .tool-bar span:hover {
-    background: #f7f8fb;
-  }
-  .tool-bar span input {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    opacity: 0;
+    margin: 10px auto;
   }
 
-  .tool-bar .icon {
-    overflow: hidden;
-    width: 70%;
-    height: 70%;
-    fill: currentColor;
-    color: #62778d;
-  }
-
-  .editor {
-    flex: 1;
-    overflow: hidden;
-    overflow-y: auto;
-    max-height: 360px;
-    padding: 5px 8px;
-    font-size: 14px;
-    outline: none;
-  }
-  .editor img {
-    max-width: 100%;
-  }
-
-  .font-layer,
-  .color-layer,
-  .link-layer {
-    visibility: hidden;
-    position: absolute;
-    left: 0;
-    top: 0;
-    z-index: 99;
-    width: 80px;
-    padding: 5px 0;
-    line-height: 25px;
-    background: #fff;
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
-    font-size: 13px;
-    user-select: none;
-    opacity: 0;
-    transition: all ease-in-out 0.2s;
-  }
-  .font-layer.fadein {
-    visibility: visible;
-    top: 34px;
-    opacity: 1;
-  }
-  .font-layer span {
-    display: block;
+  button {
+    min-width: 32px;
+    height: 32px;
     padding: 0 8px;
-  }
-  .font-layer span:hover {
-    background: #f7f8fb;
-  }
-
-  .color-layer {
-    display: flex;
-    flex-flow: row wrap;
-    left: 30px;
-    width: 96px;
-  }
-  .color-layer.fadein {
-    visibility: visible;
-    top: 34px;
-    opacity: 1;
-  }
-  .color-layer span {
-    width: 20px;
-    height: 20px;
-    margin: 2px;
-    background: #f30;
-  }
-  .color-layer span:nth-child(1) {
-    background: #f3f5fb;
-  }
-  .color-layer span:nth-child(2) {
-    background: #dae1e9;
-  }
-  .color-layer span:nth-child(3) {
-    background: #62778d;
-  }
-  .color-layer span:nth-child(4) {
-    background: #58d68d;
-  }
-  .color-layer span:nth-child(5) {
-    background: #3fc2a7;
-  }
-  .color-layer span:nth-child(6) {
-    background: #52a3de;
-  }
-  .color-layer span:nth-child(7) {
-    background: #ac61ce;
-  }
-  .color-layer span:nth-child(8) {
-    background: #ffb618;
-  }
-  .color-layer span:nth-child(9) {
-    background: #e67e22;
-  }
-  .color-layer span:nth-child(10) {
-    background: #ff5061;
-  }
-  .color-layer span:nth-child(11) {
-    background: #ff0000;
-  }
-  .color-layer span:nth-child(12) {
-    background: #000000;
-  }
-
-  .link-layer {
-    display: flex;
-    align-items: center;
-    left: 330px;
-    width: 180px;
-    padding: 8px;
-  }
-  .link-layer input {
-    width: 120px;
-    height: 20px;
-    margin-right: 8px;
-    padding: 0 5px;
-    border: 1px solid #e7e8eb;
-    outline: none;
-  }
-  .link-layer span {
-    height: 20px;
-    padding: 0 5px;
-    line-height: 20px;
+    margin: 0 3px;
+    background: nth($cp, 1);
+    border: 0;
     border-radius: 4px;
-    background: #dae1e9;
-    text-align: center;
-    font-size: 12px;
+    outline: none;
+    font-size: inherit;
+    color: inherit;
+
+    &:hover {
+      background: nth($cp, 2);
+    }
+
+    &[curr] {
+      background: nth($ct, 1);
+      color: #fff;
+    }
+  }
+}
+
+:host([simple]) {
+  .home,
+  .end {
+    display: none;
+  }
+}
+
+:host([circle]) button {
+  border-radius: 50%;
+}
+
+:host([color='red']) button[curr] {
+  background: nth($cr, 1);
+}
+
+:host([color='blue']) button[curr] {
+  background: nth($cb, 1);
+}
+
+:host([color='green']) button[curr] {
+  background: nth($cg, 1);
+}
+
+:host([color='teal']) button[curr] {
+  background: nth($ct, 1);
+}
+
+:host([color='orange']) button[curr] {
+  background: nth($co, 1);
+}
+
+:host([color='dark']) button[curr] {
+  background: nth($cd, 1);
+}
+
+:host([color='purple']) button[curr] {
+  background: nth($cpp, 1);
+}
+</style>
+
+<script>
+// 计算页码
+function calculate(curr, total, simple) {
+  var arr = []
+  var fixed = 0
+  var half = curr < 3 ? 6 - curr : 2 // 中间页码
+
+  // 总页码小于2, 或者简单模式下
+  if (total < 2 || simple) {
+    arr.push({ to: curr, txt: curr })
+    return arr
   }
 
-  .link-layer.fadein {
-    visibility: visible;
-    top: 34px;
-    opacity: 1;
+  // 当前页面比半数多时, 前面的用省略号代替
+  if (curr - half > 1 && total > 5) {
+    var to = curr - 2 * half
+    to = to < 1 ? 1 : to
+    arr.push({ to, txt: '...' })
   }
-</style>
+
+  if (total - curr < half) {
+    fixed = half - total + curr
+  }
+
+  // 把页码拆成2部分来
+  for (var i = curr - half - fixed; i < curr + half + 1 && i <= total; i++) {
+    if (i > 0) {
+      arr.push({ to: i, txt: i })
+    }
+  }
+
+  // 总页码太多时, 以省略号代替
+  if (curr + half < total) {
+    var to = curr + 2 * half
+    to = to > total ? total : to
+    arr.push({ to, txt: '...' })
+  }
+
+  return arr
+}
+export default class Pager {
+  props = {
+    layout: 'home, prev, next, end',
+    total: 0,
+    curr: 1,
+    pagesize: 20,
+    simple: false
+  }
+  constructor() {
+    /* render */
+
+    this.__LAYOUT__ = this.root.children[1]
+    this.__HOME__ = this.__LAYOUT__.children[0]
+    this.__PREV__ = this.__LAYOUT__.children[1]
+    this.__PAGE__ = this.__LAYOUT__.children[2]
+    this.__NEXT__ = this.__LAYOUT__.children[3]
+    this.__END__ = this.__LAYOUT__.children[4]
+  }
+
+  update() {
+    var { curr, totalpage, simple } = this.props
+
+    var list = calculate(curr, totalpage, simple)
+
+    this.__PAGE__.innerHTML = list
+      .map(
+        it =>
+          `<button ${curr === it.to ? 'curr' : ''} data-page="${it.to}">${
+            it.txt
+          }</button>`
+      )
+      .join('')
+  }
+
+  mounted() {
+    var { pagesize, total } = this.props
+    this.props.totalpage = Math.ceil(total / pagesize)
+
+    this.update()
+
+    this.__LAYOUT__.addEventListener(
+      'click',
+      ev => {
+        if (ev.target.tagName === 'BUTTON') {
+          var { curr, totalpage } = this.props
+          var page = ev.target.dataset.page
+          var num = +page
+          if (num === num) {
+            if (num === curr) {
+              return
+            }
+          } else {
+            switch (page) {
+              case 'prev':
+                num = curr - 1
+                if (num < 1) {
+                  return
+                }
+                break
+              case 'next':
+                num = curr + 1
+                if (num > totalpage) {
+                  return
+                }
+                break
+              case 'end':
+                if (totalpage === curr) {
+                  return
+                }
+                num = totalpage
+                break
+            }
+          }
+          this.props.curr = num
+          this.update()
+          this.dispatchEvent(
+            new CustomEvent('pick', {
+              detail: num
+            })
+          )
+        }
+      },
+      false
+    )
+  }
+
+  watch(name, old, val) {
+    if (old === val) {
+      return
+    }
+
+    switch (name) {
+      case 'total':
+      case 'pagesize':
+      case 'curr':
+        this.props[name] = +val || this.props[name]
+        var { pagesize, total } = this.props
+        this.props.totalpage = Math.ceil(total / pagesize)
+        this.update()
+        break
+
+      case 'simple':
+        this.props.simple = true
+        break
+    }
+  }
+}
+</script>
