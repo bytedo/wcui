@@ -1,0 +1,234 @@
+<template>
+  <slot></slot>
+  <div class="is-horizontal"><span class="thumb"></span></div>
+  <div class="is-vertical"><span class="thumb"></span></div>
+</template>
+
+<style lang="scss">
+:host {
+  overflow: hidden;
+  position: relative;
+  display: block;
+}
+
+/* 横向 */
+
+.is-horizontal,
+.is-vertical {
+  visibility: hidden;
+  position: absolute;
+  z-index: 10240;
+  opacity: 0;
+  transition: opacity 0.3s linear, visibility 0.3s linear;
+
+  .thumb {
+    display: block;
+    border-radius: 3px;
+    background: rgba(44, 47, 53, 0.25);
+
+    &:hover {
+      background: rgba(44, 47, 53, 0.5);
+    }
+  }
+}
+
+.is-horizontal {
+  left: 0;
+  bottom: 1px;
+  width: 100%;
+  height: 6px;
+
+  .thumb {
+    width: 0;
+    height: 6px;
+  }
+}
+
+/* 纵向 */
+.is-vertical {
+  top: 0;
+  right: 1px;
+  width: 6px;
+  height: 100%;
+
+  .thumb {
+    width: 6px;
+    height: 0;
+  }
+}
+
+:host(:hover) {
+  .is-horizontal,
+  .is-vertical {
+    visibility: visible;
+    opacity: 1;
+  }
+}
+</style>
+
+<script>
+export default class Scroll {
+  props = {
+    v: ''
+  }
+  constructor() {
+    /* render */
+    this.__X__ = this.root.children[2]
+    this.__Y__ = this.root.children[3]
+    this.__XT__ = this.__X__.children[0]
+    this.__YT__ = this.__Y__.children[0]
+  }
+
+  mounted() {
+    // 初始化滚动条的位置和长度
+    this._initFn = ev => {
+      var ow = this.offsetWidth
+      var sw = this.scrollWidth
+      var oh = this.offsetHeight
+      var sh = this.scrollHeight
+
+      var yh = ((oh * oh) / sh) >> 0
+      var xw = ((ow * ow) / sw) >> 0
+      if (yh < 50) {
+        yh = 50
+      }
+      if (xw < 50) {
+        xw = 50
+      }
+
+      // 100%时不显示
+      if (xw === ow) {
+        xw = 0
+      }
+      if (yh === oh) {
+        yh = 0
+      }
+
+      this.props.oh = oh
+      this.props.sh = sh
+      this.props.ow = ow
+      this.props.sw = sw
+      this.props.yh = yh
+      this.props.xw = xw
+
+      this.__X__.style.width = sw + 'px'
+      this.__XT__.style.width = xw + 'px'
+
+      this.__Y__.style.height = sh + 'px'
+      this.__YT__.style.height = yh + 'px'
+    }
+
+    // 鼠标滚动事件
+    this._wheelFn = ev => {
+      ev.preventDefault()
+      var { sh, oh, yh, sw, ow, xw } = this.props
+
+      // x轴 y轴 都为0时, 不作任何处理
+      if (!xw && !yh) {
+        return
+      }
+
+      this.scrollTop += ev.deltaY
+      this.scrollLeft += ev.deltaX
+
+      if (xw) {
+        // 修正滚动条的位置
+        // 滚动比例 x 滚动条的可移动距离
+        var fixedX = (this.scrollLeft / (sw - ow)) * (ow - xw)
+        this.props.thumbX = fixedX
+        this.__Y__.style.transform = `translateX(${this.scrollLeft}px)`
+
+        this.__XT__.style.transform = `translateX(${this.scrollLeft +
+          fixedX}px)`
+      }
+
+      if (yh) {
+        var fixedY = (this.scrollTop / (sh - oh)) * (oh - yh)
+        this.props.thumbY = fixedY
+
+        this.__X__.style.transform = `translateY(${this.scrollTop}px)`
+        this.__YT__.style.transform = `translateY(${this.scrollTop + fixedY}px)`
+      }
+    }
+
+    this.addEventListener('mouseenter', this._initFn, false)
+
+    this.addEventListener('wheel', this._wheelFn, false)
+
+    var startX,
+      startY,
+      moveX,
+      moveY,
+      mousemoveFn = ev => {
+        var { sw, ow, xw, sh, oh, yh, thumbY, thumbX } = this.props
+
+        if (startX !== null) {
+          moveX = thumbX + ev.pageX - startX
+          if (moveX < 0) {
+            moveX = 0
+          } else if (moveX > ow - xw) {
+            moveX = ow - xw
+          }
+          this.scrollLeft = (sw - ow) * (moveX / (ow - xw))
+
+          this.__Y__.style.transform = `translateX(${this.scrollLeft}px)`
+          this.__XT__.style.transform = `translateX(${this.scrollLeft +
+            moveX}px)`
+        }
+
+        if (startY !== null) {
+          moveY = thumbY + ev.pageY - startY
+          if (moveY < 0) {
+            moveY = 0
+          } else if (moveY > oh - yh) {
+            moveY = oh - yh
+          }
+          this.scrollTop = (sh - oh) * (moveY / (oh - yh))
+
+          this.__X__.style.transform = `translateY(${this.scrollTop}px)`
+          this.__YT__.style.transform = `translateY(${this.scrollTop +
+            moveY}px)`
+        }
+      },
+      mouseupFn = ev => {
+        startX = null
+        startY = null
+        this.props.thumbX = moveX
+        this.props.thumbY = moveY
+        document.removeEventListener('mousemove', mousemoveFn)
+        document.removeEventListener('mouseup', mouseupFn)
+      }
+
+    this.__YT__.addEventListener(
+      'mousedown',
+      ev => {
+        startY = ev.pageY
+        if (!this.props.thumbY) {
+          this.props.thumbY = 0
+        }
+        document.addEventListener('mousemove', mousemoveFn, false)
+        document.addEventListener('mouseup', mouseupFn, false)
+      },
+      false
+    )
+
+    this.__XT__.addEventListener(
+      'mousedown',
+      ev => {
+        startX = ev.pageX
+        if (!this.props.thumbX) {
+          this.props.thumbX = 0
+        }
+        document.addEventListener('mousemove', mousemoveFn, false)
+        document.addEventListener('mouseup', mouseupFn, false)
+      },
+      false
+    )
+  }
+
+  unmount() {
+    this.removeEventListener('mouseenter', this._initFn)
+    this.removeEventListener('wheel', this._wheelFn)
+  }
+}
+</script>
