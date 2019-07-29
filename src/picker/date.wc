@@ -1,17 +1,76 @@
 <template>
-  <input type="text" />
+  <label class="input">
+    <input readonly type="text" />
+    <wc-icon class="icon" is="key"></wc-icon>
+  </label>
+  <div class="calendar">
+    <header>
+      <wc-icon is="key"></wc-icon>
+      <wc-icon is="key"></wc-icon>
+      <wc-icon is="key"></wc-icon>
+      <wc-icon is="key"></wc-icon>
+      <span>2019-07</span>
+    </header>
+  </div>
 </template>
 
 <style lang="scss">
 :host {
   display: inline-block;
+  user-select: none;
+  -moz-user-select: none;
+  color: nth($cd, 2);
+  border-radius: 4px;
+}
+
+.input {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 64px;
+  height: 32px;
+  font-size: 14px;
+  border: 1px solid nth($cp, 3);
+  border-radius: inherit;
+  background: #fff;
+  color: inherit;
+  cursor: text;
+
+  input {
+    min-width: 0;
+    padding: 0 5px;
+    border: 0;
+    border-radius: inherit;
+    color: inherit;
+    font-size: inherit;
+    background: none;
+    outline: none;
+    box-shadow: none;
+    cursor: inherit;
+
+    &::placeholder {
+      color: nth($cgr, 1);
+    }
+  }
+
+  &:focus-within {
+    box-shadow: 0 0 3px nth($co, 1);
+  }
+  /* ----- */
+  .icon {
+    padding: 0 5px;
+    --size: 20px;
+  }
 }
 </style>
 
 <script>
+import '../icon/index'
+
 export default class DatePicker {
   props = {
-    value: ''
+    value: '',
+    format: 'Y-m-d'
   }
 
   constructor() {
