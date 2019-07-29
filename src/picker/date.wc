@@ -1,0 +1,21 @@
+<template>
+  <input type="text" />
+</template>
+
+<style lang="scss">
+:host {
+  display: inline-block;
+}
+</style>
+
+<script>
+export default class DatePicker {
+  props = {
+    value: ''
+  }
+
+  constructor() {
+    /* render */
+  }
+}
+</script>
