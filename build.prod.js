@@ -73,7 +73,8 @@ function mkWCFile({ style, html, js }) {
   html = html.replace(/[\n\r]+/g, ' ')
   html = html.replace(/\s+/g, ' ')
 
-  let name, props
+  let name = ''
+  let props = ''
 
   js = js.replace(/props = (\{[\w\W]*?\n\s{2}?\})/, function(s, m) {
     props = m

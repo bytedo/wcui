@@ -1,14 +1,14 @@
 <template>
   <label class="input">
     <input readonly type="text" />
-    <wc-icon class="icon" is="key"></wc-icon>
+    <wc-icon class="icon" is="calendar"></wc-icon>
   </label>
   <div class="calendar">
     <header>
-      <wc-icon is="key"></wc-icon>
-      <wc-icon is="key"></wc-icon>
-      <wc-icon is="key"></wc-icon>
-      <wc-icon is="key"></wc-icon>
+      <wc-icon is="dbl-left"></wc-icon>
+      <wc-icon is="left"></wc-icon>
+      <wc-icon is="right"></wc-icon>
+      <wc-icon is="dbl-right"></wc-icon>
       <span>2019-07</span>
     </header>
   </div>

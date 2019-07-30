@@ -1,5 +1,5 @@
 <template>
-  <slot></slot>
+  <div class="container"><slot></slot></div>
   <div class="is-horizontal"><span class="thumb"></span></div>
   <div class="is-vertical"><span class="thumb"></span></div>
 </template>
@@ -9,6 +9,14 @@
   overflow: hidden;
   position: relative;
   display: block;
+  width: 100%;
+  height: 100%;
+
+  .container {
+    overflow: hidden;
+    width: inherit;
+    height: inherit;
+  }
 }
 
 /* 横向 */
@@ -67,25 +75,28 @@
 </style>
 
 <script>
+// 是否火狐浏览器
+const IS_FF = !!window.sidebar
+
+/*  */
 export default class Scroll {
   props = {
     v: ''
   }
   constructor() {
     /* render */
-    this.__X__ = this.root.children[2]
-    this.__Y__ = this.root.children[3]
-    this.__XT__ = this.__X__.children[0]
-    this.__YT__ = this.__Y__.children[0]
+    this.__BOX__ = this.root.children[1]
+    this.__X__ = this.root.children[2].children[0]
+    this.__Y__ = this.root.children[3].children[0]
   }
 
   mounted() {
     // 初始化滚动条的位置和长度
     this._initFn = ev => {
-      var ow = this.offsetWidth
-      var sw = this.scrollWidth
-      var oh = this.offsetHeight
-      var sh = this.scrollHeight
+      var ow = this.__BOX__.offsetWidth
+      var sw = this.__BOX__.scrollWidth
+      var oh = this.__BOX__.offsetHeight
+      var sh = this.__BOX__.scrollHeight
 
       var yh = ((oh * oh) / sh) >> 0
       var xw = ((ow * ow) / sw) >> 0
@@ -111,11 +122,9 @@ export default class Scroll {
       this.props.yh = yh
       this.props.xw = xw
 
-      this.__X__.style.width = sw + 'px'
-      this.__XT__.style.width = xw + 'px'
+      this.__X__.style.width = xw + 'px'
 
-      this.__Y__.style.height = sh + 'px'
-      this.__YT__.style.height = yh + 'px'
+      this.__Y__.style.height = yh + 'px'
     }
 
     // 鼠标滚动事件
@@ -128,32 +137,49 @@ export default class Scroll {
         return
       }
 
-      this.scrollTop += ev.deltaY
-      this.scrollLeft += ev.deltaX
+      //校正兼容苹果鼠标在 chrome和FF下滚动的精度
+      var deltaX
+      var deltaY
+
+      if (IS_FF) {
+        // 区分是触摸板还是普通鼠标
+        deltaX = ev.deltaMode ? 10 * ev.deltaX : ev.deltaX
+        deltaY = ev.deltaMode ? 10 * ev.deltaY : ev.deltaY
+      } else {
+        var delta = Math.abs(ev.wheelDelta)
+        // 精度高的(小于120), 一般是触摸板或苹果的鼠标
+        if (delta < 120) {
+          deltaX = ev.deltaX
+          deltaY = ev.deltaY
+        } else {
+          deltaX = ev.deltaX / (delta / 120)
+          deltaY = ev.deltaY / (delta / 120)
+        }
+      }
+
+      this.__BOX__.scrollTop += deltaY
+      this.__BOX__.scrollLeft += deltaX
 
       if (xw) {
         // 修正滚动条的位置
         // 滚动比例 x 滚动条的可移动距离
-        var fixedX = (this.scrollLeft / (sw - ow)) * (ow - xw)
+        var fixedX = (this.__BOX__.scrollLeft / (sw - ow)) * (ow - xw)
         this.props.thumbX = fixedX
-        this.__Y__.style.transform = `translateX(${this.scrollLeft}px)`
 
-        this.__XT__.style.transform = `translateX(${this.scrollLeft +
-          fixedX}px)`
+        this.__X__.style.transform = `translateX(${fixedX}px)`
       }
 
       if (yh) {
-        var fixedY = (this.scrollTop / (sh - oh)) * (oh - yh)
+        var fixedY = (this.__BOX__.scrollTop / (sh - oh)) * (oh - yh)
         this.props.thumbY = fixedY
 
-        this.__X__.style.transform = `translateY(${this.scrollTop}px)`
-        this.__YT__.style.transform = `translateY(${this.scrollTop + fixedY}px)`
+        this.__Y__.style.transform = `translateY(${fixedY}px)`
       }
     }
 
-    this.addEventListener('mouseenter', this._initFn, false)
+    this.__BOX__.addEventListener('mouseenter', this._initFn, false)
 
-    this.addEventListener('wheel', this._wheelFn, false)
+    this.__BOX__.addEventListener('wheel', this._wheelFn, false)
 
     var startX,
       startY,
@@ -169,11 +195,8 @@ export default class Scroll {
           } else if (moveX > ow - xw) {
             moveX = ow - xw
           }
-          this.scrollLeft = (sw - ow) * (moveX / (ow - xw))
-
-          this.__Y__.style.transform = `translateX(${this.scrollLeft}px)`
-          this.__XT__.style.transform = `translateX(${this.scrollLeft +
-            moveX}px)`
+          this.__BOX__.scrollLeft = (sw - ow) * (moveX / (ow - xw))
+          this.__X__.style.transform = `translateX(${moveX}px)`
         }
 
         if (startY !== null) {
@@ -183,11 +206,8 @@ export default class Scroll {
           } else if (moveY > oh - yh) {
             moveY = oh - yh
           }
-          this.scrollTop = (sh - oh) * (moveY / (oh - yh))
-
-          this.__X__.style.transform = `translateY(${this.scrollTop}px)`
-          this.__YT__.style.transform = `translateY(${this.scrollTop +
-            moveY}px)`
+          this.__BOX__.scrollTop = (sh - oh) * (moveY / (oh - yh))
+          this.__Y__.style.transform = `translateY(${moveY}px)`
         }
       },
       mouseupFn = ev => {
@@ -199,7 +219,7 @@ export default class Scroll {
         document.removeEventListener('mouseup', mouseupFn)
       }
 
-    this.__YT__.addEventListener(
+    this.__Y__.addEventListener(
       'mousedown',
       ev => {
         startY = ev.pageY
@@ -212,7 +232,7 @@ export default class Scroll {
       false
     )
 
-    this.__XT__.addEventListener(
+    this.__X__.addEventListener(
       'mousedown',
       ev => {
         startX = ev.pageX
@@ -227,8 +247,8 @@ export default class Scroll {
   }
 
   unmount() {
-    this.removeEventListener('mouseenter', this._initFn)
-    this.removeEventListener('wheel', this._wheelFn)
+    this.__BOX__.removeEventListener('mouseenter', this._initFn)
+    this.__BOX__.removeEventListener('wheel', this._wheelFn)
   }
 }
 </script>
