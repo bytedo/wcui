@@ -8,9 +8,7 @@
 :host {
   overflow: hidden;
   position: relative;
-  display: block;
-  width: 100%;
-  height: 100%;
+  display: flex;
 
   .container {
     overflow: hidden;
