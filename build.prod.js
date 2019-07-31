@@ -97,11 +97,10 @@ function mkWCFile({ style, html, js }) {
       /import ([\w]*) from '([a-z0-9\/\.\-_]*)'/g,
       'import $1 from "$2.js"'
     )
+    .replace(/constructor\([^)]?\)\s+\{/, 'constructor() {\n super();')
     .replace(
       '/* render */',
       `
-      super()
-      
       Object.defineProperty(this, 'root', {
         value: this.attachShadow({ mode: 'open' }),
         writable: true,

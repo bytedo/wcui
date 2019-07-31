@@ -21,6 +21,7 @@
     min-width: 32px;
     height: 32px;
     padding: 0 5px;
+    margin: auto;
     font-size: 14px;
     border: 1px solid nth($cp, 3);
     border-radius: 4px;
