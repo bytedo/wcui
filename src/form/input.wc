@@ -205,7 +205,7 @@ li {
 }
 :host([size='mini']) {
   .label {
-    height: 20px;
+    height: 24px;
     font-size: 12px;
   }
   .icon {

@@ -1,0 +1,118 @@
+<template>
+  <label><span></span></label>
+</template>
+
+<style lang="scss">
+:host {
+  display: flex;
+  align-items: center;
+
+  label {
+    flex: 1;
+    height: var(--size, 10px);
+    border-radius: 9px;
+    background: nth($cp, 2);
+
+    span {
+      display: block;
+      width: 0;
+      height: 100%;
+      border-radius: 9px;
+      background: nth($ct, 1);
+    }
+  }
+}
+
+:host([size='large']) label {
+  height: 18px;
+}
+
+:host([size='medium']) label {
+  height: 14px;
+}
+
+:host([size='mini']) label {
+  height: 6px;
+}
+
+:host([color='red']) label span {
+  background: nth($cr, 1);
+}
+
+:host([color='blue']) label span {
+  background: nth($cb, 1);
+}
+
+:host([color='green']) label span {
+  background: nth($cg, 1);
+}
+
+:host([color='orange']) label span {
+  background: nth($co, 1);
+}
+
+:host([color='dark']) label span {
+  background: nth($cd, 1);
+}
+
+:host([color='purple']) label span {
+  background: nth($cpp, 1);
+}
+</style>
+
+<script>
+export default class Progress {
+  props = {
+    value: 0,
+    max: 1
+  }
+
+  constructor() {
+    /* render */
+    this.__THUMB__ = this.root.children[1].lastElementChild
+  }
+
+  get value() {
+    return this.props.value
+  }
+
+  set value(val) {
+    this.props.value = +val
+    this.calculate()
+  }
+
+  calculate() {
+    var { max, value } = this.props
+    this.__THUMB__.style.width = `${(100 * value) / max}%`
+  }
+
+  mounted() {
+    this.calculate()
+  }
+
+  watch(name, old, val) {
+    if (old === val) {
+      return
+    }
+
+    switch (name) {
+      case max:
+        var max = +val
+        if (max !== max || max < 1) {
+          max = 1
+        }
+        this.props.max = max
+        this.calculate()
+        break
+
+      case 'value':
+        var v = +val
+        if (v === v) {
+          this.props.value = v
+          this.calculate()
+        }
+        break
+    }
+  }
+}
+</script>
