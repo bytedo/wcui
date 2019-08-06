@@ -36,6 +36,7 @@ class Router {
     Anot.hideProperty(this, 'table', [])
     Anot.hideProperty(this, 'last', '')
     Anot.hideProperty(this, 'path', '')
+    Anot.hideProperty(this, 'pathArr', [])
     Anot.hideProperty(this, 'ready', false)
     Anot.hideProperty(this, 'noMatch', null)
     Anot.hideProperty(
@@ -178,6 +179,7 @@ class Router {
 
     this.last = this.path
     this.path = path
+    this.pathArr = path.split('/')
     LINKS.forEach(vm => {
       if (vm.rule.test(this.path)) {
         vm.active = true
@@ -197,6 +199,7 @@ class Router {
 
   // 跳转到路由
   go(path, forceCleanHash = false) {
+    path = path.replace(/^[/]+/, '')
     let { mode, prefix } = this.options
 
     if (mode === 'hash') {
