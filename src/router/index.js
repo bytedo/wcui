@@ -22,10 +22,11 @@ function targetIsThisWindow(targetWindow) {
   }
   return false
 }
-
+//hash前缀正则
+const PREFIX_REGEXP = /^(#!|#)[\/]?/
+const TRIM_REGEXP = /(^[/]+)|([/]+$)/g
 const DEFAULT_OPTIONS = {
   mode: 'hash', // hash | history
-  prefix: /^(#!|#)[\/]?/, //hash前缀正则
   allowReload: true //连续点击同一个链接是否重新加载
 }
 const LINKS = []
@@ -59,7 +60,7 @@ class Router {
 
   // 事件监听
   __listen__() {
-    let { mode, prefix } = this.options
+    let { mode } = this.options
 
     Anot.bind(window, 'load, popstate', ev => {
       if (ev.type === 'load') {
@@ -71,7 +72,9 @@ class Router {
 
       let path = mode === 'hash' ? location.hash : location.pathname
 
-      path = path.replace(prefix, '').trim()
+      path = path.replace(PREFIX_REGEXP, '').trim()
+      path = path.replace(TRIM_REGEXP, '')
+
       if (ev.type === 'load') {
         this.go(path)
         // hash模式要手动触发一下路由检测
@@ -81,7 +84,6 @@ class Router {
       } else {
         // 因为pushState不会触发popstate事件,
         // 所以这里只在hash模式或有ev.state的情况下才会主动触发路由检测
-        path = path.replace(/^[/]+?/, '')
         if (mode === 'hash' || ev.state) {
           this.__check__(path)
         }
@@ -121,7 +123,7 @@ class Router {
           }
 
           // hash地址,只管修正前缀即可, 会触发popstate事件,所以这里只处理非hash的情况
-          if (!prefix.test(href)) {
+          if (!PREFIX_REGEXP.test(href)) {
             // 非hash地址,则需要阻止默认事件
             // 并主动触发跳转, 同时强制清除hash
             ev.preventDefault()
@@ -199,11 +201,10 @@ class Router {
 
   // 跳转到路由
   go(path, forceCleanHash = false) {
-    path = path.replace(/^[/]+/, '')
-    let { mode, prefix } = this.options
+    path = path.trim().replace(TRIM_REGEXP, '')
+    let { mode } = this.options
 
     if (mode === 'hash') {
-      path = path.trim().replace(prefix, '')
       // 页面刷新时, 不主动添加空hash, 避免执行2次noMatch回调
       if (!path && path === location.hash) {
         return
@@ -212,7 +213,6 @@ class Router {
     } else {
       let hash = forceCleanHash ? '' : location.hash
       let search = forceCleanHash ? '' : location.search
-      path = path.replace(/^[/]+?/, '')
       if (forceCleanHash) {
         window.history.pushState({ path }, null, `/${path + search + hash}`)
       } else {

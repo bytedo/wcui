@@ -483,6 +483,9 @@ class __layer__ {
           layerDom[$id][1].classList.add('shift')
           setTimeout(_ => {
             $dom1.css(offsetStyle)
+            if (vm.$refs.input) {
+              vm.$refs.input.focus()
+            }
             setTimeout(_ => {
               try {
                 layerDom[$id][1].classList.remove('shift')
@@ -656,7 +659,7 @@ const _layer = {
       type: 3,
       prompt: '',
       title,
-      content: `<input class="prompt-value" data-duplex-focus :class="{alert: !prompt}" :duplex="prompt" />`,
+      content: `<input class="prompt-value" ref="input" :class="{alert: !prompt}" :duplex="prompt" />`,
       fixed: true,
       yes: yescb
     }
