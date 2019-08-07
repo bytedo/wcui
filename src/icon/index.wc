@@ -121,6 +121,10 @@ export default class Icon {
     }
   }
 
+  get is() {
+    return this.props.is
+  }
+
   set is(val) {
     this.props.is = val
     this.drawPath()

@@ -18,14 +18,14 @@ function getCalendarTable({ year, month, max, min }, last) {
 
   for (let i = numsFixed; i <= nums; i++) {
     let day = {
-      weeken: !1,
+      weekend: !1,
       day: i < 1 ? '' : i,
       selected: !1,
       disabled: !0
     }
     if (i > 0) {
       let week = getFirstDay(year, month, i)
-      day.weeken = week === 0 || week === 6
+      day.weekend = week === 0 || week === 6
       day.selected = isSelected({ year, month, day: i }, last)
       day.disabled = disabledDay({ max, min }, i, isLimitYM)
     }
@@ -241,7 +241,7 @@ export default Anot.component('datepicker', {
         </section>
         <section class="tr do-fn-cl" :click="pick">
           <span class="td"
-            :class="{weeken:el.weeken, disabled: el.disabled, selected: el.selected}"
+            :class="{weekend:el.weekend, disabled: el.disabled, selected: el.selected}"
             :for="calendar.list"
             :data-idx="$index"
             :text="el.day"></span>

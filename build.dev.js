@@ -4,7 +4,6 @@ require('es.shim')
 const log = console.log
 const fs = require('iofs')
 const path = require('path')
-const babel = require('babel-core')
 const scss = require('node-sass')
 const chokidar = require('chokidar')
 const chalk = require('chalk')
@@ -69,7 +68,12 @@ function mkWCFile({ style, html, js }) {
   js = js.replace(/props = (\{[\w\W]*?\n\s{2}?\})/, function(s, m) {
     props = m
     var attr = new Function(
-      `var props = ${m}, attr = []; for(var i in props){attr.push(i)}; return attr`
+      `try {
+        var props = ${m}, attr = []
+        for(var i in props){attr.push(i)}
+        return attr
+      } catch(err) {console.error(err);return []}
+      `
     )()
     return `static get observedAttributes() {
         return ${JSON.stringify(attr)}
@@ -161,17 +165,19 @@ chokidar
         return
       }
 
-      switch (file.ext) {
-        case '.js':
-          compileJs(entry, output)
-          break
-        case '.wc':
-          output = output.replace(/\.wc$/, '.js')
-          compileWC(entry, output)
-          break
-        default:
-          fs.cp(entry, output)
-      }
+      setTimeout(() => {
+        switch (file.ext) {
+          case '.js':
+            compileJs(entry, output)
+            break
+          case '.wc':
+            output = output.replace(/\.wc$/, '.js')
+            compileWC(entry, output)
+            break
+          default:
+            fs.cp(entry, output)
+        }
+      }, 100)
     }
   })
   .on('ready', () => {
