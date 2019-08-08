@@ -390,7 +390,6 @@ export default class Input {
     // 键盘事件
     this._handleSubmit = ebind(this.__INPUT__, 'keydown', ev => {
       if (this.disabled || this.readonly) {
-        ev.stopPropagation()
         return
       }
       // up: 38, down: 40
@@ -466,6 +465,7 @@ export default class Input {
       this._handleSelect = bind(this.__LIST__, 'click', ev => {
         if (ev.target.tagName === 'LI') {
           this._fetchSelect(ev.target.dataset.idx, ev)
+          this.dispatchEvent(new CustomEvent('input'))
         }
       })
     }

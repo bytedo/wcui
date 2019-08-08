@@ -101,7 +101,7 @@
     font-size: 14px;
 
     wc-icon {
-      --size: 16px;
+      --size: 14px;
       margin: 0 3px;
       color: nth($cgr, 1);
       cursor: pointer;
