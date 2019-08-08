@@ -1,6 +1,6 @@
 <template>
   <label class="input" tabindex="0">
-    <span>ddd</span>
+    <span></span>
     <wc-icon class="icon" is="calendar"></wc-icon>
   </label>
   <div class="calendar">
@@ -21,6 +21,7 @@
       <span>六</span>
     </section>
     <section class="days"></section>
+    <div class="tips">日期超出限制</div>
   </div>
 </template>
 
@@ -41,7 +42,7 @@
   align-items: center;
   min-width: 64px;
   height: 32px;
-  font-size: 14px;
+  font-size: 13px;
   border: 1px solid nth($cp, 3);
   border-radius: inherit;
   background: #fff;
@@ -57,14 +58,10 @@
       color: nth($cgr, 1);
     }
   }
-
-  &:focus {
-    border-color: nth($ct, 1);
-  }
   /* ----- */
   .icon {
     padding: 0 5px;
-    --size: 20px;
+    --size: 16px;
   }
 }
 
@@ -74,11 +71,12 @@
   z-index: 10240;
   left: 0;
   top: 0;
-  width: 202px;
+  width: 216px;
   height: auto;
   padding: 8px 10px;
   border-radius: 4px;
-  font-size: 14px;
+  font-size: 12px;
+  text-align: center;
   background: #fff;
   box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
 
@@ -100,11 +98,13 @@
     justify-content: space-between;
     height: 30px;
     margin: 8px 0;
+    font-size: 14px;
 
     wc-icon {
       --size: 16px;
       margin: 0 3px;
       color: nth($cgr, 1);
+      cursor: pointer;
     }
     span {
       flex: 1;
@@ -113,10 +113,9 @@
   }
   .week {
     display: flex;
-    height: 27px;
+    height: 29px;
     border-bottom: 1px solid #f2f5fc;
-    text-align: center;
-    font-weight: bold;
+    font-size: 14px;
     span {
       flex: 1;
     }
@@ -125,47 +124,88 @@
   .days {
     display: flex;
     flex-wrap: wrap;
+    margin-top: 8px;
     line-height: 26px;
-    text-align: center;
 
     span {
       position: relative;
-      width: 26px;
-      height: 26px;
+      width: 28px;
+      height: 28px;
+      border: 1px solid transparent;
+      border-radius: 50%;
+
+      &:hover {
+        border-color: #f2f5fc;
+        font-size: 13px;
+      }
 
       &[weekend] {
         color: nth($ct, 1);
       }
       &[picked] {
         color: #fff;
+        border-color: #f2f5fc;
 
         &::before {
           display: block;
           position: absolute;
-          left: 0;
-          top: 0;
+          left: 3px;
+          top: 3px;
           z-index: -1;
-          width: 100%;
-          height: 100%;
+          width: 20px;
+          height: 20px;
           border-radius: 50%;
           background: nth($ct, 1);
           content: '';
         }
       }
       &[disabled] {
+        border-color: transparent;
+        font-size: 12px;
         color: nth($cp, 3);
       }
     }
+  }
+
+  .tips {
+    display: none;
+    position: absolute;
+    z-index: 10241;
+    left: 25%;
+    top: 40%;
+    width: 50%;
+    height: 30px;
+    line-height: 28px;
+    background: #fffbed;
+    color: nth($co, 2);
+    border: 1px solid nth($co, 1);
+    border-radius: 4px;
+  }
+}
+
+:host(:focus-within) {
+  box-shadow: 0 0 3px nth($ct, 1);
+}
+:host(:focus-within[readonly]) {
+  box-shadow: 0 0 3px nth($co, 1);
+}
+:host([disabled]) {
+  opacity: 0.6;
+  .input {
+    cursor: not-allowed;
+    background: #f3f5fb;
   }
 }
 </style>
 
 <script>
 import '../icon/index'
+import { nextTick, each, ebind, bind, unbind } from '../utils'
 
 const today = new Date()
 
 /**************** 公共函数 *****************/
+
 //计算日历数组
 function getCalendarTable({ year, month, max, min, last }) {
   let nums = getTotalDays(year, month)
@@ -173,7 +213,6 @@ function getCalendarTable({ year, month, max, min, last }) {
   let isLimitYM = isLimited({ max, min }, { year, month })
   let list = []
 
-  log(isLimitYM, year, month)
   for (let i = numsFixed; i <= nums; i++) {
     let day = {
       weekend: false,
@@ -210,10 +249,6 @@ function isLimited({ max, min }, { year, month }) {
       } else if (month === max.month) {
         result += '+'
       }
-      // todo next
-      // result += '+'
-    } else {
-      // return true
     }
   }
 
@@ -226,9 +261,6 @@ function isLimited({ max, min }, { year, month }) {
       } else if (month === min.month) {
         result += '-'
       }
-      // todo next
-    } else {
-      // return true
     }
   }
   return result
@@ -291,7 +323,9 @@ export default class DatePicker {
     'min-date': '',
     max: null,
     min: null,
-    calendar: null
+    calendar: null,
+    readonly: false,
+    disabled: false
   }
 
   constructor() {
@@ -301,7 +335,8 @@ export default class DatePicker {
     this.__INPUT__ = this.root.children[1]
     this.__CALENDAR__ = this.root.children[2]
     this.__CTRL__ = this.__CALENDAR__.firstElementChild
-    this.__DAYS__ = this.__CALENDAR__.lastElementChild
+    this.__DAYS__ = this.__CALENDAR__.children[2]
+    this.__TIPS__ = this.__CALENDAR__.lastElementChild
   }
 
   get value() {
@@ -313,7 +348,7 @@ export default class DatePicker {
       if (!Date.isDate(val)) {
         val = new Date(val)
         if (val.toString() === 'Invalid Date') {
-          val = new Date()
+          return
         }
       }
       this._updateValue(val)
@@ -322,10 +357,68 @@ export default class DatePicker {
       this.props.value = ''
       this.__INPUT__.firstElementChild.textContent = ''
     }
+    let { calendar, last } = this.props
+
+    if (
+      !calendar.year ||
+      (last && calendar.year !== last.year && calendar.month !== last.month)
+    ) {
+      this.props.calendar = { ...last }
+    }
     this._renderCalendar()
+    nextTick(_ => this.dispatchEvent(new CustomEvent('input')))
   }
 
-  _updateValue(oDate) {
+  get readonly() {
+    return this.props.readonly
+  }
+
+  set readonly(val) {
+    var type = typeof val
+
+    if (val === this.props.readonly) {
+      return
+    }
+    if ((type === 'boolean' && val) || type !== 'boolean') {
+      this.props.readonly = true
+      this.setAttribute('readonly', '')
+    } else {
+      this.props.readonly = false
+      this.removeAttribute('readonly')
+    }
+  }
+
+  get disabled() {
+    return this.props.disabled
+  }
+
+  set disabled(val) {
+    var type = typeof val
+
+    if (val === this.props.disabled) {
+      return
+    }
+    if ((type === 'boolean' && val) || type !== 'boolean') {
+      this.props.disabled = true
+      this.setAttribute('disabled', '')
+      this.__INPUT__.removeAttribute('tabindex')
+    } else {
+      this.props.disabled = false
+      this.removeAttribute('disabled')
+      this.__INPUT__.setAttribute('tabindex', '0')
+    }
+  }
+
+  _tips() {
+    clearTimeout(this.timer)
+    this.__TIPS__.style.display = 'block'
+
+    this.timer = setTimeout(() => {
+      this.__TIPS__.style.display = ''
+    }, 1500)
+  }
+
+  _updateValue(oDate, needUpdateStyle) {
     this.props.last = {
       year: oDate.getFullYear(),
       month: oDate.getMonth(),
@@ -333,6 +426,18 @@ export default class DatePicker {
     }
     this.props.value = oDate.format(this.props.format)
     this.__INPUT__.firstElementChild.textContent = this.props.value
+
+    if (needUpdateStyle) {
+      each(this.__DAYS__.children, (el, i) => {
+        if (this.props.last.day === this.calendar[i].day) {
+          this.calendar[i].picked = true
+          el.setAttribute('picked', '')
+        } else {
+          this.calendar[i].picked = false
+          el.removeAttribute('picked')
+        }
+      })
+    }
   }
 
   _renderCalendar() {
@@ -361,85 +466,91 @@ export default class DatePicker {
 
     this._renderCalendar()
 
-    this.__INPUT__.addEventListener(
-      'click',
-      ev => {
-        if (this.props.active) {
+    this._activeFn = bind(this.__INPUT__, 'click', ev => {
+      if (this.props.disabled || this.props.readonly || this.props.active) {
+        return
+      }
+      this.props.active = true
+
+      let { x, y } = this.getBoundingClientRect()
+
+      this.__CALENDAR__.style.cssText = `display:block;left:${x}px;top:${y +
+        50}px`
+    })
+
+    this._bubbleFn = ebind(this, 'click')
+    this._inactiveFn = bind(document, 'click', ev => {
+      this.__CALENDAR__.style.cssText = ''
+      this.props.active = false
+    })
+
+    this._ctrlFn = bind(this.__CTRL__, 'click', ev => {
+      let {
+        calendar: { year, month },
+        max,
+        min
+      } = this.props
+      if (ev.target.tagName === 'WC-ICON') {
+        let act = ev.target.is
+        // log(ev.target, act)
+        switch (act) {
+          case 'left':
+            month--
+            if (month < 0) {
+              month = 11
+              year--
+            }
+            break
+          case 'right':
+            month++
+            if (month > 11) {
+              month = 0
+              year++
+            }
+            break
+          case 'dbl-left':
+            year--
+            break
+          case 'dbl-right':
+            year++
+            break
+        }
+        if (isLimited({ max, min }, { year, month }) === true) {
+          return this._tips()
+        }
+        this.props.calendar.month = month
+        this.props.calendar.year = year
+        this._renderCalendar()
+      }
+    })
+
+    this._pickFn = bind(this.__DAYS__, 'click', ev => {
+      if (ev.target.tagName === 'SPAN') {
+        let { calendar, last } = this.props
+        let item = this.calendar[ev.target.dataset.idx]
+        if (
+          item.disabled ||
+          (last &&
+            calendar.year === last.year &&
+            calendar.month === last.month &&
+            item.day === last.day)
+        ) {
           return
         }
-        this.props.active = true
 
-        let { x, y } = this.getBoundingClientRect()
+        this._updateValue(item._, true)
+        nextTick(_ => this.dispatchEvent(new CustomEvent('input')))
+        this._inactiveFn()
+      }
+    })
+  }
 
-        this.__CALENDAR__.style.cssText = `display:block;left:${x}px;top:${y +
-          50}px`
-      },
-      false
-    )
-
-    this.addEventListener('click', ev => ev.stopPropagation(), false)
-
-    document.addEventListener(
-      'click',
-      ev => {
-        this.__CALENDAR__.style.cssText = ''
-        this.props.active = false
-      },
-      false
-    )
-
-    this.__CTRL__.addEventListener(
-      'click',
-      ev => {
-        let { year, month } = this.props.calendar
-        if (ev.target.tagName === 'WC-ICON') {
-          let act = ev.target.is
-          // log(ev.target, act)
-          switch (act) {
-            case 'left':
-              month--
-              if (month < 0) {
-                month = 11
-                year--
-              }
-              break
-            case 'right':
-              month++
-              if (month > 11) {
-                month = 0
-                year++
-              }
-              break
-            case 'dbl-left':
-              year--
-              break
-            case 'dbl-right':
-              year++
-              break
-          }
-          this.props.calendar.month = month
-          this.props.calendar.year = year
-          this._renderCalendar()
-        }
-      },
-      false
-    )
-
-    this.__DAYS__.addEventListener(
-      'click',
-      ev => {
-        if (ev.target.tagName === 'SPAN') {
-          let item = this.calendar[ev.target.dataset.idx]
-          log(item)
-          if (item.disabled) {
-            return
-          }
-
-          item.selected = true
-        }
-      },
-      false
-    )
+  unmount() {
+    unbind(this.__INPUT__, 'click', this._activeFn)
+    unbind(this, 'click', this._bubbleFn)
+    unbind(document, 'click', this._inactiveFn)
+    unbind(this.__CTRL__, 'click', this._ctrlFn)
+    unbind(this.__DAYS__, 'click', this._pickFn)
   }
 
   watch(name, old, val) {
@@ -485,19 +596,12 @@ export default class DatePicker {
 
       case 'value':
         this.value = val
-
-        if (!this.props.calendar.year) {
-          this.props.calendar = {
-            year: this.props.pick.getFullYear(),
-            month: this.props.pick.getMonth()
-          }
-        }
-        this._renderCalendar()
         break
 
+      case 'readonly':
       case 'disabled':
         if (val === '') {
-          this.disabled = true
+          this[name] = true
         }
         break
     }

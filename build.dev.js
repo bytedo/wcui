@@ -37,15 +37,19 @@ $cd: #62778d #526273 #425064;
 ::after{box-sizing:border-box;}
 `
 
+function fixImport(str) {
+  return str
+    .replace(/import '([\w-/_.]*)'/g, 'import "$1.js"')
+    .replace(
+      /import ([\w\s,{}]*) from '([a-z0-9\/\.\-_]*)'/g,
+      'import $1 from "$2.js"'
+    )
+}
+
 function compileJs(entry, output) {
   log('编译JS: %s', chalk.green(entry))
   let buf = fs.cat(entry).toString()
-  let code = buf
-    .replace(/import '([a-z0-9\/\.\-_]*)'/g, 'import "$1.js"')
-    .replace(
-      /import ([\w]*) from '([a-z0-9\/\.\-_]*)'/g,
-      'import $1 from "$2.js"'
-    )
+  let code = fixImport(buf)
 
   fs.echo(code, output)
 }
@@ -81,16 +85,11 @@ function mkWCFile({ style, html, js }) {
       `
   })
 
-  js = js
+  js = fixImport(js)
     .replace(/class ([\w]+)/, function(s, m) {
       name = m
       return `${s} extends HTMLElement `
     })
-    .replace(/import '([a-z0-9\/\.\-_]*)'/g, 'import "$1.js"')
-    .replace(
-      /import ([\w]*) from '([a-z0-9\/\.\-_]*)'/g,
-      'import $1 from "$2.js"'
-    )
     .replace(/constructor\([^)]?\)\s+\{/, 'constructor() {\n super();')
     .replace(
       '/* render */',

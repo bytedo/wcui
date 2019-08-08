@@ -9,6 +9,7 @@
   overflow: hidden;
   position: relative;
   display: flex;
+  width: 100%;
 
   .container {
     overflow: hidden;
@@ -32,6 +33,7 @@
     display: block;
     border-radius: 3px;
     background: rgba(44, 47, 53, 0.25);
+    cursor: default;
 
     &:hover {
       background: rgba(44, 47, 53, 0.5);

@@ -37,16 +37,21 @@ $cd: #62778d #526273 #425064;
 ::after{box-sizing:border-box;}
 `
 
+function fixImport(str) {
+  return str
+    .replace(/import '([\w-/_.]*)'/g, 'import "$1.js"')
+    .replace(
+      /import ([\w\s,{}]*) from '([a-z0-9\/\.\-_]*)'/g,
+      'import $1 from "$2.js"'
+    )
+}
+
 const compileJs = (entry, output) => {
   let t1 = Date.now()
   let buf = fs.cat(entry).toString()
   let { code } = uglify.minify(buf)
-  code = code
-    .replace(/import"([a-z0-9\/\.\-_]*)"/g, 'import "$1.js"')
-    .replace(
-      /import ([\w]*) from"([a-z0-9\/\.\-_]*)"/g,
-      'import $1 from "$2.js"'
-    )
+  code = fixImport(code)
+
   log(
     '编译JS: %s, 耗时 %s ms',
     chalk.green(entry),
@@ -87,16 +92,11 @@ function mkWCFile({ style, html, js }) {
       `
   })
 
-  js = js
+  js = fixImport(js)
     .replace(/class ([\w]+)/, function(s, m) {
       name = m
       return `${s} extends HTMLElement `
     })
-    .replace(/import '([a-z0-9\/\.\-_]*)'/g, 'import "$1.js"')
-    .replace(
-      /import ([\w]*) from '([a-z0-9\/\.\-_]*)'/g,
-      'import $1 from "$2.js"'
-    )
     .replace(/constructor\([^)]?\)\s+\{/, 'constructor() {\n super();')
     .replace(
       '/* render */',

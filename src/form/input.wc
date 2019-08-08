@@ -6,7 +6,9 @@
     <slot class="append" name="append"></slot>
 
     <div class="suggestion">
-      <ul class="list"></ul>
+      <wc-scroll>
+        <ul class="list"></ul>
+      </wc-scroll>
     </div>
   </div>
 </template>
@@ -17,6 +19,7 @@ li {
   list-style: none;
 }
 :host {
+  overflow: hidden;
   display: inline-block;
   user-select: none;
   -moz-user-select: none;
@@ -25,7 +28,6 @@ li {
 }
 
 .label {
-  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -94,11 +96,11 @@ li {
 
 .suggestion {
   display: none;
-  position: absolute;
+  position: fixed;
   z-index: 10240;
   left: 0;
-  top: 50px;
-  width: 100%;
+  top: 0;
+  width: 200px;
   height: auto;
   max-height: 200px;
   min-height: 46px;
@@ -108,8 +110,6 @@ li {
   box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
 
   .list {
-    overflow: hidden;
-    overflow-y: auto;
     width: 100%;
   }
 
@@ -219,7 +219,9 @@ li {
 </style>
 
 <script>
+import '../scroll/index'
 import '../icon/index'
+import { nextTick, ebind, bind, unbind } from '../utils'
 
 const IS_FIREFOX = !!window.sidebar
 const TYPES = ['text', 'textarea', 'password']
@@ -327,7 +329,9 @@ export default class Input {
     if (list && list.length) {
       ev.preventDefault()
       var step = ev.keyCode === 38 ? -1 : 1
-      var items = Array.from(this.__LIST__.firstElementChild.children)
+      var items = Array.from(
+        this.__LIST__.firstElementChild.firstElementChild.children
+      )
       if (this.props.mvidx === null) {
         this.props.mvidx = 0
       } else {
@@ -383,8 +387,8 @@ export default class Input {
 
     var { type } = this.props
 
-    // 回车事件
-    this._handleSubmit = ev => {
+    // 键盘事件
+    this._handleSubmit = ebind(this.__INPUT__, 'keydown', ev => {
       if (this.disabled || this.readonly) {
         ev.stopPropagation()
         return
@@ -404,7 +408,6 @@ export default class Input {
           return this._fetchSelect(this.props.mvidx, ev)
         }
 
-        //
         if (
           type === 'text' ||
           (type === 'textarea' && (ev.ctrlKey || ev.metaKey))
@@ -416,69 +419,65 @@ export default class Input {
           )
         }
       }
-    }
-
-    // 输入状态事件
-    this._handleChange = ev => {
-      ev.preventDefault()
-      this.dispatchEvent(
-        new CustomEvent('fetch-suggestions', {
-          detail: {
-            value: this.value,
-            send: list => {
-              this.props.list = list
-              this._parseSuggestion()
-            }
-          }
-        })
-      )
-    }
-
-    // 渲染建议列表
-    this._parseSuggestion = ev => {
-      var { list } = this.props
-      if (list && list.length) {
-        var html = list
-          .map((it, i) => `<li data-idx="${i}">${it.value}</li>`)
-          .join('')
-        this.__LIST__.firstElementChild.innerHTML = html
-        this.__LIST__.classList.toggle('show', true)
-      } else {
-        this.__LIST__.classList.toggle('show', false)
-      }
-    }
-
-    //  失去焦点
-    this._handleBlur = ev => {
-      setTimeout(() => {
-        this.__LIST__.classList.remove('show')
-      }, 50)
-    }
-
-    // 选择建议
-    this._handleSelect = ev => {
-      if (ev.target.tagName === 'LI') {
-        this._fetchSelect(ev.target.dataset.idx, ev)
-      }
-    }
-
-    this.__INPUT__.addEventListener('keydown', this._handleSubmit, false)
+    })
 
     // 非textarea, 可做输入建议功能
     if (type === 'text') {
-      this.__INPUT__.addEventListener('input', this._handleChange, false)
-      this.__INPUT__.addEventListener('focus', this._parseSuggestion, false)
-      this.__INPUT__.addEventListener('blur', this._handleBlur, false)
-      this.__LIST__.addEventListener('click', this._handleSelect, false)
+      // 输入状态事件
+      this._handleChange = bind(this.__INPUT__, 'input', ev => {
+        ev.preventDefault()
+        this.dispatchEvent(
+          new CustomEvent('fetch-suggest', {
+            detail: {
+              value: this.value,
+              send: list => {
+                this.props.list = list
+                this._parseSuggestion()
+              }
+            }
+          })
+        )
+      })
+
+      // 渲染建议列表
+      this._parseSuggestion = bind(this.__INPUT__, 'click', ev => {
+        var { list } = this.props
+        let { x, y, width } = this.getBoundingClientRect()
+        if (list && list.length) {
+          var html = list
+            .map((it, i) => `<li data-idx="${i}">${it.value}</li>`)
+            .join('')
+          this.__LIST__.firstElementChild.firstElementChild.innerHTML = html
+          this.__LIST__.classList.toggle('show', true)
+          this.__LIST__.style.cssText = `left:${x}px;top:${y +
+            50}px;width:${width}px;`
+        } else {
+          this.__LIST__.classList.toggle('show', false)
+        }
+      })
+
+      this._bubbleFn = ebind(this, 'click')
+
+      this._inactiveFn = bind(document, 'click', ev => {
+        this.__LIST__.classList.remove('show')
+      })
+
+      // 选择建议
+      this._handleSelect = bind(this.__LIST__, 'click', ev => {
+        if (ev.target.tagName === 'LI') {
+          this._fetchSelect(ev.target.dataset.idx, ev)
+        }
+      })
     }
   }
 
   unmount() {
-    this.__INPUT__.removeEventListener('keydown', this._handleSubmit)
-    this.__INPUT__.removeEventListener('input', this._handleChange)
-    this.__INPUT__.removeEventListener('focus', this._parseSuggestion)
-    this.__INPUT__.removeEventListener('blur', this._handleBlur)
-    this.__LIST__.removeEventListener('click', this._handleSelect)
+    unbind(this.__INPUT__, 'keydown', this._handleSubmit)
+    unbind(this.__INPUT__, 'input', this._handleChange)
+    unbind(this, 'click', this._bubbleFn)
+    unbind(document, 'click', this._inactiveFn)
+    unbind(this.__INPUT__, 'blur', this._handleBlur)
+    unbind(this.__LIST__, 'click', this._handleSelect)
   }
 
   watch(name, old, val) {
