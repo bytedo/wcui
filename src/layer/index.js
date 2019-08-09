@@ -8,7 +8,6 @@
 'use strict'
 
 import '../drag/index'
-import 'css/layer-normal.scss'
 
 Anot.ui.layer = '1.0.0-normal'
 
@@ -245,7 +244,7 @@ class __layer__ {
     let layBox = document.createElement('div')
 
     outerBox.setAttribute('anot', $id)
-    outerBox.setAttribute(':click', 'onMaskClick')
+    outerBox.setAttribute(':on-click', 'onMaskClick')
 
     outerBox.classList.add('do-layer')
     if (state.mask) {
@@ -281,7 +280,7 @@ class __layer__ {
     }
 
     layBox.setAttribute('ref', 'layer')
-    // layBox.setAttribute(':click', 'cancelBubble')
+    // layBox.setAttribute(':on-click', 'cancelBubble')
 
     // 暂时隐藏,避免修正定位时,能看到闪一下
     layBox.style.cssText += 'border-radius:' + state.radius + 'px'
@@ -359,7 +358,7 @@ class __layer__ {
       let html = ''
       let btns = `
         <a class="action-yes"
-          :click="handleConfirm"
+          :on-click="handleConfirm"
           tabindex="-1"
           :text="btns[0]"
           ></a>
@@ -368,7 +367,7 @@ class __layer__ {
         btns =
           `
         <a class="action-no"
-          :click="handleCancel"
+          :on-click="handleCancel"
           :text="btns[1]"
           ></a>
         ` + btns

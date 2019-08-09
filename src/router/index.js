@@ -239,44 +239,4 @@ class Router {
   }
 }
 
-Anot.component('link', {
-  __init__(props, state, next) {
-    if (!Anot.router) {
-      return Anot.error('使用<anot-link />前,请先初始化路由')
-    }
-    let { mode } = Anot.router.options
-    if (!props.to) {
-      return
-    }
-    this.setAttribute(':class', '{active: active}')
-    state.rule = Anot.router.__parseRule__(
-      props.to.replace(/^[\/]+|[\/]+$|\s+/g, ''),
-      {}
-    ).regexp
-    props.label = props.label || this.text()
-    if (mode === 'hash') {
-      state.link = '#!' + props.to
-    } else {
-      state.link = props.to
-    }
-    delete props.to
-    next()
-  },
-  render() {
-    return '<a :attr-href="link" :text="props.label"></a>'
-  },
-  skip: ['rule'],
-  componentDidMount() {
-    this.active = this.rule.test(Anot.router.path)
-    LINKS.push(this)
-  },
-  state: {
-    link: '',
-    active: false
-  },
-  props: {
-    label: ''
-  }
-})
-
 export default Router

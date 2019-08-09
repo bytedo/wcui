@@ -49,8 +49,8 @@ function fixImport(str) {
 const compileJs = (entry, output) => {
   let t1 = Date.now()
   let buf = fs.cat(entry).toString()
+  buf = fixImport(buf)
   let { code } = uglify.minify(buf)
-  code = fixImport(code)
 
   log(
     '编译JS: %s, 耗时 %s ms',

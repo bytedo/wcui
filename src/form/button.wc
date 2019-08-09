@@ -9,24 +9,27 @@
 :host {
   overflow: hidden;
   display: inline-block;
+  min-width: 64px;
+  height: 32px;
   user-select: none;
   -moz-user-select: none;
   color: nth($cd, 2);
+  font-size: 14px;
   cursor: pointer;
 
   button {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-width: 32px;
-    width: inherit;
+    width: 100%;
     height: inherit;
     padding: 0 5px;
     margin: auto;
-    font-size: 14px;
     border: 1px solid nth($cp, 3);
     border-radius: 4px;
+    white-space: nowrap;
     background: #fff;
+    font-size: inherit;
     outline: none;
     color: inherit;
     cursor: inherit;
@@ -50,9 +53,10 @@
   border-radius: 21px;
 }
 :host([circle]) {
+  min-width: 32px;
   button {
-    border-radius: 50%;
     padding: 0;
+    border-radius: 50%;
   }
   .icon {
     margin-right: 0;
@@ -60,37 +64,29 @@
 }
 
 :host([size='large']) {
-  button {
-    min-width: 120px;
-    height: 42px;
-    font-size: 16px;
-  }
+  min-width: 120px;
+  height: 42px;
+  font-size: 16px;
+
   .icon {
     --size: 20px;
   }
 }
 :host([size='large'][circle]) {
-  button {
-    min-width: 42px;
-  }
+  min-width: 42px;
 }
 :host([size='medium']) {
-  button {
-    min-width: 90px;
-    height: 36px;
-  }
+  min-width: 90px;
+  height: 36px;
 }
 :host([size='medium'][circle]) {
-  button {
-    min-width: 36px;
-  }
+  min-width: 36px;
 }
 :host([size='mini']) {
-  button {
-    min-width: 24px;
-    height: 24px;
-    font-size: 12px;
-  }
+  min-width: 24px;
+  height: 24px;
+  font-size: 12px;
+
   .icon {
     --size: 14px;
   }
@@ -100,11 +96,12 @@
 :host([disabled]) {
   cursor: not-allowed;
   color: nth($cgr, 1);
+  opacity: 0.6;
+
   .icon {
     color: nth($cgr, 1);
   }
   button {
-    opacity: 0.6;
     background: #fff;
   }
 }
