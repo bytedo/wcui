@@ -69,7 +69,7 @@ function mkWCFile({ style, html, js }) {
   let name = ''
   let props = ''
 
-  js = js.replace(/props = (\{[\w\W]*?\n\s{2}?\})/, function(s, m) {
+  js = js.replace(/props = (\{\}|\{[\w\W]*?\n\s{2}?\})/, function(s, m) {
     props = m
     var attr = new Function(
       `try {

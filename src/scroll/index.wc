@@ -81,14 +81,59 @@ const IS_FF = !!window.sidebar
 
 /*  */
 export default class Scroll {
-  props = {
-    v: ''
-  }
+  props = {}
   constructor() {
     /* render */
     this.__BOX__ = this.root.children[1]
     this.__X__ = this.root.children[2].children[0]
     this.__Y__ = this.root.children[3].children[0]
+  }
+
+  get scrollTop() {
+    return this.__BOX__.scrollTop
+  }
+
+  set scrollTop(n) {
+    //  this.__BOX__.scrollTop
+  }
+
+  get scrollLeft() {
+    return this.__BOX__.scrollLeft
+  }
+
+  set scrollLeft(val) {
+    // this.__BOX__.scrollLeft
+  }
+
+  get scrollHeight() {
+    return this.__BOX__.scrollHeight
+  }
+
+  _fetchScrollX(moveX) {
+    var { sw, ow, xw, sh, oh, yh } = this.props
+
+    if (moveX < 0) {
+      moveX = 0
+    } else if (moveX > ow - xw) {
+      moveX = ow - xw
+    }
+    this.__BOX__.scrollLeft = (sw - ow) * (moveX / (ow - xw))
+    this.__X__.style.transform = `translateX(${moveX}px)`
+
+    return moveX
+  }
+
+  _fetchScrollY(moveY) {
+    var { sw, ow, xw, sh, oh, yh } = this.props
+
+    if (moveY < 0) {
+      moveY = 0
+    } else if (moveY > oh - yh) {
+      moveY = oh - yh
+    }
+    this.__BOX__.scrollTop = (sh - oh) * (moveY / (oh - yh))
+    this.__Y__.style.transform = `translateY(${moveY}px)`
+    return moveY
   }
 
   mounted() {
@@ -187,28 +232,13 @@ export default class Scroll {
       moveX,
       moveY,
       mousemoveFn = ev => {
-        var { sw, ow, xw, sh, oh, yh, thumbY, thumbX } = this.props
-
+        var { thumbY, thumbX } = this.props
         if (startX !== null) {
-          moveX = thumbX + ev.pageX - startX
-          if (moveX < 0) {
-            moveX = 0
-          } else if (moveX > ow - xw) {
-            moveX = ow - xw
-          }
-          this.__BOX__.scrollLeft = (sw - ow) * (moveX / (ow - xw))
-          this.__X__.style.transform = `translateX(${moveX}px)`
+          moveX = this._fetchScrollX(thumbX + ev.pageX - startX)
         }
 
         if (startY !== null) {
-          moveY = thumbY + ev.pageY - startY
-          if (moveY < 0) {
-            moveY = 0
-          } else if (moveY > oh - yh) {
-            moveY = oh - yh
-          }
-          this.__BOX__.scrollTop = (sh - oh) * (moveY / (oh - yh))
-          this.__Y__.style.transform = `translateY(${moveY}px)`
+          moveY = this._fetchScrollY(thumbY + ev.pageY - startY)
         }
       },
       mouseupFn = ev => {

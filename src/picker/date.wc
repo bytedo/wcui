@@ -601,25 +601,15 @@ export default class DatePicker {
         break
 
       case 'max-date':
-        if (val) {
-          let tmp = new Date(val)
-          if (tmp.getFullYear()) {
-            this.props.max = {
-              year: tmp.getFullYear(),
-              month: tmp.getMonth(),
-              day: tmp.getDate()
-            }
-            this._renderCalendar()
-          }
-        }
-        this.removeAttribute('max-date')
-        break
-
       case 'min-date':
         if (val) {
+          let v = +val
+          if (v === v) {
+            val = v
+          }
           let tmp = new Date(val)
           if (tmp.getFullYear()) {
-            this.props.min = {
+            this.props[name.slice(0, 3)] = {
               year: tmp.getFullYear(),
               month: tmp.getMonth(),
               day: tmp.getDate()
@@ -627,7 +617,7 @@ export default class DatePicker {
             this._renderCalendar()
           }
         }
-        this.removeAttribute('min-date')
+        this.removeAttribute(name)
         break
 
       case 'value':

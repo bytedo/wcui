@@ -4,11 +4,8 @@
     <input readonly />
     <wc-icon class="arrow" is="left"></wc-icon>
     <slot class="append" name="append"></slot>
-    <div class="opt-box">
-      <wc-scroll>
-        <dl class="list"></dl>
-      </wc-scroll>
-    </div>
+
+    <div class="opt-box"></div>
   </div>
 </template>
 
@@ -122,8 +119,7 @@ li {
     display: flex;
   }
 
-  dt,
-  dd {
+  li {
     overflow: hidden;
     width: 100%;
     height: 30px;
@@ -131,23 +127,11 @@ li {
     padding: 0 8px;
     text-overflow: ellipsis;
     white-space: nowrap;
-  }
-
-  dt {
-    font-size: 12px;
-    color: nth($cgr, 1);
-    cursor: default;
-  }
-
-  dd {
     cursor: pointer;
 
     &:hover,
     &[focus] {
       background: nth($cp, 1);
-    }
-    &[sub] {
-      text-indent: 1em;
     }
   }
 }
@@ -217,19 +201,52 @@ import '../scroll/index'
 import '../icon/index'
 import { nextTick, ebind, bind, unbind } from '../utils'
 
-function parseOptions(list) {
-  let html = ''
-  for (let it of list) {
-    if (it.list) {
-      html += `<dt>${it.name}</dt>`
-      for (let _ of it.list) {
-        html += `<dd sub data-value="${_.value}">${_.label}</dd>`
-      }
+function parseTree(list, key) {
+  var tmp = {}
+  var arr = []
+
+  list.sort(function(a, b) {
+    return a.parent === b.parent ? a.id - b.id : a.parent - b.parent
+  })
+
+  list.forEach(it => {
+    it.id = +it.id
+    it.parent = +it.parent
+    it.children = []
+
+    tmp[it.id] = it
+    let _p = tmp[it.parent]
+
+    if (_p) {
+      _p.children.push(it)
     } else {
-      html += `<dd data-value="${it.value}">${it.label}</dd>`
+      arr.push(it)
     }
+  })
+  // key && (store.project[key] = tmp)
+  return arr
+}
+
+function parseOptions(list) {
+  // 最多只允许4级联动
+  var arr = Array(4)
+    .fill(null)
+    .map(_ => [])
+  var path = {}
+
+  for (let it of list) {
+    path[value] = value
+    arr[0].push({ label: it.label, value: it.value })
+
+    if (it.children && it.children.length) {
+      for (let s of it.children) {
+        path[s.value] = it.value
+      }
+    }
+    arr[1] = arr[1].concat(it.children || [])
   }
-  return html
+  for (let it of arr[1]) {
+  }
 }
 
 export default class Select {
@@ -282,6 +299,12 @@ export default class Select {
     this.__INPUT__.value = val
   }
 
+  _mkOpt(list) {
+    var html = list
+      .map((it, i) => `<li data-idx="${i}">${it.value}</li>`)
+      .join('')
+  }
+
   mounted() {
     var prepend = this.__PREPEND__.assignedNodes()
     var append = this.__APPEND__.assignedNodes()
@@ -307,9 +330,10 @@ export default class Select {
       let { x, y, width } = this.getBoundingClientRect()
       log(list, this.props)
       if (list && list.length) {
-        this.__OPTG__.firstElementChild.firstElementChild.innerHTML = parseOptions(
-          list
-        )
+        var html = list
+          .map((it, i) => `<li data-idx="${i}">${it.value}</li>`)
+          .join('')
+        this.__OPTG__.innerHTML = html
         this.__OPTG__.classList.toggle('show', true)
         this.__OPTG__.style.cssText = `left:${x}px;top:${y +
           50}px;width:${width}px;`
