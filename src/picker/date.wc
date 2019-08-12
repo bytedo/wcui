@@ -311,17 +311,6 @@ function isPicked({ year, month, day }, last) {
   return last && last.year === year && last.month === month && last.day === day
 }
 
-//修改当前选中日期的样式
-function changeStyle(calendar, day) {
-  calendar.list.forEach(function(item) {
-    if (item.day != day) {
-      item.selected = !1
-    } else {
-      item.selected = !0
-    }
-  })
-}
-
 //获取今年的年份/月份，返回的是数组
 function getThisYearMonth() {
   var oDate = new Date()
@@ -346,7 +335,11 @@ export default class DatePicker {
     'min-date': '',
     max: null,
     min: null,
-    calendar: null,
+    calendar: {
+      year: 0,
+      month: 0,
+      list: []
+    },
     readonly: false,
     disabled: false
   }
@@ -354,7 +347,6 @@ export default class DatePicker {
   constructor() {
     /* render */
 
-    this.calendar = []
     this.__INPUT__ = this.root.children[1]
     this.__CALENDAR__ = this.root.children[2]
     this.__CTRL__ = this.__CALENDAR__.firstElementChild
@@ -386,7 +378,7 @@ export default class DatePicker {
       !calendar.year ||
       (last && calendar.year !== last.year && calendar.month !== last.month)
     ) {
-      this.props.calendar = { ...last }
+      this.props.calendar = { ...last, list: [] }
     }
     this._renderCalendar()
     nextTick(_ => this.dispatchEvent(new CustomEvent('input')))
@@ -451,12 +443,13 @@ export default class DatePicker {
     this.__INPUT__.children[1].textContent = this.props.value
 
     if (needUpdateStyle) {
+      var list = this.props.calendar.list
       each(this.__DAYS__.children, (el, i) => {
-        if (this.props.last.day === this.calendar[i].day) {
-          this.calendar[i].picked = true
+        if (this.props.last.day === list[i].day) {
+          list[i].picked = true
           el.setAttribute('picked', '')
         } else {
-          this.calendar[i].picked = false
+          list[i].picked = false
           el.removeAttribute('picked')
         }
       })
@@ -465,13 +458,13 @@ export default class DatePicker {
 
   _renderCalendar() {
     var { calendar, max, min, last } = this.props
-    this.calendar = getCalendarTable({ ...calendar, max, min, last })
+    calendar.list = getCalendarTable({ ...calendar, max, min, last })
 
     this.__CTRL__.children[2].textContent = `${
       calendar.year
     }年${calendar.month + 1}月`
 
-    this.__DAYS__.innerHTML = this.calendar
+    this.__DAYS__.innerHTML = calendar.list
       .map(
         (it, i) =>
           `<span data-idx="${i}" ${it.picked ? 'picked' : ''} ${
@@ -492,7 +485,8 @@ export default class DatePicker {
 
     this.props.calendar = {
       year: today.getFullYear(),
-      month: today.getMonth()
+      month: today.getMonth(),
+      list: []
     }
 
     this._renderCalendar()
@@ -558,7 +552,7 @@ export default class DatePicker {
     this._pickFn = bind(this.__DAYS__, 'click', ev => {
       if (ev.target.tagName === 'SPAN') {
         let { calendar, last } = this.props
-        let item = this.calendar[ev.target.dataset.idx]
+        let item = calendar.list[ev.target.dataset.idx]
         if (
           item.disabled ||
           (last &&
