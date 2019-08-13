@@ -482,7 +482,7 @@ class __layer__ {
           layerDom[$id][1].classList.add('shift')
           setTimeout(_ => {
             $dom1.css(offsetStyle)
-            if (vm.$refs.input) {
+            if (vm && vm.$refs.input) {
               vm.$refs.input.focus()
             }
             setTimeout(_ => {

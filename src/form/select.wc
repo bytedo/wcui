@@ -40,6 +40,7 @@ li {
 
   input {
     flex: 1;
+    width: auto;
     min-width: 0;
     height: 100%;
     padding: 0 5px;
@@ -344,7 +345,7 @@ export default class Select {
   }
 
   // 触发列表选择
-  _fetchSelect(idx, ev) {
+  _fetchSelect(idx, needUpdateStyle) {
     var item = this.props.LIST[idx]
     this.value = item.value
     this.dispatchEvent(
@@ -352,6 +353,21 @@ export default class Select {
         detail: item
       })
     )
+    if (needUpdateStyle) {
+      this.props.mvidx = idx
+      var items = Array.from(
+        this.__OPTG__.firstElementChild.firstElementChild.children
+      ).filter(it => {
+        return it.tagName === 'DD' && !it.hasAttribute('disabled')
+      })
+      items.forEach((it, i) => {
+        if (i === idx) {
+          it.setAttribute('focus', '')
+        } else {
+          it.removeAttribute('focus')
+        }
+      })
+    }
     this.props.active = false
     this.__OPTG__.classList.remove('show')
   }
@@ -402,8 +418,8 @@ export default class Select {
       }
       // 回车触发select事件
       if (ev.keyCode === 13) {
-        if (this.props.mvidx !== null) {
-          return this._fetchSelect(this.props.mvidx, ev)
+        if (this.props.mvidx !== null && this.props.active) {
+          return this._fetchSelect(this.props.mvidx)
         }
       }
     })
@@ -419,7 +435,7 @@ export default class Select {
     // 选择选项
     this._handleSelect = bind(this.__OPTG__, 'click', ev => {
       if (ev.target.tagName === 'DD' && !ev.target.hasAttribute('disabled')) {
-        this._fetchSelect(ev.target.dataset.idx, ev)
+        this._fetchSelect(+ev.target.dataset.idx, true)
         this.dispatchEvent(new CustomEvent('input'))
       }
     })
