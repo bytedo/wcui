@@ -31,7 +31,7 @@
   overflow: hidden;
   display: inline-block;
   position: relative;
-  min-width: 80px;
+  min-width: 105px;
   user-select: none;
   -moz-user-select: none;
   color: nth($cd, 2);
@@ -67,9 +67,7 @@
   }
 
   span {
-    overflow: hidden;
     flex: 1;
-    min-width: 64px;
     padding: 0 5px;
 
     &::placeholder {
