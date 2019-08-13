@@ -76,6 +76,7 @@
 </style>
 
 <script>
+import { bind, ebind, unbind } from '../utils'
 // 是否火狐浏览器
 const IS_FF = !!window.sidebar
 
@@ -156,7 +157,7 @@ export default class Scroll {
 
   mounted() {
     // 初始化滚动条的位置和长度
-    this._initFn = ev => {
+    this._initFn = bind(this.__BOX__, 'mouseenter', ev => {
       var ow = this.__BOX__.offsetWidth
       var sw = this.__BOX__.scrollWidth
       var oh = this.__BOX__.offsetHeight
@@ -189,10 +190,10 @@ export default class Scroll {
       this.__X__.style.width = xw + 'px'
 
       this.__Y__.style.height = yh + 'px'
-    }
+    })
 
     // 鼠标滚动事件
-    this._wheelFn = ev => {
+    this._wheelFn = ebind(this.__BOX__, 'wheel', ev => {
       ev.preventDefault()
       var { sh, oh, yh, sw, ow, xw } = this.props
 
@@ -239,11 +240,7 @@ export default class Scroll {
 
         this.__Y__.style.transform = `translateY(${fixedY}px)`
       }
-    }
-
-    this.__BOX__.addEventListener('mouseenter', this._initFn, false)
-
-    this.__BOX__.addEventListener('wheel', this._wheelFn, false)
+    })
 
     var startX,
       startY,
@@ -264,40 +261,32 @@ export default class Scroll {
         startY = null
         this.props.thumbX = moveX
         this.props.thumbY = moveY
-        document.removeEventListener('mousemove', mousemoveFn)
-        document.removeEventListener('mouseup', mouseupFn)
+        unbind(document, 'mousemove', mousemoveFn)
+        unbind(document, 'mouseup', mouseupFn)
       }
 
-    this.__Y__.addEventListener(
-      'mousedown',
-      ev => {
-        startY = ev.pageY
-        if (!this.props.thumbY) {
-          this.props.thumbY = 0
-        }
-        document.addEventListener('mousemove', mousemoveFn, false)
-        document.addEventListener('mouseup', mouseupFn, false)
-      },
-      false
-    )
+    bind(this.__Y__, 'mousedown', ev => {
+      startY = ev.pageY
+      if (!this.props.thumbY) {
+        this.props.thumbY = 0
+      }
+      bind(document, 'mousemove', mousemoveFn)
+      bind(document, 'mouseup', mouseupFn)
+    })
 
-    this.__X__.addEventListener(
-      'mousedown',
-      ev => {
-        startX = ev.pageX
-        if (!this.props.thumbX) {
-          this.props.thumbX = 0
-        }
-        document.addEventListener('mousemove', mousemoveFn, false)
-        document.addEventListener('mouseup', mouseupFn, false)
-      },
-      false
-    )
+    bind(this.__X__, 'mousedown', ev => {
+      startX = ev.pageX
+      if (!this.props.thumbX) {
+        this.props.thumbX = 0
+      }
+      bind(document, 'mousemove', mousemoveFn)
+      bind(document, 'mouseup', mouseupFn)
+    })
   }
 
   unmount() {
-    this.__BOX__.removeEventListener('mouseenter', this._initFn)
-    this.__BOX__.removeEventListener('wheel', this._wheelFn)
+    unbind(this.__BOX__, 'mouseenter', this._initFn)
+    unbind(this.__BOX__, 'wheel', this._wheelFn)
   }
 }
 </script>

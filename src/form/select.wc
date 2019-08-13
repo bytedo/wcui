@@ -36,7 +36,7 @@ li {
   border-radius: inherit;
   background: #fff;
   color: inherit;
-  cursor: text;
+  cursor: default;
 
   input {
     flex: 1;
