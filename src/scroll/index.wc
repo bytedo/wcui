@@ -94,7 +94,16 @@ export default class Scroll {
   }
 
   set scrollTop(n) {
-    //  this.__BOX__.scrollTop
+    n = +n
+    if (n === n) {
+      var { sh, oh, yh } = this.props
+
+      this.__BOX__.scrollTop = n
+      var fixedY = (this.__BOX__.scrollTop / (sh - oh)) * (oh - yh)
+      this.props.thumbY = fixedY
+
+      this.__Y__.style.transform = `translateY(${fixedY}px)`
+    }
   }
 
   get scrollLeft() {
@@ -102,7 +111,16 @@ export default class Scroll {
   }
 
   set scrollLeft(val) {
-    // this.__BOX__.scrollLeft
+    n = +n
+    if (n === n) {
+      var { sw, ow, xw } = this.props
+
+      this.__BOX__.scrollLeft = n
+      var fixedX = (this.__BOX__.scrollLeft / (sw - ow)) * (ow - xw)
+      this.props.thumbX = fixedX
+
+      this.__X__.style.transform = `translateX(${fixedX}px)`
+    }
   }
 
   get scrollHeight() {
@@ -110,7 +128,7 @@ export default class Scroll {
   }
 
   _fetchScrollX(moveX) {
-    var { sw, ow, xw, sh, oh, yh } = this.props
+    var { sw, ow, xw } = this.props
 
     if (moveX < 0) {
       moveX = 0
@@ -124,7 +142,7 @@ export default class Scroll {
   }
 
   _fetchScrollY(moveY) {
-    var { sw, ow, xw, sh, oh, yh } = this.props
+    var { sh, oh, yh } = this.props
 
     if (moveY < 0) {
       moveY = 0

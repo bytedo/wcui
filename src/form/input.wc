@@ -343,6 +343,7 @@ export default class Input {
       }
       items.forEach((it, i) => {
         if (i === this.props.mvidx) {
+          this.__LIST__.firstElementChild.scrollTop = it.offsetTop - 150
           it.setAttribute('focus', '')
         } else {
           it.removeAttribute('focus')
@@ -475,7 +476,6 @@ export default class Input {
     unbind(this.__INPUT__, 'input', this._handleChange)
     unbind(this, 'click', this._bubbleFn)
     unbind(document, 'click', this._inactiveFn)
-    unbind(this.__INPUT__, 'blur', this._handleBlur)
     unbind(this.__LIST__, 'click', this._handleSelect)
   }
 

@@ -102,6 +102,7 @@ li {
   border-radius: 4px;
   background: #fff;
   box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
+  cursor: default;
 
   .list {
     width: 100%;
@@ -136,7 +137,6 @@ li {
   dt {
     font-size: 12px;
     color: nth($cgr, 1);
-    cursor: default;
   }
 
   dd {
@@ -148,6 +148,11 @@ li {
     }
     &[sub] {
       text-indent: 1em;
+    }
+    &[disabled] {
+      color: nth($cgr, 1);
+      cursor: not-allowed;
+      background: none;
     }
   }
 }
@@ -217,16 +222,28 @@ import '../scroll/index'
 import '../icon/index'
 import { nextTick, ebind, bind, unbind } from '../utils'
 
-function parseOptions(list) {
+function parseOptions(arr, props) {
   let html = ''
-  for (let it of list) {
+  for (let it of arr) {
     if (it.list) {
       html += `<dt>${it.name}</dt>`
       for (let _ of it.list) {
-        html += `<dd sub data-value="${_.value}">${_.label}</dd>`
+        props.DICT[_.value] = _
+        if (!_.disabled) {
+          props.LIST.push(_)
+        }
+        html += `<dd sub ${
+          _.disabled ? 'disabled' : `data-idx="${props.LIST.length - 1}"`
+        } ${_.value === props.value ? 'focus' : ''}>${_.label}</dd>`
       }
     } else {
-      html += `<dd data-value="${it.value}">${it.label}</dd>`
+      if (!it.disabled) {
+        props.LIST.push(it)
+      }
+      props.DICT[it.value] = it
+      html += `<dd ${
+        it.disabled ? 'disabled' : `data-idx="${props.LIST.length - 1}"`
+      } ${it.value === props.value ? 'focus' : ''}>${it.label}</dd>`
     }
   }
   return html
@@ -237,7 +254,8 @@ export default class Select {
     label: '',
     placeholder: '',
     multi: '',
-    options: [],
+    value: '',
+    options: '',
     mvidx: null, //下拉列表光标的索引ID
     disabled: false
   }
@@ -275,11 +293,67 @@ export default class Select {
   }
 
   get value() {
-    return this.__INPUT__.value
+    return this.props.value
   }
 
   set value(val) {
-    this.__INPUT__.value = val
+    var { DICT } = this.props
+    this.props.value = val
+    this.__INPUT__.value = (DICT && DICT[val] && DICT[val].label) || val
+  }
+
+  _renderOptions(options) {
+    this.props.DICT = {}
+    this.props.LIST = []
+    var elem = this.__OPTG__.firstElementChild.firstElementChild
+
+    elem.innerHTML = parseOptions(options, this.props)
+  }
+
+  // 移动光标选择下拉选项
+  _moveSelect(ev) {
+    var { LIST, DICT } = this.props
+    if (LIST && LIST.length) {
+      ev.preventDefault()
+      var step = ev.keyCode === 38 ? -1 : 1
+      var items = Array.from(
+        this.__OPTG__.firstElementChild.firstElementChild.children
+      ).filter(it => {
+        return it.tagName === 'DD' && !it.hasAttribute('disabled')
+      })
+      if (this.props.mvidx === null) {
+        this.props.mvidx = 0
+      } else {
+        this.props.mvidx += step
+      }
+      if (this.props.mvidx < 0) {
+        this.props.mvidx = 0
+      } else if (this.props.mvidx > items.length - 1) {
+        this.props.mvidx = items.length - 1
+      }
+
+      items.forEach((it, i) => {
+        if (i === this.props.mvidx) {
+          this.__OPTG__.firstElementChild.scrollTop = it.offsetTop - 150
+          it.setAttribute('focus', '')
+        } else {
+          it.removeAttribute('focus')
+        }
+      })
+    }
+  }
+
+  // 触发列表选择
+  _fetchSelect(idx, ev) {
+    var item = this.props.LIST[idx]
+    this.value = item.value
+    this.dispatchEvent(
+      new CustomEvent('select', {
+        detail: item
+      })
+    )
+    this.props.active = false
+    this.__OPTG__.classList.remove('show')
   }
 
   mounted() {
@@ -301,24 +375,60 @@ export default class Select {
       this.__OUTER__.setAttribute('append', '')
     }
 
+    function initPos() {
+      var { x, y, width } = this.getBoundingClientRect()
+      this.props.active = true
+      this.__OPTG__.style.cssText = `left:${x}px;top:${y +
+        50}px;width:${width}px;`
+    }
+
+    /* ---------------------------------------------------- */
+    /* -----------------     各种事件     ------------------ */
+    /* ---------------------------------------------------- */
+
+    // 键盘事件
+    this._handleKeydown = ebind(this.__INPUT__, 'keydown', ev => {
+      if (this.disabled || this.readonly) {
+        return
+      }
+      // up: 38, down: 40
+      if (ev.keyCode === 38 || ev.keyCode === 40) {
+        if (!this.props.active) {
+          initPos.call(this)
+          this.__OPTG__.classList.toggle('show', true)
+          return
+        }
+        return this._moveSelect(ev)
+      }
+      // 回车触发select事件
+      if (ev.keyCode === 13) {
+        if (this.props.mvidx !== null) {
+          return this._fetchSelect(this.props.mvidx, ev)
+        }
+      }
+    })
+
     // 渲染建议列表
-    this._parseOptGroup = bind(this.__INPUT__, 'click', ev => {
-      var { options: list } = this.props
-      let { x, y, width } = this.getBoundingClientRect()
-      log(list, this.props)
-      if (list && list.length) {
-        this.__OPTG__.firstElementChild.firstElementChild.innerHTML = parseOptions(
-          list
-        )
-        this.__OPTG__.classList.toggle('show', true)
-        this.__OPTG__.style.cssText = `left:${x}px;top:${y +
-          50}px;width:${width}px;`
-      } else {
-        this.__OPTG__.classList.toggle('show', false)
+    this._activeFn = bind(this.__INPUT__, 'click', ev => {
+      var { options } = this.props
+
+      initPos.call(this)
+      this.__OPTG__.classList.toggle('show', true)
+    })
+
+    // 选择选项
+    this._handleSelect = bind(this.__OPTG__, 'click', ev => {
+      if (ev.target.tagName === 'DD' && !ev.target.hasAttribute('disabled')) {
+        this._fetchSelect(ev.target.dataset.idx, ev)
+        this.dispatchEvent(new CustomEvent('input'))
       }
     })
 
     this._bubbleFn = ebind(this, 'click')
+    this._inactiveFn = bind(document, 'click', ev => {
+      this.__OPTG__.classList.toggle('show', false)
+      this.props.active = false
+    })
   }
 
   watch(name, old, val) {
@@ -335,8 +445,9 @@ export default class Select {
       case 'options':
         if (val) {
           try {
-            this.props.options = JSON.parse(val)
+            this._renderOptions(JSON.parse(val))
           } catch (err) {}
+          this.removeAttribute('options')
         }
         break
 
@@ -351,6 +462,14 @@ export default class Select {
         }
         break
     }
+  }
+
+  unmount() {
+    unbind(this.__INPUT__, 'keydown', this._handleKeydown)
+    unbind(this.__INPUT__, 'click', this._activeFn)
+    unbind(this, 'click', this._bubbleFn)
+    unbind(document, 'click', this._inactiveFn)
+    unbind(this.__OPTG__, 'click', this._handleSelect)
   }
 }
 </script>

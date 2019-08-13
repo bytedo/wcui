@@ -553,14 +553,18 @@ export default class DatePicker {
       if (ev.target.tagName === 'SPAN') {
         let { calendar, last } = this.props
         let item = calendar.list[ev.target.dataset.idx]
-        if (
-          item.disabled ||
-          (last &&
-            calendar.year === last.year &&
-            calendar.month === last.month &&
-            item.day === last.day)
-        ) {
+        if (item.disabled) {
           return
+        }
+
+        // 日期未变化时, 直接隐藏, 不作处理
+        if (
+          last &&
+          calendar.year === last.year &&
+          calendar.month === last.month &&
+          item.day === last.day
+        ) {
+          return this._inactiveFn()
         }
 
         this._updateValue(item._, true)
