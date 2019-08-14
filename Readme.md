@@ -24,7 +24,8 @@
 - [x] 表单组件-复选框(`wc-checkbox`)
 - [x] 表单组件-文本输入框(`wc-input`)
 - [x] 表单组件-单选框(`wc-radio`)
-- [ ] 表单组件-下拉选择(`wc-select`)
+- [x] 表单组件-下拉选择(`wc-select`)
+- [ ] 表单组件-多级联动(`wc-select`)
 - [x] 表单组件-开关(`wc-switch`)
 - [x] 图标组件(`wc-icon`)
 - [ ] 弹层插件(`layer`) 待重构...
@@ -32,15 +33,16 @@
 - [x] md5(`md5`)
 - [ ] md文本编辑器(`anot-meditor`) 待重构...
 - [ ] 富文本编辑器(`do-neditor`) 待重构...
-- [ ] 分页组件(`wc-pager`)
+- [x] 分页组件(`wc-pager`)
 - [ ] 颜色选择器(`wc-colorpicker`)
-- [ ] 日期选择器(`wc-datepicker`)
+- [x] 日期选择器(`wc-datepicker`)
 - [ ] 时间选择器(`wc-timepicker`)
 - [x] 代码高亮插件(`prism`)
 - [ ] 网络请求插件(`request`) 待重构...
 - [ ] 路由插件(`router`) 待重构...
 - [x] 滚动组件(`wc-scroll`)
 - [ ] 滑块组件(`wc-silder`)
+- [x] 进度条组件(`wc-progress`)
 - [x] 数据管理插件(`store`)
 - [x] 树形菜单组件(`anot-tree`) 待重构...
 - [x] 上传组件(`anot-uploader`) 待重构...
