@@ -13,10 +13,6 @@
 </template>
 
 <style lang="scss">
-ul,
-li {
-  list-style: none;
-}
 :host {
   overflow: hidden;
   display: inline-block;
@@ -146,6 +142,9 @@ li {
     &:hover,
     &[focus] {
       background: nth($cp, 1);
+    }
+    &[focus] {
+      color: nth($ct, 1);
     }
     &[sub] {
       text-indent: 1em;
@@ -298,9 +297,12 @@ export default class Select {
   }
 
   set value(val) {
-    var { DICT } = this.props
+    var { DICT, active } = this.props
     this.props.value = val
     this.__INPUT__.value = (DICT && DICT[val] && DICT[val].label) || val
+    if (!active) {
+      this._updateStyle()
+    }
   }
 
   _renderOptions(options) {
@@ -309,19 +311,18 @@ export default class Select {
     var elem = this.__OPTG__.firstElementChild.firstElementChild
 
     elem.innerHTML = parseOptions(options, this.props)
+    this.props.ITEMS = Array.from(elem.children).filter(it => {
+      return it.tagName === 'DD' && !it.hasAttribute('disabled')
+    })
   }
 
   // 移动光标选择下拉选项
   _moveSelect(ev) {
-    var { LIST, DICT } = this.props
+    var { LIST, DICT, ITEMS } = this.props
     if (LIST && LIST.length) {
       ev.preventDefault()
       var step = ev.keyCode === 38 ? -1 : 1
-      var items = Array.from(
-        this.__OPTG__.firstElementChild.firstElementChild.children
-      ).filter(it => {
-        return it.tagName === 'DD' && !it.hasAttribute('disabled')
-      })
+
       if (this.props.mvidx === null) {
         this.props.mvidx = 0
       } else {
@@ -329,13 +330,35 @@ export default class Select {
       }
       if (this.props.mvidx < 0) {
         this.props.mvidx = 0
-      } else if (this.props.mvidx > items.length - 1) {
-        this.props.mvidx = items.length - 1
+      } else if (this.props.mvidx > ITEMS.length - 1) {
+        this.props.mvidx = ITEMS.length - 1
       }
 
-      items.forEach((it, i) => {
+      ITEMS.forEach((it, i) => {
         if (i === this.props.mvidx) {
           this.__OPTG__.firstElementChild.scrollTop = it.offsetTop - 150
+          it.setAttribute('focus', '')
+        } else {
+          it.removeAttribute('focus')
+        }
+      })
+    }
+  }
+
+  _updateStyle(idx) {
+    var { LIST, ITEMS, value } = this.props
+    if (LIST && LIST.length) {
+      if (idx === undefined) {
+        for (let i = -1, it; (it = LIST[++i]); ) {
+          if (value === it.value) {
+            idx = i
+            break
+          }
+        }
+      }
+      this.props.mvidx = idx
+      ITEMS.forEach((it, i) => {
+        if (i === idx) {
           it.setAttribute('focus', '')
         } else {
           it.removeAttribute('focus')
@@ -354,19 +377,7 @@ export default class Select {
       })
     )
     if (needUpdateStyle) {
-      this.props.mvidx = idx
-      var items = Array.from(
-        this.__OPTG__.firstElementChild.firstElementChild.children
-      ).filter(it => {
-        return it.tagName === 'DD' && !it.hasAttribute('disabled')
-      })
-      items.forEach((it, i) => {
-        if (i === idx) {
-          it.setAttribute('focus', '')
-        } else {
-          it.removeAttribute('focus')
-        }
-      })
+      this._updateStyle(idx)
     }
     this.props.active = false
     this.__OPTG__.classList.remove('show')
@@ -424,12 +435,12 @@ export default class Select {
       }
     })
 
-    // 渲染建议列表
+    // 渲染列表
     this._activeFn = bind(this.__INPUT__, 'click', ev => {
       var { options } = this.props
 
       initPos.call(this)
-      this.__OPTG__.classList.toggle('show', true)
+      this.__OPTG__.classList.toggle('show')
     })
 
     // 选择选项

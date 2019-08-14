@@ -129,7 +129,9 @@ const log = console.log
 
 ${js}
 
-customElements.define('wc-${name.toLowerCase()}', ${name})
+if(!customElements.get('wc-${name.toLowerCase()}')){
+  customElements.define('wc-${name.toLowerCase()}', ${name})
+}
 `
 }
 
