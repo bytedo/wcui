@@ -36,8 +36,8 @@
 
   input {
     flex: 1;
-    width: auto;
-    min-width: 0;
+    width: 0;
+    min-width: 64px;
     height: 100%;
     padding: 0 5px;
     border: 0;
@@ -88,7 +88,7 @@
 .opt-box {
   display: none;
   position: fixed;
-  z-index: 10240;
+  z-index: 10260;
   left: 0;
   top: 0;
   width: 200px;
@@ -127,6 +127,7 @@
     height: 30px;
     line-height: 30px;
     padding: 0 8px;
+    text-align: left;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
