@@ -314,6 +314,7 @@ export default class Select {
     this.props.ITEMS = Array.from(elem.children).filter(it => {
       return it.tagName === 'DD' && !it.hasAttribute('disabled')
     })
+    this.value = this.props.value
   }
 
   // 移动光标选择下拉选项

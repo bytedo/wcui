@@ -202,6 +202,10 @@
     border: 1px solid nth($co, 1);
     border-radius: 4px;
   }
+
+  &.show {
+    display: block;
+  }
 }
 
 :host(:focus-within) {
@@ -490,20 +494,20 @@ export default class DatePicker {
     this._renderCalendar()
 
     this._activeFn = bind(this.__INPUT__, 'click', ev => {
-      if (this.props.disabled || this.props.readonly || this.props.active) {
+      if (this.props.disabled || this.props.readonly) {
         return
       }
-      this.props.active = true
+      this.props.active = !this.props.active
 
       let { x, y } = this.getBoundingClientRect()
 
-      this.__CALENDAR__.style.cssText = `display:block;left:${x}px;top:${y +
-        50}px`
+      this.__CALENDAR__.style.cssText = `left:${x}px;top:${y + 50}px`
+      this.__CALENDAR__.classList.toggle('show')
     })
 
     this._bubbleFn = ebind(this, 'click')
     this._inactiveFn = bind(document, 'click', ev => {
-      this.__CALENDAR__.style.cssText = ''
+      this.__CALENDAR__.classList.toggle('show', false)
       this.props.active = false
     })
 

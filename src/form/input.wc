@@ -420,6 +420,8 @@ export default class Input {
       }
     })
 
+    this._handleWheel = ebind(this.__INPUT__, 'wheel')
+
     // 非textarea, 可做输入建议功能
     if (type === 'text') {
       // 输入状态事件
@@ -472,6 +474,7 @@ export default class Input {
   }
 
   unmount() {
+    unbind(this.__INPUT__, 'wheel', this._handleWheel)
     unbind(this.__INPUT__, 'keydown', this._handleSubmit)
     unbind(this.__INPUT__, 'input', this._handleChange)
     unbind(this, 'click', this._bubbleFn)
