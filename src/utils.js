@@ -85,3 +85,17 @@ export const unbind = function(dom, type, fn = noop, phase = false) {
     dom.removeEventListener(t, fn, phase)
   })
 }
+
+// 指定节点外点击(最高不能超过body层)
+export const clickOutside = function(dom, fn = noop) {
+  return bind(document, 'mousedown', ev => {
+    if (ev) {
+      var target = ev.target
+
+      if (dom === target || dom.contains(target)) {
+        return
+      }
+      fn(ev)
+    }
+  })
+}

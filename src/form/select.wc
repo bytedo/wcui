@@ -39,6 +39,7 @@
     flex: 1;
     width: 0;
     min-width: 64px;
+    width: 0;
     height: 100%;
     padding: 0 5px;
     border: 0;
@@ -99,7 +100,7 @@
   padding: 8px 0;
   border-radius: 4px;
   background: #fff;
-  box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.25);
   cursor: default;
 
   .list {
@@ -209,8 +210,8 @@
     height: 24px;
     font-size: 12px;
   }
-  .icon {
-    --size: 16px;
+  .arrow {
+    --size: 12px;
   }
   .prepend,
   .append {
@@ -222,7 +223,7 @@
 <script>
 import '../scroll/index'
 import '../icon/index'
-import { nextTick, ebind, bind, unbind } from '../utils'
+import { ebind, bind, unbind, clickOutside } from '../utils'
 
 function parseOptions(arr, props) {
   let html = ''
@@ -407,9 +408,14 @@ export default class Select {
 
     function initPos() {
       var { x, y, width } = this.getBoundingClientRect()
+      var size = this.getAttribute('size')
       this.props.active = true
-      this.__OPTG__.style.cssText = `left:${x}px;top:${y +
-        50}px;width:${width}px;`
+      if (size && size === 'mini') {
+        y += 32
+      } else {
+        y += 50
+      }
+      this.__OPTG__.style.cssText = `left:${x}px;top:${y}px;width:${width}px;`
     }
 
     /* ---------------------------------------------------- */
@@ -454,8 +460,7 @@ export default class Select {
       }
     })
 
-    this._bubbleFn = ebind(this, 'click')
-    this._inactiveFn = bind(document, 'click', ev => {
+    this._inactiveFn = clickOutside(this, ev => {
       this.__OPTG__.classList.toggle('show', false)
       this.props.active = false
     })
@@ -497,8 +502,7 @@ export default class Select {
   unmount() {
     unbind(this.__INPUT__, 'keydown', this._handleKeydown)
     unbind(this.__INPUT__, 'click', this._activeFn)
-    unbind(this, 'click', this._bubbleFn)
-    unbind(document, 'click', this._inactiveFn)
+    unbind(document, 'mousedown', this._inactiveFn)
     unbind(this.__OPTG__, 'click', this._handleSelect)
   }
 }

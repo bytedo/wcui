@@ -45,6 +45,7 @@ li {
   textarea {
     flex: 1;
     min-width: 0;
+    width: 0;
     height: 100%;
     padding: 0 5px;
     border: 0;
@@ -61,8 +62,7 @@ li {
     }
   }
   textarea {
-    width: 100%;
-    padding: 5px;
+    padding: 5px 8px;
     resize: none;
   }
   .prepend,
@@ -107,7 +107,7 @@ li {
   padding: 8px 0;
   border-radius: 4px;
   background: #fff;
-  box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.25);
 
   .list {
     width: 100%;
@@ -221,7 +221,7 @@ li {
 <script>
 import '../scroll/index'
 import '../icon/index'
-import { nextTick, ebind, bind, unbind } from '../utils'
+import { ebind, bind, unbind, clickOutside } from '../utils'
 
 const IS_FIREFOX = !!window.sidebar
 const TYPES = ['text', 'textarea', 'password']
@@ -458,9 +458,7 @@ export default class Input {
         }
       })
 
-      this._bubbleFn = ebind(this, 'click')
-
-      this._inactiveFn = bind(document, 'click', ev => {
+      this._inactiveFn = clickOutside(this, ev => {
         this.__LIST__.classList.remove('show')
       })
 
@@ -478,8 +476,7 @@ export default class Input {
     unbind(this.__INPUT__, 'wheel', this._handleWheel)
     unbind(this.__INPUT__, 'keydown', this._handleSubmit)
     unbind(this.__INPUT__, 'input', this._handleChange)
-    unbind(this, 'click', this._bubbleFn)
-    unbind(document, 'click', this._inactiveFn)
+    unbind(document, 'mousedown', this._inactiveFn)
     unbind(this.__LIST__, 'click', this._handleSelect)
   }
 

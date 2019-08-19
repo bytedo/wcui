@@ -99,7 +99,7 @@
   font-size: 12px;
   text-align: center;
   background: #fff;
-  box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.25);
 
   &::after {
     position: absolute;
@@ -225,7 +225,7 @@
 
 <script>
 import '../icon/index'
-import { nextTick, each, ebind, bind, unbind } from '../utils'
+import { nextTick, each, ebind, bind, unbind, clickOutside } from '../utils'
 
 const today = new Date()
 
@@ -505,8 +505,7 @@ export default class DatePicker {
       this.__CALENDAR__.classList.toggle('show')
     })
 
-    this._bubbleFn = ebind(this, 'click')
-    this._inactiveFn = bind(document, 'click', ev => {
+    this._inactiveFn = clickOutside(this, ev => {
       this.__CALENDAR__.classList.toggle('show', false)
       this.props.active = false
     })
@@ -583,8 +582,7 @@ export default class DatePicker {
 
   unmount() {
     unbind(this.__INPUT__, 'click', this._activeFn)
-    unbind(this, 'click', this._bubbleFn)
-    unbind(document, 'click', this._inactiveFn)
+    unbind(document, 'mousedown', this._inactiveFn)
     unbind(this.__CTRL__, 'click', this._ctrlFn)
     unbind(this.__DAYS__, 'click', this._pickFn)
   }
