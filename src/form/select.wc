@@ -96,7 +96,6 @@
   width: 200px;
   height: auto;
   max-height: 200px;
-  min-height: 46px;
   padding: 8px 0;
   border-radius: 4px;
   background: #fff;

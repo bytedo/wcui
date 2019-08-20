@@ -95,7 +95,7 @@ export const clickOutside = function(dom, fn = noop) {
       if (dom === target || dom.contains(target)) {
         return
       }
-      fn(ev)
     }
+    fn(ev)
   })
 }

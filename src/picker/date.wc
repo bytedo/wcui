@@ -238,6 +238,8 @@ function getCalendarTable({ year, month, max, min, last }) {
   let isLimitYM = isLimited({ max, min }, { year, month })
   let list = []
 
+  log(year, month, nums, numsFixed)
+
   for (let i = numsFixed; i <= nums; i++) {
     let day = {
       weekend: false,
@@ -321,7 +323,7 @@ function getThisYearMonth() {
 
 //根据年份获取指定月份天数
 function getTotalDays(year, month) {
-  return new Date(year, month, 0).getDate()
+  return new Date(year, month + 1, 0).getDate()
 }
 
 //判断指定年月第一天是星期几
@@ -460,6 +462,7 @@ export default class DatePicker {
 
   _renderCalendar() {
     var { calendar, max, min, last } = this.props
+
     calendar.list = getCalendarTable({ ...calendar, max, min, last })
 
     this.__CTRL__.children[2].textContent = `${
