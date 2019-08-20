@@ -238,8 +238,6 @@ function getCalendarTable({ year, month, max, min, last }) {
   let isLimitYM = isLimited({ max, min }, { year, month })
   let list = []
 
-  log(year, month, nums, numsFixed)
-
   for (let i = numsFixed; i <= nums; i++) {
     let day = {
       weekend: false,
