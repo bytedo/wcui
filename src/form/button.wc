@@ -244,7 +244,7 @@ export default class Button {
     disabled: false
   }
 
-  constructor() {
+  __init__() {
     /* render */
 
     // 圆形按钮不允许文字

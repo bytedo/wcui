@@ -135,7 +135,7 @@ export default class Pager {
     pagesize: 20,
     simple: false
   }
-  constructor() {
+  __init__() {
     /* render */
 
     this.__LAYOUT__ = this.root.children[1]

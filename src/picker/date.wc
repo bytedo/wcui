@@ -346,7 +346,7 @@ export default class DatePicker {
     disabled: false
   }
 
-  constructor() {
+  __init__() {
     /* render */
 
     this.__INPUT__ = this.root.children[1]

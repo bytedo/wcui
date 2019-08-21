@@ -168,7 +168,7 @@ export default class Avatar {
     fit: '' // 头像填充方式  fill, contain, cover, scale-down
   }
 
-  constructor() {
+  __init__() {
     /* render */
     this.__IMG__ = this.root.lastElementChild
     var text = this.textContent.slice(0, 1)

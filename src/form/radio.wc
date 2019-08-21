@@ -159,7 +159,7 @@ export default class Radio {
     checked: false,
     disabled: false
   }
-  constructor() {
+  __init__() {
     /* render */
 
     this.__SWITCH__ = this.root.lastElementChild

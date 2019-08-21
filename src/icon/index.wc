@@ -100,7 +100,7 @@ export default class Icon {
     is: ''
   }
 
-  constructor() {
+  __init__() {
     /* render */
 
     this.__ICO__ = this.root.lastElementChild

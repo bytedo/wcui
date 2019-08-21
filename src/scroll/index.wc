@@ -83,7 +83,7 @@ const IS_FF = !!window.sidebar
 /*  */
 export default class Scroll {
   props = {}
-  constructor() {
+  __init__() {
     /* render */
     this.__BOX__ = this.root.children[1]
     this.__X__ = this.root.children[2].children[0]

@@ -59,7 +59,7 @@ export default class Badge {
     label: ''
   }
 
-  constructor() {
+  __init__() {
     /* render */
     this.__DOT__ = this.root.lastElementChild
   }

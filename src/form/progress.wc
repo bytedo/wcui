@@ -67,7 +67,7 @@ export default class Progress {
     max: 1
   }
 
-  constructor() {
+  __init__() {
     /* render */
     this.__THUMB__ = this.root.children[1].lastElementChild
   }

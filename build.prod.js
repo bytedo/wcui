@@ -93,11 +93,11 @@ function mkWCFile({ style, html, js }) {
   })
 
   js = fixImport(js)
-    .replace(/class ([\w]+)/, function(s, m) {
+    .replace(/class ([a-zA-Z0-9]+)/, function(s, m) {
       name = m
       return `${s} extends HTMLElement `
     })
-    .replace(/constructor\([^)]?\)\s+\{/, 'constructor() {\n super();')
+    .replace(/__init__\(\)\s+\{/, 'constructor() {\n super();')
     .replace(
       '/* render */',
       `
@@ -136,7 +136,9 @@ function mkWCFile({ style, html, js }) {
 
 ${res.code}
 
-customElements.define('wc-${name.toLowerCase()}', ${name})
+if(!customElements.get('wc-${name.toLowerCase()}')){
+  customElements.define('wc-${name.toLowerCase()}', ${name})
+}
 `
 }
 

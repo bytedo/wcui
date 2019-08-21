@@ -259,7 +259,7 @@ export default class Select {
     disabled: false
   }
 
-  constructor() {
+  __init__() {
     /* render */
 
     this.__OUTER__ = this.root.children[1]
