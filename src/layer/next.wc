@@ -112,7 +112,7 @@
 </style>
 
 <script>
-import '../drag/index'
+import Drag from '../drag/core'
 
 import { nextTick, bind, unbind, clickOutside } from '../utils'
 
@@ -634,6 +634,7 @@ const _layer = {
     l.setAttribute('mask', '')
     l.innerHTML = '<p>ffdfdffd</p>'
     document.body.appendChild(l)
+    new Drag(l.root.children[1]).by(l.__TITLE__)
     return _layer.open(opt)
   },
   confirm(content, title, yescb, nocb) {
