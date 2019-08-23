@@ -19,7 +19,7 @@
 - [x] 徽标组件(`wc-badge`)
 - [x] codemirror插件(第三方插件,整合适配)
 - [ ] 倒计时组件(`wc-counter`)
-- [ ] 拖拽指令插件(`:drag`) 待重构...
+- [x] 拖拽指令插件(`:drag`)
 - [x] 表单组件-按钮(`wc-button`)
 - [x] 表单组件-复选框(`wc-checkbox`)
 - [x] 表单组件-文本输入框(`wc-input`)

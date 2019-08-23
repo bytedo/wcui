@@ -1,14 +1,12 @@
 /**
- * 拖拽插件
+ * 拖拽插件的核心部分
  * @author yutent<yutent@doui.cc>
- * @date 2019/08/21 17:28:40
+ * @date 2019/08/23 19:41:21
  */
 
 'use strict'
 
 import { bind, unbind } from '../utils'
-
-const log = console.log
 
 const DEF_OPT = {
   axis: '', // x | y | xy 拖拽方向
