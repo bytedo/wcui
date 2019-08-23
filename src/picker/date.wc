@@ -30,7 +30,6 @@
 :host {
   overflow: hidden;
   display: inline-block;
-  position: relative;
   min-width: 105px;
   user-select: none;
   -moz-user-select: none;

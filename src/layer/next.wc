@@ -28,7 +28,7 @@
   flex: 0 auto;
   position: absolute;
   z-index: 65535;
-  padding: 15px 10px;
+  // padding: 15px 10px;
   border-radius: 3px;
   color: #666;
   font-size: 14px;
@@ -51,9 +51,9 @@
 
   &__title {
     width: 100%;
-    height: 43px;
-    padding: 0 10px;
-    line-height: 43px;
+    height: 60px;
+    padding: 15px;
+    line-height: 30px;
     font-size: 16px;
     color: nth($cd, 2);
   }
@@ -69,8 +69,8 @@
 
   &__ctrl {
     width: 100%;
-    height: 40px;
-    padding: 5px 0;
+    height: 60px;
+    padding: 15px;
     line-height: 30px;
     font-size: 14px;
     color: #454545;
@@ -105,7 +105,7 @@
     background: #fff;
 
     &__content {
-      padding: 10px;
+      padding: 0 15px;
     }
   }
 }
@@ -953,5 +953,9 @@ export default class Layer {
   set title(val) {
     this.__TITLE__.textContent = val || lang.TITLE
   }
+
+  mounted() {}
+
+  unmount() {}
 }
 </script>
