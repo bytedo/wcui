@@ -68,6 +68,8 @@
   }
 
   &__ctrl {
+    display: flex;
+    flex-direction: row-reverse;
     width: 100%;
     height: 60px;
     padding: 15px;
@@ -75,6 +77,45 @@
     font-size: 14px;
     color: #454545;
     text-align: right;
+
+    button {
+      min-width: 64px;
+      height: 30px;
+      padding: 0 10px;
+      margin: 0 5px;
+      border: 1px solid nth($cp, 3);
+      border-radius: 4px;
+      white-space: nowrap;
+      background: #fff;
+      font-size: inherit;
+      outline: none;
+      color: inherit;
+
+      &:hover {
+        background: nth($cp, 1);
+      }
+
+      &:active {
+        border-color: nth($cgr, 1);
+      }
+
+      &:last-child {
+        color: #fff;
+        background: nth($ct, 2);
+        border-color: transparent;
+
+        &:hover {
+          background: nth($ct, 1);
+        }
+        &:active {
+          background: nth($ct, 3);
+        }
+      }
+
+      &::-moz-focus-inner {
+        border: none;
+      }
+    }
   }
 }
 
@@ -119,6 +160,7 @@ import { nextTick, bind, unbind, clickOutside } from '../utils'
 const LANGUAGES = {
   en: {
     TITLE: 'Dialog',
+    BTNS: ['Cancel', 'OK'],
     YES_BTN: 'OK',
     NO_BTN: 'Cancel',
     ERROR: 'The layer instance is not exists',
@@ -126,6 +168,7 @@ const LANGUAGES = {
   },
   zh: {
     TITLE: '提示',
+    BTNS: ['取消', '确定'],
     YES_BTN: '确定',
     NO_BTN: '取消',
     ERROR: '要关闭的layer实例不存在',
@@ -634,7 +677,7 @@ const _layer = {
     l.setAttribute('mask', '')
     l.innerHTML = '<p>ffdfdffd</p>'
     document.body.appendChild(l)
-    new Drag(l.root.children[1]).by(l.__TITLE__)
+
     return _layer.open(opt)
   },
   confirm(content, title, yescb, nocb) {
@@ -936,10 +979,20 @@ const _layer = {
 
 window.layer = _layer
 
+function renderBtns(list) {
+  var html = ''
+  list.forEach((t, i) => {
+    html += `<button data-idx="${i}"">${t || lang.BTNS[i]}</button>`
+  })
+
+  return html
+}
+
 export default class Layer {
   props = {
     type: 'msg',
-    title: ''
+    title: '',
+    fixed: false //是否固定位置
   }
 
   __init__() {
@@ -954,8 +1007,70 @@ export default class Layer {
     this.__TITLE__.textContent = val || lang.TITLE
   }
 
-  mounted() {}
+  set type(val) {
+    switch (val) {
+      case 'alert':
+        this.__CTRL__.innerHTML = renderBtns(['确定'])
+        break
+      case 'confirm':
+      case 'prompt':
+        this.__CTRL__.innerHTML = renderBtns(['取消', '确定'])
+        break
+      case 'toast':
+        break
+      default:
+        if (this.opt.btns) {
+          this.__CTRL__.innerHTML = renderBtns(this.opt.btns)
+          break
+        }
+    }
+  }
+
+  get fixed() {
+    return this.props.fixed
+  }
+
+  set fixed(val) {
+    this.props.fixed = !!val
+
+    if (this.props.fixed) {
+      this._dragIns = new Drag(this.root.children[1]).by(this.__TITLE__, {
+        overflow: false
+      })
+    } else {
+      if (this._dragIns) {
+        this._dragIns.destroy()
+        this._dragIns = null
+      }
+    }
+  }
+
+  mounted() {
+    bind(this.__CTRL__, 'click', ev => {
+      if (ev.target.tagName === 'BUTTON') {
+        var idx = +ev.target.dataset.idx
+        log(idx)
+        this.parentNode.removeChild(this)
+      }
+    })
+  }
 
   unmount() {}
+
+  watch(name, old, val) {
+    if (old === val) {
+      return
+    }
+
+    switch (name) {
+      case 'title':
+      case 'type':
+        this[name] = val
+        break
+      case 'fixed':
+        this.fixed = true
+        break
+    }
+  }
 }
 </script>

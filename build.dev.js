@@ -110,10 +110,10 @@ function mkWCFile({ style, html, js }) {
       this.root.innerHTML = \`<style>${style}</style>${html}\`
       `
     )
-    .replace('mounted', 'connectedCallback')
-    .replace('unmount', 'disconnectedCallback')
-    .replace('watch', 'attributeChangedCallback')
-    .replace('adopted', 'adoptedCallback')
+    .replace('mounted()', 'connectedCallback()')
+    .replace('unmount()', 'disconnectedCallback()')
+    .replace(/watch\(([\w\s,]*?)\)/, 'attributeChangedCallback($1)')
+    .replace('adopted()', 'adoptedCallback()')
 
   return `/**
  *
