@@ -220,10 +220,7 @@ export default class Checkbox {
     )
   }
 
-  watch(name, old, val) {
-    if (old === val) {
-      return
-    }
+  watch() {
     switch (name) {
       case 'label':
       case 'color':
@@ -232,9 +229,7 @@ export default class Checkbox {
 
       case 'checked':
       case 'disabled':
-        if (val === '') {
-          this[name] = true
-        }
+        this[name] = true
         break
     }
   }

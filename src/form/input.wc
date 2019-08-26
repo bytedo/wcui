@@ -480,10 +480,7 @@ export default class Input {
     unbind(this.__LIST__, 'click', this._handleSelect)
   }
 
-  watch(name, old, val) {
-    if (old === val) {
-      return
-    }
+  watch() {
     switch (name) {
       case 'icon':
         this.props.icon = val
@@ -525,9 +522,7 @@ export default class Input {
 
       case 'readonly':
       case 'disabled':
-        if (val === '') {
-          this[name] = true
-        }
+        this[name] = true
         break
     }
   }

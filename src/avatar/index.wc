@@ -176,10 +176,7 @@ export default class Avatar {
     this.textContent = text
   }
 
-  watch(name, old, val) {
-    if (old === val) {
-      return
-    }
+  watch() {
     switch (name) {
       case 'src':
         this.removeAttribute('hash')

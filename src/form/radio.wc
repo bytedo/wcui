@@ -153,6 +153,8 @@
 </style>
 
 <script>
+import { bind, unbind } from '../utils'
+
 export default class Radio {
   props = {
     label: '',
@@ -202,22 +204,19 @@ export default class Radio {
   }
 
   mounted() {
-    this.addEventListener(
-      'click',
-      ev => {
-        if (!this.disabled && !this.checked) {
-          this.checked = true
-          this.dispatchEvent(new CustomEvent('input'))
-        }
-      },
-      false
-    )
+    this._handleClick = bind(this, 'click', ev => {
+      if (!this.disabled && !this.checked) {
+        this.checked = true
+        this.dispatchEvent(new CustomEvent('input'))
+      }
+    })
   }
 
-  watch(name, old, val) {
-    if (old === val) {
-      return
-    }
+  unmount() {
+    unbind(this, 'click', this._handleClick)
+  }
+
+  watch() {
     switch (name) {
       case 'label':
         this.props.label = val
@@ -225,9 +224,7 @@ export default class Radio {
 
       case 'checked':
       case 'disabled':
-        if (val === '') {
-          this[name] = true
-        }
+        this[name] = true
         break
     }
   }

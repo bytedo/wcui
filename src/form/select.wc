@@ -465,10 +465,7 @@ export default class Select {
     })
   }
 
-  watch(name, old, val) {
-    if (old === val) {
-      return
-    }
+  watch() {
     switch (name) {
       // label和placeholder 功能相同
       case 'label':
@@ -491,9 +488,7 @@ export default class Select {
 
       case 'readonly':
       case 'disabled':
-        if (val === '') {
-          this[name] = true
-        }
+        this[name] = true
         break
     }
   }

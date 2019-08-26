@@ -587,10 +587,7 @@ export default class DatePicker {
     unbind(this.__DAYS__, 'click', this._pickFn)
   }
 
-  watch(name, old, val) {
-    if (old === val) {
-      return
-    }
+  watch() {
     switch (name) {
       // label和placeholder 功能相同
       case 'label':
@@ -630,9 +627,7 @@ export default class DatePicker {
 
       case 'readonly':
       case 'disabled':
-        if (val === '') {
-          this[name] = true
-        }
+        this[name] = true
         break
     }
   }

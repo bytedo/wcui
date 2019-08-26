@@ -112,7 +112,10 @@ function mkWCFile({ style, html, js }) {
     )
     .replace('mounted()', 'connectedCallback()')
     .replace('unmount()', 'disconnectedCallback()')
-    .replace(/watch\(([\w\s,]*?)\)/, 'attributeChangedCallback($1)')
+    .replace(
+      'watch() {',
+      'attributeChangedCallback(name, old, val) {\nif (old === val) {return}'
+    )
     .replace('adopted()', 'adoptedCallback()')
 
   return `/**

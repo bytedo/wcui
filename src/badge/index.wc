@@ -64,10 +64,7 @@ export default class Badge {
     this.__DOT__ = this.root.lastElementChild
   }
 
-  watch(name, old, val) {
-    if (old === val) {
-      return
-    }
+  watch() {
     switch (name) {
       case 'label':
         var num = Number(val)

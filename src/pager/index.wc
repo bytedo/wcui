@@ -213,11 +213,7 @@ export default class Pager {
     )
   }
 
-  watch(name, old, val) {
-    if (old === val) {
-      return
-    }
-
+  watch() {
     switch (name) {
       case 'total':
       case 'pagesize':

@@ -130,7 +130,7 @@ export default class Icon {
     this.drawPath()
   }
 
-  watch(name, old, val) {
+  watch() {
     switch (name) {
       case 'is':
         this.is = val

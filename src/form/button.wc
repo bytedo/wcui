@@ -313,10 +313,7 @@ export default class Button {
     this.__BTN__.removeEventListener('click', this._handleClick)
   }
 
-  watch(name, old, val) {
-    if (old === val) {
-      return
-    }
+  watch() {
     switch (name) {
       case 'icon':
         this.props.icon = val
@@ -342,9 +339,7 @@ export default class Button {
 
       case 'loading':
       case 'disabled':
-        if (val === '') {
-          this[name] = true
-        }
+        this[name] = true
         break
     }
   }

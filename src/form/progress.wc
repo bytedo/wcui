@@ -90,11 +90,7 @@ export default class Progress {
     this.calculate()
   }
 
-  watch(name, old, val) {
-    if (old === val) {
-      return
-    }
-
+  watch() {
     switch (name) {
       case max:
         var max = +val

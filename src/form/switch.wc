@@ -98,6 +98,7 @@
 </style>
 
 <script>
+import { bind, unbind } from '../utils'
 export default class Switch {
   props = {
     checked: false,
@@ -146,31 +147,24 @@ export default class Switch {
   }
 
   mounted() {
-    this.addEventListener(
-      'click',
-      ev => {
-        if (this.disabled) {
-          return
-        }
-        if (!this.disabled) {
-          this.checked = !this.checked
-          this.dispatchEvent(new CustomEvent('input'))
-        }
-      },
-      false
-    )
+    this._handleClick = bind(this, 'click', ev => {
+      if (this.disabled) {
+        return
+      }
+      this.checked = !this.checked
+      this.dispatchEvent(new CustomEvent('input'))
+    })
   }
 
-  watch(name, old, val) {
-    if (old === val) {
-      return
-    }
+  unmount() {
+    unbind(this, 'click', this._handleClick)
+  }
+
+  watch() {
     switch (name) {
       case 'checked':
       case 'disabled':
-        if (val === '') {
-          this[name] = true
-        }
+        this[name] = true
         break
     }
   }
