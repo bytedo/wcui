@@ -90,9 +90,17 @@ export const unbind = function(dom, type, fn = noop, phase = false) {
 export const clickOutside = function(dom, fn = noop) {
   return bind(document, 'mousedown', ev => {
     if (ev) {
-      var path = ev.path.concat()
-      while (path.length > 3) {
-        if (path.shift() === dom) {
+      if (ev.path) {
+        var path = ev.path.concat()
+        while (path.length > 3) {
+          if (path.shift() === dom) {
+            return
+          }
+        }
+      } else {
+        var target = ev.originalTarget || ev.target
+        console.log(target, typeof target, target.__proto__)
+        if (dom === target || dom.contains(target)) {
           return
         }
       }
