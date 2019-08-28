@@ -90,10 +90,11 @@ export const unbind = function(dom, type, fn = noop, phase = false) {
 export const clickOutside = function(dom, fn = noop) {
   return bind(document, 'mousedown', ev => {
     if (ev) {
-      var target = ev.target
-
-      if (dom === target || dom.contains(target)) {
-        return
+      var path = ev.path.concat()
+      while (path.length > 3) {
+        if (path.shift() === dom) {
+          return
+        }
       }
     }
     fn(ev)

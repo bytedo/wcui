@@ -38,7 +38,10 @@
   &.shift {
     transition: all 0.5s ease-out;
   }
-
+  &.scale {
+    transform: scale(1.01);
+    transition: transform 0.1s linear;
+  }
   &.blur {
     backdrop-filter: blur(5px);
   }
@@ -666,6 +669,13 @@ class Layer {
       this._handlMask = clickOutside(this.root.children[1], ev => {
         if (this.props.maskClose) {
           this.close()
+        } else {
+          if (UNIQUE_TYPES.includes(this.props.type)) {
+            this.root.children[1].classList.toggle('scale', true)
+            setTimeout(_ => {
+              this.root.children[1].classList.remove('scale')
+            }, 100)
+          }
         }
       })
     }
