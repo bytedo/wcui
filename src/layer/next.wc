@@ -38,10 +38,7 @@
   &.shift {
     transition: all 0.5s ease-out;
   }
-  &.scale {
-    transform: scale(1.02);
-    transition: transform 0.1s linear;
-  }
+
   &.blur {
     backdrop-filter: blur(5px);
   }
@@ -53,6 +50,7 @@
   /* 弹层样式 */
 
   &__title {
+    display: flex;
     width: 100%;
     height: 60px;
     padding: 15px;
@@ -62,17 +60,33 @@
   }
 
   &__content {
+    display: flex;
     position: relative;
     width: 100%;
     height: auto;
     min-height: 50px;
     word-break: break-all;
     word-wrap: break-word;
+
+    ::slotted(&__input) {
+      flex: 1;
+      height: 32px;
+    }
+
+    ::slotted(&__frame) {
+      display: flex;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      border: 0;
+      resize: none;
+    }
   }
 
   &__ctrl {
     display: flex;
-    flex-direction: row-reverse;
+    justify-content: flex-end;
     width: 100%;
     height: 60px;
     padding: 15px;
@@ -156,6 +170,7 @@
 </style>
 
 <script>
+import '../form/input'
 import Drag from '../drag/core'
 
 import { nextTick, bind, unbind, clickOutside } from '../utils'
@@ -164,26 +179,20 @@ const LANGUAGES = {
   en: {
     TITLE: 'Dialog',
     BTNS: ['Cancel', 'OK'],
-    YES_BTN: 'OK',
-    NO_BTN: 'Cancel',
-    ERROR: 'The layer instance is not exists',
-    NEED_CONTAINER: 'layer "tips" require a DOM object as container'
+    ERROR: 'The layer instance is not exists'
   },
   zh: {
     TITLE: '提示',
     BTNS: ['取消', '确定'],
-    YES_BTN: '确定',
-    NO_BTN: '取消',
-    ERROR: '要关闭的layer实例不存在',
-    NEED_CONTAINER: 'tips类型需要指定一个元素节点作为容器'
+    ERROR: '要关闭的layer实例不存在'
   }
 }
 LANGUAGES['zh-CN'] = LANGUAGES.zh
 const lang =
   LANGUAGES[window.__ENV_LANG__ || navigator.language] || LANGUAGES.en
 
-let unique = null // 储存当前打开的1/2/3类型的弹窗
-let lid = 0
+let unique = null // 储存当前打开的alert/confirm/prompt类型的弹窗
+
 let defconf = {
   type: 1, // 弹窗类型
   background: '#fff',
@@ -200,9 +209,6 @@ let defconf = {
   offset: {} // 弹窗出来后的坐标, 为数组,可有4个值,依次是 上右下左
 }
 
-const uuid = function() {
-  return 'layer-' + lid++
-}
 // 要保证弹层唯一的类型
 const UNIQUE_TYPES = ['alert', 'confirm', 'prompt']
 
@@ -219,57 +225,81 @@ const fixOffset = function(offset) {
   return offset
 }
 
-/* type: { // 弹窗类型对应的id值
-  1: 'alert',
-  2: 'confirm',
-  3: 'prompt',
-  4: 'iframe',
-  5: 'tips',
-  6: 'loading',
-  7: 'msg',
-} */
-
 function createLayer(opt) {
   var layDom = document.createElement('wc-layer')
-  layDom.type = opt.type
   if (opt.mask) {
     layDom.setAttribute('mask', '')
   }
 
-  if (opt.title) {
-    layDom.title = opt.title
+  layDom.title = opt.title
+  if (opt.btns && opt.btns.length) {
+    layDom.props.btns = opt.btns
+  } else {
+    layDom.props.btns = lang.BTNS.concat()
   }
 
+  if (opt.intercept && typeof opt.intercept === 'function') {
+    layDom.props.intercept = opt.intercept
+  }
+
+  layDom.props.background = opt.background
+  layDom.props.mask = opt.mask
+  layDom.props.maskClose = opt.maskClose
+  layDom.props.maskColor = opt.maskColor
+
+  layDom.type = opt.type
   layDom.innerHTML = opt.content
   document.body.appendChild(layDom)
 
-  return layDom
+  // 这3种类型, 只允许同时存在1个, 如果之前有弹出则关闭
+  if (UNIQUE_TYPES.includes(opt.type)) {
+    if (unique) {
+      unique.close()
+    }
+    unique = layDom
+  }
+  return layDom.promise
 }
 
 const _layer = {
-  alert(content, title) {
+  alert(content, title = lang.TITLE) {
     return createLayer({
       type: 'alert',
-      title: title || 'Hello world!',
-      content:
-        content || '<p>blablablablsjkdjbskj fghjsdgfjs djfhjsdgf jhs jhj</p>',
+      title,
+      content,
       fixed: true,
       mask: true
     })
   },
-  confirm(content, title) {
+  confirm(content, title = lang.TITLE, intercept) {
+    if (typeof title === 'function') {
+      intercept = title
+      title = lang.TITLE
+    }
     return createLayer({
       type: 'confirm',
-      title: title || 'Hello world!',
-      content: content || 'blablablablsjkdjbskj fghjsdgfjs djfhjsdgf jhs jhj',
+      title,
+      content,
       fixed: true,
-      mask: true
+      mask: true,
+      intercept
+    })
+  },
+  prompt(title = lang.TITLE, intercept) {
+    return createLayer({
+      type: 'prompt',
+      title,
+      content: `<wc-input autofocus class="layer__content__input"></wc-input>`,
+      fixed: true,
+      mask: true,
+      intercept
     })
   },
   frame(url, extra = {}) {
     return createLayer({
+      ...extra,
       type: 'frame',
-      content: `<iframe ref="frame" class="frame-box" src="${url}"></iframe>`,
+      content: `<iframe class="layer__content__frame" src="${url}"></iframe>`,
       fixed: true,
       mask: true,
       maskClose: true
@@ -310,25 +340,7 @@ const _layer = {
 
     return _layer.open(opt)
   },
-  prompt(title, yescb) {
-    if (typeof yescb !== 'function') {
-      return console.error(
-        'argument [callback] requires a function, but ' +
-          typeof yescb +
-          ' given'
-      )
-    }
-    let opt = {
-      type: 3,
-      prompt: '',
-      title,
-      content: `<input class="prompt-value" ref="input" :class="{alert: !prompt}" :duplex="prompt" />`,
-      fixed: true,
-      yes: yescb
-    }
-    return _layer.open(opt)
-  },
-  close: close,
+
   open(opt) {
     if (typeof opt === 'string') {
       opt = 'layerwrap-' + opt
@@ -356,8 +368,7 @@ const _layer = {
     } else {
       return new __layer__(opt).init.$id
     }
-  },
-  version: Anot.ui.layer
+  }
 }
 
 /* Anot.directive('layer', {
@@ -494,8 +505,6 @@ const _layer = {
   }
 }) */
 
-window.layer = _layer
-
 function renderBtns(list) {
   var html = ''
   list.forEach((t, i) => {
@@ -505,8 +514,9 @@ function renderBtns(list) {
   return html
 }
 
-export default class Layer {
+class Layer {
   props = {
+    btns: [],
     type: 'msg',
     title: '',
     fixed: false //是否固定位置
@@ -518,40 +528,54 @@ export default class Layer {
     this.__TITLE__ = this.root.children[1].firstElementChild
     this.__BODY__ = this.root.children[1].children[1]
     this.__CTRL__ = this.root.children[1].lastElementChild
+
+    this.promise = new Promise((resolve, reject) => {
+      this.resolve = resolve
+      this.reject = reject
+    })
   }
 
   set title(val) {
-    this.__TITLE__.textContent = val || lang.TITLE
+    if (val) {
+      this.__TITLE__.textContent = val
+      this.__TITLE__.style.display = ''
+    } else {
+      this.__TITLE__.style.display = 'none'
+    }
   }
 
   set type(val) {
-    this.props.type = val
+    var { btns } = this.props
 
     switch (val) {
       case 'alert':
-        this.__CTRL__.innerHTML = renderBtns(['确定'])
+        while (btns.length > 1) {
+          btns.splice(0, 1)
+        }
         break
       case 'confirm':
       case 'prompt':
-        this.__CTRL__.innerHTML = renderBtns(['取消', '确定'])
+        while (btns.length > 2) {
+          btns.splice(0, 1)
+        }
         break
       case 'toast':
-        break
       case 'frame':
+        btns = []
         break
       default:
         val = 'common'
-        if (this.opt.btns) {
-          this.__CTRL__.innerHTML = renderBtns(this.opt.btns)
-          break
-        }
+        break
+    }
+    this.props.type = val
+    if (btns.length) {
+      this.__CTRL__.innerHTML = renderBtns(btns)
+      this.__CTRL__.style.display = ''
+    } else {
+      this.__CTRL__.style.display = 'none'
     }
 
     this.setAttribute('type', val)
-  }
-
-  get fixed() {
-    return this.props.fixed
   }
 
   set fixed(val) {
@@ -575,24 +599,81 @@ export default class Layer {
     }
   }
 
+  // 拦截 "确定"按钮的事件
+  _intercept(input) {
+    if (this.props.intercept) {
+      this.props.intercept(input, _ => {
+        delete this.props.intercept
+        this.resolve(input)
+        this.close()
+      })
+    } else {
+      this.resolve(input)
+      this.close()
+    }
+  }
+
   close() {
     if (this._dragIns) {
       this._dragIns.destroy()
     }
+    if (UNIQUE_TYPES.includes(this.props.type)) {
+      unique = null
+    }
+    delete this.promise
+    unbind(this.__CTRL__, 'click', this._handleBtnClick)
     this.parentNode.removeChild(this)
   }
 
   mounted() {
-    bind(this.__CTRL__, 'click', ev => {
+    this._handleBtnClick = bind(this.__CTRL__, 'click', ev => {
       if (ev.target.tagName === 'BUTTON') {
         var idx = +ev.target.dataset.idx
-        log(idx)
-        this.close()
+        var { intercept, type } = this.props
+
+        switch (type) {
+          case 'alert':
+            this.resolve()
+            this.close()
+            break
+          case 'confirm':
+          case 'prompt':
+            if (idx === 0) {
+              this.reject()
+              this.close()
+            } else {
+              let inputValue = type === 'prompt' ? this.__INPUT__.value : null
+              this._intercept(inputValue)
+            }
+            break
+
+          default:
+            // 其他类型, 如有按钮, 直接返回按钮的索引, 不作任何拦截
+            this.resolve(idx)
+            this.close()
+        }
       }
     })
+
+    if (this.props.type === 'prompt') {
+      this.__INPUT__ = this.__BODY__.firstElementChild.assignedNodes().pop()
+      this._handleSubmit = bind(this.__INPUT__, 'submit', ev => {
+        this._intercept(ev.detail)
+      })
+    }
+
+    if (this.props.mask) {
+      this._handlMask = clickOutside(this.root.children[1], ev => {
+        if (this.props.maskClose) {
+          this.close()
+        }
+      })
+    }
   }
 
-  unmount() {}
+  unmount() {
+    unbind(document, 'mousedown', this._handlMask)
+  }
 
   watch() {
     switch (name) {
@@ -606,4 +687,8 @@ export default class Layer {
     }
   }
 }
+
+window.layer = _layer
+
+export default _layer
 </script>
