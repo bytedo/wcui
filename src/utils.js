@@ -98,9 +98,12 @@ export const clickOutside = function(dom, fn = noop) {
           }
         }
       } else {
-        var target = ev.originalTarget || ev.target
-        console.log(target, typeof target, target.__proto__)
-        if (dom === target || dom.contains(target)) {
+        var target = ev.explicitOriginalTarget || ev.target
+        if (
+          dom === target ||
+          dom.contains(target) ||
+          (dom.root && dom.root.contains(target))
+        ) {
           return
         }
       }
