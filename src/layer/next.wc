@@ -25,11 +25,11 @@
 }
 
 .layer {
+  overflow: hidden;
   flex: 0 auto;
-  position: absolute;
+  position: fixed;
   z-index: 65535;
-  // padding: 15px 10px;
-  border-radius: 3px;
+  border-radius: 4px;
   color: #666;
   font-size: 14px;
   box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
@@ -197,17 +197,7 @@ const lang =
 let unique = null // 储存当前打开的alert/confirm/prompt类型的弹窗
 
 let defconf = {
-  type: 1, // 弹窗类型
-  background: '#fff',
-  mask: true, // 遮罩
-  maskClose: false, // 遮罩点击关闭弹窗
-  maskColor: null, // 遮罩背景色
-  radius: '0px', // 弹窗圆角半径
   area: ['auto', 'auto'],
-  title: lang.TITLE, // 弹窗主标题(在工具栏上的)
-  menubar: true, // 是否显示菜单栏
-  content: '', // 弹窗的内容
-  fixed: false, // 是否固定不可拖拽
   shift: {}, // 弹窗出来的初始位置,用于出场动画
   offset: {} // 弹窗出来后的坐标, 为数组,可有4个值,依次是 上右下左
 }
@@ -228,6 +218,227 @@ const fixOffset = function(offset) {
   return offset
 }
 
+function renderBtns(list) {
+  var html = ''
+  list.forEach((t, i) => {
+    html += `<button data-idx="${i}"">${t || lang.BTNS[i]}</button>`
+  })
+
+  return html
+}
+
+class Layer {
+  props = {
+    btns: [],
+    type: 'msg',
+    title: '',
+    fixed: false //是否固定位置
+  }
+
+  __init__() {
+    /* render */
+
+    this.__TITLE__ = this.root.children[1].firstElementChild
+    this.__BODY__ = this.root.children[1].children[1]
+    this.__CTRL__ = this.root.children[1].lastElementChild
+
+    this.promise = new Promise((resolve, reject) => {
+      this.resolve = resolve
+      this.reject = reject
+    })
+  }
+
+  set title(val) {
+    if (val) {
+      this.__TITLE__.textContent = val
+      this.__TITLE__.style.display = ''
+    } else {
+      this.__TITLE__.style.display = 'none'
+    }
+  }
+
+  set type(val) {
+    var { btns } = this.props
+
+    switch (val) {
+      case 'alert':
+        while (btns.length > 1) {
+          btns.splice(0, 1)
+        }
+        break
+      case 'confirm':
+      case 'prompt':
+        while (btns.length > 2) {
+          btns.splice(0, 1)
+        }
+        break
+      case 'toast':
+      case 'frame':
+        btns = []
+        break
+      default:
+        val = 'common'
+        break
+    }
+    this.props.type = val
+    if (btns.length) {
+      this.__CTRL__.innerHTML = renderBtns(btns)
+      this.__CTRL__.style.display = ''
+    } else {
+      this.__CTRL__.style.display = 'none'
+    }
+
+    this.setAttribute('type', val)
+  }
+
+  set fixed(val) {
+    this.props.fixed = !!val
+
+    this._updateFixedStat()
+  }
+
+  _updateFixedStat() {
+    // 这3类弹层不允许拖拽
+    if (UNIQUE_TYPES.includes(this.props.type)) {
+      return
+    }
+
+    if (this.props.fixed) {
+      if (this._dragIns) {
+        this._dragIns.destroy()
+        this._dragIns = null
+      }
+    } else {
+      this._dragIns = new Drag(this.root.children[1]).by(this.__TITLE__, {
+        overflow: this.props.hasOwnProperty('overflow')
+          ? this.props.overflow
+          : false
+      })
+      this.removeAttribute('fixed')
+    }
+  }
+
+  // 拦截 "确定"按钮的事件
+  _intercept(input) {
+    if (this.props.intercept) {
+      this.props.intercept(input, _ => {
+        delete this.props.intercept
+        this.resolve(input)
+        this.close()
+      })
+    } else {
+      this.resolve(input)
+      this.close()
+    }
+  }
+
+  close() {
+    if (this._dragIns) {
+      this._dragIns.destroy()
+    }
+    if (UNIQUE_TYPES.includes(this.props.type)) {
+      unique = null
+    }
+    delete this.promise
+    unbind(this.__CTRL__, 'click', this._handleBtnClick)
+    this.parentNode.removeChild(this)
+  }
+
+  mounted() {
+    this._handleBtnClick = bind(this.__CTRL__, 'click', ev => {
+      if (ev.target.tagName === 'BUTTON') {
+        var idx = +ev.target.dataset.idx
+        var { type } = this.props
+
+        switch (type) {
+          case 'alert':
+            this.resolve()
+            this.close()
+            break
+          case 'confirm':
+          case 'prompt':
+            if (idx === 0) {
+              this.reject()
+              this.close()
+            } else {
+              let inputValue = type === 'prompt' ? this.__INPUT__.value : null
+              this._intercept(inputValue)
+            }
+            break
+
+          default:
+            // 其他类型, 如有按钮, 直接交给拦截器处理
+            this._intercept(idx)
+            break
+        }
+      }
+    })
+
+    if (this.props.type === 'prompt') {
+      this.__INPUT__ = this.__BODY__.firstElementChild.assignedNodes().pop()
+      this._handleSubmit = bind(this.__INPUT__, 'submit', ev => {
+        this._intercept(ev.detail)
+      })
+    }
+
+    this._updateFixedStat()
+
+    if (this.props.mask) {
+      this._handlMask = clickOutside(this.root.children[1], ev => {
+        if (this.props.maskClose) {
+          this.reject(null)
+          this.close()
+        } else {
+          if (UNIQUE_TYPES.includes(this.props.type)) {
+            this.root.children[1].classList.toggle('scale', true)
+            setTimeout(_ => {
+              this.root.children[1].classList.remove('scale')
+            }, 100)
+          }
+        }
+      })
+
+      if (this.props.maskColor) {
+        this.style.backgroundColor = this.props.maskColor
+      }
+    }
+
+    if (this.props.blur) {
+      this.root.children[1].classList.toggle('blur', true)
+    }
+
+    let _style = ''
+
+    if (this.props.background) {
+      _style += `background: ${this.props.background};`
+    }
+    if (this.props.radius) {
+      _style += `border-radius: ${this.props.radius};`
+    }
+
+    if (_style) {
+      log(_style)
+      this.root.children[1].style.cssText += _style
+    }
+  }
+
+  unmount() {
+    unbind(document, 'mousedown', this._handlMask)
+  }
+
+  watch() {
+    switch (name) {
+      case 'title':
+      case 'type':
+        this[name] = val
+        break
+      case 'fixed':
+        this.fixed = true
+        break
+    }
+  }
+}
+
 function createLayer(opt) {
   var layDom = document.createElement('wc-layer')
   if (opt.mask) {
@@ -235,7 +446,9 @@ function createLayer(opt) {
   }
 
   layDom.title = opt.title
-  if (opt.btns && opt.btns.length) {
+  if (opt.btns === false) {
+    layDom.props.btns = []
+  } else if (opt.btns && opt.btns.length) {
     layDom.props.btns = opt.btns
   } else {
     layDom.props.btns = lang.BTNS.concat()
@@ -245,10 +458,15 @@ function createLayer(opt) {
     layDom.props.intercept = opt.intercept
   }
 
+  layDom.props.radius = opt.radius
   layDom.props.background = opt.background
   layDom.props.mask = opt.mask
   layDom.props.maskClose = opt.maskClose
   layDom.props.maskColor = opt.maskColor
+  layDom.props.blur = opt.blur
+  if (opt.hasOwnProperty('overflow')) {
+    layDom.props.overflow = opt.overflow
+  }
 
   layDom.type = opt.type
   layDom.innerHTML = opt.content
@@ -264,7 +482,36 @@ function createLayer(opt) {
   return layDom.promise
 }
 
-const _layer = {
+const _layer = function(opt) {
+  if (typeof opt === 'string') {
+    opt = 'layerwrap-' + opt
+    if (!layerObj[opt]) {
+      throw new Error(lang.ERROR)
+    } else {
+      //只能显示一个实例
+      if (layerObj[opt].show) {
+        return opt
+      }
+      layerObj[opt].show = true
+
+      layerObj[opt].parentElem.appendChild(layerDom[opt][0])
+      layerDom[opt][0]
+        .querySelector('.layer-content')
+        .appendChild(layerObj[opt].wrap)
+      layerObj[opt].wrap.style.display = ''
+
+      if (!Anot.vmodels[opt]) {
+        Anot(layerObj[opt].obj.init)
+      }
+      layerObj[opt].obj.show()
+      return opt
+    }
+  } else {
+    return createLayer(opt)
+  }
+}
+
+Object.assign(_layer, {
   alert(content, title = lang.TITLE) {
     return createLayer({
       type: 'alert',
@@ -342,37 +589,8 @@ const _layer = {
     }
 
     return _layer.open(opt)
-  },
-
-  open(opt) {
-    if (typeof opt === 'string') {
-      opt = 'layerwrap-' + opt
-      if (!layerObj[opt]) {
-        throw new Error(lang.ERROR)
-      } else {
-        //只能显示一个实例
-        if (layerObj[opt].show) {
-          return opt
-        }
-        layerObj[opt].show = true
-
-        layerObj[opt].parentElem.appendChild(layerDom[opt][0])
-        layerDom[opt][0]
-          .querySelector('.layer-content')
-          .appendChild(layerObj[opt].wrap)
-        layerObj[opt].wrap.style.display = ''
-
-        if (!Anot.vmodels[opt]) {
-          Anot(layerObj[opt].obj.init)
-        }
-        layerObj[opt].obj.show()
-        return opt
-      }
-    } else {
-      return new __layer__(opt).init.$id
-    }
   }
-}
+})
 
 /* Anot.directive('layer', {
   priority: 8090,
@@ -507,196 +725,6 @@ const _layer = {
     }
   }
 }) */
-
-function renderBtns(list) {
-  var html = ''
-  list.forEach((t, i) => {
-    html += `<button data-idx="${i}"">${t || lang.BTNS[i]}</button>`
-  })
-
-  return html
-}
-
-class Layer {
-  props = {
-    btns: [],
-    type: 'msg',
-    title: '',
-    fixed: false //是否固定位置
-  }
-
-  __init__() {
-    /* render */
-
-    this.__TITLE__ = this.root.children[1].firstElementChild
-    this.__BODY__ = this.root.children[1].children[1]
-    this.__CTRL__ = this.root.children[1].lastElementChild
-
-    this.promise = new Promise((resolve, reject) => {
-      this.resolve = resolve
-      this.reject = reject
-    })
-  }
-
-  set title(val) {
-    if (val) {
-      this.__TITLE__.textContent = val
-      this.__TITLE__.style.display = ''
-    } else {
-      this.__TITLE__.style.display = 'none'
-    }
-  }
-
-  set type(val) {
-    var { btns } = this.props
-
-    switch (val) {
-      case 'alert':
-        while (btns.length > 1) {
-          btns.splice(0, 1)
-        }
-        break
-      case 'confirm':
-      case 'prompt':
-        while (btns.length > 2) {
-          btns.splice(0, 1)
-        }
-        break
-      case 'toast':
-      case 'frame':
-        btns = []
-        break
-      default:
-        val = 'common'
-        break
-    }
-    this.props.type = val
-    if (btns.length) {
-      this.__CTRL__.innerHTML = renderBtns(btns)
-      this.__CTRL__.style.display = ''
-    } else {
-      this.__CTRL__.style.display = 'none'
-    }
-
-    this.setAttribute('type', val)
-  }
-
-  set fixed(val) {
-    this.props.fixed = !!val
-
-    // 这3类弹层不允许拖拽
-    if (UNIQUE_TYPES.includes(this.props.type)) {
-      return
-    }
-
-    if (this.props.fixed) {
-      if (this._dragIns) {
-        this._dragIns.destroy()
-        this._dragIns = null
-      }
-    } else {
-      this._dragIns = new Drag(this.root.children[1]).by(this.__TITLE__, {
-        overflow: false
-      })
-      this.removeAttribute('fixed')
-    }
-  }
-
-  // 拦截 "确定"按钮的事件
-  _intercept(input) {
-    if (this.props.intercept) {
-      this.props.intercept(input, _ => {
-        delete this.props.intercept
-        this.resolve(input)
-        this.close()
-      })
-    } else {
-      this.resolve(input)
-      this.close()
-    }
-  }
-
-  close() {
-    if (this._dragIns) {
-      this._dragIns.destroy()
-    }
-    if (UNIQUE_TYPES.includes(this.props.type)) {
-      unique = null
-    }
-    delete this.promise
-    unbind(this.__CTRL__, 'click', this._handleBtnClick)
-    this.parentNode.removeChild(this)
-  }
-
-  mounted() {
-    this._handleBtnClick = bind(this.__CTRL__, 'click', ev => {
-      if (ev.target.tagName === 'BUTTON') {
-        var idx = +ev.target.dataset.idx
-        var { intercept, type } = this.props
-
-        switch (type) {
-          case 'alert':
-            this.resolve()
-            this.close()
-            break
-          case 'confirm':
-          case 'prompt':
-            if (idx === 0) {
-              this.reject()
-              this.close()
-            } else {
-              let inputValue = type === 'prompt' ? this.__INPUT__.value : null
-              this._intercept(inputValue)
-            }
-            break
-
-          default:
-            // 其他类型, 如有按钮, 直接返回按钮的索引, 不作任何拦截
-            this.resolve(idx)
-            this.close()
-        }
-      }
-    })
-
-    if (this.props.type === 'prompt') {
-      this.__INPUT__ = this.__BODY__.firstElementChild.assignedNodes().pop()
-      this._handleSubmit = bind(this.__INPUT__, 'submit', ev => {
-        this._intercept(ev.detail)
-      })
-    }
-
-    if (this.props.mask) {
-      this._handlMask = clickOutside(this.root.children[1], ev => {
-        if (this.props.maskClose) {
-          this.close()
-        } else {
-          if (UNIQUE_TYPES.includes(this.props.type)) {
-            this.root.children[1].classList.toggle('scale', true)
-            setTimeout(_ => {
-              this.root.children[1].classList.remove('scale')
-            }, 100)
-          }
-        }
-      })
-    }
-  }
-
-  unmount() {
-    unbind(document, 'mousedown', this._handlMask)
-  }
-
-  watch() {
-    switch (name) {
-      case 'title':
-      case 'type':
-        this[name] = val
-        break
-      case 'fixed':
-        this.fixed = true
-        break
-    }
-  }
-}
 
 window.layer = _layer
 

@@ -39,13 +39,7 @@ export default class Drag {
     }
 
     // 鼠标状态图标
-    var ico = document.documentMode ? 'move' : 'grab'
-    if (window.sidebar) {
-      ico = '-moz-' + ico
-    } else {
-      ico = '-webkit-' + ico
-    }
-    node.style.cursor = ico
+    node.style.cursor = 'move'
 
     this._handleResize = bind(window, 'resize', this._init.bind(this))
 
