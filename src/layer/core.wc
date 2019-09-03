@@ -33,11 +33,10 @@
   color: #666;
   font-size: 14px;
   box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
-  // opacity: 0;
+  transition: opacity 0.2s ease-in-out, left 0.2s ease-in-out,
+    right 0.2s ease-in-out, top 0.2s ease-in-out, bottom 0.2s ease-in-out;
+  opacity: 0;
 
-  &.shift {
-    transition: all 0.5s ease-out;
-  }
   &.scale {
     transform: scale(1.01);
     transition: transform 0.1s linear;
@@ -84,6 +83,31 @@
       padding: 0;
       border: 0;
       resize: none;
+      background: #fff;
+    }
+
+    ::slotted(&__toast) {
+      display: flex;
+      align-items: center;
+      width: 300px;
+      padding: 0 10px !important;
+      border-radius: 4px;
+    }
+
+    ::slotted(&__toast.style-info) {
+      border: 1px solid nth($cp, 3);
+      background: nth($cp, 2);
+      color: nth($cgr, 3);
+    }
+    ::slotted(&__toast.style-warn) {
+      border: 1px solid #faebb4;
+      background: #fffbed;
+      color: nth($co, 3);
+    }
+    ::slotted(&__toast.style-error) {
+      border: 1px solid #f5c4c4;
+      background: #fef0f0;
+      color: nth($cr, 1);
     }
   }
 
@@ -148,13 +172,6 @@
   height: 100%;
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(5px);
-
-  &.shift {
-    transition: all 0.5s ease-out;
-  }
-  &.inner {
-    position: absolute;
-  }
 }
 
 :host([type='alert']),
@@ -167,6 +184,15 @@
 
     &__content {
       padding: 0 15px;
+    }
+  }
+}
+:host([type='toast']) {
+  .layer {
+    box-shadow: none;
+
+    &__content {
+      min-height: 40px;
     }
   }
 }
@@ -195,28 +221,10 @@ const lang =
   LANGUAGES[window.__ENV_LANG__ || navigator.language] || LANGUAGES.en
 
 let unique = null // 储存当前打开的alert/confirm/prompt类型的弹窗
-
-let defconf = {
-  area: ['auto', 'auto'],
-  shift: {}, // 弹窗出来的初始位置,用于出场动画
-  offset: {} // 弹窗出来后的坐标, 为数组,可有4个值,依次是 上右下左
-}
+let toastCount = 0
 
 // 要保证弹层唯一的类型
 const UNIQUE_TYPES = ['alert', 'confirm', 'prompt']
-
-const fixOffset = function(offset) {
-  for (let i in offset) {
-    if (offset[i] === 'auto' || (!offset[i] && offset[i] !== 0)) {
-      delete offset[i]
-    } else {
-      if (isFinite(offset[i])) {
-        offset[i] += 'px'
-      }
-    }
-  }
-  return offset
-}
 
 function renderBtns(list) {
   var html = ''
@@ -259,6 +267,10 @@ class Layer {
 
   set type(val) {
     var { btns } = this.props
+
+    if (this._handleBtnClick) {
+      return
+    }
 
     switch (val) {
       case 'alert':
@@ -341,7 +353,23 @@ class Layer {
     }
     delete this.promise
     unbind(this.__CTRL__, 'click', this._handleBtnClick)
-    this.parentNode.removeChild(this)
+
+    // 离场动画
+    if (this.props.from) {
+      let _style = 'opacity:0;'
+      for (let k in this.props.from) {
+        _style += `${k}:${this.props.from[k]};`
+      }
+      this.root.children[1].style.cssText += _style
+      setTimeout(() => {
+        this.parentNode.removeChild(this)
+        if (this.props.type === 'toast') {
+          toastCount--
+        }
+      }, 200)
+    } else {
+      this.parentNode.removeChild(this)
+    }
   }
 
   mounted() {
@@ -383,6 +411,9 @@ class Layer {
 
     this._updateFixedStat()
 
+    /* ------------------------ */
+    /* ----    额外的样式     --- */
+    /* ------------------------ */
     if (this.props.mask) {
       this._handlMask = clickOutside(this.root.children[1], ev => {
         if (this.props.maskClose) {
@@ -412,13 +443,38 @@ class Layer {
     if (this.props.background) {
       _style += `background: ${this.props.background};`
     }
-    if (this.props.radius) {
+    if (this.props.radius || this.props.radius === 0) {
       _style += `border-radius: ${this.props.radius};`
     }
 
+    if (this.props.size) {
+      for (let k in this.props.size) {
+        _style += `${k}:${this.props.size[k]};`
+      }
+    }
+
+    if (this.props.from) {
+      for (let k in this.props.from) {
+        _style += `${k}:${this.props.from[k]};`
+      }
+      // 进场动画
+      setTimeout(_ => {
+        let _nextStyle = 'opacity:1;'
+        for (let k in this.props.to) {
+          _nextStyle += `${k}:${this.props.to[k]};`
+        }
+        this.root.children[1].style.cssText += _nextStyle
+      }, 50)
+    }
+
     if (_style) {
-      log(_style)
       this.root.children[1].style.cssText += _style
+    }
+
+    if (this.props.type === 'toast') {
+      setTimeout(() => {
+        this.close()
+      }, this.props.timeout)
     }
   }
 
@@ -441,31 +497,68 @@ class Layer {
 
 function createLayer(opt) {
   var layDom = document.createElement('wc-layer')
-  if (opt.mask) {
-    layDom.setAttribute('mask', '')
+
+  if (opt.type === 'toast') {
+    var { timeout, type, content } = opt
+    timeout = timeout >>> 0
+    if (timeout < 1) {
+      timeout = 2500
+    }
+    opt = {
+      timeout,
+      type,
+      content,
+      from: { top: `${toastCount * 50}px` },
+      to: { top: `${(toastCount + 1) * 50 - 30}px` }
+    }
+    toastCount++
+  } else {
+    if (opt.mask) {
+      layDom.setAttribute('mask', '')
+    }
+
+    if (opt.btns === false) {
+      layDom.props.btns = []
+    } else if (opt.btns && opt.btns.length) {
+      layDom.props.btns = opt.btns
+    } else {
+      layDom.props.btns = lang.BTNS.concat()
+    }
+
+    if (opt.intercept && typeof opt.intercept === 'function') {
+      layDom.props.intercept = opt.intercept
+    }
+
+    layDom.props.mask = opt.mask
+    layDom.props.maskClose = opt.maskClose
+
+    if (opt.hasOwnProperty('overflow')) {
+      layDom.props.overflow = opt.overflow
+    }
+
+    /* 额外样式 */
+    layDom.props.maskColor = opt.maskColor
+
+    layDom.props.blur = opt.blur
+
+    layDom.props.radius = opt.radius
+    layDom.props.background = opt.background
+
+    if (opt.size && typeof opt.size === 'object') {
+      layDom.props.size = opt.size
+    }
   }
 
   layDom.title = opt.title
-  if (opt.btns === false) {
-    layDom.props.btns = []
-  } else if (opt.btns && opt.btns.length) {
-    layDom.props.btns = opt.btns
-  } else {
-    layDom.props.btns = lang.BTNS.concat()
-  }
+  layDom.props.timeout = timeout
 
-  if (opt.intercept && typeof opt.intercept === 'function') {
-    layDom.props.intercept = opt.intercept
-  }
-
-  layDom.props.radius = opt.radius
-  layDom.props.background = opt.background
-  layDom.props.mask = opt.mask
-  layDom.props.maskClose = opt.maskClose
-  layDom.props.maskColor = opt.maskColor
-  layDom.props.blur = opt.blur
-  if (opt.hasOwnProperty('overflow')) {
-    layDom.props.overflow = opt.overflow
+  if (opt.to && typeof opt.to === 'object') {
+    layDom.props.to = opt.to
+    if (opt.from && typeof opt.from === 'object') {
+      layDom.props.from = opt.from
+    } else {
+      layDom.props.from = opt.to
+    }
   }
 
   layDom.type = opt.type
@@ -510,6 +603,13 @@ const _layer = function(opt) {
     return createLayer(opt)
   }
 }
+
+Object.defineProperty(_layer, '__map__', {
+  value: {},
+  writable: true,
+  enumerable: false,
+  configurable: true
+})
 
 Object.assign(_layer, {
   alert(content, title = lang.TITLE) {
@@ -562,169 +662,24 @@ Object.assign(_layer, {
     }
     switch (type) {
       case 'info':
-        break
       case 'warn':
-        break
       case 'error':
-        type = 'deny'
         break
       default:
         type = 'info'
     }
 
-    let opt = {
+    return createLayer({
       content: `
-      <mark class="toast-box style-${type}">
-        <i class="do-icon-${type}"></i>
+      <div class="layer__content__toast style-${type}">
+        <wc-icon size="mini" is="${type}"></wc-icon>
         ${txt}
-      </mark>`,
-      menubar: false,
-      mask: false,
-      type: 7,
-      shift: { top: 0 },
-      timeout,
-      offset: { top: 50 },
-      fixed: true,
-      toast: true // toast模式
-    }
-
-    return _layer.open(opt)
+      </div>`,
+      type: 'toast',
+      timeout
+    })
   }
 })
-
-/* Anot.directive('layer', {
-  priority: 8090,
-  init: function(binding) {
-    // 去掉:layer属性,避免二次扫描
-    binding.element.removeAttribute(binding.name)
-    if (!binding.param || binding.param !== 'tips') {
-      binding.param = '' // 去掉param,保证之后的逻辑处理正常
-      binding.element.style.display = 'none'
-    }
-  },
-  update: function(val) {
-    if (!val) {
-      return console.error(
-        `SyntaxError: Unexpected [${this.name}=${this.expr}]`
-      )
-    }
-
-    let state = Object.assign({ type: 7, wrap: true }, this.element.dataset)
-
-    if (!this.param) {
-      let init = { $id: 'layerwrap-' + val, state, props: {} }
-
-      if (state.hasOwnProperty('area')) {
-        state.area = state.area.split(',')
-      }
-      if (state.hasOwnProperty('shift')) {
-        state.shift = fixOffset(new Function(`return ${state.shift}`)())
-      }
-
-      if (state.hasOwnProperty('offset')) {
-        state.offset = fixOffset(new Function(`return ${state.offset}`)())
-      }
-
-      if (state.hasOwnProperty('btns')) {
-        state.btns = state.btns.split(',')
-      }
-
-      if (!state.hasOwnProperty('menubar')) {
-        state.menubar = false
-      }
-
-      let tmp = new __layer__().__init__(init)
-
-      //去掉data-*属性
-      for (let i in this.element.dataset) {
-        delete this.element.dataset[i]
-      }
-
-      layerObj[tmp.init.$id] = {
-        obj: tmp,
-        parentElem: this.element.parentNode,
-        wrap: this.element,
-        show: false
-      }
-      layerDom[tmp.init.$id] = tmp.create()
-    } else if (this.param === 'tips') {
-      let tips = document.createElement('div')
-      let cont = document.createElement('span')
-      let arrow = document.createElement('i')
-      let $container = Anot(this.element)
-      let { position } = getComputedStyle(this.element)
-
-      tips.className = 'do-layer__tips'
-      cont.className = 'layer-content'
-      arrow.className = 'arrow'
-      cont.textContent = val
-      tips.appendChild(cont)
-      tips.appendChild(arrow)
-
-      if (position === 'static') {
-        this.element.style.position = 'relative'
-      }
-      this.element.appendChild(tips)
-
-      let style = {}
-
-      if (state.color) {
-        style.color = state.color
-      }
-      if (state.color) {
-        style.background = state.background
-      }
-
-      let cw = $container.innerWidth()
-      let ch = $container.innerHeight()
-
-      let arrowOffset = ['top']
-
-      // log(tips, layw, layh)
-      Anot(tips).css(style)
-
-      $container.bind('mouseenter', ev => {
-        let tmpStyle = { visibility: 'visible' }
-        let layw = tips.clientWidth
-        let layh = tips.clientHeight
-        let { left, top } = $container.offset()
-        let ol = left - $doc.scrollLeft()
-        let ot = top - $doc.scrollTop()
-
-        // 判断位置是以确定出现 在上还是在下
-        if (ot < layh + 8) {
-          arrowOffset[0] = 'bottom'
-          arrow.style.borderBottomColor = state.background
-          tmpStyle.bottom = ''
-          tmpStyle.top = ch + 8
-        } else {
-          arrow.style.borderTopColor = state.background
-          tmpStyle.top = ''
-          tmpStyle.bottom = ch + 8
-        }
-
-        if (ol + cw * 0.7 + layw > window.innerWidth) {
-          tmpStyle.left = cw * 0.3 - layw
-          arrowOffset[1] = 'left'
-        } else {
-          tmpStyle.left = cw * 0.7
-        }
-
-        arrow.classList.add('offset-' + arrowOffset.join('-'))
-        Anot(tips).css(tmpStyle)
-      })
-      $container.bind('mouseleave', () => {
-        setTimeout(() => {
-          arrow.classList.remove('offset-' + arrowOffset.join('-'))
-          arrowOffset = ['top']
-          arrow.style.borderBottomColor = ''
-          arrow.style.borderTopColor = ''
-          tips.style.visibility = 'hidden'
-        }, 100)
-      })
-    }
-  }
-}) */
 
 window.layer = _layer
 
