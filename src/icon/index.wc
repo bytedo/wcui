@@ -121,21 +121,13 @@ export default class Icon {
     }
   }
 
-  get is() {
-    return this.props.is
-  }
-
-  set is(val) {
-    this.props.is = val
-    this.setAttribute('is', val)
-    this.drawPath()
-  }
-
   watch() {
     switch (name) {
       case 'is':
-        this.is = val
-        if (!val) {
+        if (val) {
+          this.props.is = val
+          this.drawPath()
+        } else {
           this.removeAttribute('is')
         }
         break

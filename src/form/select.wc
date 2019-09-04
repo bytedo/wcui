@@ -268,7 +268,6 @@ export default class Select {
     this.__OUTER__ = this.root.children[1]
     this.__PREPEND__ = this.__OUTER__.children[0]
     this.__INPUT__ = this.__OUTER__.children[1]
-    this.__ICO__ = this.__OUTER__.children[2]
     this.__APPEND__ = this.__OUTER__.children[3]
     this.__OPTG__ = this.__OUTER__.children[4]
   }

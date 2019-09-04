@@ -339,7 +339,7 @@ class Layer {
       case 'frame':
         if (val === 'notify') {
           var _ico = document.createElement('wc-icon')
-          _ico.is = 'close'
+          _ico.setAttribute('is', 'close')
           this.__TITLE__.appendChild(_ico)
         }
         btns = []
