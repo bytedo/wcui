@@ -108,6 +108,9 @@
   }
   button {
     background: #fff;
+    // &:active {
+    border-color: nth($cp, 3);
+    // }
   }
 }
 
@@ -234,10 +237,11 @@
 }
 
 :host(:focus-within) {
-  box-shadow: 0 0 3px nth($ct, 1);
+  @include focus1;
 }
-:host(:focus-within[disabled]) {
-  box-shadow: 0 0 3px nth($co, 1);
+:host(:focus-within[disabled]),
+:host(:focus-within[loading]) {
+  box-shadow: none;
 }
 </style>
 

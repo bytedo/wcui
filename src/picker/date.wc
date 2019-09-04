@@ -208,10 +208,10 @@
 }
 
 :host(:focus-within) {
-  box-shadow: 0 0 3px nth($ct, 1);
+  @include focus1;
 }
 :host(:focus-within[readonly]) {
-  box-shadow: 0 0 3px nth($co, 1);
+  @include focus2;
 }
 :host([disabled]) {
   opacity: 0.6;

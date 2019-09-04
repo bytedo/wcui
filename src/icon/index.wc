@@ -124,8 +124,8 @@ export default class Icon {
   watch() {
     switch (name) {
       case 'is':
+        this.props.is = val
         if (val) {
-          this.props.is = val
           this.drawPath()
         } else {
           this.removeAttribute('is')

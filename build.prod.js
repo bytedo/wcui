@@ -29,6 +29,14 @@ $cd: #62778d #526273 #425064;
   transition:$c $t $m;
 }
 
+@mixin focus1(){
+  box-shadow: 0 0 2px #88f7df;
+}
+
+@mixin focus2(){
+  box-shadow: 0 0 2px #f3be4d;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;padding: 0;
@@ -121,7 +129,7 @@ function mkWCFile({ style, html, js }) {
     .replace('unmount()', 'disconnectedCallback()')
     .replace(
       'watch() {',
-      'attributeChangedCallback(name, old, val) {\nif (old === val) {return}'
+      'attributeChangedCallback(name, old, val) {\nif (val === null || old === val) {return}'
     )
     .replace('adopted()', 'adoptedCallback()')
 

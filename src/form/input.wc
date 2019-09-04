@@ -152,10 +152,10 @@ li {
   opacity: 0.6;
 }
 :host(:focus-within) {
-  box-shadow: 0 0 3px nth($ct, 1);
+  @include focus1;
 }
 :host(:focus-within[readonly]) {
-  box-shadow: 0 0 3px nth($co, 1);
+  @include focus2;
 }
 
 :host([type='textarea']) {
