@@ -53,12 +53,21 @@
 
   &__title {
     display: flex;
+    justify-content: space-between;
+    align-items: center;
     width: 100%;
     height: 60px;
     padding: 15px;
-    line-height: 30px;
     font-size: 16px;
     color: nth($cd, 2);
+
+    wc-icon {
+      --size: 14px;
+
+      &:hover {
+        color: nth($cr, 1);
+      }
+    }
   }
 
   &__content {
@@ -143,6 +152,10 @@
         border-color: nth($cgr, 1);
       }
 
+      &:focus {
+        box-shadow: 0 0 3px nth($ct, 1);
+      }
+
       &:last-child {
         color: #fff;
         background: nth($ct, 2);
@@ -187,6 +200,16 @@
     }
   }
 }
+:host([type='notify']) {
+  .layer {
+    width: 300px;
+    height: 120px;
+
+    &__content {
+      padding: 0 15px;
+    }
+  }
+}
 :host([type='toast']) {
   .layer {
     box-shadow: none;
@@ -220,8 +243,8 @@ LANGUAGES['zh-CN'] = LANGUAGES.zh
 const lang =
   LANGUAGES[window.__ENV_LANG__ || navigator.language] || LANGUAGES.en
 
-let unique = null // 储存当前打开的alert/confirm/prompt类型的弹窗
-let toastCount = 0
+let uniqueInstance = null // 缓存当前打开的alert/confirm/prompt类型的弹窗
+let toastInstance = null // 缓存toast的实例
 
 // 要保证弹层唯一的类型
 const UNIQUE_TYPES = ['alert', 'confirm', 'prompt']
@@ -238,7 +261,7 @@ function renderBtns(list) {
 class Layer {
   props = {
     btns: [],
-    type: 'msg',
+    type: '',
     title: '',
     fixed: false //是否固定位置
   }
@@ -257,6 +280,7 @@ class Layer {
   }
 
   set title(val) {
+    this.props.title = val
     if (val) {
       this.__TITLE__.textContent = val
       this.__TITLE__.style.display = ''
@@ -285,7 +309,13 @@ class Layer {
         }
         break
       case 'toast':
+      case 'notify':
       case 'frame':
+        if (val === 'notify') {
+          var _ico = document.createElement('wc-icon')
+          _ico.is = 'close'
+          this.__TITLE__.appendChild(_ico)
+        }
         btns = []
         break
       default:
@@ -344,30 +374,28 @@ class Layer {
     }
   }
 
-  close() {
+  close(force) {
     if (this._dragIns) {
       this._dragIns.destroy()
     }
     if (UNIQUE_TYPES.includes(this.props.type)) {
-      unique = null
+      uniqueInstance = null
     }
     delete this.promise
     unbind(this.__CTRL__, 'click', this._handleBtnClick)
 
     // 离场动画
-    if (this.props.from) {
+    if (this.props.from && !force) {
       let _style = 'opacity:0;'
       for (let k in this.props.from) {
         _style += `${k}:${this.props.from[k]};`
       }
       this.root.children[1].style.cssText += _style
-      setTimeout(() => {
+      this.timer = setTimeout(() => {
         this.parentNode.removeChild(this)
-        if (this.props.type === 'toast') {
-          toastCount--
-        }
       }, 200)
     } else {
+      clearTimeout(this.timer)
       this.parentNode.removeChild(this)
     }
   }
@@ -438,7 +466,7 @@ class Layer {
       this.root.children[1].classList.toggle('blur', true)
     }
 
-    let _style = ''
+    let _style = this.props.from ? '' : 'opacity:1;'
 
     if (this.props.background) {
       _style += `background: ${this.props.background};`
@@ -472,21 +500,33 @@ class Layer {
     }
 
     if (this.props.type === 'toast') {
-      setTimeout(() => {
+      this.timer = setTimeout(() => {
+        toastInstance = null
         this.close()
-      }, this.props.timeout)
+      }, 3000)
+    }
+
+    if (this.props.type === 'notify') {
+      this._handleClose = bind(this.__TITLE__, 'click', ev => {
+        if (ev.target.tagName === 'WC-ICON') {
+          this.close()
+        }
+      })
     }
   }
 
   unmount() {
     unbind(document, 'mousedown', this._handlMask)
+    unbind(this.__TITLE__, 'click', this._handleClose)
   }
 
   watch() {
     switch (name) {
       case 'title':
       case 'type':
-        this[name] = val
+        if (val !== this.props[name]) {
+          this[name] = val
+        }
         break
       case 'fixed':
         this.fixed = true
@@ -499,19 +539,20 @@ function createLayer(opt) {
   var layDom = document.createElement('wc-layer')
 
   if (opt.type === 'toast') {
-    var { timeout, type, content } = opt
-    timeout = timeout >>> 0
-    if (timeout < 1) {
-      timeout = 2500
-    }
+    var { type, content } = opt
+
     opt = {
-      timeout,
       type,
       content,
-      from: { top: `${toastCount * 50}px` },
-      to: { top: `${(toastCount + 1) * 50 - 30}px` }
+      fixed: true,
+      from: { top: 0 },
+      to: { top: '30px' }
     }
-    toastCount++
+
+    if (toastInstance) {
+      toastInstance.close(true)
+    }
+    toastInstance = layDom
   } else {
     if (opt.mask) {
       layDom.setAttribute('mask', '')
@@ -547,10 +588,15 @@ function createLayer(opt) {
     if (opt.size && typeof opt.size === 'object') {
       layDom.props.size = opt.size
     }
-  }
 
-  layDom.title = opt.title
-  layDom.props.timeout = timeout
+    // 这3种类型, 只允许同时存在1个, 如果之前有弹出则关闭
+    if (UNIQUE_TYPES.includes(opt.type)) {
+      if (uniqueInstance) {
+        uniqueInstance.close(true)
+      }
+      uniqueInstance = layDom
+    }
+  }
 
   if (opt.to && typeof opt.to === 'object') {
     layDom.props.to = opt.to
@@ -561,17 +607,13 @@ function createLayer(opt) {
     }
   }
 
+  layDom.title = opt.title
   layDom.type = opt.type
+  layDom.fixed = opt.fixed
+
   layDom.innerHTML = opt.content
   document.body.appendChild(layDom)
 
-  // 这3种类型, 只允许同时存在1个, 如果之前有弹出则关闭
-  if (UNIQUE_TYPES.includes(opt.type)) {
-    if (unique) {
-      unique.close()
-    }
-    unique = layDom
-  }
   return layDom.promise
 }
 
@@ -655,11 +697,18 @@ Object.assign(_layer, {
       maskClose: true
     })
   },
-  toast(txt, type = 'info', timeout = 2500) {
-    if (typeof type === 'number') {
-      timeout = type
-      type = 'info'
-    }
+  notify(content) {
+    return createLayer({
+      type: 'notify',
+      title: '通知',
+      content,
+      fixed: true,
+      blur: true,
+      from: { right: '-300px', top: 0 },
+      to: { right: 0 }
+    })
+  },
+  toast(txt, type = 'info') {
     switch (type) {
       case 'info':
       case 'warn':
@@ -675,8 +724,7 @@ Object.assign(_layer, {
         <wc-icon size="mini" is="${type}"></wc-icon>
         ${txt}
       </div>`,
-      type: 'toast',
-      timeout
+      type: 'toast'
     })
   }
 })

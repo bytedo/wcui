@@ -127,6 +127,7 @@ export default class Icon {
 
   set is(val) {
     this.props.is = val
+    this.setAttribute('is', val)
     this.drawPath()
   }
 
