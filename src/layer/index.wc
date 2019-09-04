@@ -65,7 +65,7 @@
   /* 弹层样式 */
 
   &__title {
-    display: flex;
+    display: none;
     justify-content: space-between;
     align-items: center;
     width: 100%;
@@ -134,7 +134,7 @@
   }
 
   &__ctrl {
-    display: flex;
+    display: none;
     justify-content: flex-end;
     width: 100%;
     height: 60px;
@@ -280,7 +280,7 @@ class Layer {
     mask: false,
     'mask-close': false,
     'mask-color': null,
-    fixed: false //是否固定位置
+    fixed: true //是否固定位置
   }
 
   __init__() {
@@ -307,9 +307,9 @@ class Layer {
       } else {
         this.__TITLE__.textContent = val
       }
-      this.__TITLE__.style.display = ''
+      this.__TITLE__.style.display = 'flex'
     } else {
-      this.__TITLE__.style.display = 'none'
+      this.__TITLE__.style.display = ''
     }
   }
 
@@ -349,9 +349,9 @@ class Layer {
     this.props.type = val
     if (btns.length) {
       this.__CTRL__.innerHTML = renderBtns(btns)
-      this.__CTRL__.style.display = ''
+      this.__CTRL__.style.display = 'flex'
     } else {
-      this.__CTRL__.style.display = 'none'
+      this.__CTRL__.style.display = ''
     }
 
     this.setAttribute(val, '')
@@ -605,7 +605,6 @@ function _layer(opt) {
     opt = {
       type,
       content,
-      fixed: true,
       from: { top: 0 },
       to: { top: '30px' }
     }
@@ -683,7 +682,6 @@ Object.assign(_layer, {
       type: 'alert',
       title,
       content,
-      fixed: true,
       mask: true
     })
   },
@@ -696,7 +694,6 @@ Object.assign(_layer, {
       type: 'confirm',
       title,
       content,
-      fixed: true,
       mask: true,
       intercept
     })
@@ -706,7 +703,6 @@ Object.assign(_layer, {
       type: 'prompt',
       title,
       content: `<wc-input autofocus class="layer__content__input"></wc-input>`,
-      fixed: true,
       mask: true,
       intercept
     })
@@ -716,7 +712,6 @@ Object.assign(_layer, {
       ...extra,
       type: 'frame',
       content: `<iframe class="layer__content__frame" src="${url}"></iframe>`,
-      fixed: true,
       mask: true,
       'mask-close': true
     })
@@ -726,7 +721,6 @@ Object.assign(_layer, {
       type: 'notify',
       title: '通知',
       content,
-      fixed: true,
       blur: true,
       from: { right: '-300px', top: 0 },
       to: { right: 0 }
