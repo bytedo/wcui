@@ -7,12 +7,22 @@
 </template>
 <style lang="scss">
 :host {
-  display: flex;
+  display: none;
   justify-content: center;
   align-items: center;
   width: auto;
   height: auto;
 }
+:host([alert]),
+:host([confirm]),
+:host([prompt]),
+:host([frame]),
+:host([toast]),
+:host([notify]),
+:host([common]) {
+  display: flex;
+}
+
 .noselect {
   -webkit-touch-callout: none;
   -webkit-user-select: none;
@@ -187,9 +197,9 @@
   backdrop-filter: blur(5px);
 }
 
-:host([type='alert']),
-:host([type='confirm']),
-:host([type='prompt']) {
+:host([alert]),
+:host([confirm]),
+:host([prompt]) {
   .layer {
     max-width: 600px;
     min-width: 300px;
@@ -200,7 +210,7 @@
     }
   }
 }
-:host([type='notify']) {
+:host([notify]) {
   .layer {
     width: 300px;
     height: 120px;
@@ -210,7 +220,7 @@
     }
   }
 }
-:host([type='toast']) {
+:host([toast]) {
   .layer {
     box-shadow: none;
 
@@ -230,13 +240,11 @@ import { nextTick, bind, unbind, clickOutside } from '../utils'
 const LANGUAGES = {
   en: {
     TITLE: 'Dialog',
-    BTNS: ['Cancel', 'OK'],
-    ERROR: 'The layer instance is not exists'
+    BTNS: ['Cancel', 'OK']
   },
   zh: {
     TITLE: '提示',
-    BTNS: ['取消', '确定'],
-    ERROR: '要关闭的layer实例不存在'
+    BTNS: ['取消', '确定']
   }
 }
 LANGUAGES['zh-CN'] = LANGUAGES.zh
@@ -260,9 +268,20 @@ function renderBtns(list) {
 
 class Layer {
   props = {
+    left: 'auto',
+    right: 'auto',
+    top: 'auto',
+    bottom: 'auto',
+    from: Object.create(null),
+    to: Object.create(null),
     btns: [],
     type: '',
     title: '',
+    blur: false,
+    background: null,
+    mask: false,
+    'mask-close': false,
+    'mask-color': null,
     fixed: false //是否固定位置
   }
 
@@ -282,7 +301,14 @@ class Layer {
   set title(val) {
     this.props.title = val
     if (val) {
-      this.__TITLE__.textContent = val
+      if (this.__TITLE__.firstElementChild) {
+        this.__TITLE__.insertBefore(
+          document.createTextNode(val),
+          this.__TITLE__.firstElementChild
+        )
+      } else {
+        this.__TITLE__.textContent = val
+      }
       this.__TITLE__.style.display = ''
     } else {
       this.__TITLE__.style.display = 'none'
@@ -292,7 +318,7 @@ class Layer {
   set type(val) {
     var { btns } = this.props
 
-    if (this._handleBtnClick) {
+    if (!val || this._handleBtnClick) {
       return
     }
 
@@ -330,7 +356,7 @@ class Layer {
       this.__CTRL__.style.display = 'none'
     }
 
-    this.setAttribute('type', val)
+    this.setAttribute(val, '')
   }
 
   set fixed(val) {
@@ -375,32 +401,46 @@ class Layer {
   }
 
   close(force) {
-    if (this._dragIns) {
-      this._dragIns.destroy()
-    }
-    if (UNIQUE_TYPES.includes(this.props.type)) {
-      uniqueInstance = null
-    }
-    delete this.promise
-    unbind(this.__CTRL__, 'click', this._handleBtnClick)
-
-    // 离场动画
-    if (this.props.from && !force) {
-      let _style = 'opacity:0;'
-      for (let k in this.props.from) {
-        _style += `${k}:${this.props.from[k]};`
+    if (this.wrapped === false) {
+      if (this._dragIns) {
+        this._dragIns.destroy()
       }
-      this.root.children[1].style.cssText += _style
-      this.timer = setTimeout(() => {
+      if (UNIQUE_TYPES.includes(this.props.type)) {
+        uniqueInstance = null
+      }
+      delete this.promise
+      unbind(this.__CTRL__, 'click', this._handleBtnClick)
+
+      // 离场动画
+      if (this.props.from && !force) {
+        let _style = 'opacity:0;'
+        for (let k in this.props.from) {
+          _style += `${k}:${this.props.from[k]};`
+        }
+        this.root.children[1].style.cssText += _style
+        this.timer = setTimeout(() => {
+          this.parentNode.removeChild(this)
+        }, 200)
+      } else {
+        clearTimeout(this.timer)
         this.parentNode.removeChild(this)
-      }, 200)
+      }
     } else {
-      clearTimeout(this.timer)
-      this.parentNode.removeChild(this)
+      this.removeAttribute('common')
     }
   }
 
+  show() {
+    if (this.wrapped === false) {
+      return
+    }
+    this.setAttribute('common', '')
+  }
+
   mounted() {
+    this.type = this.props.type
+    this.title = this.props.title
+
     this._handleBtnClick = bind(this.__CTRL__, 'click', ev => {
       if (ev.target.tagName === 'BUTTON') {
         var idx = +ev.target.dataset.idx
@@ -437,6 +477,10 @@ class Layer {
       })
     }
 
+    if (this.props.mask) {
+      this.setAttribute('mask', '')
+    }
+
     this._updateFixedStat()
 
     /* ------------------------ */
@@ -444,8 +488,10 @@ class Layer {
     /* ------------------------ */
     if (this.props.mask) {
       this._handlMask = clickOutside(this.root.children[1], ev => {
-        if (this.props.maskClose) {
-          this.reject(null)
+        if (this.props['mask-close']) {
+          if (this.wrapped === false) {
+            this.reject(null)
+          }
           this.close()
         } else {
           if (UNIQUE_TYPES.includes(this.props.type)) {
@@ -457,8 +503,8 @@ class Layer {
         }
       })
 
-      if (this.props.maskColor) {
-        this.style.backgroundColor = this.props.maskColor
+      if (this.props['mask-color']) {
+        this.style.backgroundColor = this.props['mask-color']
       }
     }
 
@@ -524,8 +570,25 @@ class Layer {
     switch (name) {
       case 'title':
       case 'type':
-        if (val !== this.props[name]) {
-          this[name] = val
+        this[name] = val
+        break
+      case 'mask-color':
+      case 'background':
+        this.props[name] = val
+        break
+      case 'mask':
+      case 'mask-close':
+      case 'blur':
+        this.props[name] = true
+        break
+      case 'left':
+      case 'right':
+      case 'top':
+      case 'bottom':
+        if (val !== null) {
+          this.props.from[name] = val
+          this.props.to = this.props.from
+          this.removeAttribute(name)
         }
         break
       case 'fixed':
@@ -535,7 +598,7 @@ class Layer {
   }
 }
 
-function createLayer(opt) {
+function _layer(opt) {
   var layDom = document.createElement('wc-layer')
 
   if (opt.type === 'toast') {
@@ -554,9 +617,7 @@ function createLayer(opt) {
     }
     toastInstance = layDom
   } else {
-    if (opt.mask) {
-      layDom.setAttribute('mask', '')
-    }
+    layDom.props.mask = opt.mask
 
     if (opt.btns === false) {
       layDom.props.btns = []
@@ -571,14 +632,14 @@ function createLayer(opt) {
     }
 
     layDom.props.mask = opt.mask
-    layDom.props.maskClose = opt.maskClose
+    layDom.props['mask-close'] = opt['mask-close']
 
     if (opt.hasOwnProperty('overflow')) {
       layDom.props.overflow = opt.overflow
     }
 
     /* 额外样式 */
-    layDom.props.maskColor = opt.maskColor
+    layDom.props['mask-color'] = opt['mask-color']
 
     layDom.props.blur = opt.blur
 
@@ -607,55 +668,20 @@ function createLayer(opt) {
     }
   }
 
-  layDom.title = opt.title
-  layDom.type = opt.type
-  layDom.fixed = opt.fixed
+  layDom.props.type = opt.type
+  layDom.props.fixed = opt.fixed
+  layDom.props.title = opt.title
 
   layDom.innerHTML = opt.content
+  layDom.wrapped = false // 用于区分是API创建的还是包裹现有的节点
   document.body.appendChild(layDom)
 
   return layDom.promise
 }
 
-const _layer = function(opt) {
-  if (typeof opt === 'string') {
-    opt = 'layerwrap-' + opt
-    if (!layerObj[opt]) {
-      throw new Error(lang.ERROR)
-    } else {
-      //只能显示一个实例
-      if (layerObj[opt].show) {
-        return opt
-      }
-      layerObj[opt].show = true
-
-      layerObj[opt].parentElem.appendChild(layerDom[opt][0])
-      layerDom[opt][0]
-        .querySelector('.layer-content')
-        .appendChild(layerObj[opt].wrap)
-      layerObj[opt].wrap.style.display = ''
-
-      if (!Anot.vmodels[opt]) {
-        Anot(layerObj[opt].obj.init)
-      }
-      layerObj[opt].obj.show()
-      return opt
-    }
-  } else {
-    return createLayer(opt)
-  }
-}
-
-Object.defineProperty(_layer, '__map__', {
-  value: {},
-  writable: true,
-  enumerable: false,
-  configurable: true
-})
-
 Object.assign(_layer, {
   alert(content, title = lang.TITLE) {
-    return createLayer({
+    return this({
       type: 'alert',
       title,
       content,
@@ -668,7 +694,7 @@ Object.assign(_layer, {
       intercept = title
       title = lang.TITLE
     }
-    return createLayer({
+    return this({
       type: 'confirm',
       title,
       content,
@@ -678,7 +704,7 @@ Object.assign(_layer, {
     })
   },
   prompt(title = lang.TITLE, intercept) {
-    return createLayer({
+    return this({
       type: 'prompt',
       title,
       content: `<wc-input autofocus class="layer__content__input"></wc-input>`,
@@ -688,17 +714,17 @@ Object.assign(_layer, {
     })
   },
   frame(url, extra = {}) {
-    return createLayer({
+    return this({
       ...extra,
       type: 'frame',
       content: `<iframe class="layer__content__frame" src="${url}"></iframe>`,
       fixed: true,
       mask: true,
-      maskClose: true
+      'mask-close': true
     })
   },
   notify(content) {
-    return createLayer({
+    return this({
       type: 'notify',
       title: '通知',
       content,
@@ -718,7 +744,7 @@ Object.assign(_layer, {
         type = 'info'
     }
 
-    return createLayer({
+    return this({
       content: `
       <div class="layer__content__toast style-${type}">
         <wc-icon size="mini" is="${type}"></wc-icon>
