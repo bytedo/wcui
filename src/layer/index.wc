@@ -10,8 +10,11 @@
   display: none;
   justify-content: center;
   align-items: center;
-  width: auto;
-  height: auto;
+  position: fixed;
+  z-index: 65534;
+  left: 0;
+  top: 0;
+  width: 100%;
 }
 :host([alert]),
 :host([confirm]),
@@ -187,11 +190,6 @@
 }
 
 :host([mask]) {
-  position: fixed;
-  z-index: 65534;
-  left: 0;
-  top: 0;
-  width: 100%;
   height: 100%;
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(5px);
