@@ -154,6 +154,7 @@
       white-space: nowrap;
       background: #fff;
       font-size: inherit;
+      font-family: inherit;
       outline: none;
       color: inherit;
 

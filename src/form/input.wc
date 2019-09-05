@@ -52,6 +52,7 @@ li {
     border-radius: inherit;
     color: inherit;
     font-size: inherit;
+    font-family: inherit;
     background: none;
     outline: none;
     box-shadow: none;
