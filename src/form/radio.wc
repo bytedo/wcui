@@ -44,6 +44,10 @@
   }
 }
 
+:host([readonly]) {
+  opacity: 0.8;
+}
+
 :host([disabled]) {
   cursor: not-allowed;
   opacity: 0.6;
@@ -159,6 +163,7 @@ export default class Radio {
   props = {
     label: '',
     checked: false,
+    readonly: false,
     disabled: false
   }
   __init__() {
@@ -184,6 +189,25 @@ export default class Radio {
     this.__SWITCH__.classList.toggle('checked', this.props.checked)
   }
 
+  get readonly() {
+    return this.props.readonly
+  }
+
+  set readonly(val) {
+    var type = typeof val
+
+    if (val === this.props.readonly) {
+      return
+    }
+    if ((type === 'boolean' && val) || type !== 'boolean') {
+      this.props.readonly = true
+      this.setAttribute('readonly', '')
+    } else {
+      this.props.readonly = false
+      this.removeAttribute('readonly')
+    }
+  }
+
   get disabled() {
     return this.props.disabled
   }
@@ -205,7 +229,7 @@ export default class Radio {
 
   mounted() {
     this._handleClick = bind(this, 'click', ev => {
-      if (!this.disabled && !this.checked) {
+      if (!this.disabled && !this.readonly && !this.checked) {
         this.checked = true
         this.dispatchEvent(new CustomEvent('input'))
       }
@@ -223,6 +247,7 @@ export default class Radio {
         break
 
       case 'checked':
+      case 'readonly':
       case 'disabled':
         this[name] = true
         break

@@ -31,6 +31,10 @@
   }
 }
 
+:host([readonly]) {
+  opacity: 0.8;
+}
+
 :host([disabled]) {
   cursor: not-allowed;
   opacity: 0.6;
@@ -136,12 +140,15 @@
 
 <script>
 import '../icon/index'
+import { bind, unbind } from '../utils'
+
 export default class Checkbox {
   props = {
     label: '',
     color: '',
     value: [],
     checked: false,
+    readonly: false,
     disabled: false
   }
   __init__() {
@@ -188,6 +195,25 @@ export default class Checkbox {
     }
   }
 
+  get readonly() {
+    return this.props.readonly
+  }
+
+  set readonly(val) {
+    var type = typeof val
+
+    if (val === this.props.readonly) {
+      return
+    }
+    if ((type === 'boolean' && val) || type !== 'boolean') {
+      this.props.readonly = true
+      this.setAttribute('readonly', '')
+    } else {
+      this.props.readonly = false
+      this.removeAttribute('readonly')
+    }
+  }
+
   get disabled() {
     return this.props.disabled
   }
@@ -208,16 +234,18 @@ export default class Checkbox {
   }
 
   mounted() {
-    this.addEventListener(
-      'click',
-      ev => {
-        if (!this.disabled) {
-          this.checked = !this.checked
-          this.dispatchEvent(new CustomEvent('input'))
-        }
-      },
-      false
-    )
+    this._handlClick = bind(this, 'click', ev => {
+      ev.preventDefault()
+
+      if (!this.disabled && !this.readonly) {
+        this.checked = !this.checked
+        this.dispatchEvent(new CustomEvent('input'))
+      }
+    })
+  }
+
+  unmount() {
+    unbind(this, 'click', this._handlClick)
   }
 
   watch() {
@@ -228,6 +256,7 @@ export default class Checkbox {
         break
 
       case 'checked':
+      case 'readonly':
       case 'disabled':
         this[name] = true
         break
