@@ -1,13 +1,21 @@
 <template>
-  <label>
-    <span class="dot"></span>
-  </label>
+  <section>
+    <label>
+      <span class="dot"></span>
+    </label>
+    <slot></slot>
+  </section>
 </template>
 
 <style lang="scss">
 :host {
   display: inline-block;
 
+  section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
   label {
     display: flex;
     width: 38px;
@@ -107,7 +115,7 @@ export default class Switch {
   __init__() {
     /* render */
 
-    this.__SWITCH__ = this.root.lastElementChild
+    this.__SWITCH__ = this.root.lastElementChild.firstElementChild
   }
 
   get value() {
