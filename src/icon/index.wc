@@ -107,6 +107,10 @@ export default class Icon {
     this.drawPath()
   }
 
+  get is() {
+    return this.props.is
+  }
+
   // 绘制图标
   drawPath() {
     var { is } = this.props
