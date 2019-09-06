@@ -12,6 +12,8 @@
 :host {
   overflow: hidden;
   display: inline-block;
+  width: 128px;
+  height: 32px;
   user-select: none;
   -moz-user-select: none;
   color: nth($cd, 2);
@@ -20,8 +22,9 @@
 
 .label {
   display: flex;
-  width: 128px;
-  height: 32px;
+  width: 100%;
+  height: 100%;
+  margin: 0 auto;
   font-size: 14px;
   border: 1px solid nth($cp, 3);
   border-radius: inherit;
@@ -120,9 +123,9 @@
 }
 
 :host([size='large']) {
+  width: 192px;
+  height: 42px;
   .label {
-    width: 192px;
-    height: 42px;
     font-size: 16px;
     span {
       width: 48px;
@@ -135,9 +138,9 @@
 }
 
 :host([size='medium']) {
+  width: 144px;
+  height: 36px;
   .label {
-    width: 144px;
-    height: 36px;
     span {
       width: 36px;
     }
@@ -148,9 +151,9 @@
   }
 }
 :host([size='mini']) {
+  width: 96px;
+  height: 24px;
   .label {
-    width: 96px;
-    height: 24px;
     font-size: 12px;
     span {
       width: 28px;
