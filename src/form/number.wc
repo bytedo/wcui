@@ -1,0 +1,364 @@
+<template>
+  <div class="label">
+    <span data-act="-">-</span>
+    <!-- <wc-icon class="icon" icon="minus"></wc-icon> -->
+    <input value="0" maxlength="9" />
+    <span data-act="+">+</span>
+    <!-- <wc-icon class="icon" icon="plus"></wc-icon> -->
+  </div>
+</template>
+
+<style lang="scss">
+:host {
+  overflow: hidden;
+  display: inline-block;
+  user-select: none;
+  -moz-user-select: none;
+  color: nth($cd, 2);
+  border-radius: 4px;
+}
+
+.label {
+  display: flex;
+  width: 128px;
+  height: 32px;
+  font-size: 14px;
+  border: 1px solid nth($cp, 3);
+  border-radius: inherit;
+  background: #fff;
+  color: inherit;
+  cursor: text;
+
+  span {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 32px;
+    height: 100%;
+    background: nth($cp, 1);
+    font-size: 18px;
+    cursor: pointer;
+
+    &:first-child {
+      border-radius: 4px 0 0 4px;
+      border-right: 1px solid nth($cp, 3);
+    }
+    &:last-child {
+      border-radius: 0 4px 4px 0;
+      border-left: 1px solid nth($cp, 3);
+    }
+
+    &.disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+  }
+
+  input {
+    flex: 1;
+    min-width: 0;
+    width: 0;
+    height: 100%;
+    padding: 0 5px;
+    border: 0;
+    border-radius: inherit;
+    color: inherit;
+    text-align: center;
+    font-size: inherit;
+    font-family: inherit;
+    background: none;
+    outline: none;
+    box-shadow: none;
+    cursor: inherit;
+
+    &::placeholder {
+      color: nth($cgr, 1);
+    }
+  }
+  /* ----- */
+  .icon {
+    padding: 0 5px;
+    --size: 20px;
+  }
+}
+
+/* --- */
+:host([readonly]) .label {
+  cursor: default;
+  opacity: 0.8;
+
+  span {
+    cursor: inherit;
+  }
+}
+:host([disabled]) .label {
+  background: nth($cp, 1);
+  cursor: not-allowed;
+  opacity: 0.6;
+
+  span {
+    cursor: inherit;
+  }
+}
+:host(:focus-within) {
+  @include focus1;
+}
+:host(:focus-within[readonly]) {
+  @include focus2;
+}
+
+/* 额外样式 */
+:host([round]) {
+  border-radius: 21px;
+
+  .label span:first-child {
+    border-radius: 21px 0 0 21px;
+  }
+  .label span:last-child {
+    border-radius: 0 21px 21px 0;
+  }
+}
+
+:host([size='large']) {
+  .label {
+    width: 192px;
+    height: 42px;
+    font-size: 16px;
+    span {
+      width: 48px;
+    }
+  }
+  .prepend,
+  .append {
+    height: 40px;
+  }
+}
+
+:host([size='medium']) {
+  .label {
+    width: 144px;
+    height: 36px;
+    span {
+      width: 36px;
+    }
+  }
+  .prepend,
+  .append {
+    height: 34px;
+  }
+}
+:host([size='mini']) {
+  .label {
+    width: 96px;
+    height: 24px;
+    font-size: 12px;
+    span {
+      width: 28px;
+    }
+  }
+  .icon {
+    --size: 16px;
+  }
+  .prepend,
+  .append {
+    height: 18px;
+  }
+}
+</style>
+
+<script>
+import '../scroll/index'
+import '../icon/index'
+import { ebind, bind, unbind } from '../utils'
+
+export default class Number {
+  props = {
+    value: 0,
+    max: null,
+    min: null,
+    step: 1,
+    autofocus: false,
+    readonly: false,
+    disabled: false
+  }
+
+  __init__() {
+    /* render */
+
+    this.__OUTER__ = this.root.children[1]
+    this.__INPUT__ = this.__OUTER__.children[1]
+  }
+
+  get readonly() {
+    return this.props.readonly
+  }
+
+  set readonly(val) {
+    var type = typeof val
+
+    if (val === this.props.readonly) {
+      return
+    }
+    if ((type === 'boolean' && val) || type !== 'boolean') {
+      this.props.readonly = true
+      this.setAttribute('readonly', '')
+      this.__INPUT__.setAttribute('readonly', '')
+    } else {
+      this.props.readonly = false
+      this.removeAttribute('readonly')
+      this.__INPUT__.removeAttribute('readonly')
+    }
+  }
+
+  get disabled() {
+    return this.props.disabled
+  }
+
+  set disabled(val) {
+    var type = typeof val
+
+    if (val === this.props.disabled) {
+      return
+    }
+    if ((type === 'boolean' && val) || type !== 'boolean') {
+      this.props.disabled = true
+      this.setAttribute('disabled', '')
+      this.__INPUT__.setAttribute('disabled', '')
+    } else {
+      this.props.disabled = false
+      this.removeAttribute('disabled')
+      this.__INPUT__.removeAttribute('disabled')
+    }
+  }
+
+  get value() {
+    return this.props.value
+  }
+
+  set value(val) {
+    var n = +val
+    if (n === n) {
+      val = n
+    } else {
+      val = 0
+    }
+    this.props.value = val
+    this.__INPUT__.value = this.props.value
+
+    this._checkActionEnable()
+  }
+
+  _checkActionEnable() {
+    var { max, min, value } = this.props
+    if (max !== null) {
+      this.__OUTER__.children[2].classList.toggle('disabled', value >= max)
+    }
+    if (min !== null) {
+      this.__OUTER__.children[0].classList.toggle('disabled', value <= min)
+    }
+  }
+
+  _updateValue(act) {
+    var { max, min, value, step } = this.props
+    if (act === '+') {
+      if (max !== null && max < value + step) {
+        return
+      }
+      value += step
+    } else {
+      if (min !== null && min > value - step) {
+        return
+      }
+      value -= step
+    }
+    this.props.value = +value.toFixed(2)
+    this.__INPUT__.value = this.props.value
+    this._checkActionEnable()
+    this.dispatchEvent(new CustomEvent('input'))
+  }
+
+  mounted() {
+    // 键盘事件
+    this._handleSubmit = ebind(this.__INPUT__, 'keydown', ev => {
+      if (this.disabled || this.readonly) {
+        return
+      }
+
+      // up: 38, down: 40
+      if (ev.keyCode === 38 || ev.keyCode === 40) {
+        ev.preventDefault()
+        return this._updateValue(ev.keyCode === 38 ? '+' : '-')
+      }
+      // 回车触发submit事件
+      if (ev.keyCode === 13) {
+        ev.preventDefault()
+        this.dispatchEvent(
+          new CustomEvent('submit', {
+            detail: this.value
+          })
+        )
+      }
+    })
+
+    this._handleChange = ebind(this.__INPUT__, 'change', ev => {
+      if (isFinite(this.__INPUT__.value)) {
+        this.props.value = +this.__INPUT__.value
+        if (!this.__INPUT__.value.endsWith('.')) {
+          this.__INPUT__.value = this.props.value
+        }
+      } else {
+        this.__INPUT__.value = this.props.value = 0
+      }
+      this.dispatchEvent(new CustomEvent('input'))
+    })
+
+    this._handleAction = bind(this.__OUTER__, 'click', ev => {
+      if (this.disabled || this.readonly) {
+        return
+      }
+      var target = ev.target
+
+      if (target.tagName === 'SPAN' || target.parentNode === 'SPAN') {
+        var act = target.dataset.act || target.parentNode.dataset.act
+
+        this._updateValue(act)
+      }
+    })
+  }
+
+  unmount() {
+    unbind(this.__INPUT__, 'keydown', this._handleSubmit)
+  }
+
+  watch() {
+    switch (name) {
+      case 'autofocus':
+        this.__INPUT__.setAttribute('autofocus', '')
+        // 辣鸡火狐, 要触发一下focus, 才能聚焦
+        setTimeout(_ => {
+          this.__INPUT__.focus()
+        }, 10)
+        break
+
+      case 'value':
+        this.value = val >> 0
+        break
+
+      case 'step':
+      case 'max':
+      case 'min':
+        var n = +val
+        if (n === n) {
+          this.props[name] = n
+        }
+        this._checkActionEnable()
+        break
+
+      case 'readonly':
+      case 'disabled':
+        this[name] = true
+        break
+    }
+  }
+}
+</script>

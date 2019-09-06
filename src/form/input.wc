@@ -224,7 +224,6 @@ import '../scroll/index'
 import '../icon/index'
 import { ebind, bind, unbind, clickOutside } from '../utils'
 
-const IS_FIREFOX = !!window.sidebar
 const TYPES = ['text', 'textarea', 'password']
 const INPUTS = {
   text: '<input spellcheck="false">',
@@ -496,11 +495,10 @@ export default class Input {
       case 'autofocus':
         this.__INPUT__.setAttribute('autofocus', '')
         // 辣鸡火狐, 要触发一下focus, 才能聚焦
-        if (IS_FIREFOX) {
-          setTimeout(_ => {
-            this.__INPUT__.focus()
-          }, 10)
-        }
+        setTimeout(_ => {
+          this.__INPUT__.focus()
+        }, 10)
+
         break
 
       // label和placeholder 功能相同
