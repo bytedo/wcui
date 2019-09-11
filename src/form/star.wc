@@ -1,0 +1,142 @@
+<template>
+  <label>
+    <wc-icon data-idx="0" is="star"></wc-icon>
+    <wc-icon data-idx="1" is="star"></wc-icon>
+    <wc-icon data-idx="2" is="star"></wc-icon>
+    <wc-icon data-idx="3" is="star"></wc-icon>
+    <wc-icon data-idx="4" is="star"></wc-icon>
+    <span class="text"></span>
+  </label>
+</template>
+
+<style lang="scss">
+:host {
+  display: flex;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+  cursor: pointer;
+}
+
+label {
+  display: flex;
+  cursor: inherit;
+
+  wc-icon {
+    margin: 0 3px;
+    @include ts(transform);
+
+    &:hover {
+      transform: scale(1.05);
+    }
+  }
+}
+
+:host([disabled]) {
+  cursor: default;
+}
+</style>
+
+<script>
+import { ebind, bind, unbind } from '../utils'
+
+export default class Star {
+  props = {
+    value: 0,
+    text: [],
+    size: 'small',
+    'allow-half': false,
+    starSize: 32, // 星星的宽度, 用于实现半星
+    disabled: false
+  }
+  __init__() {
+    /* render */
+
+    this.__BOX__ = this.root.children[1]
+    this.__STARS__ = Array.from(this.__BOX__.children)
+    this.__TEXT__ = this.__STARS__.pop()
+  }
+
+  get value() {
+    return this.props.value
+  }
+
+  set value(val) {
+    var v = +val
+    if (v === v) {
+      val = v
+    } else {
+      val = 0
+    }
+    this.props.value = val
+    this._updateDraw(-1)
+  }
+
+  // 更新图标渲染
+  _updateDraw(v, s = 0) {
+    var _last = 'star-half'
+    if (v === -1) {
+      v = this.value
+      s = +(v % 1).toFixed(1)
+    }
+
+    if (!this.props['allow-half']) {
+      if (s > 0) {
+        s = 1
+      }
+    }
+    if (s > 0.5) {
+      _last = 'star-full'
+    }
+    this.__STARS__.forEach((it, i) =>
+      it.setAttribute('is', i < v ? 'star-full' : 'star')
+    )
+
+    if (s > 0) {
+      this.__STARS__[v].setAttribute('is', _last)
+    }
+
+    // 缓存结果
+    this.props.tmpValue = v + s
+
+    if (this.props.text.length) {
+      this.__TEXT__.textContent = this.props.text[v]
+    }
+  }
+
+  mounted() {
+    ebind(this.__BOX__, 'mousemove', ev => {
+      if (ev.target.tagName === 'WC-ICON') {
+        let idx = +ev.target.dataset.idx
+        this._updateDraw(idx, ev.offsetX / this.props.starSize)
+      }
+    })
+
+    ebind(this.__BOX__, 'click', ev => {
+      // this._updateDraw()
+      this.props.value = this.props.tmpValue
+    })
+
+    ebind(this.__BOX__, 'mouseleave', ev => {
+      this._updateDraw(-1)
+    })
+  }
+
+  watch() {
+    switch (name) {
+      case 'size':
+        this.__STARS__.forEach(it => it.setAttribute('size', val))
+        this.props.starSize = this.__STARS__[0].clientWidth
+        break
+
+      case 'allow-half':
+        this.props['allow-half'] = true
+        break
+
+      default:
+        break
+    }
+  }
+}
+</script>

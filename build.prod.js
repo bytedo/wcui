@@ -25,7 +25,7 @@ $cp: #f3f5fb #e8ebf4 #dae1e9;
 $cgr: #aabac3 #90a3ae #7e909a;
 $cd: #62778d #526273 #425064;
 
-@mixin ts($c: all, $t: .2s, $m: ease-in-out){
+@mixin ts($c: all, $t: .1s, $m: ease-in-out){
   transition:$c $t $m;
 }
 
