@@ -23,16 +23,18 @@
 - [x] 表单组件-按钮(`wc-button`)
 - [x] 表单组件-复选框(`wc-checkbox`)
 - [x] 表单组件-文本输入框(`wc-input`)
+- [x] 表单组件-步进数字输入(`wc-number`)
+- [x] 表单组件-评分(`wc-star`)
 - [x] 表单组件-单选框(`wc-radio`)
 - [x] 表单组件-下拉选择(`wc-select`)
-- [ ] 表单组件-多级联动(`wc-select`)
+- [ ] 表单组件-多级联动(`wc-cascadar`)
 - [x] 表单组件-开关(`wc-switch`)
 - [x] 图标组件(`wc-icon`)
-- [ ] 弹层插件(`layer`) 待重构...
+- [x] 弹层插件(`layer`)
 - [ ] markdown解析器(`marked`) 待重构...
 - [x] md5(`md5`)
 - [ ] md文本编辑器(`anot-meditor`) 待重构...
-- [ ] 富文本编辑器(`do-neditor`) 待重构...
+- [x] 富文本编辑器(`do-neditor`)
 - [x] 分页组件(`wc-pager`)
 - [ ] 颜色选择器(`wc-colorpicker`)
 - [x] 日期选择器(`wc-datepicker`)
