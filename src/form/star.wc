@@ -1,10 +1,10 @@
 <template>
   <label>
-    <wc-icon data-idx="0" is="star"></wc-icon>
-    <wc-icon data-idx="1" is="star"></wc-icon>
-    <wc-icon data-idx="2" is="star"></wc-icon>
-    <wc-icon data-idx="3" is="star"></wc-icon>
-    <wc-icon data-idx="4" is="star"></wc-icon>
+    <wc-icon data-idx="0" is="star" color="grey"></wc-icon>
+    <wc-icon data-idx="1" is="star" color="grey"></wc-icon>
+    <wc-icon data-idx="2" is="star" color="grey"></wc-icon>
+    <wc-icon data-idx="3" is="star" color="grey"></wc-icon>
+    <wc-icon data-idx="4" is="star" color="grey"></wc-icon>
     <span class="text"></span>
   </label>
 </template>
@@ -17,10 +17,14 @@
   -moz-user-select: none;
   user-select: none;
   cursor: pointer;
+  font-size: 14px;
+  --size: 24px;
 }
 
 label {
   display: flex;
+  align-items: center;
+  line-height: 0;
   cursor: inherit;
 
   wc-icon {
@@ -31,10 +35,54 @@ label {
       transform: scale(1.05);
     }
   }
+
+  span {
+    padding: 0 8px;
+    margin: 0 3px;
+  }
+}
+
+:host([size='large']) {
+  font-size: 16px;
+  --size: 36px;
+}
+:host([size='medium']) {
+  --size: 30px;
+}
+:host([size='mini']) {
+  font-size: 12px;
+  --size: 20px;
+}
+
+:host([color='red']) label span {
+  color: nth($cr, 1);
+}
+:host([color='teal']) label span {
+  color: nth($ct, 1);
+}
+:host([color='green']) label span {
+  color: nth($cg, 1);
+}
+:host([color='grey']) label span {
+  color: nth($cgr, 1);
+}
+:host([color='blue']) label span {
+  color: nth($cb, 1);
+}
+:host([color='purple']) label span {
+  color: nth($cpp, 1);
+}
+:host([color='orange']) label span {
+  color: nth($co, 1);
 }
 
 :host([disabled]) {
   cursor: default;
+  opacity: 0.6;
+
+  label wc-icon:hover {
+    transform: none;
+  }
 }
 </style>
 
@@ -45,8 +93,10 @@ export default class Star {
   props = {
     value: 0,
     text: [],
-    size: 'small',
+    size: '',
+    color: '',
     'allow-half': false,
+    'show-value': false,
     starSize: 32, // 星星的宽度, 用于实现半星
     disabled: false
   }
@@ -64,61 +114,103 @@ export default class Star {
 
   set value(val) {
     var v = +val
-    if (v === v) {
+    var tmp = val >> 0
+    if (v === v && v > 0) {
       val = v
     } else {
       val = 0
     }
+
+    if (val > 5) {
+      val = 5
+    }
+
     this.props.value = val
     this._updateDraw(-1)
   }
 
-  // 更新图标渲染
-  _updateDraw(v, s = 0) {
+  /**
+   * 更新图标渲染
+   * i: int
+   * f: float
+   */
+  _updateDraw(i, f = 0) {
     var _last = 'star-half'
-    if (v === -1) {
-      v = this.value
-      s = +(v % 1).toFixed(1)
+    var { value, tmp = { i: 0, f: 0 } } = this.props
+
+    if (i === -1) {
+      i = Math.floor(value)
+      f = +(value % 1).toFixed(1)
+      if (i > 0 && i === value) {
+        i--
+        f = 1
+      }
     }
 
     if (!this.props['allow-half']) {
-      if (s > 0) {
-        s = 1
-      }
+      f = f > 0 ? 1 : 0
     }
-    if (s > 0.5) {
+    // 减少DOM操作
+    if (i === tmp.i && f === tmp.f) {
+      return
+    }
+
+    if (f > 0.5) {
       _last = 'star-full'
     }
-    this.__STARS__.forEach((it, i) =>
-      it.setAttribute('is', i < v ? 'star-full' : 'star')
-    )
 
-    if (s > 0) {
-      this.__STARS__[v].setAttribute('is', _last)
+    this.__STARS__.forEach((it, k) => {
+      it.setAttribute('is', k < i ? 'star-full' : 'star')
+      it.setAttribute('color', k < i ? this.props.color : 'grey')
+    })
+
+    if (f > 0) {
+      this.__STARS__[i].setAttribute('is', _last)
+      this.__STARS__[i].setAttribute('color', this.props.color)
     }
 
     // 缓存结果
-    this.props.tmpValue = v + s
+    this.props.tmp = { i, f }
 
-    if (this.props.text.length) {
-      this.__TEXT__.textContent = this.props.text[v]
+    if (i === 0 && f === 0) {
+      this.__TEXT__.textContent = ''
+    } else {
+      if (this.props.text.length === 5) {
+        this.__TEXT__.textContent = this.props.text[i]
+      } else {
+        if (this.props['show-value']) {
+          this.__TEXT__.textContent = i + f
+        }
+      }
     }
   }
 
   mounted() {
     ebind(this.__BOX__, 'mousemove', ev => {
+      if (this.props.disabled) {
+        return
+      }
       if (ev.target.tagName === 'WC-ICON') {
         let idx = +ev.target.dataset.idx
-        this._updateDraw(idx, ev.offsetX / this.props.starSize)
+        this._updateDraw(idx, +(ev.offsetX / this.props.starSize).toFixed(1))
       }
     })
 
     ebind(this.__BOX__, 'click', ev => {
-      // this._updateDraw()
-      this.props.value = this.props.tmpValue
+      var { tmp, disabled } = this.props
+      if (disabled) {
+        return
+      }
+      if (ev.target.tagName === 'WC-ICON') {
+        this.props.value = tmp.i + tmp.f
+        this.dispatchEvent(new CustomEvent('input'))
+      }
     })
 
     ebind(this.__BOX__, 'mouseleave', ev => {
+      if (this.props.disabled) {
+        return
+      }
       this._updateDraw(-1)
     })
   }
@@ -126,15 +218,32 @@ export default class Star {
   watch() {
     switch (name) {
       case 'size':
-        this.__STARS__.forEach(it => it.setAttribute('size', val))
         this.props.starSize = this.__STARS__[0].clientWidth
         break
 
       case 'allow-half':
-        this.props['allow-half'] = true
+      case 'show-value':
+      case 'disabled':
+        this.props[name] = true
         break
 
-      default:
+      case 'color':
+        if (val) {
+          this.props.color = val
+        }
+        break
+
+      case 'text':
+        if (val) {
+          val = val.split('|')
+          if (val.length === 5) {
+            this.props.text = val.map(it => it.trim())
+          }
+        }
+        break
+
+      case 'value':
+        this.value = val
         break
     }
   }
