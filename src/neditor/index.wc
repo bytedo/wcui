@@ -259,7 +259,7 @@ export default class Neditor {
 
     var ct = this.root.children[1]
     this.__TOOLBAR__ = ct.children[0]
-    this.__EDITOR__ = ct.children[1]
+    this.__EDITOR__ = ct.children[1].firstElementChild
 
     this.__FONT__ = ct.children[2]
     this.__COLOR__ = ct.children[3]
@@ -272,9 +272,7 @@ export default class Neditor {
   }
 
   set value(val) {
-    if (this.__EDITOR__ && this.__EDITOR__.innerHTML !== val) {
-      this.__EDITOR__.innerHTML = val
-    }
+    this.__EDITOR__.innerHTML = val
   }
 
   _updateToolbar() {
@@ -354,6 +352,7 @@ export default class Neditor {
 
     // 工具栏点击事件
     this._toolFn = bind(this.__TOOLBAR__, 'click', ev => {
+      this.restoreSelection()
       if (ev.target === ev.currentTarget) {
         return
       }
@@ -450,6 +449,12 @@ export default class Neditor {
       this.__COLOR__.classList.remove('fadein')
       this.__LINK__.classList.remove('fadein')
       this.saveSelection()
+    })
+
+    clickOutside(this, ev => {
+      this.__FONT__.classList.remove('fadein')
+      this.__COLOR__.classList.remove('fadein')
+      this.__LINK__.classList.remove('fadein')
     })
 
     //  粘贴板事件
