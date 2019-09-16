@@ -34,7 +34,7 @@
 - [ ] markdown解析器(`marked`) 待重构...
 - [x] md5(`md5`)
 - [ ] md文本编辑器(`anot-meditor`) 待重构...
-- [x] 富文本编辑器(`do-neditor`)
+- [x] 富文本编辑器(`wc-neditor`)
 - [x] 分页组件(`wc-pager`)
 - [ ] 颜色选择器(`wc-colorpicker`)
 - [x] 日期选择器(`wc-datepicker`)
