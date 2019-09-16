@@ -26,6 +26,7 @@
     height: inherit;
     padding: 0 5px;
     margin: auto;
+    line-height: 0;
     border: 1px solid nth($cp, 3);
     border-radius: inherit;
     white-space: nowrap;

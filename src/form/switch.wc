@@ -22,6 +22,7 @@
     height: 22px;
     padding: 3px;
     margin: 5px;
+    line-height: 0;
     border-radius: 21px;
     background: nth($cp, 3);
     cursor: inherit;

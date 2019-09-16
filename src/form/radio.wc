@@ -18,6 +18,7 @@
     min-width: 32px;
     height: 32px;
     padding: 0 5px;
+    line-height: 0;
     user-select: none;
     -moz-user-select: none;
     cursor: inherit;

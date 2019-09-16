@@ -34,6 +34,7 @@ li {
   min-width: 64px;
   width: 100%;
   height: 32px;
+  line-height: 0;
   font-size: 14px;
   border: 1px solid nth($cp, 3);
   border-radius: inherit;
@@ -74,6 +75,7 @@ li {
     width: auto;
     height: 30px;
     padding: 0 10px;
+    line-height: 0;
     background: nth($cp, 1);
   }
   .prepend {

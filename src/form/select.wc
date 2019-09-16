@@ -28,6 +28,7 @@
   min-width: 64px;
   width: 100%;
   height: 32px;
+  line-height: 0;
   font-size: 14px;
   border: 1px solid nth($cp, 3);
   border-radius: inherit;
