@@ -434,6 +434,58 @@ export default class DatePicker {
     }, 1500)
   }
 
+  // 修正日历日期渲染
+  _fixedRenderDate() {
+    var { max, min, last } = this.props
+
+    if (!last) {
+      this._updateValue(today)
+      last = this.props.last
+    }
+    if (max) {
+      if (last.year > max.year) {
+        last.year = max.year
+        last.month = max.month
+        last.day = max.day
+      } else if (max.year === last.year) {
+        if (last.month > max.month) {
+          last.month = max.month
+        } else if (last.month === max.month) {
+          if (last.day > max.day) {
+            last.day = max.day
+          }
+        }
+      }
+    }
+    if (min) {
+      if (last.year < min.year) {
+        last.year = min.year
+        last.month = min.month
+        last.day = min.day
+      } else if (last.year === min.year) {
+        if (last.month < min.month) {
+          last.month = min.month
+        } else if (last.month === min.month) {
+          if (last.day < max.day) {
+            last.day = min.day
+          }
+        }
+      }
+    }
+
+    var _date = new Date(last.year, last.month, last.day)
+    this.props.calendar = {
+      year: _date.getFullYear(),
+      month: _date.getMonth(),
+      list: []
+    }
+
+    this._updateValue(_date)
+    this._renderCalendar()
+
+    return _date
+  }
+
   _updateValue(oDate, needUpdateStyle) {
     this.props.last = {
       year: oDate.getFullYear(),
@@ -485,13 +537,7 @@ export default class DatePicker {
       this.__INPUT__.setAttribute('label', '')
     }
 
-    this.props.calendar = {
-      year: today.getFullYear(),
-      month: today.getMonth(),
-      list: []
-    }
-
-    this._renderCalendar()
+    this._fixedRenderDate()
 
     this._activeFn = bind(this.__INPUT__, 'click', ev => {
       if (this.props.disabled || this.props.readonly) {
@@ -615,9 +661,10 @@ export default class DatePicker {
               month: tmp.getMonth(),
               day: tmp.getDate()
             }
-            this._renderCalendar()
+            this._fixedRenderDate()
           }
         }
+
         this.removeAttribute(name)
         break
 
