@@ -466,7 +466,7 @@ export default class DatePicker {
         if (last.month < min.month) {
           last.month = min.month
         } else if (last.month === min.month) {
-          if (last.day < max.day) {
+          if (last.day < min.day) {
             last.day = min.day
           }
         }
