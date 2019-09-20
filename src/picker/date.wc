@@ -450,6 +450,7 @@ export default class DatePicker {
       } else if (max.year === last.year) {
         if (last.month > max.month) {
           last.month = max.month
+          last.day = max.day
         } else if (last.month === max.month) {
           if (last.day > max.day) {
             last.day = max.day
@@ -465,6 +466,7 @@ export default class DatePicker {
       } else if (last.year === min.year) {
         if (last.month < min.month) {
           last.month = min.month
+          last.day = min.day
         } else if (last.month === min.month) {
           if (last.day < min.day) {
             last.day = min.day
