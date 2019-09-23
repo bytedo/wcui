@@ -45,6 +45,7 @@
   border-radius: 4px;
   color: #666;
   font-size: 14px;
+  background: rgba(255, 255, 255, 0.7);
   box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
   transition: opacity 0.2s ease-in-out, left 0.2s ease-in-out,
     right 0.2s ease-in-out, top 0.2s ease-in-out, bottom 0.2s ease-in-out;
@@ -600,6 +601,10 @@ class Layer {
 function _layer(opt) {
   var layDom = document.createElement('wc-layer')
 
+  if (!opt.type) {
+    opt.type = 'common'
+  }
+
   if (opt.type === 'toast') {
     var { type, content } = opt
 
@@ -667,8 +672,10 @@ function _layer(opt) {
   }
 
   layDom.props.type = opt.type
-  layDom.props.fixed = opt.fixed
   layDom.props.title = opt.title
+  if (opt.hasOwnProperty('fixed')) {
+    layDom.props.fixed = opt.fixed
+  }
 
   layDom.innerHTML = opt.content
   layDom.wrapped = false // 用于区分是API创建的还是包裹现有的节点
