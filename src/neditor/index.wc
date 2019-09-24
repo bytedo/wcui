@@ -39,6 +39,26 @@
   border-radius: 4px;
 }
 
+table {
+  border-spacing: 0;
+  border-collapse: collapse;
+
+  tr {
+    background: #fff;
+  }
+  thead tr {
+    background: nth($cp, 1);
+  }
+  th,
+  td {
+    padding: 6px 12px;
+    border: 1px solid nth($cp, 3);
+  }
+  th {
+    font-weight: bold;
+  }
+}
+
 .neditor {
   position: relative;
   flex: 1;
@@ -268,7 +288,13 @@ export default class Neditor {
   }
 
   get value() {
-    return this.__EDITOR__.innerHTML
+    var html = this.__EDITOR__.innerHTML
+    if (~html.indexOf('<table>')) {
+      html =
+        '<style>table{border-spacing:0;border-collapse:collapse;}table tr{background:#fff;}table thead tr{background:#f3f5fb;}table th,table td{padding:6px 12px;border:1px solid #dae1e9;}table th{font-weight: bold;}</style>' +
+        html
+    }
+    return html
   }
 
   set value(val) {
@@ -461,8 +487,26 @@ export default class Neditor {
     this.__pasteFn = bind(this.__EDITOR__, 'paste', ev => {
       ev.preventDefault()
 
+      var html = ev.clipboardData.getData('text/html')
       var txt = ev.clipboardData.getData('text/plain')
       var items = ev.clipboardData.items
+
+      if (html) {
+        html = html
+          .replace(/\t/g, '  ')
+          .replace(/<meta [^>]*>/, '')
+          .replace(
+            /<a[^>]*? href\s?=\s?["']?([^"']*)["']?[^>]*?>/g,
+            '<a href="$1">'
+          )
+          .replace(
+            /<img[^>]*? href\s?=\s?["']?([^"']*)["']?[^>]*?>/g,
+            '<img src="$1">'
+          )
+          .replace(/<(?!a|img)([\w\-]+)[^>]*>/g, '<$1>')
+
+        return this.exec('insertHtml', html)
+      }
 
       if (txt) {
         return this.exec('insertText', txt)
