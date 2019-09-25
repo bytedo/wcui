@@ -282,9 +282,17 @@ export default class Scroll {
       bind(document, 'mousemove', mousemoveFn)
       bind(document, 'mouseup', mouseupFn)
     })
+
+    this.__observer = new MutationObserver(this._initFn)
+    this.__observer.observe(this, {
+      childList: true,
+      subtree: true,
+      characterData: true
+    })
   }
 
   unmount() {
+    this.__observer.disconnect()
     unbind(this.__BOX__, 'mouseenter', this._initFn)
     unbind(this.__BOX__, 'wheel', this._wheelFn)
   }
