@@ -15,6 +15,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    white-space: nowrap;
   }
   label {
     display: flex;
@@ -110,6 +111,8 @@
 import { bind, unbind } from '../utils'
 export default class Switch {
   props = {
+    'active-text': null,
+    'inactive-text': null,
     checked: false,
     disabled: false
   }
@@ -161,6 +164,15 @@ export default class Switch {
         return
       }
       this.checked = !this.checked
+      if (this.checked) {
+        if (this.props['active-text'] !== null) {
+          this.textContent = this.props['active-text']
+        }
+      } else {
+        if (this.props['inactive-text'] !== null) {
+          this.textContent = this.props['inactive-text']
+        }
+      }
       this.dispatchEvent(new CustomEvent('input'))
     })
   }
@@ -174,6 +186,10 @@ export default class Switch {
       case 'checked':
       case 'disabled':
         this[name] = true
+        break
+      case 'active-text':
+      case 'inactive-text':
+        this.props[name] = val + ''
         break
     }
   }

@@ -19,8 +19,9 @@
     height: 32px;
     padding: 0 5px;
     line-height: 0;
-    user-select: none;
     -moz-user-select: none;
+    user-select: none;
+    white-space: nowrap;
     cursor: inherit;
     color: nth($cgr, 3);
   }

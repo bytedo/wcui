@@ -65,6 +65,7 @@
     width: auto;
     height: 30px;
     padding: 0 10px;
+    white-space: nowrap;
     background: nth($cp, 1);
   }
   .prepend {

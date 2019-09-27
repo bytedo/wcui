@@ -1,0 +1,23 @@
+<template>
+  <div class="meditor">
+    <section class="toolbar"></section>
+    <textarea cols="30" rows="10"></textarea>
+    <wc-markdown></wc-markdown>
+  </div>
+</template>
+
+<style lang="scss"></style>
+
+<script>
+import '../markdown/index'
+
+export default class Meditor {
+  props = {
+    value: ''
+  }
+
+  __init__() {
+    // /* render */
+  }
+}
+</script>
