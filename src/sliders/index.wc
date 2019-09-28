@@ -1,0 +1,22 @@
+<template>
+  <label></label>
+</template>
+
+<style lang="scss">
+:host {
+  display: flex;
+}
+</style>
+
+<script>
+export default class Slider {
+  props = {
+    value: 0,
+    max: 100
+  }
+
+  __init__() {
+    /* render */
+  }
+}
+</script>
