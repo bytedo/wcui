@@ -165,11 +165,12 @@ export default class Checkbox {
   }
 
   set value(val) {
+    log(val, this, this.props.label)
     if (Array.isArray(val)) {
       this.props.value = val
       this.checked = this.props.value.includes(this.props.label)
     } else {
-      throw TypeError(':duplex指令需要传入一个数组, 当前为: ' + typeof val)
+      console.error('checkbox组件的value必须是数组, 当前为: ' + typeof val)
     }
   }
 
