@@ -5,9 +5,11 @@
       <div contenteditable="true" class="editor" spellcheck="false"></div>
     </wc-scroll>
     <div class="font-layer">
-      <span data-size="6">大号字体</span>
-      <span data-size="5">中号字体</span>
-      <span data-size="3">小号字体</span>
+      <span data-size="6">6号字体</span>
+      <span data-size="5">5号字体</span>
+      <span data-size="4">4号字体</span>
+      <span data-size="3">3号字体</span>
+      <span data-size="2">2号字体</span>
     </div>
     <div class="color-layer">
       <span data-color="#f3f5fb"></span>
@@ -254,7 +256,8 @@ const DEFAULT_TOOLS = [
   'center',
   'right',
   'link',
-  'image'
+  'image',
+  'topic'
 ]
 
 function renderToolbar(list) {
@@ -423,6 +426,10 @@ export default class Neditor {
 
         case 'image':
           // 这里不作任何处理
+          break
+
+        case 'topic':
+          this.exec('insertHtml', '#话题#')
           break
 
         default:
