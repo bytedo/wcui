@@ -477,10 +477,7 @@ export default class Neditor {
     })
 
     //监听鼠标事件的,以缓存选中状态
-    this.__mouseFn = bind(this.__EDITOR__, 'mouseup', ev => {
-      this.__FONT__.classList.remove('fadein')
-      this.__COLOR__.classList.remove('fadein')
-      this.__LINK__.classList.remove('fadein')
+    this.__mouseFn = bind(this.__EDITOR__, 'mouseleave', ev => {
       this.saveSelection()
     })
 
@@ -501,7 +498,8 @@ export default class Neditor {
       if (html) {
         html = html
           .replace(/\t/g, '  ')
-          .replace(/<meta [^>]*>/, '')
+          .replace(/<\/?(meta|link|script)[^>]*?>/g, '')
+          .replace(/<!--[\w\W]*?-->/g, '')
           .replace(
             /<a[^>]*? href\s?=\s?["']?([^"']*)["']?[^>]*?>/g,
             '<a href="$1">'
@@ -550,7 +548,7 @@ export default class Neditor {
     unbind(this.__FONT__, 'click', this.__fontFn)
     unbind(this.__COLOR__, 'click', this.__colorFn)
     unbind(this.__LINK_BTN__, 'click', this.__linkFn)
-    unbind(this.__EDITOR__, 'mouseup', this.__mouseFn)
+    unbind(this.__EDITOR__, 'mouseleave', this.__mouseFn)
     unbind(this.__EDITOR__, 'paste', this.__pasteFn)
     this.__observer.disconnect()
   }
