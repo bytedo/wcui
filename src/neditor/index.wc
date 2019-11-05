@@ -256,8 +256,7 @@ const DEFAULT_TOOLS = [
   'center',
   'right',
   'link',
-  'image',
-  'topic'
+  'image'
 ]
 
 function renderToolbar(list) {
@@ -426,10 +425,6 @@ export default class Neditor {
 
         case 'image':
           // 这里不作任何处理
-          break
-
-        case 'topic':
-          this.exec('insertHtml', '#话题#')
           break
 
         default:

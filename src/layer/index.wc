@@ -488,8 +488,8 @@ class Layer {
     /* ------------------------ */
     if (this.props.mask) {
       this._handlMask = clickOutside(this.root.children[1], ev => {
-        // 只作用于wc-layer
-        if (ev.target.tagName !== 'WC-LAYER') {
+        // 只作用于当前wc-layer
+        if (ev.target !== this) {
           return
         }
         if (this.props['mask-close']) {
