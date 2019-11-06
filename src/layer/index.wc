@@ -420,13 +420,16 @@ class Layer {
         this.root.children[1].style.cssText += _style
         this.timer = setTimeout(() => {
           this.parentNode.removeChild(this)
+          this.dispatchEvent(new CustomEvent('close'))
         }, 200)
       } else {
         clearTimeout(this.timer)
         this.parentNode.removeChild(this)
+        this.dispatchEvent(new CustomEvent('close'))
       }
     } else {
       this.removeAttribute('common')
+      this.dispatchEvent(new CustomEvent('close'))
     }
   }
 
