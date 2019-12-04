@@ -440,6 +440,14 @@ class Layer {
     this.setAttribute('common', '')
   }
 
+  moveTo(obj = {}) {
+    var css = ''
+    for (var k in obj) {
+      css += `${k}:${obj[k]};`
+    }
+    this.root.children[1].style.cssText += css
+  }
+
   mounted() {
     this.type = this.props.type
     this.title = this.props.title
@@ -578,6 +586,7 @@ class Layer {
       case 'title':
       case 'type':
         this[name] = val
+        this.removeAttribute(name)
         break
       case 'mask-color':
       case 'background':

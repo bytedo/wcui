@@ -44,6 +44,11 @@ Anot.directive('drag', {
         if (!target.classList) {
           Anot.error(`${this.name}=${this.expr}, 解析异常[元素不存在]`)
         }
+        if (target.tagName === 'WC-LAYER' && val === 'layer') {
+          target = target.root.children[1]
+          break
+        }
+
         if (target.classList.contains(val) || target.id === val) {
           break
         } else {
