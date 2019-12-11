@@ -150,6 +150,9 @@ li {
 }
 
 /* --- */
+:host([auto-border]) .label {
+  border-color: transparent;
+}
 :host([disabled]) .label {
   background: nth($cp, 1);
   cursor: not-allowed;
@@ -157,6 +160,9 @@ li {
 }
 :host(:focus-within) {
   @include focus1;
+  .label {
+    border-color: nth($cp, 3);
+  }
 }
 :host(:focus-within[readonly]) {
   @include focus2;
