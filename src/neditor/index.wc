@@ -500,7 +500,7 @@ export default class Neditor {
             '<a href="$1">'
           )
           .replace(
-            /<img[^>]*? href\s?=\s?["']?([^"']*)["']?[^>]*?>/g,
+            /<img[^>]*? src\s?=\s?["']?([^"']*)["']?[^>]*?>/g,
             '<img src="$1">'
           )
           .replace(/<(?!a|img)([\w\-]+)[^>]*>/g, '<$1>')
