@@ -566,8 +566,8 @@ class Layer {
 
     if (this.props.type === 'toast') {
       this.timer = setTimeout(() => {
-        // toastInstance = null
-        // this.close()
+        toastInstance = null
+        this.close()
       }, 3000)
     }
 
