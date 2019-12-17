@@ -5,7 +5,7 @@
 <style lang="scss">
 :host {
   display: inline-block;
-  color: nth($cd, 2);
+  color: inherit;
 }
 :host(:not([is])) {
   display: none;
@@ -14,6 +14,7 @@
   display: block;
   width: var(--size, 32px);
   height: var(--size, 32px);
+  margin: var(--pad, auto);
   fill: currentColor;
 
   &.load {

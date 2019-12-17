@@ -115,6 +115,10 @@
       width: 300px;
       padding: 0 10px !important;
       border-radius: 4px;
+      font-weight: normal;
+
+      --size: 16px;
+      --pad: 0 8px 0 0;
     }
 
     ::slotted(&__toast.style-info) {
@@ -562,8 +566,8 @@ class Layer {
 
     if (this.props.type === 'toast') {
       this.timer = setTimeout(() => {
-        toastInstance = null
-        this.close()
+        // toastInstance = null
+        // this.close()
       }, 3000)
     }
 
@@ -751,20 +755,23 @@ Object.assign(_layer, {
     })
   },
   toast(txt, type = 'info') {
+    var ico = type
     switch (type) {
       case 'info':
       case 'warn':
+        break
       case 'error':
+        ico = 'deny'
         break
       default:
-        type = 'info'
+        ico = 'info'
     }
 
     return this({
       content: `
       <div class="layer__content__toast style-${type}">
-        <wc-icon size="mini" is="${type}"></wc-icon>
-        ${txt}
+        <wc-icon is="${ico}"></wc-icon>
+        <span>${txt}</span>
       </div>`,
       type: 'toast'
     })
