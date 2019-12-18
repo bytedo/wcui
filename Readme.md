@@ -30,7 +30,7 @@
 - [ ] 表单组件-多级联动(`wc-cascadar`)
 - [x] 表单组件-开关(`wc-switch`)
 - [x] 图标组件(`wc-icon`)
-- [x] 弹层插件(`layer`)
+- [x] 弹层插件(`layer`、`wc-layer`)
 - [ ] markdown解析器(`marked`) 待重构...
 - [x] md5(`md5`)
 - [ ] md文本编辑器(`anot-meditor`) 待重构...
