@@ -88,6 +88,8 @@
 </style>
 
 <script>
+import $ from '../utils'
+
 // 计算页码
 function calculate(curr, total, simple) {
   var arr = []
@@ -167,50 +169,46 @@ export default class Pager {
 
     this.update()
 
-    this.__LAYOUT__.addEventListener(
-      'click',
-      ev => {
-        if (ev.target.tagName === 'BUTTON') {
-          var { curr, totalpage } = this.props
-          var page = ev.target.dataset.page
-          var num = +page
-          if (num === num) {
-            if (num === curr) {
-              return
-            }
-          } else {
-            switch (page) {
-              case 'prev':
-                num = curr - 1
-                if (num < 1) {
-                  return
-                }
-                break
-              case 'next':
-                num = curr + 1
-                if (num > totalpage) {
-                  return
-                }
-                break
-              case 'end':
-                if (totalpage === curr) {
-                  return
-                }
-                num = totalpage
-                break
-            }
+    $.bind(this.__LAYOUT__, 'click', ev => {
+      if (ev.target.tagName === 'BUTTON') {
+        var { curr, totalpage } = this.props
+        var page = ev.target.dataset.page
+        var num = +page
+        if (num === num) {
+          if (num === curr) {
+            return
           }
-          this.props.curr = num
-          this.update()
-          this.dispatchEvent(
-            new CustomEvent('pick', {
-              detail: num
-            })
-          )
+        } else {
+          switch (page) {
+            case 'prev':
+              num = curr - 1
+              if (num < 1) {
+                return
+              }
+              break
+            case 'next':
+              num = curr + 1
+              if (num > totalpage) {
+                return
+              }
+              break
+            case 'end':
+              if (totalpage === curr) {
+                return
+              }
+              num = totalpage
+              break
+          }
         }
-      },
-      false
-    )
+        this.props.curr = num
+        this.update()
+        this.dispatchEvent(
+          new CustomEvent('pick', {
+            detail: num
+          })
+        )
+      }
+    })
   }
 
   watch() {

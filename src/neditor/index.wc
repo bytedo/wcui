@@ -225,7 +225,7 @@ wc-scroll {
 import ICONS from './svg'
 import '../form/input'
 import '../form/button'
-import { clickOutside, bind, ebind, unbind } from '../utils'
+import $ from '../utils'
 
 const ACTTION = {
   bold: 'bold',
@@ -371,7 +371,7 @@ export default class Neditor {
     const FILE_INPUT = this.__TOOLBAR__.querySelector('input')
 
     if (FILE_INPUT) {
-      bind(FILE_INPUT, 'change', ev => {
+      $.bind(FILE_INPUT, 'change', ev => {
         this._handleImage(FILE_INPUT.files[0])
       })
     }
@@ -379,7 +379,7 @@ export default class Neditor {
     /* ------------------------------ */
 
     // 工具栏点击事件
-    this._toolFn = bind(this.__TOOLBAR__, 'click', ev => {
+    this._toolFn = $.bind(this.__TOOLBAR__, 'click', ev => {
       this.restoreSelection()
       if (ev.target === ev.currentTarget) {
         return
@@ -436,7 +436,7 @@ export default class Neditor {
     })
 
     // 字体大小设置
-    this._fontFn = bind(this.__FONT__, 'click', ev => {
+    this._fontFn = $.bind(this.__FONT__, 'click', ev => {
       if (ev.target === ev.currentTarget) {
         return
       }
@@ -448,7 +448,7 @@ export default class Neditor {
     })
 
     // 颜色
-    this._colorFn = bind(this.__COLOR__, 'click', ev => {
+    this._colorFn = $.bind(this.__COLOR__, 'click', ev => {
       if (ev.target === ev.currentTarget) {
         return
       }
@@ -460,7 +460,7 @@ export default class Neditor {
     })
 
     // 超链接
-    this.__linkFn = bind(this.__LINK_BTN__, 'active', ev => {
+    this.__linkFn = $.bind(this.__LINK_BTN__, 'active', ev => {
       if (LINK_INPUT.value) {
         this.__LINK__.classList.remove('fadein')
         this.__EDITOR__.focus()
@@ -472,18 +472,18 @@ export default class Neditor {
     })
 
     //监听鼠标事件的,以缓存选中状态
-    this.__mouseFn = bind(this.__EDITOR__, 'mouseleave', ev => {
+    this.__mouseFn = $.bind(this.__EDITOR__, 'mouseleave', ev => {
       this.saveSelection()
     })
 
-    clickOutside(this, ev => {
+    $.outside(this, ev => {
       this.__FONT__.classList.remove('fadein')
       this.__COLOR__.classList.remove('fadein')
       this.__LINK__.classList.remove('fadein')
     })
 
     //  粘贴板事件
-    this.__pasteFn = bind(this.__EDITOR__, 'paste', ev => {
+    this.__pasteFn = $.bind(this.__EDITOR__, 'paste', ev => {
       ev.preventDefault()
 
       var html = ev.clipboardData.getData('text/html')
@@ -539,12 +539,12 @@ export default class Neditor {
   }
 
   unmount() {
-    unbind(this.__TOOLBAR__, 'click', this.__toolFn)
-    unbind(this.__FONT__, 'click', this.__fontFn)
-    unbind(this.__COLOR__, 'click', this.__colorFn)
-    unbind(this.__LINK_BTN__, 'click', this.__linkFn)
-    unbind(this.__EDITOR__, 'mouseleave', this.__mouseFn)
-    unbind(this.__EDITOR__, 'paste', this.__pasteFn)
+    $.unbind(this.__TOOLBAR__, 'click', this.__toolFn)
+    $.unbind(this.__FONT__, 'click', this.__fontFn)
+    $.unbind(this.__COLOR__, 'click', this.__colorFn)
+    $.unbind(this.__LINK_BTN__, 'click', this.__linkFn)
+    $.unbind(this.__EDITOR__, 'mouseleave', this.__mouseFn)
+    $.unbind(this.__EDITOR__, 'paste', this.__pasteFn)
     this.__observer.disconnect()
   }
 

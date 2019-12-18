@@ -159,7 +159,7 @@
 </style>
 
 <script>
-import { bind, unbind } from '../utils'
+import $ from '../utils'
 
 export default class Radio {
   props = {
@@ -230,7 +230,7 @@ export default class Radio {
   }
 
   mounted() {
-    this._handleClick = bind(this, 'click', ev => {
+    this._handleClick = $.bind(this, 'click', ev => {
       if (!this.disabled && !this.readonly && !this.checked) {
         this.checked = true
         this.dispatchEvent(new CustomEvent('input'))
@@ -239,7 +239,7 @@ export default class Radio {
   }
 
   unmount() {
-    unbind(this, 'click', this._handleClick)
+    $.unbind(this, 'click', this._handleClick)
   }
 
   watch() {

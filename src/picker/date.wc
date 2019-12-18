@@ -224,7 +224,7 @@
 
 <script>
 import '../icon/index'
-import { nextTick, each, ebind, bind, unbind, clickOutside } from '../utils'
+import $ from '../utils'
 
 const today = new Date()
 
@@ -382,7 +382,7 @@ export default class DatePicker {
       this.props.calendar = { ...last, list: [] }
     }
     this._renderCalendar()
-    nextTick(_ => this.dispatchEvent(new CustomEvent('input')))
+    $.nextTick(_ => this.dispatchEvent(new CustomEvent('input')))
   }
 
   get readonly() {
@@ -499,7 +499,7 @@ export default class DatePicker {
 
     if (needUpdateStyle) {
       var list = this.props.calendar.list
-      each(this.__DAYS__.children, (el, i) => {
+      $.each(this.__DAYS__.children, (el, i) => {
         if (this.props.last.day === list[i].day) {
           list[i].picked = true
           el.setAttribute('picked', '')
@@ -541,7 +541,7 @@ export default class DatePicker {
 
     this._fixedRenderDate()
 
-    this._activeFn = bind(this.__INPUT__, 'click', ev => {
+    this._activeFn = $.bind(this.__INPUT__, 'click', ev => {
       if (this.props.disabled || this.props.readonly) {
         return
       }
@@ -553,12 +553,12 @@ export default class DatePicker {
       this.__CALENDAR__.classList.toggle('show')
     })
 
-    this._inactiveFn = clickOutside(this, ev => {
+    this._inactiveFn = $.outside(this, ev => {
       this.__CALENDAR__.classList.toggle('show', false)
       this.props.active = false
     })
 
-    this._ctrlFn = bind(this.__CTRL__, 'click', ev => {
+    this._ctrlFn = $.bind(this.__CTRL__, 'click', ev => {
       let {
         calendar: { year, month },
         max,
@@ -598,7 +598,7 @@ export default class DatePicker {
       }
     })
 
-    this._pickFn = bind(this.__DAYS__, 'click', ev => {
+    this._pickFn = $.bind(this.__DAYS__, 'click', ev => {
       if (ev.target.tagName === 'SPAN') {
         let { calendar, last } = this.props
         let item = calendar.list[ev.target.dataset.idx]
@@ -617,7 +617,7 @@ export default class DatePicker {
         }
 
         this._updateValue(item._, true)
-        nextTick(_ => this.dispatchEvent(new CustomEvent('input')))
+        $.nextTick(_ => this.dispatchEvent(new CustomEvent('input')))
         this.dispatchEvent(
           new CustomEvent('pick', {
             detail: { value: this.value, _: item._ }
@@ -629,10 +629,10 @@ export default class DatePicker {
   }
 
   unmount() {
-    unbind(this.__INPUT__, 'click', this._activeFn)
-    unbind(document, 'mousedown', this._inactiveFn)
-    unbind(this.__CTRL__, 'click', this._ctrlFn)
-    unbind(this.__DAYS__, 'click', this._pickFn)
+    $.unbind(this.__INPUT__, 'click', this._activeFn)
+    $.unbind(this.__DAYS__, 'click', this._pickFn)
+    $.unbind(this.__CTRL__, 'click', this._ctrlFn)
+    $.clearOutside(this._inactiveFn)
   }
 
   watch() {

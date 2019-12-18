@@ -87,7 +87,7 @@ label {
 </style>
 
 <script>
-import { ebind, bind, unbind } from '../utils'
+import $ from '../utils'
 
 export default class Star {
   props = {
@@ -186,7 +186,7 @@ export default class Star {
   }
 
   mounted() {
-    ebind(this.__BOX__, 'mousemove', ev => {
+    $.catch(this.__BOX__, 'mousemove', ev => {
       if (this.props.disabled) {
         return
       }
@@ -196,7 +196,7 @@ export default class Star {
       }
     })
 
-    ebind(this.__BOX__, 'click', ev => {
+    $.catch(this.__BOX__, 'click', ev => {
       var { tmp, disabled } = this.props
       if (disabled) {
         return
@@ -207,7 +207,7 @@ export default class Star {
       }
     })
 
-    ebind(this.__BOX__, 'mouseleave', ev => {
+    $.catch(this.__BOX__, 'mouseleave', ev => {
       if (this.props.disabled) {
         return
       }

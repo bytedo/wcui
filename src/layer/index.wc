@@ -239,7 +239,7 @@
 import '../form/input'
 import Drag from '../drag/core'
 
-import { nextTick, bind, unbind, clickOutside } from '../utils'
+import $ from '../utils'
 
 const LANGUAGES = {
   en: {
@@ -456,7 +456,7 @@ class Layer {
     this.type = this.props.type
     this.title = this.props.title
 
-    this._handleBtnClick = bind(this.__CTRL__, 'click', ev => {
+    this._handleBtnClick = $.bind(this.__CTRL__, 'click', ev => {
       if (ev.target.tagName === 'BUTTON') {
         var idx = +ev.target.dataset.idx
         var { type } = this.props
@@ -487,7 +487,7 @@ class Layer {
 
     if (this.props.type === 'prompt') {
       this.__INPUT__ = this.__BODY__.firstElementChild.assignedNodes().pop()
-      this._handleSubmit = bind(this.__INPUT__, 'submit', ev => {
+      this._handleSubmit = $.bind(this.__INPUT__, 'submit', ev => {
         this._intercept(ev.detail)
       })
     }
@@ -502,7 +502,7 @@ class Layer {
     /* ----    额外的样式     --- */
     /* ------------------------ */
     if (this.props.mask) {
-      this._handlMask = clickOutside(this.root.children[1], ev => {
+      this._handlMask = $.outside(this.root.children[1], ev => {
         // 只作用于当前wc-layer
         if (ev.target !== this) {
           return
@@ -572,7 +572,7 @@ class Layer {
     }
 
     if (this.props.type === 'notify') {
-      this._handleClose = bind(this.__TITLE__, 'click', ev => {
+      this._handleClose = $.bind(this.__TITLE__, 'click', ev => {
         if (ev.target.tagName === 'WC-ICON') {
           this.close()
         }
@@ -581,8 +581,8 @@ class Layer {
   }
 
   unmount() {
-    unbind(document, 'mousedown', this._handlMask)
-    unbind(this.__TITLE__, 'click', this._handleClose)
+    $.clearOutside(this._handlMask)
+    $.unbind(this.__TITLE__, 'click', this._handleClose)
   }
 
   watch() {
