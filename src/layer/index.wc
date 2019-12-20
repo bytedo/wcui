@@ -418,7 +418,7 @@ class Layer {
         uniqueInstance = null
       }
       delete this.promise
-      unbind(this.__CTRL__, 'click', this._handleBtnClick)
+      $.unbind(this.__CTRL__, 'click', this._handleBtnClick)
 
       // 离场动画
       if (this.props.from && !force) {
