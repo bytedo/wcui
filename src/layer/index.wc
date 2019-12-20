@@ -123,8 +123,13 @@
 
     ::slotted(&__toast.style-info) {
       border: 1px solid nth($cp, 3);
-      background: nth($cp, 2);
+      background: nth($cp, 1);
       color: nth($cgr, 3);
+    }
+    ::slotted(&__toast.style-success) {
+      border: 1px solid #b3e19d;
+      background: #f0f9eb;
+      color: nth($ct, 1);
     }
     ::slotted(&__toast.style-warn) {
       border: 1px solid #faebb4;
@@ -762,6 +767,9 @@ Object.assign(_layer, {
         break
       case 'error':
         ico = 'deny'
+        break
+      case 'success':
+        ico = 'get'
         break
       default:
         ico = 'info'

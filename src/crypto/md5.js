@@ -1,10 +1,10 @@
 /*
-     * Fastest md5 implementation around (JKM md5).
-     * Credits: Joseph Myers
-     *
-     * @see http://www.myersdaily.org/joseph/javascript/md5-text.html
-     * @see http://jsperf.com/md5-shootout/7
-     */
+ * Fastest md5 implementation around (JKM md5).
+ * Credits: Joseph Myers
+ *
+ * @see http://www.myersdaily.org/joseph/javascript/md5-text.html
+ * @see http://jsperf.com/md5-shootout/7
+ */
 
 /* this function is much faster,
       so if possible we use it. Some IEs
@@ -224,9 +224,9 @@ function md51(s) {
   length = s.length
   tail = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
   for (i = 0; i < length; i += 1) {
-    tail[i >> 2] |= s.charCodeAt(i) << ((i % 4) << 3)
+    tail[i >> 2] |= s.charCodeAt(i) << (i % 4 << 3)
   }
-  tail[i >> 2] |= 0x80 << ((i % 4) << 3)
+  tail[i >> 2] |= 0x80 << (i % 4 << 3)
   if (i > 55) {
     md5cycle(state, tail)
     for (i = 0; i < 16; i += 1) {
@@ -270,10 +270,10 @@ function md51_array(a) {
   length = a.length
   tail = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
   for (i = 0; i < length; i += 1) {
-    tail[i >> 2] |= a[i] << ((i % 4) << 3)
+    tail[i >> 2] |= a[i] << (i % 4 << 3)
   }
 
-  tail[i >> 2] |= 0x80 << ((i % 4) << 3)
+  tail[i >> 2] |= 0x80 << (i % 4 << 3)
   if (i > 55) {
     md5cycle(state, tail)
     for (i = 0; i < 16; i += 1) {
@@ -492,7 +492,7 @@ SparkMD5.prototype.end = function(raw) {
     ret
 
   for (i = 0; i < length; i += 1) {
-    tail[i >> 2] |= buff.charCodeAt(i) << ((i % 4) << 3)
+    tail[i >> 2] |= buff.charCodeAt(i) << (i % 4 << 3)
   }
 
   this._finish(tail, length)
@@ -570,7 +570,7 @@ SparkMD5.prototype._finish = function(tail, length) {
     lo,
     hi
 
-  tail[i >> 2] |= 0x80 << ((i % 4) << 3)
+  tail[i >> 2] |= 0x80 << (i % 4 << 3)
   if (i > 55) {
     md5cycle(this._hash, tail)
     for (i = 0; i < 16; i += 1) {
@@ -674,7 +674,7 @@ SparkMD5.ArrayBuffer.prototype.end = function(raw) {
     ret
 
   for (i = 0; i < length; i += 1) {
-    tail[i >> 2] |= buff[i] << ((i % 4) << 3)
+    tail[i >> 2] |= buff[i] << (i % 4 << 3)
   }
 
   this._finish(tail, length)
@@ -749,4 +749,16 @@ SparkMD5.ArrayBuffer.hash = function(arr, raw) {
   return raw ? hexToBinaryString(ret) : ret
 }
 
-export default new SparkMD5()
+var _sparkIns = new SparkMD5()
+
+export function md5(str) {
+  _sparkIns.append(str)
+  return _sparkIns.end()
+}
+
+export function md5Sum(binStr) {
+  _sparkIns.appendBinary(binStr)
+  return _sparkIns.end()
+}
+
+export default _sparkIns
