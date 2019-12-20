@@ -76,7 +76,7 @@
 </style>
 
 <script>
-import { bind, ebind, unbind } from '../utils'
+import $ from '../utils'
 // 是否火狐浏览器
 const IS_FF = !!window.sidebar
 
@@ -157,7 +157,7 @@ export default class Scroll {
 
   mounted() {
     // 初始化滚动条的位置和长度
-    this._initFn = bind(this.__BOX__, 'mouseenter', ev => {
+    this._initFn = $.bind(this.__BOX__, 'mouseenter', ev => {
       var ow = this.__BOX__.offsetWidth
       var sw = this.__BOX__.scrollWidth
       var oh = this.__BOX__.offsetHeight
@@ -193,7 +193,7 @@ export default class Scroll {
     })
 
     // 鼠标滚动事件
-    this._wheelFn = ebind(this.__BOX__, 'wheel', ev => {
+    this._wheelFn = $.catch(this.__BOX__, 'wheel', ev => {
       ev.preventDefault()
       var { sh, oh, yh, sw, ow, xw } = this.props
 
@@ -261,26 +261,26 @@ export default class Scroll {
         startY = null
         this.props.thumbX = moveX
         this.props.thumbY = moveY
-        unbind(document, 'mousemove', mousemoveFn)
-        unbind(document, 'mouseup', mouseupFn)
+        $.unbind(document, 'mousemove', mousemoveFn)
+        $.unbind(document, 'mouseup', mouseupFn)
       }
 
-    bind(this.__Y__, 'mousedown', ev => {
+    $.bind(this.__Y__, 'mousedown', ev => {
       startY = ev.pageY
       if (!this.props.thumbY) {
         this.props.thumbY = 0
       }
-      bind(document, 'mousemove', mousemoveFn)
-      bind(document, 'mouseup', mouseupFn)
+      $.bind(document, 'mousemove', mousemoveFn)
+      $.bind(document, 'mouseup', mouseupFn)
     })
 
-    bind(this.__X__, 'mousedown', ev => {
+    $.bind(this.__X__, 'mousedown', ev => {
       startX = ev.pageX
       if (!this.props.thumbX) {
         this.props.thumbX = 0
       }
-      bind(document, 'mousemove', mousemoveFn)
-      bind(document, 'mouseup', mouseupFn)
+      $.bind(document, 'mousemove', mousemoveFn)
+      $.bind(document, 'mouseup', mouseupFn)
     })
 
     this.__observer = new MutationObserver(this._initFn)
@@ -293,8 +293,8 @@ export default class Scroll {
 
   unmount() {
     this.__observer.disconnect()
-    unbind(this.__BOX__, 'mouseenter', this._initFn)
-    unbind(this.__BOX__, 'wheel', this._wheelFn)
+    $.unbind(this.__BOX__, 'mouseenter', this._initFn)
+    $.unbind(this.__BOX__, 'wheel', this._wheelFn)
   }
 }
 </script>

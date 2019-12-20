@@ -173,7 +173,7 @@
 <script>
 import '../scroll/index'
 import '../icon/index'
-import { ebind, bind, unbind } from '../utils'
+import $ from '../utils'
 
 export default class Number {
   props = {
@@ -283,7 +283,7 @@ export default class Number {
 
   mounted() {
     // 键盘事件
-    this._handleSubmit = ebind(this.__INPUT__, 'keydown', ev => {
+    this._handleSubmit = $.catch(this.__INPUT__, 'keydown', ev => {
       if (this.disabled || this.readonly) {
         return
       }
@@ -304,7 +304,7 @@ export default class Number {
       }
     })
 
-    this._handleChange = ebind(this.__INPUT__, 'change', ev => {
+    this._handleChange = $.catch(this.__INPUT__, 'change', ev => {
       if (isFinite(this.__INPUT__.value)) {
         this.props.value = +this.__INPUT__.value
         if (!this.__INPUT__.value.endsWith('.')) {
@@ -316,7 +316,7 @@ export default class Number {
       this.dispatchEvent(new CustomEvent('input'))
     })
 
-    this._handleAction = bind(this.__OUTER__, 'click', ev => {
+    this._handleAction = $.bind(this.__OUTER__, 'click', ev => {
       if (this.disabled || this.readonly) {
         return
       }
@@ -331,7 +331,7 @@ export default class Number {
   }
 
   unmount() {
-    unbind(this.__INPUT__, 'keydown', this._handleSubmit)
+    $.unbind(this.__INPUT__, 'keydown', this._handleSubmit)
   }
 
   watch() {

@@ -6,7 +6,7 @@
 
 'use strict'
 
-import { bind, unbind } from '../utils'
+import $ from '../utils'
 
 const DEF_OPT = {
   axis: '', // x | y | xy 拖拽方向
@@ -41,10 +41,10 @@ export default class Drag {
     // 鼠标状态图标
     node.style.cursor = 'move'
 
-    this._handleResize = bind(window, 'resize', this._init.bind(this))
+    this._handleResize = $.bind(window, 'resize', this._init.bind(this))
 
     // let
-    this._handleMousedown = bind(node, 'mousedown', ev => {
+    this._handleMousedown = $.bind(node, 'mousedown', ev => {
       if (this.disabled) {
         return
       }
@@ -74,7 +74,7 @@ export default class Drag {
         limit = [pbcr.top, pbcr.right - tw, pbcr.bottom - th, pbcr.left]
       }
 
-      let handleMove = bind(document, 'mousemove', ev => {
+      let handleMove = $.bind(document, 'mousemove', ev => {
         // 防止拖动到边缘时导致页面滚动
         ev.preventDefault()
 
@@ -119,7 +119,7 @@ export default class Drag {
         this.$elem.style.transform = `translate(${_x}px, ${_y}px)`
       })
 
-      let handleUp = bind(document, 'mouseup', ev => {
+      let handleUp = $.bind(document, 'mouseup', ev => {
         this.$elem.dispatchEvent(
           new CustomEvent('dragged', {
             detail: {
@@ -131,8 +131,8 @@ export default class Drag {
             }
           })
         )
-        unbind(document, 'mousemove', handleMove)
-        unbind(document, 'mouseup', handleUp)
+        $.unbind(document, 'mousemove', handleMove)
+        $.unbind(document, 'mouseup', handleUp)
       })
     })
 
@@ -143,16 +143,16 @@ export default class Drag {
     if (!name || typeof cb !== 'function') {
       return
     }
-    return bind(this, name, cb)
+    return $.bind(this, name, cb)
   }
 
   off(name, cb) {
-    unbind(this, name, cb)
+    $.unbind(this, name, cb)
   }
 
   destroy() {
-    unbind(window, 'resize', this._handleResize)
-    unbind(this.$drag, 'mousedown', this._handleMousedown)
+    $.unbind(window, 'resize', this._handleResize)
+    $.unbind(this.$drag, 'mousedown', this._handleMousedown)
 
     delete this.$elem
     delete this.$drag

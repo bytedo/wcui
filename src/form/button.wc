@@ -249,6 +249,8 @@
 
 <script>
 import '../icon/index'
+import $ from '../utils'
+
 const IS_FIREFOX = !!window.sidebar
 
 export default class Button {
@@ -313,19 +315,17 @@ export default class Button {
   }
 
   mounted() {
-    this._handleClick = ev => {
+    // 阻止事件冒泡, 避免用户自己绑定click事件不受这2个值的限制
+    this._handleClick = $.catch(this.__BTN__, 'click', ev => {
       if (this.props.loading || this.props.disabled) {
-        // 阻止事件冒泡, 避免用户自己绑定click事件不受这2个值的限制
-        ev.stopPropagation()
         return
       }
       this.dispatchEvent(new CustomEvent('active'))
-    }
-    this.__BTN__.addEventListener('click', this._handleClick, false)
+    })
   }
 
   unmount() {
-    this.__BTN__.removeEventListener('click', this._handleClick)
+    $.unbind(this.__BTN__, 'click', this._handleClick)
   }
 
   watch() {

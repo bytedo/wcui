@@ -231,7 +231,7 @@ li {
 <script>
 import '../scroll/index'
 import '../icon/index'
-import { ebind, bind, unbind, clickOutside } from '../utils'
+import $ from '../utils'
 
 const TYPES = ['text', 'textarea', 'password']
 const INPUTS = {
@@ -398,7 +398,7 @@ export default class Input {
     var { type } = this.props
 
     // 键盘事件
-    this._handleSubmit = ebind(this.__INPUT__, 'keydown', ev => {
+    this._handleSubmit = $.catch(this.__INPUT__, 'keydown', ev => {
       if (this.disabled || this.readonly) {
         return
       }
@@ -433,7 +433,7 @@ export default class Input {
     // 非textarea, 可做输入建议功能
     if (type === 'text') {
       // 输入状态事件
-      this._handleChange = bind(this.__INPUT__, 'input', ev => {
+      this._handleChange = $.bind(this.__INPUT__, 'input', ev => {
         ev.preventDefault()
         this.dispatchEvent(
           new CustomEvent('fetch-suggest', {
@@ -449,7 +449,7 @@ export default class Input {
       })
 
       // 渲染建议列表
-      this._parseSuggestion = bind(this.__INPUT__, 'click', ev => {
+      this._parseSuggestion = $.bind(this.__INPUT__, 'click', ev => {
         var { list } = this.props
         let { x, y, width } = this.getBoundingClientRect()
         if (list && list.length) {
@@ -465,28 +465,28 @@ export default class Input {
         }
       })
 
-      this._inactiveFn = clickOutside(this, ev => {
+      this._inactiveFn = $.outside(this, ev => {
         this.__LIST__.classList.remove('show')
       })
 
       // 选择建议
-      this._handleSelect = bind(this.__LIST__, 'click', ev => {
+      this._handleSelect = $.bind(this.__LIST__, 'click', ev => {
         if (ev.target.tagName === 'LI') {
           this._fetchSelect(ev.target.dataset.idx, ev)
           this.dispatchEvent(new CustomEvent('input'))
         }
       })
     } else {
-      this._handleWheel = ebind(this.__INPUT__, 'wheel')
+      this._handleWheel = $.catch(this.__INPUT__, 'wheel')
     }
   }
 
   unmount() {
-    unbind(this.__INPUT__, 'wheel', this._handleWheel)
-    unbind(this.__INPUT__, 'keydown', this._handleSubmit)
-    unbind(this.__INPUT__, 'input', this._handleChange)
-    unbind(document, 'mousedown', this._inactiveFn)
-    unbind(this.__LIST__, 'click', this._handleSelect)
+    $.unbind(this.__INPUT__, 'wheel', this._handleWheel)
+    $.unbind(this.__INPUT__, 'keydown', this._handleSubmit)
+    $.unbind(this.__INPUT__, 'input', this._handleChange)
+    $.unbind(this.__LIST__, 'click', this._handleSelect)
+    $.clearOutside(this._inactiveFn)
   }
 
   watch() {

@@ -49,7 +49,7 @@ function fixImport(str) {
   return str
     .replace(/import '([\w-/_.]*)'/g, 'import "$1.js"')
     .replace(
-      /import ([\w\s,{}]*) from '([a-z0-9\/\.\-_]*)'/g,
+      /import ([\w\s,{}$]*) from '([a-z0-9\/\.\-_]*)'/g,
       'import $1 from "$2.js"'
     )
 }

@@ -142,7 +142,7 @@
 
 <script>
 import '../icon/index'
-import { bind, unbind } from '../utils'
+import $ from '../utils'
 
 export default class Checkbox {
   props = {
@@ -237,7 +237,7 @@ export default class Checkbox {
   }
 
   mounted() {
-    this._handlClick = bind(this, 'click', ev => {
+    this._handlClick = $.bind(this, 'click', ev => {
       ev.preventDefault()
 
       if (!this.disabled && !this.readonly) {
@@ -248,7 +248,7 @@ export default class Checkbox {
   }
 
   unmount() {
-    unbind(this, 'click', this._handlClick)
+    $.unbind(this, 'click', this._handlClick)
   }
 
   watch() {
