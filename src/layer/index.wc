@@ -289,6 +289,7 @@ class Layer {
     blur: false,
     background: null,
     mask: false,
+    radius: null,
     'mask-close': false,
     'mask-color': null,
     fixed: true //是否固定位置
@@ -606,15 +607,16 @@ class Layer {
       case 'blur':
         this.props[name] = true
         break
+      case 'radius':
+        this.props.radius = val
+        break
       case 'left':
       case 'right':
       case 'top':
       case 'bottom':
-        if (val !== null) {
-          this.props.from[name] = val
-          this.props.to = this.props.from
-          this.removeAttribute(name)
-        }
+        this.props.from[name] = val
+        this.props.to = this.props.from
+        this.removeAttribute(name)
         break
       case 'fixed':
         this.fixed = true
