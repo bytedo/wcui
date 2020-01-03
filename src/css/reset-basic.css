@@ -35,11 +35,11 @@ q::before, q::after {content: '';content: none;}
 table {border-collapse: collapse;border-spacing: 0;}
 a:focus,input,textarea,button:focus,input:focus,textarea:focus {outline:none;}
 ::-moz-focus-inner {
-    border:none;outline:none;
+  border:none;outline:none;
 }
-body {font-family:Helvetica, Arial,"WenQuanYi Micro Hei","PingFang SC","Hiragino Sans GB","Segoe UI", "Microsoft Yahei", sans-serif;-webkit-font-smoothing: antialiased;text-size-adjust: 100%;-webkit-tap-highlight-color: transparent;}
+body {font-family:"Helvetica Neue", Arial,"WenQuanYi Micro Hei","PingFang SC","Hiragino Sans GB","Segoe UI", "Microsoft Yahei", sans-serif;-webkit-font-smoothing: antialiased;text-size-adjust: 100%;-webkit-tap-highlight-color: transparent;}
 code,pre,samp {font-family:Menlo,Monaco,Consolas,"Courier New",monospace;}
-[anot],[\:repeat],[\:if],[is-widget],slot {visibility:hidden;}
+[anot],[\:repeat],[\:if] {visibility:hidden;}
 
 .do-fn-cl { *zoom: 1; }
 .do-fn-cl::after { content: "."; display: block; height: 0; clear: both; visibility: hidden; overflow:hidden;} 
@@ -54,7 +54,5 @@ code,pre,samp {font-family:Menlo,Monaco,Consolas,"Courier New",monospace;}
 .do-fn-ell {overflow:hidden; white-space:nowrap; text-overflow:ellipsis }
 .do-st-thin {-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;}
 .do-st-hand {cursor:pointer;}
-
-[class^="do-icon-"], [class*=" do-icon-"] {display:inline-block;font-family:"uifont" !important;font-style:normal;-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;}
 
 

@@ -112,6 +112,12 @@ export default class Icon {
     return this.props.is
   }
 
+  set is(val) {
+    if (val) {
+      this.setAttribute('is', val)
+    }
+  }
+
   // 绘制图标
   drawPath() {
     var { is } = this.props

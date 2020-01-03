@@ -24,7 +24,7 @@
     align-items: center;
     width: 100%;
     height: inherit;
-    padding: 0 5px;
+    padding: 0 10px;
     margin: auto;
     line-height: 0;
     border: 1px solid nth($cp, 3);
@@ -56,6 +56,61 @@
   }
 }
 
+:host([size='large']) {
+  min-width: 120px;
+  height: 42px;
+  font-size: 16px;
+
+  .icon {
+    --size: 20px;
+  }
+}
+:host([size='large'][circle]) {
+  min-width: 42px;
+
+  button {
+    padding: 0 20px;
+  }
+}
+:host([size='medium']) {
+  min-width: 90px;
+  height: 36px;
+
+  button {
+    padding: 0 15px;
+  }
+}
+:host([size='medium'][circle]) {
+  min-width: 36px;
+}
+:host([size='mini']),
+:host([text]) {
+  min-width: 24px;
+  height: 24px;
+  font-size: 12px;
+
+  button {
+    padding: 0 5px;
+  }
+
+  .icon {
+    --size: 14px;
+  }
+}
+
+:host([text]) {
+  height: 18px;
+
+  button {
+    padding: 0;
+    border: 0;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
 :host([round]) {
   border-radius: 21px;
 }
@@ -70,35 +125,6 @@
   }
 }
 
-:host([size='large']) {
-  min-width: 120px;
-  height: 42px;
-  font-size: 16px;
-
-  .icon {
-    --size: 20px;
-  }
-}
-:host([size='large'][circle]) {
-  min-width: 42px;
-}
-:host([size='medium']) {
-  min-width: 90px;
-  height: 36px;
-}
-:host([size='medium'][circle]) {
-  min-width: 36px;
-}
-:host([size='mini']) {
-  min-width: 24px;
-  height: 24px;
-  font-size: 12px;
-
-  .icon {
-    --size: 14px;
-  }
-}
-
 :host([loading]),
 :host([disabled]) {
   cursor: not-allowed;
@@ -110,9 +136,7 @@
   }
   button {
     background: #fff;
-    // &:active {
     border-color: nth($cp, 3);
-    // }
   }
 }
 
@@ -135,6 +159,18 @@
     background: nth($cr, 3);
   }
 }
+
+:host([color='red'][text]) button {
+  background: transparent;
+  color: nth($cr, 2);
+  &:hover {
+    color: nth($cr, 1);
+  }
+  &:active {
+    color: nth($cr, 3);
+  }
+}
+
 :host([color='red'][loading]) button,
 :host([color='red'][disabled]) button {
   background: nth($cr, 1);
@@ -147,6 +183,17 @@
   }
   &:active {
     background: nth($cb, 3);
+  }
+}
+
+:host([color='blue'][text]) button {
+  background: transparent;
+  color: nth($cb, 2);
+  &:hover {
+    color: nth($cb, 1);
+  }
+  &:active {
+    color: nth($cb, 3);
   }
 }
 :host([color='blue'][loading]) button,
@@ -163,6 +210,16 @@
     background: nth($cg, 3);
   }
 }
+:host([color='green'][text]) button {
+  background: transparent;
+  color: nth($cg, 2);
+  &:hover {
+    color: nth($cg, 1);
+  }
+  &:active {
+    color: nth($cg, 3);
+  }
+}
 :host([color='green'][loading]) button,
 :host([color='green'][disabled]) button {
   background: nth($cg, 1);
@@ -175,6 +232,16 @@
   }
   &:active {
     background: nth($ct, 3);
+  }
+}
+:host([color='teal'][text]) button {
+  background: transparent;
+  color: nth($ct, 2);
+  &:hover {
+    color: nth($ct, 1);
+  }
+  &:active {
+    color: nth($ct, 3);
   }
 }
 :host([color='teal'][loading]) button,
@@ -191,6 +258,16 @@
     background: nth($co, 3);
   }
 }
+:host([color='orange'][text]) button {
+  background: transparent;
+  color: nth($co, 2);
+  &:hover {
+    color: nth($co, 1);
+  }
+  &:active {
+    color: nth($co, 3);
+  }
+}
 :host([color='orange'][loading]) button,
 :host([color='orange'][disabled]) button {
   background: nth($co, 1);
@@ -203,6 +280,16 @@
   }
   &:active {
     background: nth($cd, 3);
+  }
+}
+:host([color='dark'][text]) button {
+  background: transparent;
+  color: nth($cd, 2);
+  &:hover {
+    color: nth($cd, 1);
+  }
+  &:active {
+    color: nth($cd, 3);
   }
 }
 :host([color='dark'][loading]) button,
@@ -219,6 +306,16 @@
     background: nth($cpp, 3);
   }
 }
+:host([color='purple'][text]) button {
+  background: transparent;
+  color: nth($cpp, 2);
+  &:hover {
+    color: nth($cpp, 1);
+  }
+  &:active {
+    color: nth($cpp, 3);
+  }
+}
 :host([color='purple'][loading]) button,
 :host([color='purple'][disabled]) button {
   background: nth($cpp, 1);
@@ -233,9 +330,31 @@
     background: nth($cgr, 3);
   }
 }
+:host([color='grey'][text]) button {
+  background: transparent;
+  color: nth($cgr, 2);
+  &:hover {
+    color: nth($cgr, 1);
+  }
+  &:active {
+    color: nth($cgr, 3);
+  }
+}
 :host([color='grey'][loading]) button,
 :host([color='grey'][disabled]) button {
   background: nth($cgr, 1);
+}
+
+:host([text][loading]),
+:host([text][disabled]) {
+  button {
+    &,
+    &:hover,
+    &:active {
+      text-decoration: none;
+      background: transparent;
+    }
+  }
 }
 
 :host(:focus-within) {
