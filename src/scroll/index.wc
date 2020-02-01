@@ -25,15 +25,19 @@
 .is-vertical {
   visibility: hidden;
   position: absolute;
+  display: flex;
+  justify-content: flex-end;
   z-index: 10240;
   opacity: 0;
+  user-select: none;
   transition: opacity 0.3s linear, visibility 0.3s linear;
 
   .thumb {
     display: block;
-    border-radius: 3px;
+    border-radius: 5px;
     background: rgba(44, 47, 53, 0.25);
     cursor: default;
+    transition: width 0.1s linear, height 0.1s linear;
 
     &:hover {
       background: rgba(44, 47, 53, 0.5);
@@ -42,14 +46,19 @@
 }
 
 .is-horizontal {
+  flex-direction: column;
   left: 0;
   bottom: 1px;
   width: 100%;
-  height: 6px;
+  height: 10px;
 
   .thumb {
     width: 0;
     height: 6px;
+
+    &:hover {
+      height: 10px;
+    }
   }
 }
 
@@ -57,12 +66,16 @@
 .is-vertical {
   top: 0;
   right: 1px;
-  width: 6px;
+  width: 10px;
   height: 100%;
 
   .thumb {
     width: 6px;
     height: 0;
+
+    &:hover {
+      width: 10px;
+    }
   }
 }
 
@@ -71,6 +84,17 @@
   .is-vertical {
     visibility: visible;
     opacity: 1;
+  }
+}
+
+:host([axis='x']) {
+  .is-vertical {
+    display: none;
+  }
+}
+:host([axis='y']) {
+  .is-horizontal {
+    display: none;
   }
 }
 </style>
@@ -82,7 +106,9 @@ const IS_FF = !!window.sidebar
 
 /*  */
 export default class Scroll {
-  props = {}
+  props = {
+    axis: 'xy' // 滚动方向, 默认x轴和y轴都可以滚动
+  }
   __init__() {
     /* render */
     this.__BOX__ = this.root.children[1]
@@ -295,6 +321,14 @@ export default class Scroll {
     this.__observer.disconnect()
     $.unbind(this.__BOX__, 'mouseenter', this._initFn)
     $.unbind(this.__BOX__, 'wheel', this._wheelFn)
+  }
+
+  watch() {
+    switch (name) {
+      case 'axis':
+        this.props.axis = val
+        break
+    }
   }
 }
 </script>

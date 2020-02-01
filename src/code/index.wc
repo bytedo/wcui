@@ -1,0 +1,198 @@
+<template>
+  <div class="code-box">
+    <header class="title">
+      <span><i></i><i></i><i></i></span>
+      <span>
+        <wc-icon title="运行" size="mini" class="act run" is="live"></wc-icon>
+        <wc-icon title="复制" size="mini" class="act cp" is="doc"></wc-icon>
+      </span>
+    </header>
+    <wc-scroll axis="y" class="code"></wc-scroll>
+  </div>
+</template>
+
+<style lang="scss">
+:host {
+  display: flex;
+}
+
+.code-box {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  width: 400px;
+  min-height: 88px;
+  max-height: 210px;
+  border: 1px solid nth($cp, 2);
+  border-radius: 2px;
+
+  .title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    height: 24px;
+    padding: 0 12px;
+    line-height: 1;
+    font-size: 12px;
+    background: nth($cp, 2);
+    user-select: none;
+
+    i {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      margin-right: 6px;
+      border-radius: 50%;
+      background: nth($cr, 1);
+    }
+    i:nth-child(2) {
+      background: nth($co, 1);
+    }
+    i:nth-child(3) {
+      background: nth($cg, 1);
+    }
+
+    .act {
+      color: nth($cgr, 2);
+      cursor: pointer;
+
+      &:hover {
+        color: nth($cgr, 3);
+      }
+      &.run {
+        display: none;
+      }
+    }
+  }
+
+  .code {
+    flex: 1;
+    padding: 5px 0;
+    line-height: 18px;
+    font-family: Menlo, Monaco, Consolas, 'Courier New', monospace;
+    font-size: 13px;
+    background: linear-gradient(to right, nth($cp, 1) 40px, #fff 40px);
+    color: nth($cd, 1);
+    cursor: text;
+    counter-reset: code;
+
+    p {
+      display: flex;
+      position: relative;
+      min-height: 18px;
+      padding: 0 8px 0 45px;
+      white-space: nowrap;
+      // white-space: pre-wrap;
+      // word-wrap: break-word;
+
+      &::before {
+        position: absolute;
+        left: 0;
+        width: 40px;
+        height: 100%;
+        padding-right: 5px;
+        text-align: right;
+        color: nth($cgr, 1);
+        content: counter(code);
+        counter-increment: code;
+      }
+    }
+  }
+}
+
+:host([exec]) {
+  .title {
+    .run {
+      display: inline-block;
+    }
+  }
+}
+
+:host([dark]) {
+  .code-box {
+    border-color: nth($cd, 2);
+
+    .title {
+      background: nth($cd, 2);
+    }
+
+    .code {
+      background: linear-gradient(to right, #596b7f 40px, nth($cd, 1) 40px);
+      color: nth($cp, 3);
+
+      p::before {
+        color: nth($cgr, 3);
+      }
+    }
+  }
+}
+</style>
+
+<script>
+import '../scroll/index'
+import '../layer/index'
+import $ from '../utils'
+
+export default class Code {
+  props = {
+    dark: '',
+    inline: '',
+    content: ''
+  }
+
+  __init__() {
+    /* render */
+    var elem = this.root.children[1]
+    this.__CODE__ = elem.children[1]
+    this.__RUN__ = elem.children[0].children[1].firstElementChild
+    this.__CP__ = elem.children[0].children[1].lastElementChild
+  }
+
+  get value() {
+    return this.props.content
+  }
+
+  mounted() {
+    this._cpFN = $.bind(this.__CP__, 'click', ev => {
+      try {
+        navigator.clipboard.writeText(this.value)
+        layer.toast('复制到粘贴板成功', 'success')
+      } catch (err) {
+        layer.toast('复制到粘贴板失败', 'error')
+      }
+    })
+    // 运行按钮的点击, 内部不处理逻辑, 传递给外部的run事件
+    this._runFN = $.bind(this.__RUN__, 'click', ev => {
+      this.dispatchEvent(
+        new CustomEvent('run', {
+          detail: this.value
+        })
+      )
+    })
+  }
+
+  unmounted() {
+    $.unbind(this.__CP__, 'click', this._cpFN)
+    $.unbind(this.__RUN__, 'click', this._runFN)
+  }
+
+  watch() {
+    switch (name) {
+      case 'content':
+        this.props.content = val
+        val = val
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .split('\n')
+        val = val.map(s => `<p>${s}</p>`).join('')
+        this.__CODE__.innerHTML = val
+        this.removeAttribute('content')
+        break
+
+      default:
+        break
+    }
+  }
+}
+</script>

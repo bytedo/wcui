@@ -19,7 +19,7 @@
   user-select: none;
   -moz-user-select: none;
   color: nth($cd, 2);
-  border-radius: 4px;
+  border-radius: 2px;
 }
 .label {
   display: flex;
@@ -70,11 +70,11 @@
   }
   .prepend {
     border-right: 1px solid nth($cp, 3);
-    border-radius: 4px 0 0 4px;
+    border-radius: 2px 0 0 2px;
   }
   .append {
     border-left: 1px solid nth($cp, 3);
-    border-radius: 0 4px 4px 0;
+    border-radius: 0 2px 2px 0;
   }
   &[prepend] .prepend,
   &[append] .append {
@@ -99,7 +99,7 @@
   height: auto;
   max-height: 200px;
   padding: 8px 0;
-  border-radius: 4px;
+  border-radius: 2px;
   background: #fff;
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.25);
   cursor: default;

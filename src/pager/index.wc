@@ -31,7 +31,7 @@
     margin: 0 3px;
     background: nth($cp, 1);
     border: 0;
-    border-radius: 4px;
+    border-radius: 2px;
     outline: none;
     font-size: inherit;
     color: inherit;
