@@ -3,8 +3,8 @@
     <header class="title">
       <span><i></i><i></i><i></i></span>
       <span>
-        <wc-icon title="运行" size="mini" class="act run" is="live"></wc-icon>
-        <wc-icon title="复制" size="mini" class="act cp" is="doc"></wc-icon>
+        <wc-icon title="运行" class="act run" is="live"></wc-icon>
+        <wc-icon title="复制" class="act cp" is="doc"></wc-icon>
       </span>
     </header>
     <wc-scroll axis="y" class="code"></wc-scroll>
@@ -20,9 +20,9 @@
   display: flex;
   flex-direction: column;
   position: relative;
-  width: 400px;
+  width: 100%;
   min-height: 88px;
-  max-height: 210px;
+  max-height: 610px;
   border: 1px solid nth($cp, 2);
   border-radius: 2px;
 
@@ -54,6 +54,8 @@
     }
 
     .act {
+      --size: 16px;
+      margin: 0 2px;
       color: nth($cgr, 2);
       cursor: pointer;
 
@@ -82,9 +84,8 @@
       position: relative;
       min-height: 18px;
       padding: 0 8px 0 45px;
-      white-space: nowrap;
-      // white-space: pre-wrap;
-      // word-wrap: break-word;
+      white-space: pre-wrap;
+      word-wrap: break-word;
 
       &::before {
         position: absolute;
