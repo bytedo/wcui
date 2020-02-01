@@ -23,6 +23,7 @@
   width: 100%;
   min-height: 88px;
   max-height: 610px;
+  margin: 10px 0;
   border: 1px solid nth($cp, 2);
   border-radius: 2px;
 
