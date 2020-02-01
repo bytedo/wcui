@@ -137,7 +137,7 @@ export default class Scroll {
     return this.__BOX__.scrollLeft
   }
 
-  set scrollLeft(val) {
+  set scrollLeft(n) {
     n = +n
     if (n === n) {
       var { sw, ow, xw } = this.props
