@@ -214,7 +214,6 @@ export default class Scroll {
       this.props.xw = xw
 
       this.__X__.style.width = xw + 'px'
-
       this.__Y__.style.height = yh + 'px'
     })
 
@@ -247,24 +246,30 @@ export default class Scroll {
           deltaY = ev.deltaY / (delta / 120)
         }
       }
+      if (this.props.axis !== 'x') {
+        this.__BOX__.scrollTop += deltaY
 
-      this.__BOX__.scrollTop += deltaY
-      this.__BOX__.scrollLeft += deltaX
+        if (yh) {
+          // 修正滚动条的位置
+          // 滚动比例 y 滚动条的可移动距离
+          var fixedY = (this.__BOX__.scrollTop / (sh - oh)) * (oh - yh)
+          this.props.thumbY = fixedY
 
-      if (xw) {
-        // 修正滚动条的位置
-        // 滚动比例 x 滚动条的可移动距离
-        var fixedX = (this.__BOX__.scrollLeft / (sw - ow)) * (ow - xw)
-        this.props.thumbX = fixedX
-
-        this.__X__.style.transform = `translateX(${fixedX}px)`
+          this.__Y__.style.transform = `translateY(${fixedY}px)`
+        }
       }
 
-      if (yh) {
-        var fixedY = (this.__BOX__.scrollTop / (sh - oh)) * (oh - yh)
-        this.props.thumbY = fixedY
+      if (this.props.axis !== 'y') {
+        this.__BOX__.scrollLeft += deltaX
 
-        this.__Y__.style.transform = `translateY(${fixedY}px)`
+        if (xw) {
+          // 修正滚动条的位置
+          // 滚动比例 x 滚动条的可移动距离
+          var fixedX = (this.__BOX__.scrollLeft / (sw - ow)) * (ow - xw)
+          this.props.thumbX = fixedX
+
+          this.__X__.style.transform = `translateX(${fixedX}px)`
+        }
       }
     })
 
