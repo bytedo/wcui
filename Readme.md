@@ -31,8 +31,9 @@
 - [x] 表单组件-开关(`wc-switch`)
 - [x] 图标组件(`wc-icon`)
 - [x] 弹层插件(`layer`、`wc-layer`)
-- [ ] markdown解析器(`marked`) 待重构...
+- [x] markdown组件(`wc-markd`)
 - [x] md5(`md5`)
+- [x] crypto(`crypto`)
 - [ ] md文本编辑器(`anot-meditor`) 待重构...
 - [x] 富文本编辑器(`wc-neditor`)
 - [x] 分页组件(`wc-pager`)
