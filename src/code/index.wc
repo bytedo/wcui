@@ -2,6 +2,7 @@
   <div class="code-box">
     <header class="title">
       <span><i></i><i></i><i></i></span>
+      <span></span>
       <span>
         <wc-icon title="运行" class="act run" is="live"></wc-icon>
         <wc-icon title="复制" class="act cp" is="doc"></wc-icon>
@@ -138,23 +139,42 @@ import $ from '../utils'
 export default class Code {
   props = {
     dark: '',
-    inline: '',
-    content: ''
+    lang: ''
   }
 
   __init__() {
     /* render */
+
+    // .code-box
     var elem = this.root.children[1]
+    var header = elem.children[0]
+
     this.__CODE__ = elem.children[1]
-    this.__RUN__ = elem.children[0].children[1].firstElementChild
-    this.__CP__ = elem.children[0].children[1].lastElementChild
+
+    this.__LANG__ = header.children[1]
+    this.__RUN__ = header.children[2].firstElementChild
+    this.__CP__ = header.children[2].lastElementChild
   }
 
   get value() {
     return this.props.content
   }
 
+  set value(txt) {
+    this.props.content = txt
+    txt = txt
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .split('\n')
+    txt = txt.map(s => `<p>${s}</p>`).join('')
+    this.__CODE__.innerHTML = txt
+  }
+
   mounted() {
+    var txt = this.innerHTML || this.textContent
+    this.value = txt.replace(/^[\r\n]|\s{2,}$/g, '')
+    this.textContent = ''
+
     this._cpFN = $.bind(this.__CP__, 'click', ev => {
       try {
         navigator.clipboard.writeText(this.value)
@@ -180,18 +200,14 @@ export default class Code {
 
   watch() {
     switch (name) {
-      case 'content':
-        this.props.content = val
-        val = val
-          .replace(/</g, '&lt;')
-          .replace(/>/g, '&gt;')
-          .split('\n')
-        val = val.map(s => `<p>${s}</p>`).join('')
-        this.__CODE__.innerHTML = val
-        this.removeAttribute('content')
+      case 'lang':
+        this.props.lang = val.toLowerCase()
+        this.__LANG__.textContent = this.props.lang
         break
 
-      default:
+      case 'value':
+        this.value = val
+        this.removeAttribute('value')
         break
     }
   }

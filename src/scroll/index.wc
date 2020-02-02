@@ -219,13 +219,13 @@ export default class Scroll {
 
     // 鼠标滚动事件
     this._wheelFn = $.catch(this.__BOX__, 'wheel', ev => {
-      ev.preventDefault()
       var { sh, oh, yh, sw, ow, xw } = this.props
 
       // x轴 y轴 都为0时, 不作任何处理
       if (!xw && !yh) {
         return
       }
+      ev.preventDefault()
 
       //校正兼容苹果鼠标在 chrome和FF下滚动的精度
       var deltaX

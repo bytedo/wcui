@@ -826,48 +826,12 @@ Renderer.prototype.code = function(code, lang, escaped) {
   code = code
     .replace(/&lt;script([^&]*?)&gt;/g, '<script$1>')
     .replace(/&lt;\/script&gt;/g, '</script>')
-  if (this.options.highlight) {
-    var out = this.options.highlight(code, lang)
-    if (out != null && out !== code) {
-      escaped = true
-      code = out
-    }
-  }
 
   //转义特殊字符
-  code = escaped ? code : escape(code, true)
-  lang = this.options.langPrefix + escape(lang, true)
+  code = escape(code, true)
+  lang = escape(lang, true)
 
-  var codes = code.split('\n'),
-    ln = codes.length,
-    idx = 0,
-    output = '',
-    multiCom = false
-
-  while (idx++ < ln) {
-    //处理多行注释
-    if (!multiCom) {
-      if (
-        /^\s*?<span class="token comment"/.test(codes[idx - 1]) &&
-        !/<\/span>$/.test(codes[idx - 1])
-      ) {
-        multiCom = true
-        codes[idx - 1] += '</span>'
-      }
-    } else {
-      if (!/<\/span>$/.test(codes[idx - 1])) {
-        codes[idx - 1] =
-          '<span class="token comment">' + codes[idx - 1] + '</span>'
-      } else {
-        codes[idx - 1] = '<span class="token comment">' + codes[idx - 1]
-        multiCom = false
-      }
-    }
-
-    output += '<code class="lang ' + lang + '">' + codes[idx - 1] + '\n</code>' //加\n为了避免空行时无法显示
-  }
-
-  return '<pre skip class="do-ui-blockcode">' + output + '</pre>'
+  return '<wc-code lang="' + lang + '">' + code + '</wc-code>'
 }
 
 Renderer.prototype.blockquote = function(quote) {
@@ -1398,7 +1362,5 @@ marked.safe = function(txt) {
     .replace(/<\/script>/g, '&lt;/script&gt;')
   return marked(txt)
 }
-
-window.marked = marked
 
 export default marked
