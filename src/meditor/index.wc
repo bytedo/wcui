@@ -2,7 +2,7 @@
   <div class="meditor">
     <section class="toolbar"></section>
     <textarea cols="30" rows="10"></textarea>
-    <wc-markdown></wc-markdown>
+    <wc-markd></wc-markd>
   </div>
 </template>
 
@@ -17,7 +17,13 @@ export default class Meditor {
   }
 
   __init__() {
-    // /* render */
+    /* render */
+
+    var elem = this.root.children[1]
+
+    this.__TOOL__ = elem.children[0]
+    this.__EDITOR__ = elem.children[1]
+    this.__VIEW__ = elem.children[2]
   }
 }
 </script>
