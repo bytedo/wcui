@@ -11,6 +11,8 @@
 }
 .markd {
   padding: 10px;
+  // white-space: pre-wrap;
+  // word-wrap: break-word;
 }
 a {
   text-decoration: underline;
@@ -27,6 +29,12 @@ em {
 strong {
   color: nth($cd, 3);
 }
+a {
+  strong,
+  em {
+    color: inherit;
+  }
+}
 em,
 strong,
 del {
@@ -39,17 +47,15 @@ img {
   max-width: 100%;
 }
 
-blockquote {
-  &.md-quote {
-    margin: 10px 0;
-    padding: 5px 10px;
-    border-left: 5px solid nth($ct, 1);
-    background: #f2faf7;
-    color: nth($cgr, 1);
-
-    p {
-      margin: 0;
-    }
+blockquote.md-quote {
+  margin: 10px 0;
+  padding: 5px 10px;
+  line-height: 1.5;
+  border-left: 5px solid nth($ct, 1);
+  background: #f2faf7;
+  color: nth($cgr, 1);
+  p {
+    margin: 0;
   }
 }
 
@@ -171,14 +177,13 @@ h6 {
     padding: 0 5px;
   }
   a {
-    visibility: hidden;
-    position: absolute;
-    left: -25px;
-    width: 25px;
-    padding: 0 3px;
-    font-weight: bold;
     text-decoration: none;
-    text-align: center;
+    color: #333;
+
+    &::before {
+      content: '# ';
+      color: nth($ct, 1);
+    }
   }
   &:hover a {
     visibility: visible;
@@ -225,7 +230,12 @@ table {
 }
 
 code.inline {
+  display: inline-block;
+  margin: 0 2px;
+  padding: 0 3px;
   color: nth($co, 3);
+  background: nth($cp, 1);
+  border-radius: 2px;
 }
 </style>
 
@@ -233,7 +243,8 @@ code.inline {
 import $ from '../utils'
 import '../code/index'
 
-import parser from './core'
+// import parser from './core'
+import parser from './parser'
 
 export default class Markd {
   props = {}
@@ -246,7 +257,8 @@ export default class Markd {
   }
 
   mounted() {
-    this.__BOX__.innerHTML = parser.safe(this.textContent)
+    // this.__BOX__.innerHTML = parser.safe(this.textContent)
+    this.__BOX__.innerHTML = parser(this.textContent)
     this.textContent = ''
   }
 }
