@@ -1,5 +1,5 @@
 <template>
-  <div class="markd-box"><slot /></div>
+  <div><slot /></div>
 </template>
 
 <style lang="scss">
@@ -9,9 +9,7 @@
   color: nth($cd, 1);
   font-size: 14px;
 }
-.markd-box {
-  padding: 10px;
-}
+
 a {
   text-decoration: underline;
   color: nth($ct, 2);
@@ -257,7 +255,10 @@ import core from './core'
 import parser from './parser'
 
 export default class Markd {
-  props = {}
+  props = {
+    toc: false
+  }
+
   __init__() {
     /* render */
 

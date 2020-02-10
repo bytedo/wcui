@@ -7,7 +7,7 @@
 'use strict'
 const HR_LIST = ['=', '-', '_', '*']
 const LIST_REG = /^(([\+\-\*])|(\d+\.))\s/
-const TODO_REG = /^\[(x|\s)\]\s/
+const TODO_REG = /^\-\s\[(x|\s)\]\s/
 const log = console.log
 
 const Helper = {
@@ -36,7 +36,7 @@ const Helper = {
   isTodo(str) {
     var v = str.trim()
     if (TODO_REG.test(v)) {
-      return v[1] === 'x' ? 1 : 0
+      return v[3] === 'x' ? 1 : 0
     }
     return -1
   },
@@ -223,6 +223,17 @@ class Tool {
             continue
           }
 
+          // 任务
+          let todoChecked = Helper.isTodo(it)
+          if (~todoChecked) {
+            let word = it.replace(TODO_REG, '').trim()
+            let stat = todoChecked === 1 ? 'checked' : ''
+            let txt = todoChecked === 1 ? `<del>${word}</del>` : word
+
+            html += `<section><wc-checkbox readonly ${stat}>${txt}</wc-checkbox></section>`
+            continue
+          }
+
           // 列表
           let listChecked = Helper.isList(it)
           if (~listChecked) {
@@ -266,17 +277,6 @@ class Tool {
             }
 
             isList = true
-            continue
-          }
-
-          // 任务
-          let todoChecked = Helper.isTodo(it)
-          if (~todoChecked) {
-            let word = it.replace(TODO_REG, '').trim()
-            let stat = todoChecked === 1 ? 'checked' : ''
-            let txt = todoChecked === 1 ? `<del>${word}</del>` : word
-
-            html += `<section><wc-checkbox readonly ${stat}>${txt}</wc-checkbox></section>`
             continue
           }
 

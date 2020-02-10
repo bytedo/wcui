@@ -71,10 +71,12 @@ const compileJs = (entry, output) => {
 // 编译样式
 function compileScss(code = '') {
   try {
-    return scss.renderSync({
-      data: BASE_SCSS + code,
-      outputStyle: 'compressed'
-    }).css
+    return (
+      scss.renderSync({
+        data: BASE_SCSS + code,
+        outputStyle: 'compressed'
+      }).css + ''
+    ).trim()
   } catch (err) {
     log(err)
   }
