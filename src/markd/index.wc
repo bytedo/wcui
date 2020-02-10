@@ -1,5 +1,5 @@
 <template>
-  <div class="markd"><slot /></div>
+  <div class="markd-box"><slot /></div>
 </template>
 
 <style lang="scss">
@@ -9,10 +9,8 @@
   color: nth($cd, 1);
   font-size: 14px;
 }
-.markd {
+.markd-box {
   padding: 10px;
-  // white-space: pre-wrap;
-  // word-wrap: break-word;
 }
 a {
   text-decoration: underline;
@@ -23,8 +21,9 @@ a:hover {
   text-decoration: none;
 }
 
-em {
-  color: nth($cgr, 3);
+em,
+del {
+  color: nth($cgr, 2);
 }
 strong {
   color: nth($cd, 3);
@@ -38,7 +37,7 @@ a {
 em,
 strong,
 del {
-  padding: 0 3px;
+  padding: 0 2px;
 }
 p {
   margin: 15px 0;
@@ -129,13 +128,19 @@ blockquote.md-quote {
   }
 }
 
-hr {
-  height: 1px;
+fieldset.md-hr {
   margin: 30px 0;
-  line-height: 1px;
   border: 0;
-  color: nth($cgr, 1);
-  background-color: nth($cgr, 1);
+  border-top: 1px dashed nth($cp, 3);
+
+  legend {
+    padding: 0 5px;
+    color: nth($cgr, 1);
+    text-align: center;
+    &::before {
+      content: '华丽丽的分割线';
+    }
+  }
 }
 ol {
   margin-left: 1em;
@@ -166,36 +171,40 @@ h3,
 h4,
 h5,
 h6 {
-  position: relative;
   margin: 15px 0;
+  line-height: 2;
   font-weight: bold;
   font-size: 16px;
 
-  span {
-    position: relative;
-    display: inline-block;
-    padding: 0 5px;
+  code.inline {
+    background: none;
   }
   a {
     text-decoration: none;
     color: #333;
-
+  }
+}
+h3,
+h4,
+h5,
+h6 {
+  a {
     &::before {
       content: '# ';
       color: nth($ct, 1);
+      font-weight: normal;
     }
-  }
-  &:hover a {
-    visibility: visible;
   }
 }
 h1 {
   margin: 0 0 30px;
   font-size: 24px;
+  text-align: center;
 }
 h2 {
   margin: 20px 0;
   font-size: 22px;
+  border-bottom: 1px solid nth($cp, 2);
 }
 h3 {
   margin: 20px 0 15px;
@@ -232,10 +241,11 @@ table {
 code.inline {
   display: inline-block;
   margin: 0 2px;
-  padding: 0 3px;
+  padding: 0 2px;
   color: nth($co, 3);
   background: nth($cp, 1);
   border-radius: 2px;
+  font-family: Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
 </style>
 
@@ -243,7 +253,7 @@ code.inline {
 import $ from '../utils'
 import '../code/index'
 
-// import parser from './core'
+import core from './core'
 import parser from './parser'
 
 export default class Markd {
@@ -257,9 +267,16 @@ export default class Markd {
   }
 
   mounted() {
-    // this.__BOX__.innerHTML = parser.safe(this.textContent)
+    // this.__BOX__.innerHTML = core.safe(this.textContent)
     this.__BOX__.innerHTML = parser(this.textContent)
     this.textContent = ''
+
+    $.bind(this.__BOX__, 'click', ev => {
+      if (ev.target.className === 'md-head-link') {
+        var ot = ev.target.offsetTop
+        document.documentElement.scrollTop = ot
+      }
+    })
   }
 }
 </script>
