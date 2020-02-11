@@ -8,6 +8,7 @@
 const HR_LIST = ['=', '-', '_', '*']
 const LIST_REG = /^(([\+\-\*])|(\d+\.))\s/
 const TODO_REG = /^\-\s\[(x|\s)\]\s/
+const ESCAPE_REG = /\\([-+*_`])/g
 const log = console.log
 
 const Helper = {
@@ -55,7 +56,11 @@ class Tool {
   // 初始化字符串, 处理多余换行等
   static init(str) {
     // 去掉\r, 将\t转为空格(2个)
-    str = str.replace(/\r/g, '').replace(/\t/g, '  ')
+    str = str
+      .replace(/\r\n|\r/g, '\n')
+      .replace(/\t/g, '  ')
+      .replace(/\u00a0/g, ' ')
+      .replace(/\u2424/g, '\n')
     var list = []
     var lines = str.split('\n')
     var isCodeBlock = false // 是否代码块
@@ -163,12 +168,13 @@ class Tool {
 
           // 优先处理一些常规样式
           it = it
-            .replace(/`(.*?)`/g, '<code class="inline">$1</code>')
-            .replace(/(\-\-|\*\*)(.*?)\1/g, '<strong>$2</strong>')
-            .replace(/(\-|\_|\*)(.*?)\1/g, '<em>$2</em>')
-            .replace(/~~(.*?)~~/g, '<del>$1</del>')
+            .replace(/`(.*?[^\\])`/g, '<code class="inline">$1</code>')
+            .replace(/(__|\*\*)(.*?[^\\])\1/g, '<strong>$2</strong>')
+            .replace(/\b(_|\*)(.*?[^\\])\1\b/g, '<em>$2</em>')
+            .replace(/~~(.*?[^\\])~~/g, '<del>$1</del>')
             .replace(/\!\[([^]*?)\]\(([^)]*?)\)/g, '<img src="$2" alt="$1">')
             .replace(/\[([^]*?)\]\(([^)]*?)\)/g, '<a href="$2">$1</a>')
+            .replace(ESCAPE_REG, '$1') // 处理转义字符
 
           // 引用
           if (it.startsWith('>')) {
