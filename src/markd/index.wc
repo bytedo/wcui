@@ -251,8 +251,8 @@ code.inline {
 import $ from '../utils'
 import '../code/index'
 
-import core from './core'
-import parser from './parser'
+import core from './backup'
+import markd from './core'
 
 export default class Markd {
   props = {
@@ -269,7 +269,7 @@ export default class Markd {
 
   mounted() {
     // this.__BOX__.innerHTML = core.safe(this.textContent)
-    this.__BOX__.innerHTML = parser(this.textContent)
+    this.__BOX__.innerHTML = markd(this.textContent)
     this.textContent = ''
 
     $.bind(this.__BOX__, 'click', ev => {

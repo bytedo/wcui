@@ -1,1366 +1,329 @@
 /**
- * marked - a markdown parser
- * Copyright (c) 2011-2014, Christopher Jeffrey. (MIT Licensed)
- * https://github.com/chjj/marked
+ * markdown解析器
+ * @author yutent<yutent@doui.cc>
+ * @date 2020/02/07 17:14:19
  */
 
-// import 'css/marked.scss'
-/**
- * Block-Level Grammar
- */
+'use strict'
+const HR_LIST = ['=', '-', '_', '*']
+const LIST_REG = /^(([\+\-\*])|(\d+\.))\s/
+const TODO_REG = /^\-\s\[(x|\s)\]\s/
+const ESCAPE_REG = /\\([-+*_`])/g
+const log = console.log
 
-class Fixer {
-  constructor(exp, sign) {
-    this.exp = exp
-    this.sign = sign
-  }
-  replace(key, val) {
-    if (key) {
-      val = val.source || val
-      val = val.replace(/(^|[^\[])\^/g, '$1')
-      this.exp = this.exp.replace(key, val)
+const Helper = {
+  // 是否分割线
+  isHr(str) {
+    var s = str[0]
+    if (HR_LIST.includes(s)) {
+      return str.startsWith(s.repeat(3))
     }
-    return this
-  }
-
-  done() {
-    return new RegExp(this.exp, this.sign)
-  }
-}
-
-function replace(exp, sign) {
-  return new Fixer(exp.source, sign || '')
-}
-
-const block = {
-  newline: /^\n+/,
-  code: /^( {4}[^\n]+\n*)+/,
-  fences: noop,
-  hr: /^( *[-*_]){3,} *(?:\n+|$)/,
-  heading: /^ *(#{1,6}) *([^\n]+?) *#* *(?:\n+|$)/,
-  nptable: noop,
-  lheading: /^([^\n]+)\n *(=|-){2,} *(?:\n+|$)/,
-  blockquote: /^( *>[^\n]+(\n(?!def)[^\n]+)*\n*)+/,
-  mark: /^ *;;;([\!]?) ([^\n]+)/,
-  task: /^ *- *\[([ x]?)\] *([^\n]*)/,
-  list: /^( *)(bull) [\s\S]+?(?:hr|def|\n{2,}(?! )(?!\1bull )\n*|\s*$)/,
-  html: /^ *(?:comment *(?:\n|\s*$)|closed *(?:\n{2,}|\s*$)|closing *(?:\n{2,}|\s*$))/,
-  def: /^ *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +["(]([^\n]+)[")])? *(?:\n+|$)/,
-  table: noop,
-  paragraph: /^((?:[^\n]+\n?(?!hr|heading|lheading|blockquote|tag|def))+)\n*/,
-  text: /^[^\n]+/
-}
-
-block.bullet = /(?:[*+-]|\d+\.)/
-block.item = /^( *)(bull) [^\n]*(?:\n(?!\1bull )[^\n]*)*/
-block.item = replace(block.item, 'gm')
-  .replace(/bull/g, block.bullet)
-  .done()
-
-block.list = replace(block.list)
-  .replace(/bull/g, block.bullet)
-  .replace('hr', '\\n+(?=\\1?(?:[-*_] *){3,}(?:\\n+|$))')
-  .replace('def', '\\n+(?=' + block.def.source + ')')
-  .done()
-
-block.blockquote = replace(block.blockquote)
-  .replace('def', block.def)
-  .done()
-
-block._tag =
-  '(?!(?:' +
-  'a|em|strong|small|s|cite|q|dfn|abbr|data|time|code' +
-  '|var|samp|kbd|sub|sup|i|b|u|mark|ruby|rt|rp|bdi|bdo' +
-  '|span|br|wbr|ins|del|img)\\b)\\w+(?!:/|[^\\w\\s@]*@)\\b'
-
-block.html = replace(block.html)
-  .replace('comment', /<!--[\s\S]*?-->/)
-  .replace('closed', /<(tag)[\s\S]+?<\/\1>/)
-  .replace('closing', /<tag(?:"[^"]*"|'[^']*'|[^'">])*?>/)
-  .replace(/tag/g, block._tag)
-  .done()
-
-block.paragraph = replace(block.paragraph)
-  .replace('hr', block.hr)
-  .replace('heading', block.heading)
-  .replace('lheading', block.lheading)
-  .replace('blockquote', block.blockquote)
-  .replace('tag', '<' + block._tag)
-  .replace('def', block.def)
-  .done()
-
-/**
- * Normal Block Grammar
- */
-
-block.normal = merge({}, block)
-
-/**
- * GFM Block Grammar
- */
-
-block.gfm = merge({}, block.normal, {
-  fences: /^ *(`{3,}|~{3,})[ \.]*(\S+)? *\n([\s\S]*?)\s*\1 *(?:\n+|$)/,
-  paragraph: /^/,
-  heading: /^ *(#{1,6}) +([^\n]+?) *#* *(?:\n+|$)/
-})
-
-block.gfm.paragraph = replace(block.paragraph)
-  .replace(
-    '(?!',
-    '(?!' +
-      block.gfm.fences.source.replace('\\1', '\\2') +
-      '|' +
-      block.list.source.replace('\\1', '\\3') +
-      '|'
-  )
-  .done()
-
-/**
- * GFM + Tables Block Grammar
- */
-
-block.tables = merge({}, block.gfm, {
-  nptable: /^ *(\S.*\|.*)\n *([-:]+ *\|[-| :]*)\n((?:.*\|.*(?:\n|$))*)\n*/,
-  table: /^ *\|(.+)\n *\|( *[-:]+[-| :]*)\n((?: *\|.*(?:\n|$))*)\n*/
-})
-
-/**
- * Block Lexer
- */
-
-function Lexer(options) {
-  this.tokens = []
-  this.tokens.links = {}
-  this.options = options || marked.defaults
-  this.rules = block.normal
-
-  if (this.options.gfm) {
-    if (this.options.tables) {
-      this.rules = block.tables
-    } else {
-      this.rules = block.gfm
-    }
-  }
-}
-
-/**
- * Expose Block Rules
- */
-
-Lexer.rules = block
-
-/**
- * Static Lex Method
- */
-
-Lexer.lex = function(src, options) {
-  var lexer = new Lexer(options)
-  return lexer.lex(src)
-}
-
-/**
- * Preprocessing
- */
-
-Lexer.prototype.lex = function(src) {
-  src = src
-    .replace(/\r\n|\r/g, '\n')
-    .replace(/\t/g, '  ')
-    .replace(/\u00a0/g, ' ')
-    .replace(/\u2424/g, '\n')
-
-  return this.token(src, true)
-}
-
-/**
- * Lexing
- */
-
-Lexer.prototype.token = function(src, top, bq) {
-  var src = src.replace(/^ +$/gm, ''),
-    next,
-    loose,
-    cap,
-    bull,
-    b,
-    item,
-    space,
-    i,
-    l
-
-  while (src) {
-    // newline
-    if ((cap = this.rules.newline.exec(src))) {
-      src = src.substring(cap[0].length)
-      if (cap[0].length > 1) {
-        this.tokens.push({
-          type: 'space'
-        })
+    return false
+  },
+  // 是否列表, -1不是, 1为有序列表, 0为无序列表
+  isList(str) {
+    var v = str.trim()
+    if (LIST_REG.test(v)) {
+      var n = +v[0]
+      if (n === n) {
+        return 1
+      } else {
+        return 0
       }
     }
-
-    // code
-    if ((cap = this.rules.code.exec(src))) {
-      src = src.substring(cap[0].length)
-      cap = cap[0].replace(/^ {4}/gm, '')
-      this.tokens.push({
-        type: 'code',
-        text: !this.options.pedantic ? cap.replace(/\n+$/, '') : cap
-      })
-      continue
+    return -1
+  },
+  // 是否任务列表
+  isTodo(str) {
+    var v = str.trim()
+    if (TODO_REG.test(v)) {
+      return v[3] === 'x' ? 1 : 0
     }
-
-    // fences (gfm)
-    if ((cap = this.rules.fences.exec(src))) {
-      src = src.substring(cap[0].length)
-      this.tokens.push({
-        type: 'code',
-        lang: cap[2],
-        text: cap[3] || ''
-      })
-      continue
+    return -1
+  },
+  ltrim(str) {
+    if (str.trimStart) {
+      return str.trimStart()
     }
+    return str.replace(/^\s+/, '')
+  }
+}
 
-    // heading
-    if ((cap = this.rules.heading.exec(src))) {
-      src = src.substring(cap[0].length)
-      this.tokens.push({
-        type: 'heading',
-        depth: cap[1].length,
-        text: cap[2]
-      })
-      continue
-    }
+const Decoder = {
+  // 内联样式
+  inline(str) {
+    return str
+      .replace(/`(.*?[^\\])`/g, '<code class="inline">$1</code>')
+      .replace(/(__|\*\*)(.*?[^\\])\1/g, '<strong>$2</strong>')
+      .replace(/\b(_|\*)(.*?[^\\])\1\b/g, '<em>$2</em>')
+      .replace(/~~(.*?[^\\])~~/g, '<del>$1</del>')
+      .replace(/\!\[([^]*?)\]\(([^)]*?)\)/g, '<img src="$2" alt="$1">')
+      .replace(/\[([^]*?)\]\(([^)]*?)\)/g, '<a href="$2">$1</a>')
+      .replace(ESCAPE_REG, '$1') // 处理转义字符
+  },
+  // 分割线
+  hr() {
+    return '<fieldset class="md-hr"><legend></legend></fieldset>'
+  },
+  // 标题
+  head(str) {
+    if (str.startsWith('#')) {
+      return str.replace(/^(#{1,6}) (.*)/, (p, m1, m2) => {
+        m2 = m2.trim()
+        let level = m1.trim().length
+        let hash = m2.replace(/\s/g, '').replace(/<\/?[^>]*?>/g, '')
 
-    // table no leading pipe (gfm)
-    if (top && (cap = this.rules.nptable.exec(src))) {
-      src = src.substring(cap[0].length)
-
-      item = {
-        type: 'table',
-        header: cap[1].replace(/^ *| *\| *$/g, '').split(/ *\| */),
-        align: cap[2].replace(/^ *|\| *$/g, '').split(/ *\| */),
-        cells: cap[3].replace(/\n$/, '').split('\n')
-      }
-
-      for (i = 0; i < item.align.length; i++) {
-        if (/^ *-+: *$/.test(item.align[i])) {
-          item.align[i] = 'right'
-        } else if (/^ *:-+: *$/.test(item.align[i])) {
-          item.align[i] = 'center'
-        } else if (/^ *:-+ *$/.test(item.align[i])) {
-          item.align[i] = 'left'
+        if (level === 1) {
+          return `<h1>${m2}</h1>`
         } else {
-          item.align[i] = null
+          return `<h${level}><a href="#${hash}" class="md-head-link">${m2}</a></h${level}>`
+        }
+      })
+    }
+    return false
+  },
+  // 引用模块
+  blockquote(str) {
+    //
+  },
+  // 任务
+  task(str) {
+    var todoChecked = Helper.isTodo(str)
+    if (~todoChecked) {
+      var word = str.replace(TODO_REG, '').trim()
+      var stat = todoChecked === 1 ? 'checked' : ''
+      var txt = todoChecked === 1 ? `<del>${word}</del>` : word
+
+      return `<section><wc-checkbox readonly ${stat}>${txt}</wc-checkbox></section>`
+    }
+    return false
+  }
+}
+
+class Tool {
+  constructor(list) {
+    this.list = list
+  }
+  // 初始化字符串, 处理多余换行等
+  static init(str) {
+    // 去掉\r, 将\t转为空格(2个)
+    str = str
+      .replace(/\r\n|\r/g, '\n')
+      .replace(/\t/g, '  ')
+      .replace(/\u00a0/g, ' ')
+      .replace(/\u2424/g, '\n')
+    var list = []
+    var lines = str.split('\n')
+    var isCodeBlock = false // 是否代码块
+    var emptyLineLength = 0 //连续空行的数量
+
+    for (let it of lines) {
+      let tmp = it.trim()
+      // 空行
+      if (!tmp) {
+        if (list.length === 0 || (!isCodeBlock && emptyLineLength > 0)) {
+          continue
+        }
+        emptyLineLength++
+        list.push(tmp)
+      } else {
+        emptyLineLength = 0
+        if (tmp.startsWith('```')) {
+          if (isCodeBlock) {
+            list.push('</wc-code>')
+          } else {
+            list.push(tmp.replace(/^```([\w\#\-]*?)$/, '<wc-code lang="$1">'))
+          }
+          isCodeBlock = !isCodeBlock
+        } else {
+          list.push(it)
         }
       }
-
-      for (i = 0; i < item.cells.length; i++) {
-        item.cells[i] = item.cells[i].split(/ *\| */)
-      }
-
-      this.tokens.push(item)
-
-      continue
     }
 
-    // lheading
-    if ((cap = this.rules.lheading.exec(src))) {
-      src = src.substring(cap[0].length)
-      this.tokens.push({
-        type: 'heading',
-        depth: cap[2] === '=' ? 1 : 2,
-        text: cap[1]
-      })
-      continue
-    }
+    return new this(list)
+  }
 
-    // hr
-    if ((cap = this.rules.hr.exec(src))) {
-      src = src.substring(cap[0].length)
-      this.tokens.push({
-        type: 'hr'
-      })
-      continue
-    }
+  parse() {
+    var html = ''
+    var isCodeBlock = false // 是否代码块
+    var emptyLineLength = 0 //连续空行的数量
+    var isBlockquote = false
+    var blockquoteLevel = 0
+    var isParagraph = false
 
-    // blockquote
-    if ((cap = this.rules.blockquote.exec(src))) {
-      src = src.substring(cap[0].length)
+    var isList = false
+    var orderListLevel = -1
+    var unorderListLevel = -1
 
-      this.tokens.push({
-        type: 'blockquote_start'
-      })
+    //
+    for (let it of this.list) {
+      // 空行
+      if (!it) {
+        // 如果是在代码中, 直接拼接, 并加上换行
+        if (isCodeBlock) {
+          html += it + '\n'
+        } else {
+          emptyLineLength++
 
-      cap = cap[0].replace(/^ *> ?/gm, '')
+          // 引用结束
+          if (isBlockquote) {
+            isBlockquote = false
+            if (emptyLineLength > 0) {
+              emptyLineLength = 0
+              while (blockquoteLevel > 0) {
+                blockquoteLevel--
+                html += '</blockquote>'
+              }
+            }
+            continue
+          }
 
-      // Pass `top` to keep the current
-      // "toplevel" state. This is exactly
-      // how markdown.pl works.
-      this.token(cap, top, true)
+          if (isList) {
+            while (orderListLevel > -1 || unorderListLevel > -1) {
+              if (orderListLevel > unorderListLevel) {
+                html += '</ol>'
+                orderListLevel--
+              } else {
+                html += '</ul>'
+                unorderListLevel--
+              }
+            }
+            isList = false
+            continue
+          }
 
-      this.tokens.push({
-        type: 'blockquote_end'
-      })
-
-      continue
-    }
-
-    // mark
-    if ((cap = this.rules.mark.exec(src))) {
-      src = src.substring(cap[0].length)
-
-      this.tokens.push({
-        type: 'mark',
-        mark: cap[1] === '!',
-        text: cap[2]
-      })
-
-      continue
-    }
-
-    if ((cap = this.rules.task.exec(src))) {
-      src = src.substring(cap[0].length)
-
-      this.tokens.push({
-        type: 'task',
-        mark: cap[1] === 'x',
-        text: cap[2]
-      })
-
-      continue
-    }
-
-    // list
-    if ((cap = this.rules.list.exec(src))) {
-      src = src.substring(cap[0].length)
-      bull = cap[2]
-
-      this.tokens.push({
-        type: 'list_start',
-        ordered: bull.length > 1
-      })
-
-      // Get each top-level item.
-      cap = cap[0].match(this.rules.item)
-
-      next = false
-      l = cap.length
-      i = 0
-
-      for (; i < l; i++) {
-        item = cap[i]
-
-        // Remove the list item's bullet
-        // so it is seen as the next token.
-        space = item.length
-        item = item.replace(/^ *([*+-]|\d+\.) +/, '')
-
-        // Outdent whatever the
-        // list item contains. Hacky.
-        if (~item.indexOf('\n ')) {
-          space -= item.length
-          item = !this.options.pedantic
-            ? item.replace(new RegExp('^ {1,' + space + '}', 'gm'), '')
-            : item.replace(/^ {1,4}/gm, '')
-        }
-
-        // Determine whether the next list item belongs here.
-        // Backpedal if it does not belong in this list.
-        if (this.options.smartLists && i !== l - 1) {
-          b = block.bullet.exec(cap[i + 1])[0]
-          if (bull !== b && !(bull.length > 1 && b.length > 1)) {
-            src = cap.slice(i + 1).join('\n') + src
-            i = l - 1
+          //
+          if (isParagraph) {
+            isParagraph = false
+            html += '</p>'
           }
         }
-
-        // Determine whether item is loose or not.
-        // Use: /(^|\n)(?! )[^\n]+\n\n(?!\s*$)/
-        // for discount behavior.
-        loose = next || /\n\n(?!\s*$)/.test(item)
-        if (i !== l - 1) {
-          next = item.charAt(item.length - 1) === '\n'
-          if (!loose) loose = next
-        }
-
-        this.tokens.push({
-          type: loose ? 'loose_item_start' : 'list_item_start'
-        })
-
-        // Recurse.
-        this.token(item, false, bq)
-
-        this.tokens.push({
-          type: 'list_item_end'
-        })
-      }
-
-      this.tokens.push({
-        type: 'list_end'
-      })
-
-      continue
-    }
-
-    // html
-    if ((cap = this.rules.html.exec(src))) {
-      src = src.substring(cap[0].length)
-      this.tokens.push({
-        type: this.options.sanitize ? 'paragraph' : 'html',
-        pre:
-          !this.options.sanitizer &&
-          (cap[1] === 'pre' || cap[1] === 'script' || cap[1] === 'style'),
-        text: cap[0]
-      })
-      continue
-    }
-
-    // def
-    if (!bq && top && (cap = this.rules.def.exec(src))) {
-      src = src.substring(cap[0].length)
-      this.tokens.links[cap[1].toLowerCase()] = {
-        href: cap[2],
-        title: cap[3]
-      }
-      continue
-    }
-
-    // table (gfm)
-    if (top && (cap = this.rules.table.exec(src))) {
-      src = src.substring(cap[0].length)
-
-      item = {
-        type: 'table',
-        header: cap[1].replace(/^ *| *\| *$/g, '').split(/ *\| */),
-        align: cap[2].replace(/^ *|\| *$/g, '').split(/ *\| */),
-        cells: cap[3].replace(/(?: *\| *)?\n$/, '').split('\n')
-      }
-
-      for (i = 0; i < item.align.length; i++) {
-        if (/^ *-+: *$/.test(item.align[i])) {
-          item.align[i] = 'right'
-        } else if (/^ *:-+: *$/.test(item.align[i])) {
-          item.align[i] = 'center'
-        } else if (/^ *:-+ *$/.test(item.align[i])) {
-          item.align[i] = 'left'
+      } else {
+        // wc-code标签直接拼接
+        if (~it.indexOf('wc-code')) {
+          html += it
+          isCodeBlock = !isCodeBlock
         } else {
-          item.align[i] = null
-        }
-      }
-
-      for (i = 0; i < item.cells.length; i++) {
-        item.cells[i] = item.cells[i]
-          .replace(/^ *\| *| *\| *$/g, '')
-          .split(/ *\| */)
-      }
-
-      this.tokens.push(item)
-
-      continue
-    }
-
-    // top-level paragraph
-    if (top && (cap = this.rules.paragraph.exec(src))) {
-      src = src.substring(cap[0].length)
-      this.tokens.push({
-        type: 'paragraph',
-        text:
-          cap[1].charAt(cap[1].length - 1) === '\n'
-            ? cap[1].slice(0, -1)
-            : cap[1]
-      })
-      continue
-    }
-
-    // text
-    if ((cap = this.rules.text.exec(src))) {
-      // Top-level should never reach here.
-      src = src.substring(cap[0].length)
-      this.tokens.push({
-        type: 'text',
-        text: cap[0]
-      })
-      continue
-    }
-
-    if (src) {
-      throw new Error('Infinite loop on byte: ' + src.charCodeAt(0))
-    }
-  }
-
-  return this.tokens
-}
-
-/**
- * Inline-Level Grammar
- */
-
-var inline = {
-  escape: /^\\([\\`*{}\[\]()#+\-.!_>])/,
-  autolink: /^<([^ >]+(@|:\/)[^ >]+)>/,
-  url: noop,
-  tag: /^<!--[\s\S]*?-->|^<\/?\w+(?:"[^"]*"|'[^']*'|[^'">])*?>/,
-  link: /^!?\[(inside)\]\(href\)/,
-  reflink: /^!?\[(inside)\]\s*\[([^\]]*)\]/,
-  nolink: /^!?\[((?:\[[^\]]*\]|[^\[\]])*)\]/,
-  strong: /^__([\s\S]+?)__(?!_)|^\*\*([\s\S]+?)\*\*(?!\*)/,
-  em: /^\b_((?:[^_]|__)+?)_\b|^\*((?:\*\*|[\s\S])+?)\*(?!\*)/,
-  code: /^(`+)\s*([\s\S]*?[^`])\s*\1(?!`)/,
-  br: /^ {2,}\n(?!\s*$)/,
-  del: noop,
-  text: /^[\s\S]+?(?=[\\<!\[_*`]| {2,}\n|$)/
-}
-
-inline._inside = /(?:\[[^\]]*\]|[^\[\]]|\](?=[^\[]*\]))*/
-inline._href = /\s*<?([\s\S]*?)>?(?:\s+['"]([\s\S]*?)['"])?\s*/
-
-inline.link = replace(inline.link)
-  .replace('inside', inline._inside)
-  .replace('href', inline._href)
-  .done()
-
-inline.reflink = replace(inline.reflink)
-  .replace('inside', inline._inside)
-  .done()
-
-/**
- * Normal Inline Grammar
- */
-
-inline.normal = merge({}, inline)
-
-/**
- * Pedantic Inline Grammar
- */
-
-inline.pedantic = merge({}, inline.normal, {
-  strong: /^__(?=\S)([\s\S]*?\S)__(?!_)|^\*\*(?=\S)([\s\S]*?\S)\*\*(?!\*)/,
-  em: /^_(?=\S)([\s\S]*?\S)_(?!_)|^\*(?=\S)([\s\S]*?\S)\*(?!\*)/
-})
-
-/**
- * GFM Inline Grammar
- */
-
-inline.gfm = merge({}, inline.normal, {
-  escape: replace(inline.escape)
-    .replace('])', '~|])')
-    .done(),
-  url: /^(https?:\/\/[^\s<]+[^<.,:;"')\]\s])/,
-  del: /^~~(?=\S)([\s\S]*?\S)~~/,
-  text: replace(inline.text)
-    .replace(']|', '~]|')
-    .replace('|', '|https?://|')
-    .done()
-})
-
-/**
- * GFM + Line Breaks Inline Grammar
- */
-
-inline.breaks = merge({}, inline.gfm, {
-  br: replace(inline.br)
-    .replace('{2,}', '*')
-    .done(),
-  text: replace(inline.gfm.text)
-    .replace('{2,}', '*')
-    .done()
-})
-
-/**
- * Inline Lexer & Compiler
- */
-
-function InlineLexer(links, options) {
-  this.options = options || marked.defaults
-  this.links = links
-  this.rules = inline.normal
-  this.renderer = this.options.renderer || new Renderer()
-  this.renderer.options = this.options
-
-  if (!this.links) {
-    throw new Error('Tokens array requires a `links` property.')
-  }
-
-  if (this.options.gfm) {
-    if (this.options.breaks) {
-      this.rules = inline.breaks
-    } else {
-      this.rules = inline.gfm
-    }
-  } else if (this.options.pedantic) {
-    this.rules = inline.pedantic
-  }
-}
-
-/**
- * Expose Inline Rules
- */
-
-InlineLexer.rules = inline
-
-/**
- * Static Lexing/Compiling Method
- */
-
-InlineLexer.output = function(src, links, options) {
-  var inline = new InlineLexer(links, options)
-  return inline.output(src)
-}
-
-/**
- * Lexing/Compiling
- */
-
-InlineLexer.prototype.output = function(src) {
-  var out = '',
-    link,
-    text,
-    href,
-    cap
-
-  while (src) {
-    // escape
-    if ((cap = this.rules.escape.exec(src))) {
-      src = src.substring(cap[0].length)
-      out += cap[1]
-      continue
-    }
-
-    // autolink
-    if ((cap = this.rules.autolink.exec(src))) {
-      src = src.substring(cap[0].length)
-      if (cap[2] === '@') {
-        text =
-          cap[1].charAt(6) === ':'
-            ? this.mangle(cap[1].substring(7))
-            : this.mangle(cap[1])
-        href = this.mangle('mailto:') + text
-      } else {
-        text = escape(cap[1])
-        href = text
-      }
-      out += this.renderer.link(href, null, text)
-      continue
-    }
-
-    // url (gfm)
-    if (!this.inLink && (cap = this.rules.url.exec(src))) {
-      src = src.substring(cap[0].length)
-      text = escape(cap[1])
-      href = text
-      out += this.renderer.link(href, null, text)
-      continue
-    }
-
-    // tag
-    if ((cap = this.rules.tag.exec(src))) {
-      if (!this.inLink && /^<a /i.test(cap[0])) {
-        this.inLink = true
-      } else if (this.inLink && /^<\/a>/i.test(cap[0])) {
-        this.inLink = false
-      }
-      src = src.substring(cap[0].length)
-      out += this.options.sanitize
-        ? this.options.sanitizer
-          ? this.options.sanitizer(cap[0])
-          : escape(cap[0])
-        : cap[0]
-      continue
-    }
-
-    // link
-    if ((cap = this.rules.link.exec(src))) {
-      src = src.substring(cap[0].length)
-      this.inLink = true
-      out += this.outputLink(cap, {
-        href: cap[2],
-        title: cap[3]
-      })
-      this.inLink = false
-      continue
-    }
-
-    // reflink, nolink
-    if (
-      (cap = this.rules.reflink.exec(src)) ||
-      (cap = this.rules.nolink.exec(src))
-    ) {
-      src = src.substring(cap[0].length)
-      link = (cap[2] || cap[1]).replace(/\s+/g, ' ')
-      link = this.links[link.toLowerCase()]
-      if (!link || !link.href) {
-        out += cap[0].charAt(0)
-        src = cap[0].substring(1) + src
-        continue
-      }
-      this.inLink = true
-      out += this.outputLink(cap, link)
-      this.inLink = false
-      continue
-    }
-
-    // strong
-    if ((cap = this.rules.strong.exec(src))) {
-      src = src.substring(cap[0].length)
-      out += this.renderer.strong(this.output(cap[2] || cap[1]))
-      continue
-    }
-
-    // em
-    if ((cap = this.rules.em.exec(src))) {
-      src = src.substring(cap[0].length)
-      out += this.renderer.em(this.output(cap[2] || cap[1]))
-      continue
-    }
-
-    // code
-    if ((cap = this.rules.code.exec(src))) {
-      src = src.substring(cap[0].length)
-      out += this.renderer.codespan(escape(cap[2], true))
-      continue
-    }
-
-    // br
-    if ((cap = this.rules.br.exec(src))) {
-      src = src.substring(cap[0].length)
-      if (!/<[\/]?([a-z0-9\-])+[^>]*>/.test(src)) {
-        out += this.renderer.br()
-      }
-      continue
-    }
-
-    // del (gfm)
-    if ((cap = this.rules.del.exec(src))) {
-      src = src.substring(cap[0].length)
-      out += this.renderer.del(this.output(cap[1]))
-      continue
-    }
-
-    // text
-    if ((cap = this.rules.text.exec(src))) {
-      src = src.substring(cap[0].length)
-      out += this.renderer.text(escape(this.smartypants(cap[0])))
-      continue
-    }
-
-    if (src) {
-      throw new Error('Infinite loop on byte: ' + src.charCodeAt(0))
-    }
-  }
-
-  return out
-}
-
-/**
- * Compile Link
- */
-
-InlineLexer.prototype.outputLink = function(cap, link) {
-  var href = escape(link.href),
-    title = link.title ? escape(link.title) : null
-
-  return cap[0].charAt(0) !== '!'
-    ? this.renderer.link(href, title, this.output(cap[1]))
-    : this.renderer.image(href, title, escape(cap[1]))
-}
-
-/**
- * Smartypants Transformations
- */
-
-InlineLexer.prototype.smartypants = function(text) {
-  if (!this.options.smartypants) return text
-  return (
-    text
-      // em-dashes
-      .replace(/---/g, '\u2014')
-      // en-dashes
-      .replace(/--/g, '\u2013')
-      // opening singles
-      .replace(/(^|[-\u2014/(\[{"\s])'/g, '$1\u2018')
-      // closing singles & apostrophes
-      .replace(/'/g, '\u2019')
-      // opening doubles
-      .replace(/(^|[-\u2014/(\[{\u2018\s])"/g, '$1\u201c')
-      // closing doubles
-      .replace(/"/g, '\u201d')
-      // ellipses
-      .replace(/\.{3}/g, '\u2026')
-  )
-}
-
-/**
- * Mangle Links
- */
-
-InlineLexer.prototype.mangle = function(text) {
-  if (!this.options.mangle) return text
-  var out = '',
-    l = text.length,
-    i = 0,
-    ch
-
-  for (; i < l; i++) {
-    ch = text.charCodeAt(i)
-    if (Math.random() > 0.5) {
-      ch = 'x' + ch.toString(16)
-    }
-    out += '&#' + ch + ';'
-  }
-
-  return out
-}
-
-/**
- * Renderer
- */
-
-function Renderer(options) {
-  this.options = options || {}
-}
-
-Renderer.prototype.code = function(code, lang, escaped) {
-  code = code
-    .replace(/&lt;script([^&]*?)&gt;/g, '<script$1>')
-    .replace(/&lt;\/script&gt;/g, '</script>')
-
-  //转义特殊字符
-  code = escape(code, true)
-  lang = escape(lang, true)
-
-  return '<wc-code lang="' + lang + '">' + code + '</wc-code>'
-}
-
-Renderer.prototype.blockquote = function(quote) {
-  return '<blockquote class="md-quote">\n' + quote + '</blockquote>\n'
-}
-Renderer.prototype.mark = function(mark, t) {
-  return `<section>
-    <mark class="${t ? 'md-warn' : 'md-mark'}">
-      <i class="do-icon-${t ? 'warn' : 'unmute'}"></i>
-      ${mark}
-    </mark>
-  </section>
-  `
-}
-
-Renderer.prototype.task = function(task, t) {
-  return `<section>
-    <label class="md-task ${t ? 'done' : ''}">
-      <span class="md-task__box">
-        ${t ? '<i class="do-icon-get"></i>' : ''}
-      </span>
-      <span class="md-task__text">${task}</span>
-    </label>
-  </section>
-  `
-}
-
-Renderer.prototype.html = function(html) {
-  html = html.replace(/<br>/g, '')
-  return html
-}
-
-Renderer.prototype.heading = function(text, level, raw) {
-  raw = text.replace(/<[^>]+>|<\/[^>]+>/g, '')
-  return `
-  <h${level} class="md-head" id="${raw}">
-    <span><a href="#${raw}" class="do-icon-link"></a>${text}</span>
-  </h${level}>
-  `
-}
-
-Renderer.prototype.hr = function() {
-  return '<hr>'
-}
-
-Renderer.prototype.list = function(body, ordered) {
-  var type = ordered ? 'ol' : 'ul'
-  return '<' + type + '>\n' + body + '</' + type + '>\n'
-}
-
-Renderer.prototype.listitem = function(text) {
-  return '<li>' + text + '</li>'
-}
-
-Renderer.prototype.paragraph = function(text) {
-  return '<p>' + text + '</p>'
-}
-
-Renderer.prototype.table = function(header, body) {
-  return (
-    '<table>' +
-    '<thead>' +
-    header +
-    '</thead>' +
-    '<tbody>' +
-    body +
-    '</tbody>' +
-    '</table>'
-  )
-}
-
-Renderer.prototype.tablerow = function(content) {
-  return '<tr>' + content + '</tr>'
-}
-
-Renderer.prototype.tablecell = function(content, flags) {
-  var type = flags.header ? 'th' : 'td'
-  var tag = flags.align
-    ? '<' + type + ' style="text-align:' + flags.align + '">'
-    : '<' + type + '>'
-  return tag + content + '</' + type + '>'
-}
-
-// span level renderer
-Renderer.prototype.strong = function(text) {
-  return '<strong>' + text + '</strong>'
-}
-
-Renderer.prototype.em = function(text) {
-  return '<em>' + text + '</em>'
-}
-
-Renderer.prototype.codespan = function(txt) {
-  txt = txt.replace(/&amp;/g, '&')
-  return '<code skip class="do-ui-inlinecode">' + txt + '</code>'
-}
-
-Renderer.prototype.br = function() {
-  return '<br>'
-}
-
-Renderer.prototype.del = function(text) {
-  return '<del>' + text + '</del>'
-}
-
-Renderer.prototype.link = function(href, attr, text) {
-  if (this.options.sanitize) {
-    try {
-      var prot = decodeURIComponent(unescape(href))
-        .replace(/[^\w:]/g, '')
-        .toLowerCase()
-    } catch (e) {
-      return ''
-    }
-    if (
-      prot.indexOf('javascript:') === 0 ||
-      prot.indexOf('vbscript:') === 0 ||
-      prot.indexOf('data:') === 0
-    ) {
-      return ''
-    }
-  }
-  var out = '<a href="' + href + '" '
-  if (attr) {
-    attr = attr.split(';').map(function(it) {
-      var tmp = it.split('=')
-      if (tmp.length > 1) {
-        return tmp[0] + '="' + tmp[1] + '"'
-      } else {
-        return 'title="' + tmp[0] + '"'
-      }
-    })
-    out += attr.join(' ')
-  }
-  out += '>' + text + '</a>'
-
-  return out
-}
-
-Renderer.prototype.image = function(href, title, text) {
-  var out = '<img src="' + href + '" alt="' + text + '"'
-  if (title) {
-    out += ' title="' + title + '"'
-  }
-  out += '>'
-  return out
-}
-
-Renderer.prototype.text = function(text) {
-  return text
-}
-
-/**
- * Parsing & Compiling
- */
-
-function Parser(options) {
-  this.tokens = []
-  this.token = null
-  this.options = options || marked.defaults
-  this.options.renderer = this.options.renderer || new Renderer()
-  this.renderer = this.options.renderer
-  this.renderer.options = this.options
-}
-
-/**
- * Static Parse Method
- */
-
-Parser.parse = function(src, options, renderer) {
-  var parser = new Parser(options, renderer)
-  return parser.parse(src)
-}
-
-/**
- * Parse Loop
- */
-
-Parser.prototype.parse = function(src) {
-  this.inline = new InlineLexer(src.links, this.options, this.renderer)
-  this.tokens = src.reverse()
-
-  var out = ''
-  while (this.next()) {
-    out += this.tok()
-  }
-
-  return out
-}
-
-/**
- * Next Token
- */
-
-Parser.prototype.next = function() {
-  return (this.token = this.tokens.pop())
-}
-
-/**
- * Preview Next Token
- */
-
-Parser.prototype.peek = function() {
-  return this.tokens[this.tokens.length - 1] || 0
-}
-
-/**
- * Parse Text Tokens
- */
-
-Parser.prototype.parseText = function() {
-  var body = this.token.text
-
-  while (this.peek().type === 'text') {
-    body += '\n' + this.next().text
-  }
-
-  return this.inline.output(body)
-}
-
-/**
- * Parse Current Token
- */
-
-Parser.prototype.tok = function() {
-  switch (this.token.type) {
-    case 'space': {
-      return ''
-    }
-    case 'hr': {
-      return this.renderer.hr()
-    }
-    case 'heading': {
-      return this.renderer.heading(
-        this.inline.output(this.token.text),
-        this.token.depth,
-        this.token.text
-      )
-    }
-    case 'code': {
-      return this.renderer.code(
-        this.token.text,
-        this.token.lang || 'other',
-        this.token.escaped
-      )
-    }
-    case 'table': {
-      var header = '',
-        body = '',
-        i,
-        row,
-        cell,
-        flags,
-        j
-
-      // header
-      cell = ''
-      for (i = 0; i < this.token.header.length; i++) {
-        flags = { header: true, align: this.token.align[i] }
-        cell += this.renderer.tablecell(
-          this.inline.output(this.token.header[i]),
-          { header: true, align: this.token.align[i] }
-        )
-      }
-      header += this.renderer.tablerow(cell)
-
-      for (i = 0; i < this.token.cells.length; i++) {
-        row = this.token.cells[i]
-
-        cell = ''
-        for (j = 0; j < row.length; j++) {
-          cell += this.renderer.tablecell(this.inline.output(row[j]), {
-            header: false,
-            align: this.token.align[j]
-          })
-        }
-
-        body += this.renderer.tablerow(cell)
-      }
-      return this.renderer.table(header, body)
-    }
-    case 'blockquote_start': {
-      var body = ''
-
-      while (this.next().type !== 'blockquote_end') {
-        body += this.tok()
-      }
-
-      return this.renderer.blockquote(body)
-    }
-    case 'mark': {
-      return this.renderer.mark(this.token.text, this.token.mark)
-    }
-    case 'task': {
-      return this.renderer.task(this.token.text, this.token.mark)
-    }
-    case 'list_start': {
-      var body = '',
-        ordered = this.token.ordered
-
-      while (this.next().type !== 'list_end') {
-        body += this.tok()
-      }
-
-      return this.renderer.list(body, ordered)
-    }
-    case 'list_item_start': {
-      var body = ''
-
-      while (this.next().type !== 'list_item_end') {
-        body += this.token.type === 'text' ? this.parseText() : this.tok()
-      }
-
-      return this.renderer.listitem(body)
-    }
-    case 'loose_item_start': {
-      var body = ''
-
-      while (this.next().type !== 'list_item_end') {
-        body += this.tok()
-      }
-
-      return this.renderer.listitem(body)
-    }
-    case 'html': {
-      var html =
-        !this.token.pre && !this.options.pedantic
-          ? this.inline.output(this.token.text)
-          : this.token.text
-      return this.renderer.html(html)
-    }
-    case 'paragraph': {
-      return this.renderer.paragraph(this.inline.output(this.token.text))
-    }
-    case 'text': {
-      return this.renderer.paragraph(this.parseText())
-    }
-  }
-}
-
-/**
- * Helpers
- */
-
-function escape(html, encode) {
-  return html
-    .replace(!encode ? /&(?!#?\w+;)/g : /&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;')
-}
-
-function unescape(html) {
-  // explicitly match decimal, hex, and named HTML entities
-  return html.replace(/&(#(?:\d+)|(?:#x[0-9A-Fa-f]+)|(?:\w+));?/g, function(
-    _,
-    n
-  ) {
-    n = n.toLowerCase()
-    if (n === 'colon') return ':'
-    if (n.charAt(0) === '#') {
-      return n.charAt(1) === 'x'
-        ? String.fromCharCode(parseInt(n.substring(2), 16))
-        : String.fromCharCode(+n.substring(1))
-    }
-    return ''
-  })
-}
-
-function noop() {}
-noop.exec = noop
-
-function merge(obj) {
-  var i = 1,
-    target,
-    key
-
-  for (; i < arguments.length; i++) {
-    target = arguments[i]
-    for (key in target) {
-      if (Object.prototype.hasOwnProperty.call(target, key)) {
-        obj[key] = target[key]
-      }
-    }
-  }
-
-  return obj
-}
-
-/**
- * Marked
- */
-
-function marked(src, opt, callback) {
-  if (callback || typeof opt === 'function') {
-    if (!callback) {
-      callback = opt
-      opt = null
-    }
-
-    opt = merge({}, marked.defaults, opt || {})
-
-    var highlight = opt.highlight,
-      tokens,
-      pending,
-      i = 0
-
-    try {
-      tokens = Lexer.lex(src, opt)
-    } catch (e) {
-      return callback(e)
-    }
-
-    pending = tokens.length
-
-    var done = function(err) {
-      if (err) {
-        opt.highlight = highlight
-        return callback(err)
-      }
-
-      var out
-
-      try {
-        out = Parser.parse(tokens, opt)
-      } catch (e) {
-        err = e
-      }
-
-      opt.highlight = highlight
-
-      return err ? callback(err) : callback(null, out)
-    }
-
-    if (!highlight || highlight.length < 3) {
-      return done()
-    }
-
-    delete opt.highlight
-
-    if (!pending) return done()
-
-    for (; i < tokens.length; i++) {
-      ;(function(token) {
-        if (token.type !== 'code') {
-          return --pending || done()
-        }
-        return highlight(token.text, token.lang, function(err, code) {
-          if (err) return done(err)
-          if (code == null || code === token.text) {
-            return --pending || done()
+          // 同上代码块的处理
+          if (isCodeBlock) {
+            html += it + '\n'
+            continue
           }
-          token.text = code
-          token.escaped = true
-          --pending || done()
-        })
-      })(tokens[i])
+
+          // 无属性标签
+          if (Helper.isHr(it)) {
+            html += Decoder.hr()
+            continue
+          }
+
+          // 优先处理一些常规样式
+          it = Decoder.inline(it)
+
+          // 标题只能是单行
+          var head = Decoder.head(it)
+          if (head) {
+            isParagraph = false
+            html += head
+            continue
+          }
+
+          // 引用
+          if (it.startsWith('>')) {
+            if (isBlockquote) {
+              html += '<br>'
+            }
+            html += it.replace(/^(>+) /, (p, m) => {
+              let len = m.length
+              let tmp = ''
+              let loop = len
+              // 若之前已经有一个未闭合的引用, 需要减去已有缩进级别, 避免产生新的引用标签
+              if (isBlockquote) {
+                loop = len - blockquoteLevel
+              } else {
+              }
+
+              while (loop > 0) {
+                loop--
+                tmp += '<blockquote class="md-quote">'
+              }
+
+              blockquoteLevel = len
+              return tmp
+            })
+
+            isParagraph = false
+            isBlockquote = true
+            continue
+          }
+
+          // 任务
+          let task = Decoder.task(it)
+          if (task) {
+            html += task
+            continue
+          }
+
+          // 列表
+          let listChecked = Helper.isList(it)
+          if (~listChecked) {
+            // 左侧空格长度
+            let tmp = Helper.ltrim(it)
+            let ltrim = it.length - tmp.length
+            let word = tmp.replace(LIST_REG, '').trim()
+            let level = Math.floor(ltrim / 2)
+            let tag = listChecked > 0 ? 'ol' : 'ul'
+
+            if (!isList) {
+              html += `<${tag}>`
+              if (listChecked === 1) {
+                orderListLevel = level
+              } else {
+                unorderListLevel = level
+              }
+              html += `<li>${word}</li>`
+            } else {
+              if (listChecked === 1) {
+                if (level > orderListLevel) {
+                  html = html.replace(/<\/li>$/, '')
+                  html += `<${tag}><li>${word}</li>`
+                } else if (level === orderListLevel) {
+                  html += `<li>${word}</li>`
+                } else {
+                  html += `</${tag}></li><li>${word}</li>`
+                }
+                orderListLevel = level
+              } else {
+                if (level > unorderListLevel) {
+                  html = html.replace(/<\/li>$/, '')
+                  html += `<${tag}><li>${word}</li>`
+                } else if (level === unorderListLevel) {
+                  html += `<li>${word}</li>`
+                } else {
+                  html += `</${tag}></li><li>${word}</li>`
+                }
+                unorderListLevel = level
+              }
+            }
+
+            isList = true
+            continue
+          }
+
+          // log('it => ', isParagraph, it)
+          if (isParagraph) {
+            html += `${it}<br>`
+          } else {
+            html += `<p>${it}<br>`
+          }
+          isParagraph = true
+        }
+      }
     }
-
-    return
-  }
-  try {
-    if (opt) opt = merge({}, marked.defaults, opt)
-    return Parser.parse(Lexer.lex(src, opt), opt)
-  } catch (e) {
-    e.message += '\nPlease report this to https://github.com/chjj/marked.'
-    if ((opt || marked.defaults).silent) {
-      return (
-        '<p>An error occured:</p><pre>' +
-        escape(e.message + '', true) +
-        '</pre>'
-      )
-    }
-    throw e
+    return html
   }
 }
 
-/**
- * Options
- */
-
-marked.options = marked.setOptions = function(opt) {
-  merge(marked.defaults, opt)
-  return marked
+export default function(str) {
+  return Tool.init(str).parse()
 }
-if (window.Anot) {
-  Anot.ui.marked = '1.0.0'
-}
-
-marked.defaults = {
-  gfm: true,
-  tables: true,
-  breaks: true,
-  pedantic: false,
-  sanitize: false,
-  sanitizer: null,
-  mangle: true,
-  smartLists: false,
-  silent: false,
-  highlight: null,
-  langPrefix: 'lang-',
-  smartypants: false,
-  renderer: new Renderer()
-}
-
-/**
- * Expose
- */
-
-marked.Parser = Parser
-marked.parser = Parser.parse
-
-marked.Renderer = Renderer
-
-marked.Lexer = Lexer
-marked.lexer = Lexer.lex
-
-marked.InlineLexer = InlineLexer
-marked.inlineLexer = InlineLexer.output
-
-marked.parse = marked
-
-marked.safe = function(txt) {
-  txt = txt
-    .trim()
-    .replace(/<script([^>]*?)>/g, '&lt;script$1&gt;')
-    .replace(/<\/script>/g, '&lt;/script&gt;')
-  return marked(txt)
-}
-
-export default marked
