@@ -23,7 +23,10 @@ em,
 del {
   color: nth($cgr, 2);
 }
-strong {
+strong,
+strong em,
+strong,
+del {
   color: nth($cd, 3);
 }
 a {

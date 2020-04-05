@@ -9,6 +9,22 @@ const HR_LIST = ['=', '-', '_', '*']
 const LIST_REG = /^(([\+\-\*])|(\d+\.))\s/
 const TODO_REG = /^\-\s\[(x|\s)\]\s/
 const ESCAPE_REG = /\\([-+*_`])/g
+
+const INLINE = {
+  strong: [
+    /__([^\s_])__(?!_)/g,
+    /\*\*([^\s*])\*\*(?!\*)/g,
+    /__([^\s][\s\S]*?[^\s])__(?!_)/g,
+    /\*\*([^\s][\s\S]*?[^\s])\*\*(?!\*)/g
+  ],
+  em: [
+    /_([^\s_])_(?!_)/g,
+    /\*([^\s*])\*(?!\*)/g,
+    /_([^\s][\s\S]*?[^\s])_(?!_)/g,
+    /\*([^\s][\s\S]*?[^\s])\*(?!\*)/g
+  ],
+  del: [/~~([^\~])~~(?!~)/g, /~~([^\s][\s\S]*?[^\s])~~(?!~)/g]
+}
 const log = console.log
 
 const Helper = {
@@ -53,10 +69,17 @@ const Decoder = {
   // 内联样式
   inline(str) {
     return str
-      .replace(/`(.*?[^\\])`/g, '<code class="inline">$1</code>')
-      .replace(/(__|\*\*)(.*?[^\\])\1/g, '<strong>$2</strong>')
-      .replace(/\b(_|\*)(.*?[^\\])\1\b/g, '<em>$2</em>')
-      .replace(/~~(.*?[^\\])~~/g, '<del>$1</del>')
+      .replace(/`([^`]*?[^`\\\s])`/g, '<code class="inline">$1</code>')
+      .replace(INLINE.strong[0], '<strong>$1</strong>')
+      .replace(INLINE.strong[1], '<strong>$1</strong>')
+      .replace(INLINE.strong[2], '<strong>$1</strong>')
+      .replace(INLINE.strong[3], '<strong>$1</strong>')
+      .replace(INLINE.em[0], '<em>$1</em>')
+      .replace(INLINE.em[1], '<em>$1</em>')
+      .replace(INLINE.em[2], '<em>$1</em>')
+      .replace(INLINE.em[3], '<em>$1</em>')
+      .replace(INLINE.del[0], '<del>$1</del>')
+      .replace(INLINE.del[1], '<del>$1</del>')
       .replace(/\!\[([^]*?)\]\(([^)]*?)\)/g, '<img src="$2" alt="$1">')
       .replace(/\[([^]*?)\]\(([^)]*?)\)/g, '<a href="$2">$1</a>')
       .replace(ESCAPE_REG, '$1') // 处理转义字符
