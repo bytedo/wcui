@@ -15,8 +15,8 @@ const VERSION = require('./package.json').version
 const BUILD_DATE = new Date().format()
 
 const BASE_SCSS = `
-$ct: #3fc2a7 #19b491 #16967a;
-$cg: #58d68d #2ecc71 #27ae60;
+$ct: #26a69a #009688 #00897b;
+$cg: #66bb6a #4caf50 #43a047;
 $cpp: #ac61ce #9b59b6 #8e44ad;
 $cb: #66b1ff #409eff #3a8ee6;
 $cr: #ff5061 #eb3b48 #ce3742;

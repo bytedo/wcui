@@ -138,8 +138,9 @@ const Decoder = {
 }
 
 class Tool {
-  constructor(list) {
+  constructor(list, links) {
     this.list = list
+    this.__LINKS__ = links
   }
 
   // 初始化字符串, 处理多余换行等
@@ -157,7 +158,6 @@ class Tool {
     var isCodeBlock = false // 是否代码块
     var isTable = false // 是否表格
     var emptyLineLength = 0 //连续空行的数量
-    var ins = null
 
     for (let it of lines) {
       let tmp = it.trim()
@@ -206,9 +206,7 @@ class Tool {
       }
     }
 
-    ins = new this(list)
-    ins.__LINKS__ = links
-    return ins
+    return new this(list, links)
   }
 
   parse() {
@@ -422,6 +420,8 @@ class Tool {
         isParagraph = true
       }
     }
+    delete this.list
+    delete this.__LINKS__
     return html
   }
 }
