@@ -9,6 +9,7 @@ const HR_LIST = ['=', '-', '_', '*']
 const LIST_REG = /^(([\+\-\*])|(\d+\.))\s/
 const TODO_REG = /^\-\s\[(x|\s)\]\s/
 const ESCAPE_REG = /\\([-+*_`])/g
+const QLINK_REG = /^\[(\d+)\]: ([^\s]+)\s*?/
 
 const INLINE = {
   strong: [
@@ -23,7 +24,8 @@ const INLINE = {
     /_([^\s][\s\S]*?[^\s])_(?!_)/g,
     /\*([^\s][\s\S]*?[^\s])\*(?!\*)/g
   ],
-  del: [/~~([^\~])~~(?!~)/g, /~~([^\s][\s\S]*?[^\s])~~(?!~)/g]
+  del: [/~~([^\~])~~(?!~)/g, /~~([^\s][\s\S]*?[^\s])~~(?!~)/g],
+  qlink: /\[(.*?)\]\[(\d*?)\]/g
 }
 const log = console.log
 
@@ -62,6 +64,15 @@ const Helper = {
       return str.trimStart()
     }
     return str.replace(/^\s+/, '')
+  },
+  isQLink(str) {
+    if (QLINK_REG.test(str)) {
+      return RegExp.$2
+    }
+    return false
+  },
+  isTable(str) {
+    return /^\|.+?\|$/.test(str)
   }
 }
 
@@ -82,6 +93,9 @@ const Decoder = {
       .replace(INLINE.del[1], '<del>$1</del>')
       .replace(/\!\[([^]*?)\]\(([^)]*?)\)/g, '<img src="$2" alt="$1">')
       .replace(/\[([^]*?)\]\(([^)]*?)\)/g, '<a href="$2">$1</a>')
+      .replace(INLINE.qlink, (m, s, n) => {
+        return `<a href="${this.__LINKS__[n - 1]}">${s}</a>`
+      })
       .replace(ESCAPE_REG, '$1') // 处理转义字符
   },
   // 分割线
@@ -127,6 +141,7 @@ class Tool {
   constructor(list) {
     this.list = list
   }
+
   // 初始化字符串, 处理多余换行等
   static init(str) {
     // 去掉\r, 将\t转为空格(2个)
@@ -135,21 +150,20 @@ class Tool {
       .replace(/\t/g, '  ')
       .replace(/\u00a0/g, ' ')
       .replace(/\u2424/g, '\n')
+
+    var links = []
     var list = []
     var lines = str.split('\n')
     var isCodeBlock = false // 是否代码块
+    var isTable = false // 是否表格
     var emptyLineLength = 0 //连续空行的数量
+    var ins = null
 
     for (let it of lines) {
       let tmp = it.trim()
-      // 空行
-      if (!tmp) {
-        if (list.length === 0 || (!isCodeBlock && emptyLineLength > 0)) {
-          continue
-        }
-        emptyLineLength++
-        list.push(tmp)
-      } else {
+
+      // 非空行
+      if (tmp) {
         emptyLineLength = 0
         if (tmp.startsWith('```')) {
           if (isCodeBlock) {
@@ -158,13 +172,43 @@ class Tool {
             list.push(tmp.replace(/^```([\w\#\-]*?)$/, '<wc-code lang="$1">'))
           }
           isCodeBlock = !isCodeBlock
+        } else if (Helper.isTable(tmp) && !isTable) {
+          var thead = tmp.split('|')
+          // 去头去尾
+          thead.shift()
+          thead.pop()
+          list.push(
+            `<table><thead><tr>${thead
+              .map(_ => `<th>${_}</th>`)
+              .join('')}</tr></thead><tbody>`
+          )
+          isTable = true
         } else {
-          list.push(it)
+          var isQlink = Helper.isQLink(it)
+
+          if (isQlink) {
+            links.push(isQlink)
+          } else {
+            list.push(it)
+          }
         }
+      } else {
+        if (isTable) {
+          isTable = false
+          list.push('</tbody></table>')
+          continue
+        }
+        if (list.length === 0 || (!isCodeBlock && emptyLineLength > 0)) {
+          continue
+        }
+        emptyLineLength++
+        list.push(tmp)
       }
     }
 
-    return new this(list)
+    ins = new this(list)
+    ins.__LINKS__ = links
+    return ins
   }
 
   parse() {
@@ -172,6 +216,8 @@ class Tool {
     var isCodeBlock = false // 是否代码块
     var emptyLineLength = 0 //连续空行的数量
     var isBlockquote = false
+    var isTable = false
+    var tableAlign = null
     var blockquoteLevel = 0
     var isParagraph = false
 
@@ -223,124 +269,157 @@ class Tool {
           }
         }
       } else {
+        if (~it.indexOf('<table>') || ~it.indexOf('</table>')) {
+          html += it
+          isTable = !isTable
+          tableAlign = true
+          continue
+        }
+
+        if (isTable) {
+          var tmp = it.split('|').map(_ => _.trim())
+          tmp.shift()
+          tmp.pop()
+
+          // 表格分割行, 配置对齐方式的
+          if (tableAlign === true) {
+            tableAlign = tmp.map(a => {
+              a = a.split(/\-+/)
+              if (a[0] === ':' && a[1] === ':') {
+                return 'align="center"'
+              }
+              if (a[1] === ':') {
+                return 'align="right"'
+              }
+              return ''
+            })
+            continue
+          }
+          html += `<tr>${tmp
+            .map((_, i) => `<td ${tableAlign[i]}>${_}</td>`)
+            .join('')}</tr>`
+          continue
+        }
+
         // wc-code标签直接拼接
         if (~it.indexOf('wc-code')) {
           html += it
           isCodeBlock = !isCodeBlock
-        } else {
-          // 同上代码块的处理
-          if (isCodeBlock) {
-            html += it + '\n'
-            continue
-          }
-
-          // 无属性标签
-          if (Helper.isHr(it)) {
-            html += Decoder.hr()
-            continue
-          }
-
-          // 优先处理一些常规样式
-          it = Decoder.inline(it)
-
-          // 标题只能是单行
-          var head = Decoder.head(it)
-          if (head) {
-            isParagraph = false
-            html += head
-            continue
-          }
-
-          // 引用
-          if (it.startsWith('>')) {
-            if (isBlockquote) {
-              html += '<br>'
-            }
-            html += it.replace(/^(>+) /, (p, m) => {
-              let len = m.length
-              let tmp = ''
-              let loop = len
-              // 若之前已经有一个未闭合的引用, 需要减去已有缩进级别, 避免产生新的引用标签
-              if (isBlockquote) {
-                loop = len - blockquoteLevel
-              } else {
-              }
-
-              while (loop > 0) {
-                loop--
-                tmp += '<blockquote class="md-quote">'
-              }
-
-              blockquoteLevel = len
-              return tmp
-            })
-
-            isParagraph = false
-            isBlockquote = true
-            continue
-          }
-
-          // 任务
-          let task = Decoder.task(it)
-          if (task) {
-            html += task
-            continue
-          }
-
-          // 列表
-          let listChecked = Helper.isList(it)
-          if (~listChecked) {
-            // 左侧空格长度
-            let tmp = Helper.ltrim(it)
-            let ltrim = it.length - tmp.length
-            let word = tmp.replace(LIST_REG, '').trim()
-            let level = Math.floor(ltrim / 2)
-            let tag = listChecked > 0 ? 'ol' : 'ul'
-
-            if (!isList) {
-              html += `<${tag}>`
-              if (listChecked === 1) {
-                orderListLevel = level
-              } else {
-                unorderListLevel = level
-              }
-              html += `<li>${word}</li>`
-            } else {
-              if (listChecked === 1) {
-                if (level > orderListLevel) {
-                  html = html.replace(/<\/li>$/, '')
-                  html += `<${tag}><li>${word}</li>`
-                } else if (level === orderListLevel) {
-                  html += `<li>${word}</li>`
-                } else {
-                  html += `</${tag}></li><li>${word}</li>`
-                }
-                orderListLevel = level
-              } else {
-                if (level > unorderListLevel) {
-                  html = html.replace(/<\/li>$/, '')
-                  html += `<${tag}><li>${word}</li>`
-                } else if (level === unorderListLevel) {
-                  html += `<li>${word}</li>`
-                } else {
-                  html += `</${tag}></li><li>${word}</li>`
-                }
-                unorderListLevel = level
-              }
-            }
-
-            isList = true
-            continue
-          }
-
-          // log('it => ', isParagraph, it)
-          if (isParagraph) {
-            html += `${it}<br>`
-          } else {
-            html += `<p>${it}<br>`
-          }
-          isParagraph = true
+          continue
         }
+
+        // 同上代码块的处理
+        if (isCodeBlock) {
+          html += it + '\n'
+          continue
+        }
+
+        // 无属性标签
+        if (Helper.isHr(it)) {
+          html += Decoder.hr()
+          continue
+        }
+
+        // 优先处理一些常规样式
+        it = Decoder.inline.call(this, it)
+
+        // 标题只能是单行
+        var head = Decoder.head(it)
+        if (head) {
+          isParagraph = false
+          html += head
+          continue
+        }
+
+        // 引用
+        if (it.startsWith('>')) {
+          if (isBlockquote) {
+            html += '<br>'
+          }
+          html += it.replace(/^(>+) /, (p, m) => {
+            let len = m.length
+            let tmp = ''
+            let loop = len
+            // 若之前已经有一个未闭合的引用, 需要减去已有缩进级别, 避免产生新的引用标签
+            if (isBlockquote) {
+              loop = len - blockquoteLevel
+            } else {
+            }
+
+            while (loop > 0) {
+              loop--
+              tmp += '<blockquote class="md-quote">'
+            }
+
+            blockquoteLevel = len
+            return tmp
+          })
+
+          isParagraph = false
+          isBlockquote = true
+          continue
+        }
+
+        // 任务
+        let task = Decoder.task(it)
+        if (task) {
+          html += task
+          continue
+        }
+
+        // 列表
+        let listChecked = Helper.isList(it)
+        if (~listChecked) {
+          // 左侧空格长度
+          let tmp = Helper.ltrim(it)
+          let ltrim = it.length - tmp.length
+          let word = tmp.replace(LIST_REG, '').trim()
+          let level = Math.floor(ltrim / 2)
+          let tag = listChecked > 0 ? 'ol' : 'ul'
+
+          if (!isList) {
+            html += `<${tag}>`
+            if (listChecked === 1) {
+              orderListLevel = level
+            } else {
+              unorderListLevel = level
+            }
+            html += `<li>${word}</li>`
+          } else {
+            if (listChecked === 1) {
+              if (level > orderListLevel) {
+                html = html.replace(/<\/li>$/, '')
+                html += `<${tag}><li>${word}</li>`
+              } else if (level === orderListLevel) {
+                html += `<li>${word}</li>`
+              } else {
+                html += `</${tag}></li><li>${word}</li>`
+              }
+              orderListLevel = level
+            } else {
+              if (level > unorderListLevel) {
+                html = html.replace(/<\/li>$/, '')
+                html += `<${tag}><li>${word}</li>`
+              } else if (level === unorderListLevel) {
+                html += `<li>${word}</li>`
+              } else {
+                html += `</${tag}></li><li>${word}</li>`
+              }
+              unorderListLevel = level
+            }
+          }
+
+          isList = true
+          continue
+        }
+
+        // log('it => ', isParagraph, it)
+        if (isParagraph) {
+          html += `${it}<br>`
+        } else {
+          html += `<p>${it}<br>`
+        }
+        isParagraph = true
       }
     }
     return html
