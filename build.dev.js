@@ -15,14 +15,14 @@ const VERSION = require('./package.json').version
 const BUILD_DATE = new Date().format()
 
 const BASE_SCSS = `
-$ct: #26a69a #009688 #00897b;
-$cg: #66bb6a #4caf50 #43a047;
-$cpp: #ac61ce #9b59b6 #8e44ad;
-$cb: #66b1ff #409eff #3a8ee6;
+$ct: #4db6ac #26a69a #009688;
+$cg: #81c784 #66bb6a #4caf50;
+$cpp: #9575cd #9575cd #673ab7;
+$cb: #64b5f6 #42a5f5 #2196f3;
 $cr: #ff5061 #eb3b48 #ce3742;
 $co: #ffb618 #f39c12 #e67e22;
 $cp: #f3f5fb #e8ebf4 #dae1e9;
-$cgr: #aabac3 #90a3ae #7e909a;
+$cgr: #bdbdbd #bdbdbd #757575;
 $cd: #62778d #526273 #425064;
 
 @mixin ts($c: all, $t: .1s, $m: ease-in-out){
