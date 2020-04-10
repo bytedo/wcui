@@ -107,6 +107,7 @@ const IS_FF = !!window.sidebar
 /*  */
 export default class Scroll {
   props = {
+    disabled: false,
     axis: 'xy' // 滚动方向, 默认x轴和y轴都可以滚动
   }
   __init__() {
@@ -154,6 +155,25 @@ export default class Scroll {
     return this.__BOX__.scrollHeight
   }
 
+  get disabled() {
+    return this.props.disabled
+  }
+
+  set disabled(val) {
+    var type = typeof val
+
+    if (val === this.props.disabled) {
+      return
+    }
+    if ((type === 'boolean' && val) || type !== 'boolean') {
+      this.props.disabled = true
+      this.setAttribute('disabled', '')
+    } else {
+      this.props.disabled = false
+      this.removeAttribute('disabled')
+    }
+  }
+
   _fetchScrollX(moveX) {
     var { sw, ow, xw } = this.props
 
@@ -184,6 +204,10 @@ export default class Scroll {
   mounted() {
     // 初始化滚动条的位置和长度
     this._initFn = $.bind(this.__BOX__, 'mouseenter', ev => {
+      // 禁用状态, 不允许滚动
+      if (this.disabled) {
+        return
+      }
       var ow = this.__BOX__.offsetWidth
       var sw = this.__BOX__.scrollWidth
       var oh = this.__BOX__.offsetHeight
@@ -219,6 +243,10 @@ export default class Scroll {
 
     // 鼠标滚动事件
     this._wheelFn = $.catch(this.__BOX__, 'wheel', ev => {
+      // 禁用状态, 不允许滚动
+      if (this.disabled) {
+        return
+      }
       var { sh, oh, yh, sw, ow, xw } = this.props
 
       // x轴 y轴 都为0时, 不作任何处理
@@ -246,6 +274,8 @@ export default class Scroll {
           deltaY = ev.deltaY / (delta / 120)
         }
       }
+
+      //
       if (this.props.axis !== 'x') {
         this.__BOX__.scrollTop += deltaY
 
@@ -301,6 +331,10 @@ export default class Scroll {
       if (!this.props.thumbY) {
         this.props.thumbY = 0
       }
+      // 禁用状态, 不允许滚动
+      if (this.disabled) {
+        return
+      }
       $.bind(document, 'mousemove', mousemoveFn)
       $.bind(document, 'mouseup', mouseupFn)
     })
@@ -309,6 +343,10 @@ export default class Scroll {
       startX = ev.pageX
       if (!this.props.thumbX) {
         this.props.thumbX = 0
+      }
+      // 禁用状态, 不允许滚动
+      if (this.disabled) {
+        return
       }
       $.bind(document, 'mousemove', mousemoveFn)
       $.bind(document, 'mouseup', mouseupFn)
@@ -332,6 +370,9 @@ export default class Scroll {
     switch (name) {
       case 'axis':
         this.props.axis = val
+        break
+      case 'disabled':
+        this[name] = true
         break
     }
   }
