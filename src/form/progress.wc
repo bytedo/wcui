@@ -92,7 +92,7 @@ export default class Progress {
 
   watch() {
     switch (name) {
-      case max:
+      case 'max':
         var max = +val
         if (max !== max || max < 1) {
           max = 1
