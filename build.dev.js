@@ -21,7 +21,7 @@ $cpp: #9575cd #9575cd #673ab7;
 $cb: #64b5f6 #42a5f5 #2196f3;
 $cr: #ff5061 #eb3b48 #ce3742;
 $co: #ffb618 #f39c12 #e67e22;
-$cp: #f3f5fb #e8ebf4 #dae1e9;
+$cp: #f2f5fc #e8ebf4 #dae1e9;
 $cgr: #bdbdbd #bdbdbd #757575;
 $cd: #62778d #526273 #425064;
 
