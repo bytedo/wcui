@@ -255,7 +255,6 @@ code.inline {
 import $ from '../utils'
 import '../code/index'
 
-import core from './backup'
 import markd from './core'
 
 export default class Markd {
@@ -272,7 +271,6 @@ export default class Markd {
   }
 
   mounted() {
-    // this.__BOX__.innerHTML = core.safe(this.textContent)
     this.__BOX__.innerHTML = markd(this.textContent)
     this.textContent = ''
 
