@@ -7,7 +7,6 @@
 
 'use strict'
 //储存版本信息
-Anot.ui.router = '1.0.0'
 
 //判定A标签的target属性是否指向自身
 //thanks https://github.com/quirkey/sammy/blob/master/lib/sammy.js#L219
