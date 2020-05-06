@@ -45,6 +45,10 @@ $cd: #62778d #526273 #425064;
 ::after{box-sizing:border-box;}
 `
 
+function parseName(str) {
+  return str.replace(/[A-Z]/g, m => `-${m.toLowerCase()}`).replace(/^\-/, '')
+}
+
 function fixImport(str) {
   return str
     .replace(/import '([\w-/_.]*)'/g, 'import "$1.js"')
@@ -149,8 +153,8 @@ function mkWCFile({ style, html, js }) {
 
 ${res.code}
 
-if(!customElements.get('wc-${name.toLowerCase()}')){
-  customElements.define('wc-${name.toLowerCase()}', ${name})
+if(!customElements.get('wc-${parseName(name)}')){
+  customElements.define('wc-${parseName(name)}', ${name})
 }
 `
 }

@@ -1,0 +1,98 @@
+<template>
+  <div class="table"></div>
+</template>
+
+<style lang="scss">
+.table {
+  display: flex;
+
+  li {
+    display: flex;
+  }
+  section {
+    margin: 0 2px;
+  }
+}
+ul,
+li {
+  list-style: none;
+}
+</style>
+
+<script>
+// import './item'
+
+export default class Table {
+  props = {
+    list: null
+  }
+
+  __init__() {
+    /* render */
+    this.__OUTER__ = this.root.children[1]
+  }
+
+  __updateTable__() {
+    if (this._clear) {
+      delete this._clear
+      return
+    }
+    log('-----------')
+    var { list } = this.props
+    var items = Array.from(this.children)
+      .filter(it => it.tagName === 'WC-TABLE-ITEM')
+      .map(it => {
+        return {
+          label: it.getAttribute('label'),
+          prop: it.getAttribute('prop')
+        }
+      })
+    this._clear = true
+    this.innerText = ''
+    if (list) {
+      this.__OUTER__.innerHTML =
+        '<ul>' +
+        list
+          .map((it, i) => {
+            return (
+              '<li>' +
+              items
+                .map(_ => {
+                  return `<section>${it[_.prop]}</section>`
+                })
+                .join('') +
+              '</li>'
+            )
+          })
+          .join('') +
+        '</ul>'
+    }
+  }
+
+  mounted() {
+    this.__observer = new MutationObserver(_ => this.__updateTable__())
+    this.__observer.observe(this, {
+      childList: true,
+      subtree: true,
+      characterData: true
+    })
+  }
+
+  watch() {
+    switch (name) {
+      case 'list':
+        if (val) {
+          log('===========')
+          try {
+            this.props.list = JSON.parse(val)
+          } catch (err) {}
+          this.removeAttribute('options')
+        }
+        break
+
+      default:
+        break
+    }
+  }
+}
+</script>

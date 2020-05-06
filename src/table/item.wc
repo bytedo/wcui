@@ -1,0 +1,21 @@
+<template>
+  <div><slot /></div>
+</template>
+
+<style lang="scss">
+div {
+  color: #f30;
+}
+</style>
+
+<script>
+export default class TableItem {
+  props = {
+    foo: ''
+  }
+
+  __init__() {
+    /* render */
+  }
+}
+</script>
