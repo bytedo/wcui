@@ -9,6 +9,7 @@
   align-items: center;
   min-height: 36px;
   border-right: 1px solid nth($cp, 3);
+  border-bottom: 1px solid nth($cp, 3);
 }
 :host([flex='2']) {
   flex: 2;
