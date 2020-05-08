@@ -1,0 +1,28 @@
+<template>
+  <slot />
+</template>
+
+<style lang="scss">
+:host {
+  // flex: 1;
+  display: flex;
+  width: auto;
+  border-bottom: 1px solid nth($cp, 3);
+  color: inherit;
+}
+:host(:hover) {
+  background-color: #fbfbfb;
+}
+</style>
+
+<script>
+export default class TableTr {
+  props = {
+    foo: ''
+  }
+
+  __init__() {
+    /* render */
+  }
+}
+</script>

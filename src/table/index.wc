@@ -1,7 +1,7 @@
 <template>
   <div class="table">
     <ul class="thead"></ul>
-    <ul class="tbody"></ul>
+    <wc-scroll class="tbody"><slot /></wc-scroll>
     <ul class="tfoot"></ul>
   </div>
 </template>
@@ -10,7 +10,6 @@
 :host {
   display: flex;
   width: 100%;
-  height: 100%;
   color: nth($cd, 1);
 }
 ul,
@@ -23,16 +22,12 @@ li {
   flex-direction: column;
   width: 100%;
   height: 100%;
-  border-top: 1px solid nth($cp, 3);
-  border-left: 1px solid nth($cp, 3);
-
-  ul {
-    width: 100%;
-  }
+  border: 1px solid nth($cp, 3);
+  border-right: 0;
 
   .thead,
   .tfoot {
-    // height: 40px;
+    width: 100%;
     background: nth($cp, 1);
     user-select: none;
     -moz-user-select: none;
@@ -49,116 +44,106 @@ li {
     min-height: 36px;
     border-right: 1px solid nth($cp, 3);
     border-bottom: 1px solid nth($cp, 3);
+
+    &.flex-2 {
+      flex: 2;
+    }
+    &.flex-3 {
+      flex: 3;
+    }
+    &.flex-4 {
+      flex: 4;
+    }
+    &.flex-5 {
+      flex: 5;
+    }
+    &.flex-6 {
+      flex: 6;
+    }
+    &.flex-7 {
+      flex: 7;
+    }
+    &.flex-8 {
+      flex: 8;
+    }
   }
 
   .thead .td {
     justify-content: center;
     text-align: center;
   }
-  .tbody .tr:hover {
-    background-color: #fbfbfb;
-  }
 
   .cell {
     padding: 3px 5px;
+    word-wrap: break-word;
+    word-break: break-all;
   }
 }
 </style>
 
 <script>
+import '../scroll/index'
+import './tr'
+import './td'
+
 export default class Table {
   props = {
-    list: null
+    thead: null,
+    flex: []
   }
 
   __init__() {
     /* render */
-    this.__OUTER__ = this.root.children[1]
-  }
-
-  __updateTable__(force) {
-    if (this._clear && !force) {
-      delete this._clear
-      return
-    }
-
-    var { items } = this.props
-
-    if (!this._clear) {
-      items = Array.from(this.children)
-        .filter(it => it.tagName === 'WC-TABLE-ITEM')
-        .map(it => {
-          return {
-            label: it.getAttribute('label'),
-            prop: it.getAttribute('prop')
-          }
-        })
-
-      this.props.items = items
-    }
-
-    this._clear = true
-    this.innerText = ''
-
-    this.__render__()
+    var elem = this.root.children[1]
+    this.__THEAD__ = elem.children[0]
+    this.__TBODY__ = elem.children[1]
+    this.__TFOOT__ = elem.children[2]
   }
 
   __render__() {
-    var { list, items } = this.props
+    var { thead, flex } = this.props
 
-    if (list && items) {
-      this.__OUTER__.innerHTML = `
-      <ul class="thead">
+    if (thead) {
+      this.__THEAD__.innerHTML = `
         <li class="tr">
-          ${items
-            .map(_ => {
+          ${thead
+            .map((name, i) => {
+              let w = flex[i]
+              if (typeof w === 'number') {
+                w = ` flex-${w || 1}"`
+              } else {
+                w = `" style="${w}"`
+              }
               return `
-              <section class="td">
-                <div class="cell">${_.label}</div>
+              <section class="td${w}>
+                <div class="cell">${name}</div>
               </section>`
             })
             .join('')}
-        </li>
-      </ul>
-      <ul class="tbody">
-        ${list
-          .map((it, i) => {
-            return `<li class="tr">
-              ${items
-                .map(_ => {
-                  return `
-                  <section class="td">
-                    <div class="cell">${it[_.prop]}</div>
-                  </section>`
-                })
-                .join('')}
-              </li>`
-          })
-          .join('')}
-        </ul>`
+        </li>`
     }
   }
 
   mounted() {
-    // this.__updateTable__()
+    var tds = Array.from(this.children[0].children).map(it => {
+      let flex = +it.getAttribute('flex') || 1
+      let style = it.getAttribute('style')
 
-    this.__observer = new MutationObserver(_ => this.__updateTable__(true))
-    this.__observer.observe(this, {
-      childList: true,
-      subtree: true,
-      characterData: true
+      return style || flex
     })
+    this.props.flex = tds
+    log(tds)
   }
 
   watch() {
     switch (name) {
-      case 'list':
+      case 'thead':
         if (val) {
           try {
-            this.props.list = JSON.parse(val)
+            this.props.thead = JSON.parse(val)
             this.__render__()
           } catch (err) {}
-          this.removeAttribute('options')
+          this.removeAttribute('thead')
         }
         break
 

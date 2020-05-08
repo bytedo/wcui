@@ -1,0 +1,67 @@
+<template>
+  <div class="cell"><slot /></div>
+</template>
+
+<style lang="scss">
+:host {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  min-height: 36px;
+  border-right: 1px solid nth($cp, 3);
+}
+:host([flex='2']) {
+  flex: 2;
+}
+:host([flex='3']) {
+  flex: 3;
+}
+:host([flex='4']) {
+  flex: 4;
+}
+:host([flex='5']) {
+  flex: 5;
+}
+:host([flex='6']) {
+  flex: 6;
+}
+:host([flex='7']) {
+  flex: 7;
+}
+:host([flex='8']) {
+  flex: 8;
+}
+.cell {
+  padding: 3px 5px;
+  word-wrap: break-word;
+  word-break: break-all;
+}
+</style>
+
+<script>
+export default class TableTd {
+  props = {
+    width: null
+  }
+
+  __init__() {
+    /* render */
+  }
+
+  watch() {
+    switch (name) {
+      case 'width':
+        var n = +val
+        if (n === n) {
+          this.style.cssText = `flex:0 0 auto; width: ${n}px;`
+        }
+        this.removeAttribute('width')
+        this.removeAttribute('flex')
+        break
+
+      default:
+        break
+    }
+  }
+}
+</script>
