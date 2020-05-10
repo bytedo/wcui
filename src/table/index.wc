@@ -1,8 +1,8 @@
 <template>
   <div class="table">
-    <ul class="thead"></ul>
+    <wc-tr class="thead"></wc-tr>
     <wc-scroll class="tbody"><slot /></wc-scroll>
-    <ul class="tfoot"></ul>
+    <wc-tr class="tfoot"></wc-tr>
   </div>
 </template>
 
@@ -11,10 +11,6 @@
   display: flex;
   width: 100%;
   color: nth($cd, 1);
-}
-ul,
-li {
-  list-style: none;
 }
 .table {
   overflow: hidden;
@@ -30,60 +26,11 @@ li {
     user-select: none;
     -moz-user-select: none;
   }
-
-  .tr {
-    display: flex;
-    height: 100%;
-  }
-  .td {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    min-height: 36px;
-    border-right: 1px solid nth($cp, 3);
-    border-bottom: 1px solid nth($cp, 3);
-
-    &.flex-2 {
-      flex: 2;
-    }
-    &.flex-3 {
-      flex: 3;
-    }
-    &.flex-4 {
-      flex: 4;
-    }
-    &.flex-5 {
-      flex: 5;
-    }
-    &.flex-6 {
-      flex: 6;
-    }
-    &.flex-7 {
-      flex: 7;
-    }
-    &.flex-8 {
-      flex: 8;
-    }
-
-    &:last-child {
-      border-right: 0;
-    }
-  }
-
-  .thead .td {
-    justify-content: center;
-    text-align: center;
-  }
-
-  .cell {
-    padding: 3px 5px;
-    word-wrap: break-word;
-    word-break: break-all;
-  }
 }
 </style>
 
 <script>
+import $ from '../utils'
 import '../scroll/index'
 import './tr'
 import './td'
@@ -106,23 +53,17 @@ export default class Table {
     var { thead, flex } = this.props
 
     if (thead) {
-      this.__THEAD__.innerHTML = `
-        <li class="tr">
-          ${thead
-            .map((name, i) => {
-              let w = flex[i]
-              if (typeof w === 'number') {
-                w = ` flex-${w || 1}"`
-              } else {
-                w = `" style="${w}"`
-              }
-              return `
-              <section class="td${w}>
-                <div class="cell">${name}</div>
-              </section>`
-            })
-            .join('')}
-        </li>`
+      this.__THEAD__.innerHTML = thead
+        .map((name, i) => {
+          let w = flex[i]
+          if (typeof w === 'number') {
+            w = `flex="${w}"`
+          } else {
+            w = `style="${w}"`
+          }
+          return `<wc-td align="center" ${w}>${name}</wc-td>`
+        })
+        .join('')
     }
   }
 
@@ -134,7 +75,10 @@ export default class Table {
       return style || flex
     })
     this.props.flex = tds
-    log(tds)
+
+    $.bind(this.__TBODY__, 'scroll', ev => {
+      this.__THEAD__.scrollLeft = ev.detail.x
+    })
   }
 
   watch() {

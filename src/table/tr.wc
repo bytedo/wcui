@@ -4,22 +4,20 @@
 
 <style lang="scss">
 :host {
-  // flex: 1;
   display: flex;
-  width: auto;
-  // border-bottom: 1px solid nth($cp, 3);
   color: inherit;
 }
 :host(:hover) {
   background-color: #fbfbfb;
 }
-::slotted(wc-table-td:last-child) {
+
+::slotted(wc-td:last-child) {
   border-right: 0;
 }
 </style>
 
 <script>
-export default class TableTr {
+export default class Tr {
   props = {
     foo: ''
   }

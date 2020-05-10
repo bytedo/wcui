@@ -7,6 +7,7 @@
   flex: 1;
   display: flex;
   align-items: center;
+  min-width: 60px;
   min-height: 36px;
   border-right: 1px solid nth($cp, 3);
   border-bottom: 1px solid nth($cp, 3);
@@ -32,6 +33,13 @@
 :host([flex='8']) {
   flex: 8;
 }
+:host([align='center']) {
+  justify-content: center;
+}
+:host([align='right']) {
+  justify-content: flex-end;
+}
+
 .cell {
   padding: 3px 5px;
   word-wrap: break-word;
@@ -40,7 +48,7 @@
 </style>
 
 <script>
-export default class TableTd {
+export default class Td {
   props = {
     width: null
   }

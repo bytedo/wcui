@@ -107,6 +107,8 @@ const IS_FF = !!window.sidebar
 /*  */
 export default class Scroll {
   props = {
+    thumbX: 0,
+    thumbY: 0,
     disabled: false,
     axis: 'xy' // 滚动方向, 默认x轴和y轴都可以滚动
   }
@@ -253,7 +255,7 @@ export default class Scroll {
       if (!xw && !yh) {
         return
       }
-      ev.preventDefault()
+      // ev.preventDefault()
 
       //校正兼容苹果鼠标在 chrome和FF下滚动的精度
       var deltaX
@@ -283,8 +285,12 @@ export default class Scroll {
           // 修正滚动条的位置
           // 滚动比例 y 滚动条的可移动距离
           var fixedY = (this.__BOX__.scrollTop / (sh - oh)) * (oh - yh)
+          fixedY = fixedY >> 0
           this.props.thumbY = fixedY
-
+          if (fixedY === 0 || oh - yh === fixedY) {
+            return
+          }
+          ev.preventDefault()
           this.__Y__.style.transform = `translateY(${fixedY}px)`
         }
       }
@@ -296,11 +302,21 @@ export default class Scroll {
           // 修正滚动条的位置
           // 滚动比例 x 滚动条的可移动距离
           var fixedX = (this.__BOX__.scrollLeft / (sw - ow)) * (ow - xw)
+          fixedX = fixedX >> 0
           this.props.thumbX = fixedX
-
+          if (fixedX === 0 || ow - xw === fixedX) {
+            return
+          }
+          ev.preventDefault()
           this.__X__.style.transform = `translateX(${fixedX}px)`
         }
       }
+
+      this.dispatchEvent(
+        new CustomEvent('scroll', {
+          detail: { x: this.props.thumbX, y: this.props.thumbY }
+        })
+      )
     })
 
     var startX,
