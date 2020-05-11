@@ -286,11 +286,17 @@ export default class Scroll {
           // 滚动比例 y 滚动条的可移动距离
           var fixedY = (this.__BOX__.scrollTop / (sh - oh)) * (oh - yh)
           fixedY = fixedY >> 0
-          this.props.thumbY = fixedY
-          if (fixedY === 0 || oh - yh === fixedY) {
+
+          if (
+            (fixedY === 0 || oh - yh === fixedY) &&
+            fixedY === this.props.thumbY
+          ) {
             return
           }
+
           ev.preventDefault()
+
+          this.props.thumbY = fixedY
           this.__Y__.style.transform = `translateY(${fixedY}px)`
         }
       }
@@ -303,11 +309,17 @@ export default class Scroll {
           // 滚动比例 x 滚动条的可移动距离
           var fixedX = (this.__BOX__.scrollLeft / (sw - ow)) * (ow - xw)
           fixedX = fixedX >> 0
-          this.props.thumbX = fixedX
-          if (fixedX === 0 || ow - xw === fixedX) {
+
+          if (
+            (fixedX === 0 || ow - xw === fixedX) &&
+            fixedX === this.props.thumbX
+          ) {
             return
           }
+
           ev.preventDefault()
+
+          this.props.thumbX = fixedX
           this.__X__.style.transform = `translateX(${fixedX}px)`
         }
       }
