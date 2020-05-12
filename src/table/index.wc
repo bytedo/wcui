@@ -58,10 +58,12 @@ export default class Table {
           let w = flex[i]
           if (typeof w === 'number') {
             w = `flex="${w}"`
-          } else {
+          } else if (typeof w === 'string') {
             w = `style="${w}"`
+          } else {
+            w = ''
           }
-          return `<wc-td align="center" ${w}>${name}</wc-td>`
+          return `<wc-td leaf align="center" ${w}>${name}</wc-td>`
         })
         .join('')
     }
