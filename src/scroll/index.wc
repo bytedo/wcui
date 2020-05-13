@@ -244,7 +244,7 @@ export default class Scroll {
     })
 
     // 鼠标滚动事件
-    this._wheelFn = $.catch(this.__BOX__, 'wheel', ev => {
+    this._wheelFn = $.bind(this.__BOX__, 'wheel', ev => {
       // 禁用状态, 不允许滚动
       if (this.disabled) {
         return
@@ -295,6 +295,7 @@ export default class Scroll {
           }
 
           ev.preventDefault()
+          ev.stopPropagation()
 
           this.props.thumbY = fixedY
           this.__Y__.style.transform = `translateY(${fixedY}px)`
@@ -318,6 +319,7 @@ export default class Scroll {
           }
 
           ev.preventDefault()
+          ev.stopPropagation()
 
           this.props.thumbX = fixedX
           this.__X__.style.transform = `translateX(${fixedX}px)`
