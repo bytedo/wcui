@@ -13,7 +13,6 @@
 
 :host(.thead) ::slotted(wc-td[leaf]) {
   border-top: 0;
-  // border-bottom: 1px solid nth($cp, 3);
 }
 ::slotted(wc-td:last-child) {
   border-right: 0;
