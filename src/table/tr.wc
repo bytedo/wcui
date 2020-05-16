@@ -28,5 +28,13 @@ export default class Tr {
   __init__() {
     /* render */
   }
+
+  get scrollLeft() {
+    return 0
+  }
+
+  set scrollLeft(v) {
+    return v
+  }
 }
 </script>
