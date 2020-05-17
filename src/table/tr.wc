@@ -5,6 +5,7 @@
 <style lang="scss">
 :host {
   display: flex;
+  // min-height: 36px;
   color: inherit;
 }
 :host(:hover) {
@@ -16,6 +17,10 @@
 }
 ::slotted(wc-td:last-child) {
   border-right: 0;
+}
+
+:host(.thead) {
+  overflow-x: hidden;
 }
 </style>
 
@@ -29,12 +34,16 @@ export default class Tr {
     /* render */
   }
 
-  get scrollLeft() {
-    return 0
-  }
+  // get scrollLeft() {
+  //   return 0
+  // }
 
-  set scrollLeft(v) {
-    return v
+  // set scrollLeft(v) {
+  //   return v
+  // }
+
+  mounted() {
+    // log(this.root)
   }
 }
 </script>
