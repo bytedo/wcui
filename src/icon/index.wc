@@ -96,6 +96,11 @@
 <script>
 import SVG_DICT from './svg'
 
+let dict = SVG_DICT
+if (window.EXT_SVG_DICT) {
+  Object.assign(dict, EXT_SVG_DICT)
+}
+
 export default class Icon {
   props = {
     is: ''
@@ -121,7 +126,7 @@ export default class Icon {
   // 绘制图标
   drawPath() {
     var { is } = this.props
-    var path = SVG_DICT[is]
+    var path = dict[is]
     if (!this.__ICO__) {
       return
     }
