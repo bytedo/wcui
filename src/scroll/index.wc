@@ -261,7 +261,7 @@ export default class Scroll {
       var deltaY
       var now = Date.now()
 
-      if (!this.stamp || now - this.stamp > 1000) {
+      if (!this.stamp || now - this.stamp > 800) {
         this.stamp = now
         this.times = 1
       }
