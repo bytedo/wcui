@@ -11,10 +11,7 @@
     "type": "git",
     "url": "git+https://github.com/yutent/doui.git"
   },
-  "keywords": [
-    "doui",
-    "Anot"
-  ],
+  "keywords": ["doui", "Anot"],
   "author": "yutent",
   "license": "MIT",
   "dependencies": {},

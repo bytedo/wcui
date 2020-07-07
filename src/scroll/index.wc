@@ -255,11 +255,16 @@ export default class Scroll {
       if (!xw && !yh) {
         return
       }
-      // ev.preventDefault()
 
       //校正兼容苹果鼠标在 chrome和FF下滚动的精度
       var deltaX
       var deltaY
+      var now = Date.now()
+
+      if (!this.stamp || now - this.stamp > 1000) {
+        this.stamp = now
+        this.times = 1
+      }
 
       if (IS_FF) {
         // 区分是触摸板还是普通鼠标
@@ -277,6 +282,16 @@ export default class Scroll {
         }
       }
 
+      if (now - this.stamp < 20) {
+        this.times += 0.05
+        if (this.times > 3) {
+          this.times = 3
+        }
+      }
+
+      deltaX *= this.times
+      deltaY *= this.times
+
       //
       if (this.props.axis !== 'x') {
         this.__BOX__.scrollTop += deltaY
@@ -285,6 +300,7 @@ export default class Scroll {
           // 修正滚动条的位置
           // 滚动比例 y 滚动条的可移动距离
           var fixedY = (this.__BOX__.scrollTop / (sh - oh)) * (oh - yh)
+
           fixedY = fixedY >> 0
 
           if (
@@ -309,6 +325,7 @@ export default class Scroll {
           // 修正滚动条的位置
           // 滚动比例 x 滚动条的可移动距离
           var fixedX = (this.__BOX__.scrollLeft / (sw - ow)) * (ow - xw)
+
           fixedX = fixedX >> 0
 
           if (
@@ -326,6 +343,7 @@ export default class Scroll {
         }
       }
 
+      this.stamp = now
       this.dispatchEvent(
         new CustomEvent('scroll', {
           detail: { x: this.props.thumbX, y: this.props.thumbY }
