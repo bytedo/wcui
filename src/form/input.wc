@@ -93,8 +93,9 @@ li {
   }
   /* ----- */
   .icon {
-    padding: 0 5px;
     --size: 20px;
+    padding: 0 5px;
+    color: nth($cgr, 2);
   }
 }
 
@@ -185,6 +186,10 @@ li {
 :host([round]) {
   border-radius: 21px;
 
+  .label input {
+    padding: 0 10px;
+  }
+
   .prepend {
     border-radius: 21px 0 0 21px;
   }
@@ -224,6 +229,19 @@ li {
   .prepend,
   .append {
     height: 18px;
+  }
+}
+
+:host([no-border]),
+:host(:focus-within[no-border]) {
+  box-shadow: none;
+  .label {
+    border: 0;
+  }
+}
+:host([transparent]) {
+  .label {
+    background: transparent;
   }
 }
 </style>
