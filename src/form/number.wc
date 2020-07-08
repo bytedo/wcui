@@ -193,11 +193,11 @@ export default class Number {
     this.__INPUT__ = this.__OUTER__.children[1]
   }
 
-  get readonly() {
+  get readOnly() {
     return this.props.readonly
   }
 
-  set readonly(val) {
+  set readOnly(val) {
     var type = typeof val
 
     if (val === this.props.readonly) {
@@ -284,7 +284,7 @@ export default class Number {
   mounted() {
     // 键盘事件
     this._handleSubmit = $.catch(this.__INPUT__, 'keydown', ev => {
-      if (this.disabled || this.readonly) {
+      if (this.disabled || this.readOnly) {
         return
       }
 
@@ -317,7 +317,7 @@ export default class Number {
     })
 
     this._handleAction = $.bind(this.__OUTER__, 'click', ev => {
-      if (this.disabled || this.readonly) {
+      if (this.disabled || this.readOnly) {
         return
       }
       var target = ev.target

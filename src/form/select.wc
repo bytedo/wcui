@@ -167,6 +167,10 @@
   cursor: not-allowed;
   opacity: 0.6;
 }
+:host([readonly]) .label {
+  opacity: 0.8;
+}
+
 :host(:focus-within) {
   @include focus1;
 }
@@ -177,6 +181,10 @@
 /* 额外样式 */
 :host([round]) {
   border-radius: 21px;
+
+  .label input {
+    padding: 0 10px;
+  }
 
   .prepend {
     border-radius: 21px 0 0 21px;
@@ -261,6 +269,7 @@ export default class Select {
     value: '',
     options: '',
     mvidx: null, //下拉列表光标的索引ID
+    readonly: false,
     disabled: false
   }
 
@@ -272,6 +281,25 @@ export default class Select {
     this.__INPUT__ = this.__OUTER__.children[1]
     this.__APPEND__ = this.__OUTER__.children[3]
     this.__OPTG__ = this.__OUTER__.children[4]
+  }
+
+  get readOnly() {
+    return this.props.readonly
+  }
+
+  set readOnly(val) {
+    var type = typeof val
+
+    if (val === this.props.readonly) {
+      return
+    }
+    if ((type === 'boolean' && val) || type !== 'boolean') {
+      this.props.readonly = true
+      this.setAttribute('readonly', '')
+    } else {
+      this.props.readonly = false
+      this.removeAttribute('readonly')
+    }
   }
 
   get disabled() {
@@ -424,7 +452,7 @@ export default class Select {
 
     // 键盘事件
     this._handleKeydown = $.catch(this.__INPUT__, 'keydown', ev => {
-      if (this.disabled || this.readonly) {
+      if (this.disabled || this.readOnly) {
         return
       }
       // up: 38, down: 40
@@ -447,6 +475,10 @@ export default class Select {
     // 渲染列表
     this._activeFn = $.bind(this.__INPUT__, 'click', ev => {
       var { options } = this.props
+
+      if (this.disabled || this.readOnly) {
+        return
+      }
 
       initPos.call(this)
       this.__OPTG__.classList.toggle('show')

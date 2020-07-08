@@ -191,11 +191,11 @@ export default class Radio {
     this.__SWITCH__.classList.toggle('checked', this.props.checked)
   }
 
-  get readonly() {
+  get readOnly() {
     return this.props.readonly
   }
 
-  set readonly(val) {
+  set readOnly(val) {
     var type = typeof val
 
     if (val === this.props.readonly) {
@@ -231,7 +231,7 @@ export default class Radio {
 
   mounted() {
     this._handleClick = $.bind(this, 'click', ev => {
-      if (!this.disabled && !this.readonly && !this.checked) {
+      if (!this.disabled && !this.readOnly && !this.checked) {
         this.checked = true
         this.dispatchEvent(new CustomEvent('input'))
       }

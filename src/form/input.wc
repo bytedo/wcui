@@ -290,16 +290,17 @@ export default class Input {
     this.__LIST__ = this.__OUTER__.children[4]
   }
 
-  get readonly() {
+  get readOnly() {
     return this.props.readonly
   }
 
-  set readonly(val) {
+  set readOnly(val) {
     var type = typeof val
 
     if (val === this.props.readonly) {
       return
     }
+
     if ((type === 'boolean' && val) || type !== 'boolean') {
       this.props.readonly = true
       this.setAttribute('readonly', '')
@@ -417,7 +418,7 @@ export default class Input {
 
     // 键盘事件
     this._handleSubmit = $.catch(this.__INPUT__, 'keydown', ev => {
-      if (this.disabled || this.readonly) {
+      if (this.disabled || this.readOnly) {
         return
       }
       // up: 38, down: 40

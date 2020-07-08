@@ -198,11 +198,11 @@ export default class Checkbox {
     }
   }
 
-  get readonly() {
+  get readOnly() {
     return this.props.readonly
   }
 
-  set readonly(val) {
+  set readOnly(val) {
     var type = typeof val
 
     if (val === this.props.readonly) {
@@ -240,7 +240,7 @@ export default class Checkbox {
     this._handlClick = $.bind(this, 'click', ev => {
       ev.preventDefault()
 
-      if (!this.disabled && !this.readonly) {
+      if (!this.disabled && !this.readOnly) {
         this.checked = !this.checked
         this.dispatchEvent(new CustomEvent('input'))
       }
