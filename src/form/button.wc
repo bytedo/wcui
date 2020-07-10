@@ -346,6 +346,13 @@
   background: nth($cgr, 1);
 }
 
+:host([no-border]) {
+  button {
+    border-color: transparent;
+    background: inherit;
+  }
+}
+
 :host([text][loading]),
 :host([text][disabled]) {
   button {
@@ -378,7 +385,8 @@ export default class Button {
     icon: '',
     autofocus: '',
     loading: false,
-    disabled: false
+    disabled: false,
+    lazy: 0 // 并发拦截时间, 单位毫秒
   }
 
   __init__() {
@@ -435,12 +443,21 @@ export default class Button {
   }
 
   mounted() {
+    this.stamp = 0
+
     // 阻止事件冒泡, 避免用户自己绑定click事件不受这2个值的限制
-    this._handleClick = $.catch(this.__BTN__, 'click', ev => {
-      if (this.props.loading || this.props.disabled) {
-        return
+    this._handleClick = $.bind(this.__BTN__, 'click', ev => {
+      var { loading, disabled, lazy } = this.props
+      var now = Date.now()
+
+      if (loading || disabled) {
+        return ev.stopPropagation()
       }
-      this.dispatchEvent(new CustomEvent('active'))
+      // 并发拦截
+      if (lazy && now - this.stamp < lazy) {
+        return ev.stopPropagation()
+      }
+      this.stamp = now
     })
   }
 
@@ -470,6 +487,9 @@ export default class Button {
             this.__BTN__.focus()
           }, 10)
         }
+        break
+      case 'lazy':
+        this.props.lazy = val >> 0
         break
 
       case 'loading':
