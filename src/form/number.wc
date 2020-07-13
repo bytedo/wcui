@@ -271,6 +271,7 @@ export default class Number {
     if (n !== value) {
       this.props.value = n
       this.__INPUT__.value = n
+      this.dispatchEvent(new CustomEvent('input'))
     }
   }
 
