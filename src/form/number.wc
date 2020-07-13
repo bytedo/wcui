@@ -247,18 +247,30 @@ export default class Number {
       val = 0
     }
     this.props.value = val
-    this.__INPUT__.value = this.props.value
+    this.__INPUT__.value = val
 
     this._checkActionEnable()
   }
 
   _checkActionEnable() {
     var { max, min, value } = this.props
+    var n = value
+
+    if (min !== null) {
+      if (min > n) {
+        n = min
+      }
+      this.__OUTER__.children[0].classList.toggle('disabled', value <= min)
+    }
     if (max !== null) {
+      if (max < n) {
+        n = max
+      }
       this.__OUTER__.children[2].classList.toggle('disabled', value >= max)
     }
-    if (min !== null) {
-      this.__OUTER__.children[0].classList.toggle('disabled', value <= min)
+    if (n !== value) {
+      this.props.value = n
+      this.__INPUT__.value = n
     }
   }
 
