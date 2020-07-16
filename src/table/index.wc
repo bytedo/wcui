@@ -13,18 +13,34 @@
   color: nth($cd, 1);
 }
 .table {
-  overflow: hidden;
-  flex: 1;
   display: flex;
   flex-direction: column;
-  border: 1px solid nth($cp, 3);
+  width: 100%;
+  height: 100%;
 
   .thead,
   .tfoot {
+    overflow: hidden;
     width: 100%;
+    border: 1px solid nth($cp, 3);
+    --border-bottom: 0;
     background: nth($cp, 1);
     user-select: none;
     -moz-user-select: none;
+  }
+  .thead {
+    border-bottom: 0;
+  }
+  .tfoot {
+    display: none;
+    border-top: 0;
+  }
+  .tbody {
+    border: 1px solid nth($cp, 3);
+
+    ::slotted(wc-tr:last-child) {
+      --border-bottom: 0;
+    }
   }
 }
 </style>
@@ -63,7 +79,7 @@ export default class Table {
           } else {
             w = ''
           }
-          return `<wc-td leaf align="center" ${w}>${name}</wc-td>`
+          return `<wc-td no-border align="center" ${w}>${name}</wc-td>`
         })
         .join('')
     }

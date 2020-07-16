@@ -1,5 +1,5 @@
 <template>
-  <div class="container"><slot></slot></div>
+  <div class="container"><slot /></div>
   <div class="is-horizontal"><span class="thumb"></span></div>
   <div class="is-vertical"><span class="thumb"></span></div>
 </template>

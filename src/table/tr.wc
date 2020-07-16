@@ -1,26 +1,30 @@
 <template>
-  <slot />
+  <div class="tr"><slot /></div>
 </template>
 
 <style lang="scss">
 :host {
   display: flex;
   // min-height: 36px;
+  width: auto;
   color: inherit;
+
+  .tr {
+    flex: 1;
+    display: flex;
+    flex-wrap: nowrap;
+    // border-top: var(--border, 0);
+    // border-right: var(--border, 0);
+    border-bottom: var(--border-bottom, 1px solid nth($cp, 3));
+    // border-left: var(--border, 0);
+  }
 }
 :host(:hover) {
   background-color: #fbfbfb;
 }
 
-:host(.thead) ::slotted(wc-td[leaf]) {
-  border-top: 0;
-}
-::slotted(wc-td:last-child) {
-  border-right: 0;
-}
-
-:host(.thead) {
-  overflow-x: hidden;
+::slotted(wc-td:first-child) {
+  border-left: 0;
 }
 </style>
 
