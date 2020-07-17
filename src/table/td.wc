@@ -8,12 +8,12 @@
   display: flex;
   align-items: center;
   min-width: 60px;
+  // min-height: 36px;
   // height: auto;
   border-left: 1px solid nth($cp, 3);
 
   .cell {
-    min-height: 36px;
-    padding: 3px 5px;
+    padding: var(--padding, 5px 8px);
     word-wrap: break-word;
     word-break: break-all;
   }

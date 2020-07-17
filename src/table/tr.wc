@@ -6,17 +6,13 @@
 :host {
   display: flex;
   // min-height: 36px;
-  width: auto;
   color: inherit;
 
   .tr {
     flex: 1;
     display: flex;
     flex-wrap: nowrap;
-    // border-top: var(--border, 0);
-    // border-right: var(--border, 0);
     border-bottom: var(--border-bottom, 1px solid nth($cp, 3));
-    // border-left: var(--border, 0);
   }
 }
 :host(:hover) {
@@ -26,6 +22,13 @@
 ::slotted(wc-td:first-child) {
   border-left: 0;
 }
+
+// :host([thead]) {
+// ::slotted(wc-td) {
+// min-height: 36px;
+// --padding: 18px 8px;
+// }
+// }
 </style>
 
 <script>

@@ -1,8 +1,9 @@
 <template>
   <div class="table">
-    <wc-tr class="thead"></wc-tr>
+    <wc-tr thead class="thead"></wc-tr>
     <wc-scroll class="tbody"><slot /></wc-scroll>
-    <wc-tr class="tfoot"></wc-tr>
+    <div class="line"></div>
+    <wc-tr tfoot class="tfoot"></wc-tr>
   </div>
 </template>
 
@@ -36,6 +37,7 @@
     border-top: 0;
   }
   .tbody {
+    flex: 1;
     border: 1px solid nth($cp, 3);
 
     ::slotted(wc-tr:last-child) {
