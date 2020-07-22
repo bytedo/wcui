@@ -1,6 +1,6 @@
 /**
  *
- * @authors yutent (yutent@doui.cc)
+ * @authors yutent (yutent.io@gmail.com)
  * @date    2018-08-04 18:47:35
  */
 
@@ -117,8 +117,8 @@ CodeMirror.defineMode(
           state.token == html
             ? htmlMode
             : state.token == javascript
-              ? jsMode
-              : cssMode
+            ? jsMode
+            : cssMode
         return {
           state: state.localState || state.htmlState,
           mode: mode

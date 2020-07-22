@@ -1,6 +1,6 @@
 /**
  *
- * @authors yutent (yutent@doui.cc)
+ * @authors yutent (yutent.io@gmail.com)
  * @date    2018-03-25 23:59:13
  * @version $Id$
  */
@@ -441,7 +441,6 @@ if (!window.request) {
       this.__INIT__ = param
     }
   }
-  Anot.ui.request = request.version
 }
 
 export default request

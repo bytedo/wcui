@@ -1,6 +1,6 @@
 /**
  * 拖拽指令 :drag
- * @authors yutent (yutent@doui.cc)
+ * @authors yutent (yutent.io@gmail.com)
  * @date    2017-03-29 18:39:35
  *
  */

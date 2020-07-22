@@ -1,6 +1,6 @@
 /**
  *
- * @authors yutent (yutent@doui.cc)
+ * @authors yutent (yutent.io@gmail.com)
  * @date    2018-08-04 18:47:35
  */
 
@@ -133,15 +133,44 @@ function CodeMirror(place, givenOptions) {
     updateInput = false
   })()
   var history = new History()
-  connect(scroller, 'mousedown', operation(onMouseDown))
-  connect(scroller, 'dblclick', operation(onDoubleClick))
-  connect(lineSpace, 'selectstart', e_preventDefault)
-  if (!gecko) connect(scroller, 'contextmenu', onContextMenu)
-  connect(scroller, 'scroll', onScrollMain)
-  connect(scrollbar, 'scroll', onScrollBar)
-  connect(scrollbar, 'mousedown', function() {
-    if (focused) setTimeout(focusInput, 0)
-  })
+  connect(
+    scroller,
+    'mousedown',
+    operation(onMouseDown)
+  )
+  connect(
+    scroller,
+    'dblclick',
+    operation(onDoubleClick)
+  )
+  connect(
+    lineSpace,
+    'selectstart',
+    e_preventDefault
+  )
+  if (!gecko)
+    connect(
+      scroller,
+      'contextmenu',
+      onContextMenu
+    )
+  connect(
+    scroller,
+    'scroll',
+    onScrollMain
+  )
+  connect(
+    scrollbar,
+    'scroll',
+    onScrollBar
+  )
+  connect(
+    scrollbar,
+    'mousedown',
+    function() {
+      if (focused) setTimeout(focusInput, 0)
+    }
+  )
   var resizeHandler = connect(
     window,
     'resize',
@@ -151,31 +180,79 @@ function CodeMirror(place, givenOptions) {
     },
     true
   )
-  connect(input, 'keyup', operation(onKeyUp))
-  connect(input, 'input', fastPoll)
-  connect(input, 'keydown', operation(onKeyDown))
-  connect(input, 'keypress', operation(onKeyPress))
-  connect(input, 'focus', onFocus)
-  connect(input, 'blur', onBlur)
+  connect(
+    input,
+    'keyup',
+    operation(onKeyUp)
+  )
+  connect(
+    input,
+    'input',
+    fastPoll
+  )
+  connect(
+    input,
+    'keydown',
+    operation(onKeyDown)
+  )
+  connect(
+    input,
+    'keypress',
+    operation(onKeyPress)
+  )
+  connect(
+    input,
+    'focus',
+    onFocus
+  )
+  connect(
+    input,
+    'blur',
+    onBlur
+  )
 
   function drag_(e) {
     if (options.onDragEvent && options.onDragEvent(instance, addStop(e))) return
     e_stop(e)
   }
   if (options.dragDrop) {
-    connect(scroller, 'dragstart', onDragStart)
-    connect(scroller, 'dragenter', drag_)
-    connect(scroller, 'dragover', drag_)
-    connect(scroller, 'drop', operation(onDrop))
+    connect(
+      scroller,
+      'dragstart',
+      onDragStart
+    )
+    connect(
+      scroller,
+      'dragenter',
+      drag_
+    )
+    connect(
+      scroller,
+      'dragover',
+      drag_
+    )
+    connect(
+      scroller,
+      'drop',
+      operation(onDrop)
+    )
   }
-  connect(scroller, 'paste', function() {
-    focusInput()
-    fastPoll()
-  })
-  connect(input, 'paste', function() {
-    pasteIncoming = true
-    fastPoll()
-  })
+  connect(
+    scroller,
+    'paste',
+    function() {
+      focusInput()
+      fastPoll()
+    }
+  )
+  connect(
+    input,
+    'paste',
+    function() {
+      pasteIncoming = true
+      fastPoll()
+    }
+  )
   connect(
     input,
     'cut',
@@ -184,10 +261,14 @@ function CodeMirror(place, givenOptions) {
     })
   )
   if (khtml)
-    connect(sizer, 'mouseup', function() {
-      if (document.activeElement == input) input.blur()
-      focusInput()
-    })
+    connect(
+      sizer,
+      'mouseup',
+      function() {
+        if (document.activeElement == input) input.blur()
+        focusInput()
+      }
+    )
   var hasFocus
   try {
     hasFocus = document.activeElement == input
@@ -698,8 +779,18 @@ function CodeMirror(place, givenOptions) {
       type == 'single'
     ) {
       if (webkit) scroller.draggable = true
-      var up = connect(document, 'mouseup', operation(dragEnd), true)
-      var drop = connect(scroller, 'drop', operation(dragEnd), true)
+      var up = connect(
+        document,
+        'mouseup',
+        operation(dragEnd),
+        true
+      )
+      var drop = connect(
+        scroller,
+        'drop',
+        operation(dragEnd),
+        true
+      )
       draggingText = true
       if (scroller.dragDrop) scroller.dragDrop()
       return
@@ -775,7 +866,12 @@ function CodeMirror(place, givenOptions) {
       }),
       true
     )
-    var up = connect(document, 'mouseup', operation(done), true)
+    var up = connect(
+      document,
+      'mouseup',
+      operation(done),
+      true
+    )
   }
 
   function onDoubleClick(e) {
@@ -2032,12 +2128,12 @@ function CodeMirror(place, givenOptions) {
       var check = isWordChar(startChar)
         ? isWordChar
         : /\s/.test(startChar)
-          ? function(ch) {
-              return /\s/.test(ch)
-            }
-          : function(ch) {
-              return !/\s/.test(ch) && isWordChar(ch)
-            }
+        ? function(ch) {
+            return /\s/.test(ch)
+          }
+        : function(ch) {
+            return !/\s/.test(ch) && isWordChar(ch)
+          }
       while (start > 0 && check(line.charAt(start - 1))) --start
       while (end < line.length && check(line.charAt(end))) ++end
     }
@@ -3358,7 +3454,12 @@ CodeMirror.fromTextArea = function(textarea, options) {
     textarea.value = instance.getValue()
   }
   if (textarea.form) {
-    var rmSubmit = connect(textarea.form, 'submit', save, true)
+    var rmSubmit = connect(
+      textarea.form,
+      'submit',
+      save,
+      true
+    )
     var realSubmit = textarea.form.submit
     textarea.form.submit = function wrappedSubmit() {
       save()
@@ -3764,7 +3865,7 @@ Line.prototype = {
           if (!m) break
           pos += skipped + 1
           if (m[0] == '\t') {
-            var tabWidth = tabSize - col % tabSize
+            var tabWidth = tabSize - (col % tabSize)
             content.appendChild(elt('span', spaceStr(tabWidth), 'cm-tab'))
             col += tabWidth
           } else {
@@ -4287,7 +4388,7 @@ function countColumn(string, end, tabSize) {
     if (end == -1) end = string.length
   }
   for (var i = 0, n = 0; i < end; ++i) {
-    if (string.charAt(i) == '\t') n += tabSize - n % tabSize
+    if (string.charAt(i) == '\t') n += tabSize - (n % tabSize)
     else ++n
   }
   return n

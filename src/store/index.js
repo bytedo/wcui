@@ -1,6 +1,6 @@
 /**
  *
- * @authors yutent (yutent@doui.cc)
+ * @authors yutent (yutent.io@gmail.com)
  * @date    2018-06-25 21:39:42
  * @version $Id$
  */

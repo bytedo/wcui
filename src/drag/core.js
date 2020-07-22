@@ -1,6 +1,6 @@
 /**
  * 拖拽插件的核心部分
- * @author yutent<yutent@doui.cc>
+ * @author yutent<yutent.io@gmail.com>
  * @date 2019/08/23 19:41:21
  */
 

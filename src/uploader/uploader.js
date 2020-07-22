@@ -1,7 +1,7 @@
 /**
  * Uploader 无刷新上传文件(next版)
  * 只支持chrome/firefox/IE10+/opera12+
- * @authors yutent (yutent@doui.cc)
+ * @authors yutent (yutent.io@gmail.com)
  * @date    2016-09-05 19:33:23
  *
  */
@@ -74,7 +74,7 @@ define(function() {
         function(evt) {
           if (evt.lengthComputable && _this.progress) {
             var now = Date.now()
-            var upSize = evt.loaded * 1000 / 1024
+            var upSize = (evt.loaded * 1000) / 1024
             var res = { loaded: evt.loaded, time: now - startTime }
             res.speed = upSize / res.time
 
@@ -84,7 +84,7 @@ define(function() {
               res.speed = res.speed.toFixed(2) + ' KB/s'
             }
 
-            res.progress = Math.round(evt.loaded * 100 / evt.total)
+            res.progress = Math.round((evt.loaded * 100) / evt.total)
             _this.progress(res)
           }
         },

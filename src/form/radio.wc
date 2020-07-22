@@ -26,16 +26,14 @@
     color: nth($cgr, 3);
 
     &.checked .dot::after {
-      display: block;
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: nth($cgr, 1);
       content: '';
     }
   }
 
   .dot {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     width: 18px;
     height: 18px;
     padding: 2px;
@@ -43,6 +41,14 @@
     border: 1px solid nth($cgr, 1);
     border-radius: 50%;
     background: #fff;
+
+    &::after {
+      display: block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: nth($cgr, 1);
+    }
   }
 }
 
@@ -57,33 +63,46 @@
 
 :host([size='large']) {
   label {
-    width: 58px;
+    min-width: 58px;
     height: 32px;
   }
   .dot {
     width: 26px;
     height: 26px;
+
+    &::after {
+      width: 18px;
+      height: 18px;
+    }
   }
 }
 :host([size='medium']) {
   label {
-    width: 50px;
+    min-width: 50px;
     height: 28px;
   }
   .dot {
     width: 22px;
     height: 22px;
+
+    &::after {
+      width: 14px;
+      height: 14px;
+    }
   }
 }
 :host([size='mini']) {
   label {
-    width: 22px;
     height: 14px;
-    padding: 2px;
   }
   .dot {
-    width: 10px;
-    height: 10px;
+    width: 14px;
+    height: 14px;
+
+    &::after {
+      width: 8px;
+      height: 8px;
+    }
   }
 }
 
@@ -230,11 +249,13 @@ export default class Radio {
   }
 
   mounted() {
-    this._handleClick = $.bind(this, 'click', ev => {
-      if (!this.disabled && !this.readOnly && !this.checked) {
-        this.checked = true
-        this.dispatchEvent(new CustomEvent('input'))
+    this._handleClick = $.catch(this, 'click', ev => {
+      if (this.disabled || this.readOnly || this.checked) {
+        return
       }
+
+      this.checked = true
+      this.dispatchEvent(new CustomEvent('input'))
     })
   }
 
@@ -251,7 +272,11 @@ export default class Radio {
       case 'checked':
       case 'readonly':
       case 'disabled':
-        this[name] = true
+        var k = name
+        if (k === 'readonly') {
+          k = 'readOnly'
+        }
+        this[k] = true
         break
     }
   }

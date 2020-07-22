@@ -1,6 +1,6 @@
 /**
  *
- * @authors yutent (yutent@doui.cc)
+ * @authors yutent (yutent.io@gmail.com)
  * @date    2017-04-19 21:17:26
  *
  */
@@ -108,7 +108,7 @@ class Uploader {
       'progress',
       evt => {
         if (evt.lengthComputable && this.progress) {
-          let res = Math.round(evt.loaded * 100 / evt.total)
+          let res = Math.round((evt.loaded * 100) / evt.total)
           this.progress(res)
         }
       },

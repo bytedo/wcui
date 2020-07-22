@@ -1,6 +1,6 @@
 /**
  * {icon svg}
- * @author yutent<yutent@doui.cc>
+ * @author yutent<yutent.io@gmail.com>
  * @date 2019/07/17 15:12:14
  */
 

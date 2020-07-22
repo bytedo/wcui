@@ -25,6 +25,7 @@ li {
   -moz-user-select: none;
   color: nth($cd, 2);
   border-radius: 2px;
+  cursor: text;
 }
 
 .label {
@@ -40,7 +41,7 @@ li {
   border-radius: inherit;
   background: #fff;
   color: inherit;
-  cursor: text;
+  cursor: inherit;
 
   input,
   textarea {
@@ -52,8 +53,7 @@ li {
     border: 0;
     border-radius: inherit;
     color: inherit;
-    font-size: inherit;
-    font-family: inherit;
+    font: inherit;
     background: none;
     outline: none;
     box-shadow: none;
@@ -154,10 +154,16 @@ li {
 :host([auto-border]) .label {
   border-color: transparent;
 }
-:host([disabled]) .label {
-  background: nth($cp, 1);
+:host([disabled]) {
   cursor: not-allowed;
-  opacity: 0.6;
+
+  .label {
+    background: nth($cp, 1);
+    opacity: 0.6;
+  }
+}
+:host([readonly]) {
+  cursor: default;
 }
 :host(:focus-within) {
   @include focus1;
@@ -549,7 +555,11 @@ export default class Input {
 
       case 'readonly':
       case 'disabled':
-        this[name] = true
+        var k = name
+        if (k === 'readonly') {
+          k = 'readOnly'
+        }
+        this[k] = true
         break
     }
   }

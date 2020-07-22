@@ -143,7 +143,7 @@ function mkWCFile({ style, html, js }) {
 
   return `/**
  *
- * @authors yutent (yutent@doui.cc)
+ * @authors yutent (yutent.io@gmail.com)
  * @date    ${BUILD_DATE}
  * @version v${VERSION}
  * 

@@ -1,6 +1,6 @@
 /**
  * 公共方法库
- * @author yutent<yutent@doui.cc>
+ * @author yutent<yutent.io@gmail.com>
  * @date 2019/08/08 10:47:55
  */
 

@@ -1,6 +1,6 @@
 /**
  *
- * @authors yutent (yutent@doui.cc)
+ * @authors yutent (yutent.io@gmail.com)
  * @date    2017-04-17 16:37:12
  *
  */
@@ -471,7 +471,7 @@ Anot.component('meditor', {
       let sh = ev.target.scrollHeight
       let ch = ev.target.clientHeight
       let psh = preview.scrollHeight
-      let syncTop = st / (sh - ch) * (psh - ch)
+      let syncTop = (st / (sh - ch)) * (psh - ch)
       preview.scrollTop = syncTop
     })
     //编辑器成功加载的回调

@@ -521,7 +521,11 @@ export default class Select {
 
       case 'readonly':
       case 'disabled':
-        this[name] = true
+        var k = name
+        if (k === 'readonly') {
+          k = 'readOnly'
+        }
+        this[k] = true
         break
     }
   }
