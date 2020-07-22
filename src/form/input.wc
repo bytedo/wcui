@@ -35,7 +35,6 @@ li {
   min-width: 64px;
   width: 100%;
   height: 32px;
-  line-height: 0;
   font-size: 14px;
   border: 1px solid nth($cp, 3);
   border-radius: inherit;
@@ -91,10 +90,15 @@ li {
   &[append] .append {
     display: flex;
   }
+  &[prepend] input,
+  &[append] input {
+    min-width: 64px;
+  }
   /* ----- */
   .icon {
     --size: 20px;
     padding: 0 5px;
+    margin: 0 5px;
     color: nth($cgr, 2);
   }
 }
@@ -194,6 +198,11 @@ li {
 
   .label input {
     padding: 0 10px;
+  }
+
+  .label[prepend] input,
+  .label[append] input {
+    padding: 0 5px;
   }
 
   .prepend {
