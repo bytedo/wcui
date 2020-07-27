@@ -1,7 +1,7 @@
 {
-  "name": "doui-anot",
-  "version": "2.0.1",
-  "description": "基于Anot框架的doUI组件库。仅支持type=module的现代浏览器。",
+  "name": "wcui",
+  "version": "2.0.0",
+  "description": "基于c开发的一套UI库, 面向未来, 面向electron",
   "main": "index.js",
   "scripts": {
     "start": "node ./build.dev.js",
@@ -11,12 +11,11 @@
     "type": "git",
     "url": "git+https://github.com/yutent/doui.git"
   },
-  "keywords": ["doui", "Anot"],
+  "keywords": ["web-components", "wc", "components", "yutent"],
   "author": "yutent",
   "license": "MIT",
   "dependencies": {},
   "devDependencies": {
-    "anot": "^2.1.1",
     "chalk": "^2.4.2",
     "chokidar": "^1.7.0",
     "es.shim": "^1.1.2",

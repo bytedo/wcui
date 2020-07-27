@@ -184,13 +184,6 @@ if (fs.isdir(buildDir)) {
 }
 fs.mkdir(buildDir)
 
-let list = fs.ls('./node_modules/anot/dist/')
-list.forEach(it => {
-  fs.cp(it, path.resolve(buildDir, path.parse(it).base))
-})
-
-log('复制anot框架文件完成...')
-
 /*----------------------------------------------*/
 /*----------------------------------------------*/
 /*----------------------------------------------*/

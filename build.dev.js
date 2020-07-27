@@ -199,15 +199,3 @@ chokidar
   .on('ready', () => {
     log(chalk.red('预处理完成,监听文件变化中,请勿关闭本窗口...'))
   })
-
-chokidar
-  .watch(path.resolve('./node_modules/anot/dist/'))
-  .on('all', (act, file) => {
-    if (act === 'add' || act === 'change') {
-      log('复制: %s', chalk.green(file))
-      fs.cp(file, path.resolve(buildDir, path.parse(file).base))
-    }
-  })
-  .on('ready', () => {
-    log('复制anot框架文件完成...')
-  })

@@ -1,17 +1,16 @@
 ![doui](./slogan.jpg)
 
-## Anot 框架
-> `Anot` 是`Anot not only templateEngine`的缩写。
-> 它是一款迷你,易用、高性能的前端MVVM框架, fork于avalon。进行了大量的重构,精简部分冗余的API, 同时针对组件拓展进行了优化。
 
-
-## doUI 组件库
-> doUI组件库是基于`Web Components`开发的一套高效,轻量,可定制的现代化组件库。
+## wcUI 组件库
+> wcUI组件库是基于`Web Components`开发的一套高效,轻量,可定制的现代化组件库。
 >> 2.x版进行了大量重构, 专门适配支持 type=module的浏览器(着重于electron/node-webkit)。移除了原先对低版本浏览器的兼容代码, 更加高效。
 
 
 ##  亮点
-> 框架有着最简洁的API,学习成本为市面上所有的组件/框架中是最低的。 而`Anot`框架也是目前市面上所有的mvvm框架中**最接近原生体验的**。
+> - 简洁, 没有过多的动画, 结构尽最大的能力做到扁平
+> - 没有过多的API, 零配置也能美观
+> - 恰到好处的样式穿透, 更契合有特殊需求的你
+> - 基于WC, 很好的跑在`vue/react/angular/anot/jquery/native js`项目上...
 
 
 ## 开发进度&计划
@@ -19,7 +18,8 @@
 - [x] 徽标组件(`wc-badge`)
 - [x] codemirror插件(第三方插件,整合适配)
 - [ ] 倒计时组件(`wc-counter`)
-- [x] 拖拽指令插件(`:drag`)
+- [x] 拖拽指令(`drag.core`, 通用性插件)
+- [x] 拖拽指令插件(`:drag`, anot.js专用)
 - [x] 表单组件-按钮(`wc-button`)
 - [x] 表单组件-复选框(`wc-checkbox`)
 - [x] 表单组件-文本输入框(`wc-input`)
