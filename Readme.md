@@ -1,4 +1,4 @@
-![doui](./slogan.jpg)
+![wcui](./slogan.jpg)
 
 
 ## wcUI 组件库

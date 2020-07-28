@@ -1,7 +1,7 @@
 {
-  "name": "wcui",
+  "name": "@cc0/wcui",
   "version": "2.0.0",
-  "description": "基于c开发的一套UI库, 面向未来, 面向electron",
+  "description": "基于wc开发的一套UI库, 面向未来, 面向electron",
   "main": "index.js",
   "scripts": {
     "start": "node ./build.dev.js",
