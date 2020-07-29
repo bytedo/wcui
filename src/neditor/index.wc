@@ -121,6 +121,13 @@ wc-scroll {
   }
 }
 
+:host([disabled]) {
+  .neditor {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
 .font-layer,
 .color-layer,
 .link-layer {
@@ -273,7 +280,9 @@ function renderToolbar(list) {
 export default class Neditor {
   props = {
     toolbar: null,
-    value: ''
+    value: '',
+    readonly: false,
+    disabled: false
   }
 
   __init__() {
@@ -287,6 +296,57 @@ export default class Neditor {
     this.__COLOR__ = ct.children[3]
     this.__LINK__ = ct.children[4]
     this.__LINK_BTN__ = this.__LINK__.querySelector('wc-button')
+  }
+
+  get readOnly() {
+    return this.props.readonly
+  }
+
+  set readOnly(val) {
+    var type = typeof val
+
+    if (val === this.props.readonly) {
+      return
+    }
+
+    if ((type === 'boolean' && val) || type !== 'boolean') {
+      this.props.readonly = true
+      this.setAttribute('readonly', '')
+      this.__EDITOR__.removeAttribute('contenteditable')
+    } else {
+      this.props.readonly = false
+      this.removeAttribute('readonly')
+      this.__EDITOR__.setAttribute('contenteditable', true)
+    }
+  }
+
+  get disabled() {
+    return this.props.disabled
+  }
+
+  set disabled(val) {
+    var type = typeof val
+
+    if (val === this.props.disabled) {
+      return
+    }
+
+    log(
+      this.__EDITOR__,
+      '------',
+      val,
+      (type === 'boolean' && val) || type !== 'boolean'
+    )
+
+    if ((type === 'boolean' && val) || type !== 'boolean') {
+      this.props.disabled = true
+      this.setAttribute('disabled', '')
+      this.__EDITOR__.removeAttribute('contenteditable')
+    } else {
+      this.props.disabled = false
+      this.removeAttribute('disabled')
+      this.__EDITOR__.setAttribute('contenteditable', true)
+    }
   }
 
   get value() {
@@ -379,17 +439,26 @@ export default class Neditor {
     /* ------------------------------ */
 
     // 工具栏点击事件
-    this._toolFn = $.bind(this.__TOOLBAR__, 'click', ev => {
+    this._toolFn = $.catch(this.__TOOLBAR__, 'click', ev => {
+      var target = ev.target
+      var act, val
+
       this.restoreSelection()
+
       if (ev.target === ev.currentTarget) {
         return
       }
-      let target = ev.target
+
+      if (this.props.readonly || this.props.disabled) {
+        return ev.preventDefault()
+      }
+
       while (target.tagName !== 'SPAN') {
         target = target.parentNode
       }
-      var act = target.dataset.act
-      var val = ''
+
+      act = target.dataset.act
+      val = ''
 
       switch (act) {
         case 'font':
@@ -504,6 +573,8 @@ export default class Neditor {
             '<img src="$1">'
           )
           .replace(/<(?!a|img)([\w\-]+)[^>]*>/g, '<$1>')
+          .replace(/<xml[^>]*?>[\w\W]*?<\/xml>/g, '')
+          .replace(/<style>[\w\W]*?<\/style>/g, '')
 
         return this.exec('insertHtml', html)
       }
@@ -563,7 +634,11 @@ export default class Neditor {
 
       case 'readonly':
       case 'disabled':
-        this[name] = true
+        var k = name
+        if (k === 'readonly') {
+          k = 'readOnly'
+        }
+        this[k] = true
         break
 
       default:
