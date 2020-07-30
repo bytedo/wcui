@@ -331,13 +331,6 @@ export default class Neditor {
       return
     }
 
-    log(
-      this.__EDITOR__,
-      '------',
-      val,
-      (type === 'boolean' && val) || type !== 'boolean'
-    )
-
     if ((type === 'boolean' && val) || type !== 'boolean') {
       this.props.disabled = true
       this.setAttribute('disabled', '')

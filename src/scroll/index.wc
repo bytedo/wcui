@@ -243,6 +243,10 @@ export default class Scroll {
       this.__Y__.style.height = yh + 'px'
     })
 
+    this._inactiveFn = $.bind(this.__BOX__, 'mouseleave', ev => {
+      delete this._active
+    })
+
     // 鼠标滚动事件
     this._wheelFn = $.bind(this.__BOX__, 'wheel', ev => {
       // 禁用状态, 不允许滚动
@@ -343,6 +347,8 @@ export default class Scroll {
         }
       }
 
+      this._active = true
+
       this.stamp = now
       this.dispatchEvent(
         new CustomEvent('scroll', {
@@ -362,6 +368,7 @@ export default class Scroll {
         }
 
         if (startY !== null) {
+          this._active = true
           moveY = this._fetchScrollY(thumbY + ev.pageY - startY)
         }
       },
@@ -400,6 +407,27 @@ export default class Scroll {
       $.bind(document, 'mouseup', mouseupFn)
     })
 
+    $.catch(document, 'keydown', ev => {
+      if (this._active) {
+        var { oh, sh } = this.props
+        switch (ev.keyCode) {
+          case 33: // pageUp
+            this.scrollTop -= oh
+            break
+          case 34: // pageDown
+            this.scrollTop += oh
+            break
+          case 35: // End
+            this.scrollTop = sh
+            break
+          case 36: // Home
+            this.scrollTop = 0
+            break
+        }
+        ev.preventDefault()
+      }
+    })
+
     this.__observer = new MutationObserver(this._initFn)
     this.__observer.observe(this, {
       childList: true,
@@ -410,7 +438,9 @@ export default class Scroll {
 
   unmount() {
     this.__observer.disconnect()
+
     $.unbind(this.__BOX__, 'mouseenter', this._initFn)
+    $.unbind(this.__BOX__, 'mouseleave', this._inactiveFn)
     $.unbind(this.__BOX__, 'wheel', this._wheelFn)
   }
 
