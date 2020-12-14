@@ -13,7 +13,6 @@
 
   .container {
     overflow: hidden;
-    position: relative;
     width: 100%;
     height: 100%;
   }
@@ -110,13 +109,16 @@ export default class Scroll {
     thumbX: 0,
     thumbY: 0,
     disabled: false,
-    axis: 'xy' // 滚动方向, 默认x轴和y轴都可以滚动
+    axis: 'xy', // 滚动方向, 默认x轴和y轴都可以滚动
+    delay: 1000, // 节流延迟
+    distance: 1 // 触发距离阀值, 单位像素
   }
   __init__() {
     /* render */
     this.__BOX__ = this.root.children[1]
     this.__X__ = this.root.children[2].children[0]
     this.__Y__ = this.root.children[3].children[0]
+    this.__last__ = 0
   }
 
   get scrollTop() {
@@ -155,6 +157,10 @@ export default class Scroll {
 
   get scrollHeight() {
     return this.__BOX__.scrollHeight
+  }
+
+  get scrollWidth() {
+    return this.__BOX__.scrollWidth
   }
 
   get disabled() {
@@ -203,6 +209,30 @@ export default class Scroll {
     return moveY
   }
 
+  _fireReachEnd(action = 'reach-bottom') {
+    var { sh, oh, delay, disabled } = this.props
+    var top = this.__BOX__.scrollTop
+    var now = Date.now()
+
+    if (disabled) {
+      return
+    }
+    if (now - this.__last__ > delay) {
+      if (action === 'reach-bottom') {
+        if (oh + top < sh) {
+          return
+        }
+      } else {
+        if (top > 0) {
+          return
+        }
+      }
+
+      this.__last__ = now
+      this.dispatchEvent(new CustomEvent(action))
+    }
+  }
+
   mounted() {
     // 初始化滚动条的位置和长度
     this._initFn = $.bind(this.__BOX__, 'mouseenter', ev => {
@@ -215,8 +245,9 @@ export default class Scroll {
       var oh = this.__BOX__.offsetHeight
       var sh = this.__BOX__.scrollHeight
 
-      var yh = ((oh * oh) / sh) >> 0
-      var xw = ((ow * ow) / sw) >> 0
+      var yh = ((oh * oh) / sh) >> 0 // 滚动条的高度
+      var xw = ((ow * ow) / sw) >> 0 // 滚动条的宽度
+
       if (yh < 50) {
         yh = 50
       }
@@ -319,6 +350,10 @@ export default class Scroll {
 
           this.props.thumbY = fixedY
           this.__Y__.style.transform = `translateY(${fixedY}px)`
+
+          if (Math.abs(deltaY) > this.props.distance) {
+            this._fireReachEnd(deltaY > 0 ? 'reach-bottom' : 'reach-top')
+          }
         }
       }
 
@@ -373,6 +408,9 @@ export default class Scroll {
         }
       },
       mouseupFn = ev => {
+        if (Math.abs(ev.pageY - startY) > this.props.distance) {
+          this._fireReachEnd(ev.pageY > startY ? 'reach-bottom' : 'reach-top')
+        }
         startX = null
         startY = null
         this.props.thumbX = moveX
@@ -410,21 +448,28 @@ export default class Scroll {
     $.catch(document, 'keydown', ev => {
       if (this._active) {
         var { oh, sh } = this.props
+        var exec = false
         switch (ev.keyCode) {
           case 33: // pageUp
+            exec = true
             this.scrollTop -= oh
             break
           case 34: // pageDown
+            exec = true
             this.scrollTop += oh
             break
           case 35: // End
+            exec = true
             this.scrollTop = sh
             break
           case 36: // Home
+            exec = true
             this.scrollTop = 0
             break
         }
-        ev.preventDefault()
+        if (exec) {
+          ev.preventDefault()
+        }
       }
     })
 
@@ -451,6 +496,12 @@ export default class Scroll {
         break
       case 'disabled':
         this[name] = true
+        break
+      case 'delay':
+        this.props.delay = +val || 1000
+        break
+      case 'distance':
+        this.props.distance = +val || 1
         break
     }
   }

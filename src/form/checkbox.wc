@@ -1,163 +1,36 @@
 <template>
-  <label>
-    <wc-icon class="dot" is="checkbox-off"></wc-icon>
-    <slot></slot>
-  </label>
+  <slot />
 </template>
 
 <style lang="scss">
 :host {
-  display: inline-block;
-  line-height: 1;
-  font-size: 14px;
-
-  label {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-width: 32px;
-    height: 32px;
-    padding: 0 5px;
-    line-height: 0;
-    -moz-user-select: none;
-    user-select: none;
-    white-space: nowrap;
-    cursor: inherit;
-    color: nth($cgr, 3);
-  }
-
-  .dot {
-    --size: 18px;
-    padding: 2px;
-    margin-right: 3px;
-  }
-}
-
-:host([readonly]) {
-  opacity: 0.8;
-}
-
-:host([disabled]) {
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-:host([size='large']) {
-  font-size: 16px;
-  label {
-    height: 42px;
-  }
-  .dot {
-    --size: 22px;
-  }
-}
-:host([size='medium']) {
-  label {
-    height: 38px;
-  }
-  .dot {
-    --size: 20px;
-  }
-}
-:host([size='mini']) {
-  font-size: 12px;
-  label {
-    height: 20px;
-  }
-  .dot {
-    --size: 14px;
-  }
-}
-
-:host([color='red']) label.checked {
-  color: nth($cr, 1);
-  .dot {
-    border-color: nth($cr, 1);
-  }
-  .dot::after {
-    background: nth($cr, 1);
-  }
-}
-
-:host([color='blue']) label.checked {
-  color: nth($cb, 1);
-  .dot {
-    border-color: nth($cb, 1);
-  }
-  .dot::after {
-    background: nth($cb, 1);
-  }
-}
-
-:host([color='green']) label.checked {
-  color: nth($cg, 1);
-  .dot {
-    border-color: nth($cg, 1);
-  }
-  .dot::after {
-    background: nth($cg, 1);
-  }
-}
-
-:host([color='teal']) label.checked {
-  color: nth($ct, 1);
-  .dot {
-    border-color: nth($ct, 1);
-  }
-  .dot::after {
-    background: nth($ct, 1);
-  }
-}
-
-:host([color='orange']) label.checked {
-  color: nth($co, 1);
-  .dot {
-    border-color: nth($co, 1);
-  }
-  .dot::after {
-    background: nth($co, 1);
-  }
-}
-
-:host([color='dark']) label.checked {
-  color: nth($cd, 1);
-  .dot {
-    border-color: nth($cd, 1);
-  }
-  .dot::after {
-    background: nth($cd, 1);
-  }
-}
-
-:host([color='purple']) label.checked {
-  color: nth($cpp, 1);
-  .dot {
-    border-color: nth($cpp, 1);
-  }
-  .dot::after {
-    background: nth($cpp, 1);
-  }
+  display: inline-flex;
 }
 </style>
 
 <script>
-import '../icon/index'
 import $ from '../utils'
+import './checkbox-item'
 
 export default class Checkbox {
   props = {
-    label: '',
-    color: '',
-    value: [],
-    checked: false,
-    readonly: false,
-    disabled: false
+    value: []
   }
+
   __init__() {
     /* render */
+  }
 
-    this.__SWITCH__ = this.root.lastElementChild
-    this.__ICO__ = this.__SWITCH__.children[0]
+  _updateChildrenStat() {
+    Array.from(this.children).forEach(it => {
+      if (it.tagName === 'WC-CHECKBOX-ITEM' && it.root) {
+        if (this.value.includes(it.value)) {
+          it.checked = true
+        } else {
+          it.checked = false
+        }
+      }
+    })
   }
 
   get value() {
@@ -165,106 +38,41 @@ export default class Checkbox {
   }
 
   set value(val) {
-    if (Array.isArray(val)) {
-      this.props.value = val
-      this.checked = this.props.value.includes(this.props.label)
-    } else {
-      console.error('checkbox组件的value必须是数组, 当前为: ' + typeof val)
-    }
-  }
-
-  get checked() {
-    return this.props.checked
-  }
-
-  set checked(val) {
-    this.props.checked = !!val
-    var { value, checked, label, color } = this.props
-    this.__SWITCH__.classList.toggle('checked', checked)
-    this.__ICO__.setAttribute('is', 'checkbox-' + (checked ? 'on' : 'off'))
-
-    var idx = value.indexOf(label)
-    if (checked) {
-      this.__ICO__.setAttribute('color', color)
-      if (idx < 0) {
-        value.push(label)
-      }
-    } else {
-      this.__ICO__.removeAttribute('color')
-      if (~idx) {
-        value.splice(idx, 1)
-      }
-    }
-  }
-
-  get readOnly() {
-    return this.props.readonly
-  }
-
-  set readOnly(val) {
-    var type = typeof val
-
-    if (val === this.props.readonly) {
+    if (val === this.props.value) {
       return
     }
-    if ((type === 'boolean' && val) || type !== 'boolean') {
-      this.props.readonly = true
-      this.setAttribute('readonly', '')
-    } else {
-      this.props.readonly = false
-      this.removeAttribute('readonly')
-    }
-  }
-
-  get disabled() {
-    return this.props.disabled
-  }
-
-  set disabled(val) {
-    var type = typeof val
-
-    if (val === this.props.disabled) {
-      return
-    }
-    if ((type === 'boolean' && val) || type !== 'boolean') {
-      this.props.disabled = true
-      this.setAttribute('disabled', '')
-    } else {
-      this.props.disabled = false
-      this.removeAttribute('disabled')
-    }
+    this.props.value = val
+    this._updateChildrenStat()
   }
 
   mounted() {
-    this._handlClick = $.bind(this, 'click', ev => {
-      ev.preventDefault()
-
-      if (!this.disabled && !this.readOnly) {
-        this.checked = !this.checked
-        this.dispatchEvent(new CustomEvent('input'))
+    this._pickedFn = $.bind(this, 'child-picked', ev => {
+      var tmp = [...this.props.value]
+      var idx = tmp.indexOf(ev.detail.value)
+      if (ev.detail.checked) {
+        if (idx < 0) {
+          tmp.push(ev.detail.value)
+        }
+      } else {
+        if (~idx) {
+          tmp.splice(idx, 1)
+        }
       }
+      this.props.value = tmp
+      this.dispatchEvent(new CustomEvent('input'))
     })
   }
 
   unmount() {
-    $.unbind(this, 'click', this._handlClick)
+    $.unbind(this, 'child-picked', this._pickedFn)
   }
 
   watch() {
     switch (name) {
-      case 'label':
-      case 'color':
-        this.props[name] = val
-        break
-
-      case 'checked':
-      case 'readonly':
-      case 'disabled':
-        var k = name
-        if (k === 'readonly') {
-          k = 'readOnly'
+      case 'value':
+        if (val) {
+          this.value = val.split(/,\s*?/)
         }
-        this[k] = true
         break
     }
   }

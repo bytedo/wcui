@@ -40,35 +40,35 @@
   height: 20px;
 }
 :host([color='red']) {
-  color: nth($cr, 1);
+  color: var(--color-red-1);
 }
 
 :host([color='blue']) {
-  color: nth($cb, 1);
+  color: var(--color-blue-1);
 }
 
 :host([color='green']) {
-  color: nth($cg, 1);
+  color: var(--color-green-1);
 }
 
 :host([color='teal']) {
-  color: nth($ct, 1);
+  color: var(--color-teal-1);
 }
 
 :host([color='orange']) {
-  color: nth($co, 1);
+  color: var(--color-orange-1);
 }
 
 :host([color='dark']) {
-  color: nth($cd, 1);
+  color: var(--color-dark-1);
 }
 
 :host([color='purple']) {
-  color: nth($cpp, 1);
+  color: var(--color-purple-1);
 }
 
 :host([color='grey']) {
-  color: nth($cgr, 1);
+  color: var(--color-grey-1);
 }
 
 @keyframes circle {

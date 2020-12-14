@@ -5,8 +5,6 @@
  *
  */
 
-'use strict'
-
 import Drag from './core'
 
 Anot.directive('drag', {

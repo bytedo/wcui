@@ -1,6 +1,6 @@
 {
-  "name": "@bd/wcui",
-  "version": "2.0.0",
+  "name": "@bytedo/wcui",
+  "version": "1.0.0",
   "description": "基于wc开发的一套UI库, 面向未来, 面向electron",
   "main": "index.js",
   "scripts": {
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yutent/doui.git"
+    "url": "git+https://github.com/bytedo/wcui.git"
   },
   "keywords": ["web-components", "wc", "components", "yutent"],
   "author": "yutent",
@@ -21,6 +21,6 @@
     "es.shim": "^1.1.2",
     "iofs": "^1.3.2",
     "node-sass": "^4.12.0",
-    "uglify-es": "^3.3.9"
+    "terser": "^5.0.0"
   }
 }

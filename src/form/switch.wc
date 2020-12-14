@@ -27,12 +27,12 @@
     padding: 3px;
     margin: 5px;
     border-radius: 21px;
-    background: nth($cp, 3);
+    background: var(--color-plain-3);
     cursor: inherit;
 
     &.checked {
       flex-direction: row-reverse;
-      background: nth($cgr, 3);
+      background: var(--color-grey-3);
     }
   }
   .dot {
@@ -83,31 +83,31 @@
 }
 
 :host([color='red']) label.checked {
-  background: nth($cr, 1);
+  background: var(--color-red-1);
 }
 
 :host([color='blue']) label.checked {
-  background: nth($cb, 1);
+  background: var(--color-blue-1);
 }
 
 :host([color='green']) label.checked {
-  background: nth($cg, 1);
+  background: var(--color-green-1);
 }
 
 :host([color='teal']) label.checked {
-  background: nth($ct, 1);
+  background: var(--color-teal-1);
 }
 
 :host([color='orange']) label.checked {
-  background: nth($co, 1);
+  background: var(--color-orange-1);
 }
 
 :host([color='dark']) label.checked {
-  background: nth($cd, 1);
+  background: var(--color-dark-1);
 }
 
 :host([color='purple']) label.checked {
-  background: nth($cpp, 1);
+  background: var(--color-purple-1);
 }
 </style>
 

@@ -4,8 +4,6 @@
  * @date 2019/08/23 19:41:21
  */
 
-'use strict'
-
 import $ from '../utils'
 
 const DEF_OPT = {

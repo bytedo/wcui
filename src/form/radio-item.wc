@@ -1,0 +1,290 @@
+<template>
+  <label>
+    <span class="dot"></span>
+    <slot />
+  </label>
+</template>
+
+<style lang="scss">
+:host {
+  display: inline-flex;
+  line-height: 1;
+  font-size: 14px;
+
+  label {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 32px;
+    height: 32px;
+    padding: 0 5px;
+    line-height: 1;
+    -moz-user-select: none;
+    user-select: none;
+    white-space: nowrap;
+    cursor: inherit;
+    color: var(--color-grey-3);
+
+    &.checked .dot::after {
+      visibility: visible;
+    }
+  }
+
+  .dot {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 18px;
+    height: 18px;
+    margin-right: 3px;
+    border: 1px solid var(--color-grey-1);
+    border-radius: 50%;
+    background: #fff;
+
+    &::after {
+      display: block;
+      visibility: hidden;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--color-grey-1);
+      content: '';
+    }
+  }
+}
+
+:host([readonly]) {
+  opacity: 0.8;
+}
+
+:host([disabled]) {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+:host([size='large']) {
+  label {
+    min-width: 58px;
+    height: 32px;
+  }
+  .dot {
+    width: 26px;
+    height: 26px;
+
+    &::after {
+      width: 18px;
+      height: 18px;
+    }
+  }
+}
+:host([size='medium']) {
+  label {
+    min-width: 50px;
+    height: 28px;
+  }
+  .dot {
+    width: 22px;
+    height: 22px;
+
+    &::after {
+      width: 14px;
+      height: 14px;
+    }
+  }
+}
+:host([size='mini']) {
+  label {
+    height: 14px;
+  }
+  .dot {
+    width: 14px;
+    height: 14px;
+
+    &::after {
+      width: 8px;
+      height: 8px;
+    }
+  }
+}
+
+:host([color='red']) label.checked {
+  color: var(--color-red-1);
+  .dot {
+    border-color: var(--color-red-1);
+  }
+  .dot::after {
+    background: var(--color-red-1);
+  }
+}
+
+:host([color='blue']) label.checked {
+  color: var(--color-blue-1);
+  .dot {
+    border-color: var(--color-blue-1);
+  }
+  .dot::after {
+    background: var(--color-blue-1);
+  }
+}
+
+:host([color='green']) label.checked {
+  color: var(--color-green-1);
+  .dot {
+    border-color: var(--color-green-1);
+  }
+  .dot::after {
+    background: var(--color-green-1);
+  }
+}
+
+:host([color='teal']) label.checked {
+  color: var(--color-teal-1);
+  .dot {
+    border-color: var(--color-teal-1);
+  }
+  .dot::after {
+    background: var(--color-teal-1);
+  }
+}
+
+:host([color='orange']) label.checked {
+  color: var(--color-orange-1);
+  .dot {
+    border-color: var(--color-orange-1);
+  }
+  .dot::after {
+    background: var(--color-orange-1);
+  }
+}
+
+:host([color='dark']) label.checked {
+  color: var(--color-dark-1);
+  .dot {
+    border-color: var(--color-dark-1);
+  }
+  .dot::after {
+    background: var(--color-dark-1);
+  }
+}
+
+:host([color='purple']) label.checked {
+  color: var(--color-purple-1);
+  .dot {
+    border-color: var(--color-purple-1);
+  }
+  .dot::after {
+    background: var(--color-purple-1);
+  }
+}
+</style>
+
+<script>
+import $ from '../utils'
+
+export default class RadioItem {
+  props = {
+    value: '',
+    checked: false,
+    readonly: false,
+    disabled: false
+  }
+  __init__() {
+    /* render */
+
+    this.__SWITCH__ = this.root.lastElementChild
+  }
+
+  get value() {
+    return this.props.value
+  }
+
+  set value(val) {
+    this.props.value = val
+  }
+
+  get checked() {
+    return this.props.checked
+  }
+
+  set checked(val) {
+    this.props.checked = !!val
+    this.__SWITCH__.classList.toggle('checked', this.props.checked)
+  }
+
+  get readOnly() {
+    return this.props.readonly
+  }
+
+  set readOnly(val) {
+    var type = typeof val
+
+    if (val === this.props.readonly) {
+      return
+    }
+    if ((type === 'boolean' && val) || type !== 'boolean') {
+      this.props.readonly = true
+      this.setAttribute('readonly', '')
+    } else {
+      this.props.readonly = false
+      this.removeAttribute('readonly')
+    }
+  }
+
+  get disabled() {
+    return this.props.disabled
+  }
+
+  set disabled(val) {
+    var type = typeof val
+
+    if (val === this.props.disabled) {
+      return
+    }
+    if ((type === 'boolean' && val) || type !== 'boolean') {
+      this.props.disabled = true
+      this.setAttribute('disabled', '')
+    } else {
+      this.props.disabled = false
+      this.removeAttribute('disabled')
+    }
+  }
+
+  mounted() {
+    if (this.value === this.parentNode.value) {
+      this.checked = true
+    }
+
+    this._handleClick = $.catch(this, 'click', ev => {
+      if (this.disabled || this.readOnly || this.checked) {
+        return
+      }
+
+      this.parentNode.dispatchEvent(
+        new CustomEvent('child-picked', { detail: this.value })
+      )
+    })
+  }
+
+  unmount() {
+    $.unbind(this, 'click', this._handleClick)
+  }
+
+  watch() {
+    switch (name) {
+      case 'value':
+        this.value = val
+        break
+
+      case 'checked':
+      case 'readonly':
+      case 'disabled':
+        var k = name
+        if (k === 'readonly') {
+          k = 'readOnly'
+        }
+        this[k] = true
+        break
+    }
+  }
+}
+</script>

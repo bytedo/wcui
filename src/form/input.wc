@@ -23,7 +23,7 @@ li {
   display: inline-block;
   user-select: none;
   -moz-user-select: none;
-  color: nth($cd, 2);
+  color: var(--color-dark-1);
   border-radius: 2px;
   cursor: text;
 }
@@ -36,9 +36,9 @@ li {
   width: 100%;
   height: 32px;
   font-size: 14px;
-  border: 1px solid nth($cp, 3);
+  border: 1px solid var(--color-plain-3);
   border-radius: inherit;
-  background: #fff;
+  background: var(--bg-color, #fff);
   color: inherit;
   cursor: inherit;
 
@@ -59,7 +59,7 @@ li {
     cursor: inherit;
 
     &::placeholder {
-      color: nth($cgr, 1);
+      color: var(--color-grey-1);
     }
   }
   textarea {
@@ -75,15 +75,15 @@ li {
     height: 30px;
     padding: 0 10px;
     line-height: 0;
-    background: nth($cp, 1);
+    background: var(--bg-color, --color-plain-1);
     white-space: nowrap;
   }
   .prepend {
-    border-right: 1px solid nth($cp, 3);
+    border-right: 1px solid var(--color-plain-3);
     border-radius: 2px 0 0 2px;
   }
   .append {
-    border-left: 1px solid nth($cp, 3);
+    border-left: 1px solid var(--color-plain-3);
     border-radius: 0 2px 2px 0;
   }
   &[prepend] .prepend,
@@ -99,7 +99,7 @@ li {
     --size: 20px;
     padding: 0 5px;
     margin: 0 5px;
-    color: nth($cgr, 2);
+    color: var(--color-grey-2);
   }
 }
 
@@ -149,7 +149,7 @@ li {
 
     &:hover,
     &[focus] {
-      background: nth($cp, 1);
+      background: var(--color-plain-1);
     }
   }
 }
@@ -162,7 +162,7 @@ li {
   cursor: not-allowed;
 
   .label {
-    background: nth($cp, 1);
+    background: var(--color-plain-1);
     opacity: 0.6;
   }
 }
@@ -172,7 +172,7 @@ li {
 :host(:focus-within) {
   @include focus1;
   .label {
-    border-color: nth($cp, 3);
+    border-color: var(--color-plain-3);
   }
 }
 :host(:focus-within[readonly]) {
@@ -277,20 +277,26 @@ export default class Input {
     value: '',
     icon: '',
     type: 'text',
-    label: '',
     placeholder: '',
-    mvidx: null, //下拉列表光标的索引ID
+    maxlength: null,
+    minlength: null,
     autofocus: false,
     readonly: false,
     disabled: false
   }
 
+  state = {
+    mvidx: null //下拉列表光标的索引ID
+  }
+
   __init__() {
     var type = this.getAttribute('type')
     var input = ''
+
     if (type !== 'textarea') {
       type = 'text'
     }
+
     input = INPUTS[type]
 
     /* render */
@@ -375,18 +381,18 @@ export default class Input {
       var items = Array.from(
         this.__LIST__.firstElementChild.firstElementChild.children
       )
-      if (this.props.mvidx === null) {
-        this.props.mvidx = 0
+      if (this.state.mvidx === null) {
+        this.state.mvidx = 0
       } else {
-        this.props.mvidx += step
+        this.state.mvidx += step
       }
-      if (this.props.mvidx < 0) {
-        this.props.mvidx = 0
-      } else if (this.props.mvidx > items.length - 1) {
-        this.props.mvidx = items.length - 1
+      if (this.state.mvidx < 0) {
+        this.state.mvidx = 0
+      } else if (this.state.mvidx > items.length - 1) {
+        this.state.mvidx = items.length - 1
       }
       items.forEach((it, i) => {
-        if (i === this.props.mvidx) {
+        if (i === this.state.mvidx) {
           this.__LIST__.firstElementChild.scrollTop = it.offsetTop - 150
           it.setAttribute('focus', '')
         } else {
@@ -407,12 +413,28 @@ export default class Input {
     )
     this._handleChange(ev)
     this.__LIST__.classList.remove('show')
-    this.props.mvidx = null
+    this.state.mvidx = null
+  }
+
+  _updateAttr() {
+    var { maxlength, minlength } = this.props
+
+    if (maxlength && maxlength > 0) {
+      this.__INPUT__.setAttribute('maxlength', maxlength)
+    } else {
+      this.__INPUT__.removeAttribute('maxlength')
+    }
+    if (minlength && minlength > 0) {
+      this.__INPUT__.setAttribute('minlength', minlength)
+    } else {
+      this.__INPUT__.removeAttribute('minlength')
+    }
   }
 
   mounted() {
     var prepend = this.__PREPEND__.assignedNodes()
     var append = this.__APPEND__.assignedNodes()
+    var { type } = this.props
 
     // 相同插槽, 只允许1个
     while (prepend.length > 1) {
@@ -422,14 +444,14 @@ export default class Input {
       this.removeChild(append.pop())
     }
 
-    if (prepend.length && this.props.type !== 'textarea') {
+    if (prepend.length && type !== 'textarea') {
       this.__OUTER__.setAttribute('prepend', '')
     }
-    if (append.length && this.props.type !== 'textarea') {
+    if (append.length && type !== 'textarea') {
       this.__OUTER__.setAttribute('append', '')
     }
 
-    var { type } = this.props
+    this._updateAttr()
 
     // 键盘事件
     this._handleSubmit = $.catch(this.__INPUT__, 'keydown', ev => {
@@ -439,7 +461,7 @@ export default class Input {
       // up: 38, down: 40
       if (ev.keyCode === 38 || ev.keyCode === 40) {
         // 仅普通文本表单, 密码和多行文本框不做响应
-        if (this.type === 'text') {
+        if (type === 'text') {
           return this._moveSelect(ev)
         }
       }
@@ -447,8 +469,8 @@ export default class Input {
       // textarea 要按Ctrl Or Cmd键, 才会触发
       if (ev.keyCode === 13) {
         // 如果是输入建议存在,则第1次回车的时候, 不触发提交
-        if (this.type === 'text' && this.props.mvidx !== null) {
-          return this._fetchSelect(this.props.mvidx, ev)
+        if (type === 'text' && this.state.mvidx !== null) {
+          return this._fetchSelect(this.state.mvidx, ev)
         }
 
         if (
@@ -544,8 +566,6 @@ export default class Input {
 
         break
 
-      // label和placeholder 功能相同
-      case 'label':
       case 'placeholder':
         this.__INPUT__.setAttribute('placeholder', val)
         break
@@ -560,6 +580,12 @@ export default class Input {
 
       case 'value':
         this.value = val
+        break
+
+      case 'maxlength':
+      case 'minlength':
+        this.props[name] = val
+        this._updateAttr()
         break
 
       case 'readonly':

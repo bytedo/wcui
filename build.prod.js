@@ -6,7 +6,7 @@ const fs = require('iofs')
 const path = require('path')
 const scss = require('node-sass')
 const chalk = require('chalk')
-const uglify = require('uglify-es')
+const { minify } = require('terser')
 
 const sourceDir = path.resolve(__dirname, 'src')
 const buildDir = path.resolve(__dirname, 'dist')
@@ -15,20 +15,6 @@ const VERSION = require('./package.json').version
 const BUILD_DATE = new Date().format()
 
 const BASE_SCSS = `
-$ct: #4db6ac #26a69a #009688;
-$cg: #81c784 #66bb6a #4caf50;
-$cpp: #9575cd #9575cd #673ab7;
-$cb: #64b5f6 #42a5f5 #2196f3;
-$cr: #ff5061 #eb3b48 #ce3742;
-$co: #ffb618 #f39c12 #e67e22;
-$cp: #f2f5fc #e8ebf4 #dae1e9;
-$cgr: #bdbdbd #9e9e9e #757575;
-$cd: #62778d #526273 #425064;
-
-@mixin ts($c: all, $t: .1s, $m: ease-in-out){
-  transition:$c $t $m;
-}
-
 @mixin focus1(){
   box-shadow: 0 0 2px #88f7df;
 }
@@ -43,6 +29,36 @@ $cd: #62778d #526273 #425064;
 } 
 ::before,
 ::after{box-sizing:border-box;}
+
+:host {
+  --color-teal-1: #4db6ac;
+  --color-teal-2: #26a69a;
+  --color-teal-3: #009688;
+  --color-green-1: #81c784;
+  --color-green-2: #66bb6a;
+  --color-green-3: #4caf50;
+  --color-purple-1: #9575cd;
+  --color-purple-2: #9575cd;
+  --color-purple-3: #673ab7;
+  --color-blue-1: #64b5f6;
+  --color-blue-2: #42a5f5;
+  --color-blue-3: #2196f3;
+  --color-red-1: #ff5061;
+  --color-red-2: #eb3b48;
+  --color-red-3: #ce3742;
+  --color-orange-1: #ffb618;
+  --color-orange-2: #f39c12;
+  --color-orange-3: #e67e22;
+  --color-plain-1: #f2f5fc;
+  --color-plain-2: #e8ebf4;
+  --color-plain-3: #dae1e9;
+  --color-grey-1: #bdbdbd;
+  --color-grey-2: #9e9e9e;
+  --color-grey-3: #757575;
+  --color-dark-1: #62778d;
+  --color-dark-2: #526273;
+  --color-dark-3: #425064;
+}
 `
 
 function parseName(str) {
@@ -62,14 +78,14 @@ const compileJs = (entry, output) => {
   let t1 = Date.now()
   let buf = fs.cat(entry).toString()
   buf = fixImport(buf)
-  let { code } = uglify.minify(buf)
-
-  log(
-    '编译JS: %s, 耗时 %s ms',
-    chalk.green(entry),
-    chalk.yellow(Date.now() - t1)
-  )
-  fs.echo(code, output)
+  minify(buf, { sourceMap: false }).then(res => {
+    log(
+      '编译JS: %s, 耗时 %s ms',
+      chalk.green(entry),
+      chalk.yellow(Date.now() - t1)
+    )
+    fs.echo(res.code, output)
+  })
 }
 
 // 编译样式
@@ -93,25 +109,31 @@ function mkWCFile({ style, html, js }) {
   html = html.replace(/\s+/g, ' ')
 
   let name = ''
-  let props = ''
 
-  js = js.replace(/props = (\{\}|\{[\w\W]*?\n\s{2}?\})/, function(s, m) {
-    props = m
-    var attr = new Function(
-      `var props = ${m}, attr = []; for(var i in props){attr.push(i)}; return attr`
-    )()
-    return `static get observedAttributes() {
-        return ${JSON.stringify(attr)}
-      }
-      `
+  js = js.replace(/props = (\{\}|\{[\w\W]*?\n\s{2}?\})/, function(str) {
+    var attr = str
+      .split(/\n+/)
+      .slice(1, -1)
+      .map(it => {
+        var tmp = it.split(':')
+        return tmp[0].trim()
+      })
+    return `
+    
+  static get observedAttributes() {
+    return ${JSON.stringify(attr)}
+  }
+
+  ${str}
+  `
   })
 
   js = fixImport(js)
-    .replace(/class ([a-zA-Z0-9]+)/, function(s, m) {
+    .replace(/export default class ([a-zA-Z0-9]+)/, function(s, m) {
       name = m
       return `${s} extends HTMLElement `
     })
-    .replace(/__init__\(\)\s+\{/, 'constructor() {\n super();')
+    .replace(/__init__\(\)\s+\{/, 'constructor() {\n    super();')
     .replace(
       '/* render */',
       `
@@ -121,12 +143,7 @@ function mkWCFile({ style, html, js }) {
         enumerable: false,
         configurable: true
       })
-      Object.defineProperty(this, 'props', {
-        value: ${props},
-        writable: true,
-        enumerable: false,
-        configurable: true
-      })
+
 
       this.root.innerHTML = \`<style>${style}</style>${html}\`
       `
@@ -139,17 +156,14 @@ function mkWCFile({ style, html, js }) {
     )
     .replace('adopted()', 'adoptedCallback()')
 
-  let res = uglify.minify(js)
-
-  return `/**
- *
- * @authors yutent (yutent.io@gmail.com)
- * @date    ${BUILD_DATE}
- * @version v${VERSION}
- * 
- */
-
-'use strict'
+  return minify(js, { sourceMap: false }).then(res => {
+    return `/**
+  *
+  * @authors yutent (yutent.io@gmail.com)
+  * @date    ${BUILD_DATE}
+  * @version v${VERSION}
+  * 
+  */
 
 ${res.code}
 
@@ -157,6 +171,7 @@ if(!customElements.get('wc-${parseName(name)}')){
   customElements.define('wc-${parseName(name)}', ${name})
 }
 `
+  })
 }
 
 const compileWC = (entry, output) => {
@@ -170,8 +185,9 @@ const compileWC = (entry, output) => {
   html = html ? html[1] : ''
   js = js ? js[1] : ''
 
-  let result = mkWCFile({ style, html, js })
-  fs.echo(result, output)
+  mkWCFile({ style, html, js }).then(txt => {
+    fs.echo(txt, output)
+  })
 }
 
 /*=======================================================*/

@@ -6,28 +6,27 @@
 :host {
   display: block;
   line-height: 1.5;
-  color: nth($cd, 1);
+  color: var(--color-dark-1);
   font-size: 14px;
 }
 
 a {
   text-decoration: underline;
-  color: nth($ct, 2);
+  color: var(--color-teal-2);
 }
 a:hover {
-  color: nth($ct, 1);
+  color: var(--color-teal-1);
   text-decoration: none;
 }
 
 em,
 del {
-  color: nth($cgr, 2);
+  color: var(--color-grey-2);
 }
 strong,
 strong em,
-strong,
-del {
-  color: nth($cd, 3);
+strong {
+  color: var(--color-dark-3);
 }
 a {
   strong,
@@ -41,7 +40,7 @@ del {
   padding: 0 2px;
 }
 p {
-  margin: 15px 0;
+  margin: 12px 0;
 }
 img {
   max-width: 100%;
@@ -51,93 +50,24 @@ blockquote.md-quote {
   margin: 10px 0;
   padding: 5px 10px;
   line-height: 1.5;
-  border-left: 5px solid nth($ct, 1);
+  border-left: 5px solid var(--color-teal-1);
   background: #f2faf7;
-  color: nth($cgr, 1);
+  color: var(--color-grey-2);
   p {
     margin: 0;
-  }
-}
-
-/* 提醒文本 */
-.md-warn,
-.md-mark {
-  display: inline-block;
-  position: relative;
-  min-height: 35px;
-  margin: 3px 0;
-  padding: 3px 8px 3px 35px;
-  line-height: 27px;
-  border: 1px solid nth($co, 2);
-  border-radius: 5px;
-  background: #fffbed;
-  color: nth($co, 3);
-  word-break: break-all;
-
-  p {
-    margin: 0 !important;
-  }
-  i {
-    position: absolute;
-    left: 8px;
-    top: 6px;
-    line-height: 1;
-    font-size: 20px;
-    color: nth($cr, 2);
-  }
-}
-.md-mark {
-  border-color: nth($ct, 1);
-  color: nth($ct, 3);
-  background: #edfbf8;
-  i {
-    color: nth($ct, 3);
-  }
-}
-.md-task {
-  position: relative;
-  display: inline-block;
-  width: auto;
-  height: 30px;
-  padding-right: 10px;
-  line-height: 30px;
-  text-align: center;
-  cursor: default;
-
-  &__box {
-    float: left;
-    width: 18px;
-    height: 18px;
-    margin: 6px;
-    margin-left: 0;
-    line-height: 1;
-    border: 1px solid nth($cgr, 1);
-    border-radius: 3px;
-    font-size: 16px;
-    text-align: center;
-  }
-  &.done {
-    .md-task__box {
-      color: nth($cgr, 1);
-      border-color: nth($cp, 3);
-      background: nth($cp, 3);
-    }
-    .md-task__text {
-      color: nth($cgr, 1);
-      text-decoration: line-through;
-    }
   }
 }
 
 fieldset.md-hr {
   margin: 30px 0;
   border: 0;
-  border-top: 1px dashed nth($cp, 3);
+  border-top: 1px dashed var(--color-plain-3);
 
   legend {
     padding: 0 5px;
-    color: nth($cgr, 1);
+    color: var(--color-grey-1);
     text-align: center;
+    font-size: 12px;
     &::before {
       content: '华丽丽的分割线';
     }
@@ -191,8 +121,8 @@ h5,
 h6 {
   a {
     &::before {
-      content: '# ';
-      color: nth($ct, 1);
+      content: '∮ ';
+      color: var(--color-teal-1);
       font-weight: normal;
     }
   }
@@ -205,7 +135,7 @@ h1 {
 h2 {
   margin: 20px 0;
   font-size: 22px;
-  border-bottom: 1px solid nth($cp, 2);
+  border-bottom: 1px solid var(--color-plain-2);
 }
 h3 {
   margin: 20px 0 15px;
@@ -224,27 +154,27 @@ table {
     background-color: #fff;
   }
   thead tr {
-    background: nth($cp, 1);
+    background: var(--color-plain-1);
   }
   th,
   td {
     padding: 6px 13px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--color-plain-2);
   }
   th {
     font-weight: bold;
   }
   tr:nth-child(2n) {
-    background-color: #fbfbfb;
+    background-color: #fcfdff;
   }
 }
 
 code.inline {
-  display: inline-block;
+  display: inline;
   margin: 0 2px;
   padding: 0 2px;
-  color: nth($co, 3);
-  background: nth($cp, 1);
+  color: var(--color-orange-3);
+  background: var(--color-plain-1);
   border-radius: 2px;
   font-family: Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
@@ -252,9 +182,10 @@ code.inline {
 
 <script>
 import $ from '../utils'
-import '../code/index'
-
 import markd from './core'
+
+import '../code/index'
+import '../form/checkbox'
 
 export default class Markd {
   props = {
@@ -265,20 +196,51 @@ export default class Markd {
     /* render */
 
     var elem = this.root.children[1]
-
     this.__BOX__ = elem
   }
 
-  mounted() {
-    this.__BOX__.innerHTML = markd(this.textContent)
-    this.textContent = ''
+  __parse__() {
+    var txt = this.textContent.trim()
+    this.value = txt
+  }
 
-    $.bind(this.__BOX__, 'click', ev => {
+  set value(txt) {
+    if (txt) {
+      this.__BOX__.innerHTML = markd(txt)
+      this.textContent = ''
+    }
+  }
+
+  clear() {
+    this.__BOX__.textContent = ''
+    this.textContent = ''
+  }
+
+  mounted() {
+    this.__parse__()
+
+    this._headClickFn = $.bind(this.__BOX__, 'click', ev => {
       if (ev.target.className === 'md-head-link') {
         var ot = ev.target.offsetTop
         document.documentElement.scrollTop = ot
       }
     })
+
+    this.__observer = new MutationObserver(_ => {
+      this.__parse__()
+    })
+
+    this.__observer.observe(this, {
+      childList: true,
+      subtree: true,
+      characterData: true
+    })
+  }
+
+  unmount() {
+    $.unbind(this.__BOX__, 'click', this._headClickFn)
+    this.__observer.disconnect()
+    this.clear()
   }
 }
 </script>

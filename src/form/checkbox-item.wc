@@ -1,0 +1,283 @@
+<template>
+  <label>
+    <wc-icon class="dot" is="checkbox-off"></wc-icon>
+    <slot />
+  </label>
+</template>
+
+<style lang="scss">
+:host {
+  display: inline-flex;
+  line-height: 1;
+  font-size: 14px;
+
+  label {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 32px;
+    height: 32px;
+    padding: 0 5px;
+    line-height: 0;
+    -moz-user-select: none;
+    user-select: none;
+    white-space: nowrap;
+    cursor: inherit;
+    color: var(--color-grey-3);
+  }
+
+  .dot {
+    --size: 18px;
+    padding: 2px;
+    margin-right: 3px;
+  }
+}
+
+:host([readonly]) {
+  opacity: 0.8;
+}
+
+:host([disabled]) {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+:host([size='large']) {
+  font-size: 16px;
+  label {
+    height: 42px;
+  }
+  .dot {
+    --size: 22px;
+  }
+}
+:host([size='medium']) {
+  label {
+    height: 38px;
+  }
+  .dot {
+    --size: 20px;
+  }
+}
+:host([size='mini']) {
+  font-size: 12px;
+  label {
+    height: 20px;
+  }
+  .dot {
+    --size: 14px;
+  }
+}
+
+:host([color='red']) label.checked {
+  color: var(--color-red-1);
+  .dot {
+    border-color: var(--color-red-1);
+  }
+  .dot::after {
+    background: var(--color-red-1);
+  }
+}
+
+:host([color='blue']) label.checked {
+  color: var(--color-blue-1);
+  .dot {
+    border-color: var(--color-blue-1);
+  }
+  .dot::after {
+    background: var(--color-blue-1);
+  }
+}
+
+:host([color='green']) label.checked {
+  color: var(--color-green-1);
+  .dot {
+    border-color: var(--color-green-1);
+  }
+  .dot::after {
+    background: var(--color-green-1);
+  }
+}
+
+:host([color='teal']) label.checked {
+  color: var(--color-teal-1);
+  .dot {
+    border-color: var(--color-teal-1);
+  }
+  .dot::after {
+    background: var(--color-teal-1);
+  }
+}
+
+:host([color='orange']) label.checked {
+  color: var(--color-orange-1);
+  .dot {
+    border-color: var(--color-orange-1);
+  }
+  .dot::after {
+    background: var(--color-orange-1);
+  }
+}
+
+:host([color='dark']) label.checked {
+  color: var(--color-dark-1);
+  .dot {
+    border-color: var(--color-dark-1);
+  }
+  .dot::after {
+    background: var(--color-dark-1);
+  }
+}
+
+:host([color='purple']) label.checked {
+  color: var(--color-purple-1);
+  .dot {
+    border-color: var(--color-purple-1);
+  }
+  .dot::after {
+    background: var(--color-purple-1);
+  }
+}
+</style>
+
+<script>
+import '../icon/index'
+import $ from '../utils'
+
+export default class CheckboxItem {
+  props = {
+    color: '',
+    value: '',
+    checked: false,
+    readonly: false,
+    disabled: false
+  }
+  __init__() {
+    /* render */
+
+    this.__SWITCH__ = this.root.lastElementChild
+    this.__ICO__ = this.__SWITCH__.children[0]
+
+    this._isInGroup = false
+  }
+
+  _checkGroup() {
+    this._isInGroup = this.parentNode.tagName === 'WC-CHECKBOX'
+    if (this._isInGroup && this.parentNode.root) {
+      if (this.parentNode.value.includes(this.value)) {
+        this.checked = true
+      }
+    }
+  }
+
+  get value() {
+    return this.props.value
+  }
+
+  set value(val) {
+    this.props.value = val
+  }
+
+  get checked() {
+    return this.props.checked
+  }
+
+  set checked(val) {
+    this.props.checked = !!val
+    var { checked, color } = this.props
+    this.__SWITCH__.classList.toggle('checked', checked)
+    this.__ICO__.setAttribute('is', 'checkbox-' + (checked ? 'on' : 'off'))
+
+    if (checked) {
+      this.__ICO__.setAttribute('color', color)
+    } else {
+      this.__ICO__.removeAttribute('color')
+    }
+  }
+
+  get readOnly() {
+    return this.props.readonly
+  }
+
+  set readOnly(val) {
+    var type = typeof val
+
+    if (val === this.props.readonly) {
+      return
+    }
+    if ((type === 'boolean' && val) || type !== 'boolean') {
+      this.props.readonly = true
+      this.setAttribute('readonly', '')
+    } else {
+      this.props.readonly = false
+      this.removeAttribute('readonly')
+    }
+  }
+
+  get disabled() {
+    return this.props.disabled
+  }
+
+  set disabled(val) {
+    var type = typeof val
+
+    if (val === this.props.disabled) {
+      return
+    }
+    if ((type === 'boolean' && val) || type !== 'boolean') {
+      this.props.disabled = true
+      this.setAttribute('disabled', '')
+    } else {
+      this.props.disabled = false
+      this.removeAttribute('disabled')
+    }
+  }
+
+  mounted() {
+    this._checkGroup()
+
+    this._handlClick = $.bind(this, 'click', ev => {
+      ev.preventDefault()
+
+      if (this.disabled || this.readOnly) {
+        return
+      }
+
+      this.checked = !this.checked
+
+      if (this._isInGroup) {
+        this.parentNode.dispatchEvent(
+          new CustomEvent('child-picked', {
+            detail: { value: this.value, checked: this.checked }
+          })
+        )
+      } else {
+        this.dispatchEvent(new CustomEvent('input'))
+      }
+    })
+  }
+
+  unmount() {
+    $.unbind(this, 'click', this._handlClick)
+  }
+
+  watch() {
+    switch (name) {
+      case 'value':
+      case 'color':
+        this.props[name] = val
+        break
+
+      case 'checked':
+      case 'readonly':
+      case 'disabled':
+        var k = name
+        if (k === 'readonly') {
+          k = 'readOnly'
+        }
+        this[k] = true
+        break
+    }
+  }
+}
+</script>

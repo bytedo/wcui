@@ -20,7 +20,7 @@
   font-size: 12px;
   border: 1px solid #fff;
   border-radius: 16px;
-  background: nth($cr, 1);
+  background: var(--color-red-1);
   color: #fff;
   text-align: center;
   transform: translateX(100%) translateY(-50%);
@@ -34,22 +34,22 @@
   }
 }
 :host([color='dark']) .dot {
-  background: nth($cd, 1);
+  background: var(--color-dark-1);
 }
 :host([color='green']) .dot {
-  background: nth($cg, 1);
+  background: var(--color-green-1);
 }
 :host([color='blue']) .dot {
-  background: nth($cb, 1);
+  background: var(--color-blue-1);
 }
 :host([color='orange']) .dot {
-  background: nth($co, 1);
+  background: var(--color-orange-1);
 }
 :host([color='purple']) .dot {
-  background: nth($cpp, 1);
+  background: var(--color-purple-1);
 }
 :host([color='teal']) .dot {
-  background: nth($ct, 1);
+  background: var(--color-teal-1);
 }
 </style>
 

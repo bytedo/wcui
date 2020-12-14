@@ -29,7 +29,7 @@ label {
 
   wc-icon {
     margin: 0 3px;
-    @include ts(transform);
+    transition: transform 0.1s easein-out;
 
     &:hover {
       transform: scale(1.05);
@@ -55,25 +55,25 @@ label {
 }
 
 :host([color='red']) label span {
-  color: nth($cr, 1);
+  color: var(--color-red-1);
 }
 :host([color='teal']) label span {
-  color: nth($ct, 1);
+  color: var(--color-teal-1);
 }
 :host([color='green']) label span {
-  color: nth($cg, 1);
+  color: var(--color-green-1);
 }
 :host([color='grey']) label span {
-  color: nth($cgr, 1);
+  color: var(--color-grey-1);
 }
 :host([color='blue']) label span {
-  color: nth($cb, 1);
+  color: var(--color-blue-1);
 }
 :host([color='purple']) label span {
-  color: nth($cpp, 1);
+  color: var(--color-purple-1);
 }
 :host([color='orange']) label span {
-  color: nth($co, 1);
+  color: var(--color-orange-1);
 }
 
 :host([disabled]) {

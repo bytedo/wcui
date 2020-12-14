@@ -1,0 +1,475 @@
+<template>
+  <div class="color-picker">
+    <section class="preview alpha-bg">
+      <span></span>
+    </section>
+    <div class="color-panel">
+      <section class="dashboard">
+        <div class="scene"><span class="thumb"></span></div>
+        <div class="pool">
+          <span class="thumb hue-thumb"></span>
+          <input class="hue" max="360" min="0" step="1" type="range" />
+        </div>
+      </section>
+      <section class="alpha-box alpha-bg">
+        <div class="bar"></div>
+        <span class="thumb alpha-thumb"></span>
+        <input class="alpha" max="100" min="0" step="1" type="range" />
+      </section>
+      <section class="input-box">
+        <input class="input" maxlength="28" />
+        <a class="clear">清除</a>
+        <a class="submit">确定</a>
+      </section>
+    </div>
+  </div>
+</template>
+
+<style lang="scss">
+.alpha-bg {
+  background: linear-gradient(
+      45deg,
+      var(--color-grey-1) 25%,
+      transparent 25%,
+      transparent 75%,
+      var(--color-grey-1) 75%,
+      var(--color-grey-1)
+    ),
+    linear-gradient(
+      45deg,
+      var(--color-grey-1) 25%,
+      transparent 25%,
+      transparent 75%,
+      var(--color-grey-1) 75%,
+      var(--color-grey-1)
+    );
+  background-size: 12px 12px;
+  background-position: 0 0, 6px 6px;
+}
+.color-picker {
+  position: relative;
+  width: 32px;
+  height: 32px;
+
+  .preview {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    border: 1px solid var(--color-grey-1);
+    cursor: pointer;
+
+    span {
+      width: 100%;
+      height: 100%;
+      border: 3px solid #fff;
+    }
+  }
+
+  .color-panel {
+    position: absolute;
+    left: 0;
+    top: 32px;
+    width: 310px;
+    padding: 5px;
+    background: #fff;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+
+    .dashboard {
+      display: flex;
+      justify-content: space-between;
+
+      .scene {
+        overflow: hidden;
+        position: relative;
+        width: 280px;
+        height: 180px;
+        background: #f00;
+
+        &::before,
+        &::after {
+          position: absolute;
+          left: 0;
+          top: 0;
+          z-index: 0;
+          width: 100%;
+          height: 100%;
+          content: '';
+        }
+
+        &::before {
+          background: linear-gradient(to right, #fff, transparent);
+        }
+        &::after {
+          background: linear-gradient(to bottom, transparent, #000);
+        }
+
+        .thumb {
+          position: absolute;
+          z-index: 99;
+          width: 0;
+          height: 0;
+
+          &::after {
+            display: block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(32, 32, 32, 0.3);
+            box-shadow: 0 0 0 1px #fff;
+            transform: translate(-5px, -5px);
+            content: '';
+          }
+        }
+      }
+
+      .pool {
+        overflow: hidden;
+        position: relative;
+        width: 12px;
+        height: 180px;
+        background: linear-gradient(
+          to bottom,
+          #f00 0,
+          #ff0 17%,
+          #0f0 33%,
+          #0ff 50%,
+          #00f 67%,
+          #f0f 83%,
+          #f00
+        );
+
+        .thumb {
+          position: absolute;
+          left: 0;
+          top: 0;
+          z-index: 0;
+          width: 12px;
+          height: 0;
+
+          &::after {
+            display: block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #fff;
+            box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+            transform: translateY(-6px);
+            content: '';
+          }
+        }
+        .hue {
+          position: relative;
+          z-index: 1;
+          display: block;
+          width: 12px;
+          height: 180px;
+          appearance: slider-vertical;
+          opacity: 0;
+        }
+      }
+    }
+
+    .alpha-box {
+      overflow: hidden;
+      position: relative;
+      width: 100%;
+      height: 12px;
+      margin: 12px 0;
+
+      .bar {
+        position: absolute;
+        left: 0;
+        top: 0;
+        z-index: 0;
+        width: 100%;
+        height: 12px;
+        background: linear-gradient(to right, transparent, #f00);
+      }
+
+      .thumb {
+        position: absolute;
+        left: 100%;
+        top: 0;
+        z-index: 0;
+        width: 0;
+        height: 12px;
+
+        &::after {
+          display: block;
+          width: 12px;
+          height: 12px;
+          border-radius: 50%;
+          background: #fff;
+          box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+          transform: translateX(-6px);
+          content: '';
+        }
+      }
+
+      .alpha {
+        position: relative;
+        z-index: 9;
+        display: block;
+        width: 100%;
+        height: 12px;
+        opacity: 0;
+      }
+    }
+
+    .input-box {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+
+      .input {
+        width: 200px;
+        height: 24px;
+        padding: 0 6px;
+        line-height: 22px;
+        border: 1px solid var(--color-plain-3);
+        border-radius: 2px;
+        outline: none;
+        color: var(--color-dark-1);
+      }
+
+      .clear,
+      .submit {
+        font-size: 12px;
+        cursor: pointer;
+        user-select: none;
+      }
+
+      .clear {
+        color: var(--color-teal-1);
+      }
+
+      .submit {
+        padding: 2px 6px;
+        border-radius: 2px;
+        color: var(--color-plain-1);
+        background: var(--color-teal-1);
+      }
+    }
+  }
+}
+</style>
+
+<script>
+import $ from '../utils'
+import { hsb2rgb, rgb2hex, hex2rgb, rgb2hsb } from './helper'
+
+export default class Color {
+  props = {
+    value: ''
+  }
+
+  state = {
+    hsb: { h: 0, s: 100, b: 100 },
+    rgba: { r: 255, g: 0, b: 0, a: 100 }
+  }
+
+  __init__() {
+    /* render */
+
+    var elem = this.root.children[1]
+
+    this.__PREVIEW__ = elem.children[0].children[0]
+    this.__SCENE__ = elem.querySelector('.scene')
+    this.__SCENE_THUMB__ = this.__SCENE__.querySelector('.thumb')
+    this.__HUE__ = elem.querySelector('.hue')
+    this.__HUE_THUMB__ = elem.querySelector('.hue-thumb')
+    this.__ALPHA__ = elem.querySelector('.alpha')
+    this.__ALPHA_BAR__ = elem.querySelector('.alpha-box .bar')
+    this.__ALPHA_THUMB__ = elem.querySelector('.alpha-thumb')
+    this.__INPUT__ = elem.querySelector('.input')
+  }
+
+  _updateView() {
+    var { hsb, rgba } = this.state
+    var scene, color, alphaColor
+    var x, y
+
+    x = Math.ceil((hsb.s * 280) / 100)
+    y = 180 - Math.ceil((hsb.b * 180) / 100)
+
+    scene = '#' + rgb2hex(hsb2rgb({ h: hsb.h, s: 100, b: 100 }))
+    alphaColor = '#' + rgb2hex(rgba)
+
+    if (rgba.a < 100) {
+      color = `rgba(${rgba.r}, ${rgba.g}, ${rgba.b}, ${rgba.a / 100})`
+    } else {
+      color = alphaColor
+    }
+
+    this._moveSceneThumb(x, y)
+
+    this.__HUE_THUMB__.style.top = hsb.h / 2 + 'px'
+    this.__SCENE__.style.backgroundColor = scene
+    this.__PREVIEW__.style.backgroundColor = color
+    this.__ALPHA_BAR__.style.background = `linear-gradient(to right, transparent, ${alphaColor})`
+
+    this.__INPUT__.value = color
+  }
+
+  _moveSceneThumb(x, y) {
+    this.__SCENE_THUMB__.style.cssText = `left: ${x}px; top:${y}px`
+  }
+
+  _changeColor(x, y) {
+    var { rgba, hsb } = this.state
+    var alphaColor
+
+    hsb.s = ~~((100 * x) / 280)
+    hsb.b = ~~((100 * (180 - y)) / 180)
+    Object.assign(rgba, hsb2rgb(hsb))
+
+    var { r, g, b, a } = rgba
+
+    if (rgba.a < 100) {
+      this.__INPUT__.value = `rgba(${r}, ${g}, ${b}, ${a / 100})`
+    } else {
+      this.__INPUT__.value = `#${rgb2hex({ r, g, b })}`
+    }
+
+    alphaColor = `linear-gradient(to right, transparent, rgb(${r}, ${g}, ${b}))`
+
+    this.__PREVIEW__.style.backgroundColor = this.__INPUT__.value
+    this.__ALPHA_BAR__.style.background = alphaColor
+    this._moveSceneThumb(x, y)
+    this.dispatchEvent(new CustomEvent('input'))
+  }
+
+  get value() {
+    return this.__INPUT__.value
+  }
+
+  set value(val) {
+    var isHex
+    var rgb
+
+    val = val.toLowerCase()
+
+    if (!val) {
+      return
+    }
+
+    isHex = /^#[0-9a-f]{3,6}$/.test(val)
+
+    if (isHex) {
+      Object.assign(this.state.rgba, hex2rgb(val), { a: 100 })
+    } else {
+      var res = val.match(/rgba?\((\d+),\s*?(\d+),\s*?(\d+)[,\s]*?([\d\.]+)?\)/)
+      if (res) {
+        this.state.rgba = { r: +res[1], g: +res[2], b: +res[3], a: 100 }
+        if (res[4] !== undefined) {
+          this.state.rgba.a = ~~(res[4] * 100)
+        }
+      } else {
+        return
+      }
+    }
+    this.state.hsb = rgb2hsb(this.state.rgba)
+
+    this._updateView()
+  }
+
+  mounted() {
+    var handleMove
+
+    this.handleChange = $.bind(this.__INPUT__, 'change', ev => {
+      this.value = this.__INPUT__.value
+    })
+
+    this.handleDown = $.bind(this.__SCENE__, 'mousedown', ev => {
+      ev.preventDefault()
+
+      var { pageX, pageY } = ev
+      var { left, top } = $.offset(this.__SCENE__)
+      var w = 280
+      var h = 180
+      var x = pageX - left
+      var y = pageY - top
+
+      this._changeColor(x, y)
+
+      handleMove = $.bind(document, 'mousemove', ev => {
+        ev.preventDefault()
+
+        var { pageX, pageY } = ev
+
+        var x = pageX - left
+        var y = pageY - top
+        var rgb
+
+        x = x < 0 ? 0 : x > 280 ? 280 : x
+        y = y < 0 ? 0 : y > 180 ? 180 : y
+
+        this._changeColor(x, y)
+      })
+    })
+
+    this.handleUp = $.bind(document, 'mouseup', ev => {
+      ev.preventDefault()
+      $.unbind(document, 'mousemove', handleMove)
+    })
+
+    // 颜色池
+    this.handleInput1 = $.bind(this.__HUE__, 'input', ev => {
+      var h = 360 - this.__HUE__.value
+      var { s, b } = this.state.hsb
+      var rgba = this.state.rgba
+      var hsb = { h, s, b }
+      var scene, color, alphaColor
+
+      Object.assign(rgba, hsb2rgb(hsb))
+
+      this.state.hsb = hsb
+      this.state.rgba = rgba
+
+      scene = '#' + rgb2hex(hsb2rgb({ h, s: 100, b: 100 }))
+      alphaColor = '#' + rgb2hex(rgba)
+
+      if (rgba.a < 100) {
+        color = `rgba(${rgba.r}, ${rgba.g}, ${rgba.b}, ${rgba.a / 100})`
+      } else {
+        color = alphaColor
+      }
+
+      this.__HUE_THUMB__.style.top = h / 2 + 'px'
+      this.__SCENE__.style.backgroundColor = scene
+      this.__PREVIEW__.style.backgroundColor = color
+      this.__ALPHA_BAR__.style.background = `linear-gradient(to right, transparent, ${alphaColor})`
+
+      this.__INPUT__.value = color
+    })
+
+    // 透明度
+    this.handleInput2 = $.bind(this.__ALPHA__, 'input', ev => {
+      var a = this.__ALPHA__.value
+      var { r, g, b } = this.state.rgba
+      var color = `rgba(${r}, ${g}, ${b}, ${a / 100})`
+
+      this.state.rgba.a = a
+
+      this.__ALPHA_THUMB__.style.left = a + '%'
+      this.__PREVIEW__.style.backgroundColor = color
+      this.__INPUT__.value = color
+    })
+  }
+
+  unmount() {
+    $.unbind(this.__SCENE__, 'mousedown', this.handleDown)
+    $.unbind(document, 'mousedown', this.handleUp)
+    $.unbind(this.__INPUT__, 'change', this.handleChange)
+    $.unbind(this.__HUE__, 'input', this.handleInput1)
+    $.unbind(this.__ALPHA__, 'input', this.handleInput2)
+
+    delete this.handleDown
+    delete this.handleUp
+    delete this.handleChange
+    delete this.handleInput1
+    delete this.handleInput2
+  }
+}
+</script>

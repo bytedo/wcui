@@ -14,7 +14,7 @@
   border-radius: 2px;
   user-select: none;
   -moz-user-select: none;
-  color: nth($cd, 2);
+  color: var(--color-dark-2);
   font-size: 14px;
   cursor: pointer;
 
@@ -27,7 +27,7 @@
     padding: 0 10px;
     margin: auto;
     line-height: 0;
-    border: 1px solid nth($cp, 3);
+    border: 1px solid var(--color-plain-3);
     border-radius: inherit;
     white-space: nowrap;
     background: #fff;
@@ -38,11 +38,11 @@
     cursor: inherit;
 
     &:hover {
-      background: nth($cp, 1);
+      background: var(--color-plain-1);
     }
 
     &:active {
-      border-color: nth($cgr, 1);
+      border-color: var(--color-grey-1);
     }
 
     &::-moz-focus-inner {
@@ -133,15 +133,15 @@
 :host([loading]),
 :host([disabled]) {
   cursor: not-allowed;
-  color: nth($cgr, 1);
+  color: var(--color-grey-1);
   opacity: 0.6;
 
   .icon {
-    color: nth($cgr, 1);
+    color: var(--color-grey-1);
   }
   button {
     background: #fff;
-    border-color: nth($cp, 3);
+    border-color: var(--color-plain-3);
   }
 }
 
@@ -156,198 +156,198 @@
 }
 
 :host([color='red']) button {
-  background: nth($cr, 2);
+  background: var(--color-red-2);
   &:hover {
-    background: nth($cr, 1);
+    background: var(--color-red-1);
   }
   &:active {
-    background: nth($cr, 3);
+    background: var(--color-red-3);
   }
 }
 
 :host([color='red'][text]) button {
   background: transparent;
-  color: nth($cr, 2);
+  color: var(--color-red-2);
   &:hover {
-    color: nth($cr, 1);
+    color: var(--color-red-1);
   }
   &:active {
-    color: nth($cr, 3);
+    color: var(--color-red-3);
   }
 }
 
 :host([color='red'][loading]) button,
 :host([color='red'][disabled]) button {
-  background: nth($cr, 1);
+  background: var(--color-red-1);
 }
 
 :host([color='blue']) button {
-  background: nth($cb, 2);
+  background: var(--color-blue-2);
   &:hover {
-    background: nth($cb, 1);
+    background: var(--color-blue-1);
   }
   &:active {
-    background: nth($cb, 3);
+    background: var(--color-blue-3);
   }
 }
 
 :host([color='blue'][text]) button {
   background: transparent;
-  color: nth($cb, 2);
+  color: var(--color-blue-2);
   &:hover {
-    color: nth($cb, 1);
+    color: var(--color-blue-1);
   }
   &:active {
-    color: nth($cb, 3);
+    color: var(--color-blue-3);
   }
 }
 :host([color='blue'][loading]) button,
 :host([color='blue'][disabled]) button {
-  background: nth($cb, 1);
+  background: var(--color-blue-1);
 }
 
 :host([color='green']) button {
-  background: nth($cg, 2);
+  background: var(--color-green-2);
   &:hover {
-    background: nth($cg, 1);
+    background: var(--color-green-1);
   }
   &:active {
-    background: nth($cg, 3);
+    background: var(--color-green-3);
   }
 }
 :host([color='green'][text]) button {
   background: transparent;
-  color: nth($cg, 2);
+  color: var(--color-green-2);
   &:hover {
-    color: nth($cg, 1);
+    color: var(--color-green-1);
   }
   &:active {
-    color: nth($cg, 3);
+    color: var(--color-green-3);
   }
 }
 :host([color='green'][loading]) button,
 :host([color='green'][disabled]) button {
-  background: nth($cg, 1);
+  background: var(--color-green-1);
 }
 
 :host([color='teal']) button {
-  background: nth($ct, 2);
+  background: var(--color-teal-2);
   &:hover {
-    background: nth($ct, 1);
+    background: var(--color-teal-1);
   }
   &:active {
-    background: nth($ct, 3);
+    background: var(--color-teal-3);
   }
 }
 :host([color='teal'][text]) button {
   background: transparent;
-  color: nth($ct, 2);
+  color: var(--color-teal-2);
   &:hover {
-    color: nth($ct, 1);
+    color: var(--color-teal-1);
   }
   &:active {
-    color: nth($ct, 3);
+    color: var(--color-teal-3);
   }
 }
 :host([color='teal'][loading]) button,
 :host([color='teal'][disabled]) button {
-  background: nth($ct, 1);
+  background: var(--color-teal-1);
 }
 
 :host([color='orange']) button {
-  background: nth($co, 2);
+  background: var(--color-orange-2);
   &:hover {
-    background: nth($co, 1);
+    background: var(--color-orange-1);
   }
   &:active {
-    background: nth($co, 3);
+    background: var(--color-orange-3);
   }
 }
 :host([color='orange'][text]) button {
   background: transparent;
-  color: nth($co, 2);
+  color: var(--color-orange-2);
   &:hover {
-    color: nth($co, 1);
+    color: var(--color-orange-1);
   }
   &:active {
-    color: nth($co, 3);
+    color: var(--color-orange-3);
   }
 }
 :host([color='orange'][loading]) button,
 :host([color='orange'][disabled]) button {
-  background: nth($co, 1);
+  background: var(--color-orange-1);
 }
 
 :host([color='dark']) button {
-  background: nth($cd, 2);
+  background: var(--color-dark-2);
   &:hover {
-    background: nth($cd, 1);
+    background: var(--color-dark-1);
   }
   &:active {
-    background: nth($cd, 3);
+    background: var(--color-dark-3);
   }
 }
 :host([color='dark'][text]) button {
   background: transparent;
-  color: nth($cd, 2);
+  color: var(--color-dark-2);
   &:hover {
-    color: nth($cd, 1);
+    color: var(--color-dark-1);
   }
   &:active {
-    color: nth($cd, 3);
+    color: var(--color-dark-3);
   }
 }
 :host([color='dark'][loading]) button,
 :host([color='dark'][disabled]) button {
-  background: nth($cd, 1);
+  background: var(--color-dark-1);
 }
 
 :host([color='purple']) button {
-  background: nth($cpp, 2);
+  background: var(--color-purple-2);
   &:hover {
-    background: nth($cpp, 1);
+    background: var(--color-purple-1);
   }
   &:active {
-    background: nth($cpp, 3);
+    background: var(--color-purple-3);
   }
 }
 :host([color='purple'][text]) button {
   background: transparent;
-  color: nth($cpp, 2);
+  color: var(--color-purple-2);
   &:hover {
-    color: nth($cpp, 1);
+    color: var(--color-purple-1);
   }
   &:active {
-    color: nth($cpp, 3);
+    color: var(--color-purple-3);
   }
 }
 :host([color='purple'][loading]) button,
 :host([color='purple'][disabled]) button {
-  background: nth($cpp, 1);
+  background: var(--color-purple-1);
 }
 
 :host([color='grey']) button {
-  background: nth($cgr, 2);
+  background: var(--color-grey-2);
   &:hover {
-    background: nth($cgr, 1);
+    background: var(--color-grey-1);
   }
   &:active {
-    background: nth($cgr, 3);
+    background: var(--color-grey-3);
   }
 }
 :host([color='grey'][text]) button {
   background: transparent;
-  color: nth($cgr, 2);
+  color: var(--color-grey-2);
   &:hover {
-    color: nth($cgr, 1);
+    color: var(--color-grey-1);
   }
   &:active {
-    color: nth($cgr, 3);
+    color: var(--color-grey-3);
   }
 }
 :host([color='grey'][loading]) button,
 :host([color='grey'][disabled]) button {
-  background: nth($cgr, 1);
+  background: var(--color-grey-1);
 }
 
 :host([no-border]) {

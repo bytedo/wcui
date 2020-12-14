@@ -1,29 +1,824 @@
 <template>
   <div class="meditor">
     <section class="toolbar"></section>
-    <textarea cols="30" rows="10"></textarea>
-    <wc-markd></wc-markd>
+    <div class="editor-outbox">
+      <textarea class="editor" spellcheck="false"></textarea>
+      <wc-markd class="preview"></wc-markd>
+    </div>
   </div>
+  <wc-layer id="header"><ul class="addon-header"></ul></wc-layer>
+  <wc-layer id="table"><ul class="addon-table"></ul></wc-layer>
+  <wc-layer id="link">
+    <ul class="addon-link">
+      <li>
+        <label>链接文本</label><wc-input class="txt" size="mini"></wc-input>
+      </li>
+      <li>
+        <label>链接地址</label><wc-input class="link" size="mini"></wc-input>
+      </li>
+      <li>
+        <label>打开方式</label>
+        <wc-radio-group value="_self" class="mode">
+          <wc-radio value="_self" size="mini">当前窗口</wc-radio>
+          <wc-radio value="_blank" size="mini">新窗口</wc-radio>
+        </wc-radio-group>
+      </li>
+      <li>
+        <label></label>
+        <wc-button class="submit" color="teal" size="mini">确定</wc-button>
+      </li>
+    </ul>
+  </wc-layer>
+  <wc-layer id="attach">
+    <div class="addon-attach">
+      <header class="tabs">
+        <span data-key="remote" class="active">远程文件</span>
+        <span data-key="locale">本地上传</span>
+      </header>
+      <ul class="remote active">
+        <li>
+          <label>文件描述</label><wc-input class="txt" size="mini"></wc-input>
+        </li>
+        <li>
+          <label>文件地址</label><wc-input class="link" size="mini"></wc-input>
+        </li>
+        <li>
+          <label></label>
+          <wc-button class="submit" color="teal" size="mini">确定</wc-button>
+        </li>
+      </ul>
+      <div class="locale">
+        <div class="button"><input type="file" /></div>
+      </div>
+    </div>
+  </wc-layer>
 </template>
 
-<style lang="scss"></style>
+<style lang="scss">
+:host {
+  display: flex;
+  min-width: 200px;
+  min-height: 100px;
+  // max-height: 360px;
+  border-radius: 2px;
+}
+
+.meditor {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-plain-2);
+  border-radius: inherit;
+  font-size: 14px;
+}
+
+.toolbar {
+  display: none;
+  height: 34px;
+  padding: 5px;
+  line-height: 24px;
+  border-bottom: 1px solid var(--color-plain-2);
+
+  span {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 24px;
+    height: 24px;
+    margin: 0 3px;
+    border-radius: 3px;
+    color: var(--color-dark-1);
+
+    .icon {
+      overflow: hidden;
+      width: 70%;
+      height: 70%;
+      fill: currentColor;
+    }
+
+    &:hover,
+    &.active {
+      background: var(--color-plain-1);
+    }
+    &.active {
+      color: var(--color-teal-1);
+    }
+  }
+
+  &.active {
+    display: flex;
+  }
+}
+
+.editor-outbox {
+  flex: 1;
+  display: flex;
+  min-height: 300px;
+  background: #fff;
+
+  .editor,
+  .preview {
+    flex: 1;
+  }
+
+  .editor {
+    height: 100%;
+    padding: 5px 8px;
+    line-height: 1.5;
+    border: 0;
+    font-size: 14px;
+    font-family: Menlo, Monaco, Consolas, 'Courier New', monospace;
+    color: var(--color-grey-3);
+    background: none;
+    outline: none;
+    resize: none;
+  }
+
+  .preview {
+    overflow: hidden;
+    overflow-y: auto;
+    display: none;
+    padding: 6px 12px;
+    border-left: 1px solid var(--color-plain-2);
+
+    &.active {
+      display: block;
+    }
+  }
+}
+
+.addon-table {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 222px;
+  height: 222px;
+  padding: 2px;
+  background: #fff;
+
+  li {
+    display: flex;
+    justify-content: space-between;
+    height: 20px;
+
+    span {
+      width: 20px;
+      height: 20px;
+      background: var(--color-plain-1);
+
+      &.active {
+        background: rgba(77, 182, 172, 0.3);
+      }
+    }
+  }
+}
+
+.addon-header {
+  width: 108px;
+  height: 190px;
+  padding: 5px 0;
+  line-height: 30px;
+  user-select: none;
+  background: #fff;
+
+  li {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 30px;
+    padding: 0 12px;
+    transition: background 0.1s ease-in-out;
+    cursor: pointer;
+
+    .icon {
+      width: 14px;
+      height: 14px;
+      margin-right: 8px;
+    }
+
+    &:hover {
+      background: var(--color-plain-1);
+    }
+  }
+}
+
+.addon-link {
+  width: 320px;
+  padding: 8px 5px;
+  background: #fff;
+  font-size: 13px;
+
+  li {
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    margin-top: 6px;
+
+    label {
+      width: 60px;
+      margin-right: 8px;
+    }
+
+    wc-input {
+      flex: 1;
+    }
+
+    wc-button {
+      width: 80px;
+    }
+  }
+}
+
+.addon-attach {
+  width: 320px;
+  padding: 8px 5px;
+  background: #fff;
+  font-size: 13px;
+
+  .tabs {
+    display: flex;
+    border-bottom: 1px solid var(--color-plain-2);
+    user-select: none;
+
+    span {
+      height: 28px;
+      padding: 0 8px;
+      line-height: 28px;
+      cursor: pointer;
+
+      &.active {
+        color: var(--color-teal-1);
+      }
+    }
+  }
+
+  .remote,
+  .locale {
+    display: none;
+
+    &.active {
+      display: block;
+    }
+  }
+
+  .locale {
+    height: 120px;
+    padding: 24px 32px;
+
+    .button {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      padding: 12px 16px;
+      line-height: 46px;
+      border: 1px dashed var(--color-plain-3);
+      border-radius: 4px;
+      text-align: center;
+      cursor: pointer;
+      transition: background 0.1s ease-in-out;
+
+      &::after {
+        content: '点击选择文件,或拖拽文件到此处';
+      }
+      &:hover,
+      &.active {
+        background: rgba(255, 228, 196, 0.15);
+      }
+    }
+
+    input {
+      position: absolute;
+      left: 0;
+      top: 0;
+      z-index: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+    }
+  }
+
+  li {
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    margin-top: 6px;
+
+    label {
+      width: 60px;
+      margin-right: 8px;
+    }
+
+    wc-input {
+      flex: 1;
+    }
+
+    wc-button {
+      width: 80px;
+    }
+  }
+}
+
+:host([disabled]) {
+  .meditor {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
+:host(.fullscreen) {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 1024;
+  width: 100%;
+  height: 100%;
+}
+</style>
 
 <script>
+import $ from '../utils'
+
+import '../form/input'
+import '../form/button'
+import '../form/radio-group'
+import '../layer/index'
 import '../markd/index'
+
+import { renderToolbar, html2md, TOOL_TITLE, IMAGE_EXP } from './helper'
+import Addon from './addon'
 
 export default class Meditor {
   props = {
-    value: ''
+    toolbar: null,
+    value: '',
+    readonly: false,
+    disabled: false,
+    height: 180,
+    preview: window.innerWidth > 768
   }
 
   __init__() {
     /* render */
 
-    var elem = this.root.children[1]
+    var ct = this.root.children[1]
+    this.__TOOLBAR__ = ct.children[0]
+    this.__EDITOR__ = ct.children[1].firstElementChild
+    this.__VIEW__ = ct.children[1].lastElementChild
 
-    this.__TOOL__ = elem.children[0]
-    this.__EDITOR__ = elem.children[1]
-    this.__VIEW__ = elem.children[2]
+    this.__HEADER_ADDON__ = this.root.querySelector('#header')
+    this.__TABLE_ADDON__ = this.root.querySelector('#table')
+    this.__LINK_ADDON__ = this.root.querySelector('#link')
+    this.__ATTACH_ADDON__ = this.root.querySelector('#attach')
+  }
+
+  _updateToolbar() {
+    var { toolbar, preview } = this.props
+    var isToolbarShow = true
+    if (Array.isArray(toolbar)) {
+      if (toolbar.length) {
+        this.__TOOLBAR__.innerHTML = renderToolbar(toolbar, 'span', TOOL_TITLE)
+      } else {
+        isToolbarShow = false
+      }
+    } else {
+      this.__TOOLBAR__.innerHTML = renderToolbar(null, 'span', TOOL_TITLE)
+    }
+    this.__TOOLBAR__.classList.toggle('active', isToolbarShow)
+    this.__TOOLBAR__.lastElementChild.classList.toggle('active', preview)
+    this.__VIEW__.classList.toggle('active', preview)
+  }
+
+  _createTableAddon() {
+    var html = ''
+    var $table = this.__TABLE_ADDON__.firstElementChild
+    var $item
+    var lastx = -1
+    var lasty = -1
+
+    for (let i = 0; i < 10; i++) {
+      html += '<li>'
+      for (let j = 0; j < 10; j++) {
+        html += `<span data-x="${i}" data-y="${j}"></span>`
+      }
+      html += '</li>'
+    }
+    $table.innerHTML = html
+
+    $item = Array.from($table.children).map(it => Array.from(it.children))
+
+    $.bind($table, 'mousemove', ev => {
+      if (ev.target.tagName === 'SPAN') {
+        var x = +ev.target.dataset.x
+        var y = +ev.target.dataset.y
+        if (x === lastx && y === lasty) {
+          return
+        }
+        lastx = x
+        lasty = y
+        for (var i = 0; i < 10; i++) {
+          for (var j = 0; j < 10; j++) {
+            $item[i][j].classList.toggle('active', i <= x && j <= y)
+          }
+        }
+      }
+    })
+
+    $.bind($table, 'mouseleave', ev => {
+      lastx = -1
+      lasty = -1
+      for (var i = 0; i < 10; i++) {
+        for (var j = 0; j < 10; j++) {
+          $item[i][j].classList.remove('active')
+        }
+      }
+    })
+
+    $.bind($table, 'click', ev => {
+      if (lastx < 0 || lasty < 0) {
+        return
+      }
+      var thead = `\n\n${'| 表头 '.repeat(lastx)}|\n`
+      var pipe = `${'| -- '.repeat(lastx)}|\n`
+      var tbody = ('|    '.repeat(lastx) + '|\n').repeat(lasty)
+
+      for (var i = 0; i < 10; i++) {
+        for (var j = 0; j < 10; j++) {
+          $item[i][j].classList.remove('active')
+        }
+      }
+      lastx = -1
+      lasty = -1
+      this.insert(thead + pipe + tbody, false)
+      this.__TABLE_ADDON__.close()
+    })
+
+    $.outside($table, _ => {
+      lastx = -1
+      lasty = -1
+      this.__TABLE_ADDON__.close()
+    })
+  }
+
+  _createHeaderAddon() {
+    var items = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']
+    var html = renderToolbar(items, 'li', TOOL_TITLE, true)
+    var $header = this.__HEADER_ADDON__.firstElementChild
+
+    $header.innerHTML = html
+
+    $.bind($header, 'click', ev => {
+      var elem = ev.target
+      var level
+      if (elem === ev.currentTarget) {
+        return
+      }
+      while (elem.tagName !== 'LI') {
+        elem = elem.parentNode
+      }
+      level = +elem.dataset.act.slice(1)
+      Addon.h.call(this, level)
+      this.__HEADER_ADDON__.close()
+    })
+
+    $.outside($header, _ => {
+      this.__HEADER_ADDON__.close()
+    })
+  }
+
+  _createLinkAddon() {
+    var $link = this.__LINK_ADDON__.firstElementChild
+    var $txt = $link.querySelector('.txt')
+    var $url = $link.querySelector('.link')
+    var $mode = $link.querySelector('.mode')
+    var $submit = $link.querySelector('.submit')
+
+    this.__LINK_ADDON__.__txt__ = $txt
+    // Addon.link.call(this, this.__TOOLBAR__.children[12])
+
+    $.bind($submit, 'click', ev => {
+      var txt = $txt.value.trim()
+      var url = $url.value.trim()
+      var mode = $mode.value.trim()
+      var attr = ''
+
+      if (mode === '_blank') {
+        attr = ` "target=${mode}"`
+      }
+      if (txt && url) {
+        this.insert(`[${txt}](${url + attr}) `)
+        $txt.value = ''
+        $url.value = ''
+        this.__LINK_ADDON__.close()
+      }
+    })
+
+    $.outside($link, _ => {
+      this.__LINK_ADDON__.close()
+    })
+  }
+
+  _createAttachAddon() {
+    var $attach = this.__ATTACH_ADDON__.firstElementChild
+    var $tabs = $attach.querySelector('.tabs')
+    var $remote = $attach.querySelector('.remote')
+    var $locale = $attach.querySelector('.locale')
+    var $submit = $attach.querySelector('.submit')
+    var $drag = $locale.querySelector('.button')
+    var $file = $locale.querySelector('input')
+    var $txt = $remote.querySelector('.txt')
+    var $url = $remote.querySelector('.link')
+
+    $.bind($tabs, 'click', ev => {
+      var key = ev.target.dataset.key
+
+      if (key) {
+        ev.target.classList.toggle('active', true)
+        //
+        if (ev.target.nextElementSibling) {
+          ev.target.nextElementSibling.classList.toggle('active', false)
+          $remote.classList.toggle('active', true)
+          $locale.classList.toggle('active', false)
+        } else {
+          ev.target.previousElementSibling.classList.toggle('active', false)
+          $remote.classList.toggle('active', false)
+          $locale.classList.toggle('active', true)
+        }
+      }
+    })
+
+    // 拖拽上传
+    $.bind($drag, 'dragover', ev => {
+      ev.stopPropagation()
+      ev.preventDefault()
+      $drag.classList.toggle('active', true)
+    })
+    $.bind($drag, 'dragleave', ev => {
+      ev.stopPropagation()
+      ev.preventDefault()
+      $drag.classList.toggle('active', false)
+    })
+    $.bind($drag, 'drop', ev => {
+      ev.stopPropagation()
+      ev.preventDefault()
+      $drag.classList.toggle('active', false)
+
+      var file = ev.dataTransfer.files[0]
+      if (file) {
+        if (this._attach === 'image') {
+          if (IMAGE_EXP.test(file.type)) {
+            this._handleUpload(file)
+          }
+        } else {
+          this._handleUpload(file, '')
+        }
+      }
+    })
+
+    // 点击上传
+    $.bind($file, 'change', ev => {
+      var file = ev.target.files[0]
+      if (file) {
+        ev.target.value = ''
+        if (this._attach === 'image') {
+          if (IMAGE_EXP.test(file.type)) {
+            this._handleUpload(file)
+          }
+        } else {
+          this._handleUpload(file, '')
+        }
+      }
+    })
+
+    // 远程地址
+    $.bind($submit, 'click', ev => {
+      var txt = $txt.value.trim()
+      var url = $url.value.trim()
+
+      if (txt && url) {
+        this.insert(`${this._attach === 'image' ? '!' : ''}[${txt}](${url}) `)
+        $txt.value = ''
+        $url.value = ''
+        this.__ATTACH_ADDON__.close()
+      }
+    })
+
+    $.outside($attach, _ => {
+      this.__ATTACH_ADDON__.close()
+    })
+  }
+
+  // 处理文件上传
+  _handleUpload(file, t = '!') {
+    this.dispatchEvent(
+      new CustomEvent('upload', {
+        detail: {
+          file,
+          send: link => {
+            this.insert(`${t}[${file.name}](${link})`)
+            this.__ATTACH_ADDON__.close()
+          }
+        }
+      })
+    )
+  }
+
+  // 往文本框中插入内容
+  insert(val, isSelect) {
+    var dom = this.__EDITOR__
+    if (document.selection) {
+      dom.focus()
+      let range = document.selection.createRange()
+      range.text = val
+      dom.focus()
+      range.moveStart('character', -1)
+    } else if (dom.selectionStart || dom.selectionStart === 0) {
+      let startPos = dom.selectionStart
+      let endPos = dom.selectionEnd
+      let scrollTop = dom.scrollTop
+
+      dom.value =
+        dom.value.slice(0, startPos) +
+        val +
+        dom.value.slice(endPos, dom.value.length)
+
+      dom.selectionStart = isSelect ? startPos : startPos + val.length
+      dom.selectionEnd = startPos + val.length
+      dom.scrollTop = scrollTop
+      dom.focus()
+    } else {
+      dom.value += val
+      dom.focus()
+    }
+    this.value = dom.value
+  }
+  /**
+   * [selection 获取选中的文本]
+   * @param  {[type]} dom  [要操作的元素]
+   * @param  {[type]} forceHoleLine [是否强制光标所在的整行文本]
+   */
+  selection(forceHoleLine) {
+    var dom = this.__EDITOR__
+    if (document.selection) {
+      return document.selection.createRange().text
+    } else {
+      let startPos = dom.selectionStart
+      let endPos = dom.selectionEnd
+
+      if (endPos) {
+        //强制选择整行
+        if (forceHoleLine) {
+          startPos = dom.value.slice(0, startPos).lastIndexOf('\n')
+
+          let tmpEnd = dom.value.slice(endPos).indexOf('\n')
+          tmpEnd = tmpEnd < 0 ? dom.value.slice(endPos).length : tmpEnd
+
+          startPos += 1 // 把\n加上
+          endPos += tmpEnd
+
+          dom.selectionStart = startPos
+          dom.selectionEnd = endPos
+        }
+      } else {
+        //强制选择整行
+        if (forceHoleLine) {
+          endPos = dom.value.indexOf('\n')
+          endPos = endPos < 0 ? dom.value.length : endPos
+          dom.selectionEnd = endPos
+        }
+      }
+      dom.focus()
+      return dom.value.slice(startPos, endPos)
+    }
+  }
+
+  get value() {
+    return this.__EDITOR__.value
+  }
+
+  set value(val) {
+    this.__EDITOR__.value = val
+    if (this.props.preview) {
+      this.__VIEW__.textContent = val
+    }
+  }
+
+  mounted() {
+    this._updateToolbar()
+
+    this._createHeaderAddon()
+    this._createTableAddon()
+    this._createLinkAddon()
+    this._createAttachAddon()
+
+    $.bind(this.__EDITOR__, 'input', _ => {
+      if (this.props.preview) {
+        var txt = this.__EDITOR__.value.trim()
+        if (txt) {
+          this.__VIEW__.textContent = txt
+        } else {
+          this.__VIEW__.clear()
+        }
+      }
+    })
+
+    $.bind(this.__EDITOR__, 'keydown', ev => {
+      let wrap = this.selection() || ''
+      let select = !!wrap
+      //tab键改为插入2个空格,阻止默认事件,防止焦点失去
+      if (ev.keyCode === 9) {
+        ev.preventDefault()
+        wrap = wrap
+          .split('\n')
+          .map(function(it) {
+            return ev.shiftKey ? it.replace(/^\s\s/, '') : '  ' + it
+          })
+          .join('\n')
+        this.insert(wrap, select)
+      }
+      //修复按退格键删除选中文本时,选中的状态不更新的bug
+      if (ev.keyCode === 8) {
+        if (select) {
+          ev.preventDefault()
+          this.insert('', select)
+        }
+      }
+    })
+
+    $.bind(this.__EDITOR__, 'paste', ev => {
+      ev.preventDefault()
+      var txt = ev.clipboardData.getData('text/plain').trim()
+      var html = ev.clipboardData.getData('text/html').trim()
+      var items = ev.clipboardData.items
+
+      if (html) {
+        html = html2md(html)
+        return this.insert(html)
+      }
+
+      if (txt) {
+        return this.insert(txt)
+      }
+
+      if (items && items.length) {
+        let file = null
+
+        for (let it of items) {
+          file = it.getAsFile()
+          break
+        }
+        if (file) {
+          if (IMAGE_EXP.test(file.type)) {
+            this._handleUpload(file)
+          } else {
+            this._handleUpload(file, '')
+          }
+        }
+      }
+    })
+
+    $.bind(this.__TOOLBAR__, 'click', ev => {
+      ev.preventDefault()
+      var elem = ev.target
+      var act
+      if (elem === ev.currentTarget) {
+        return
+      }
+      while (elem.tagName !== 'SPAN') {
+        elem = elem.parentNode
+      }
+      act = elem.dataset.act
+      Addon[act].call(this, elem)
+    })
+  }
+
+  watch() {
+    switch (name) {
+      case 'toolbar':
+        if (val) {
+          val = val.split(',').map(it => it.trim())
+          this.props.toolbar = val
+        }
+        break
+
+      case 'value':
+        this.value = val
+        break
+
+      case 'readonly':
+      case 'disabled':
+        var k = name
+        if (k === 'readonly') {
+          k = 'readOnly'
+        }
+        this[k] = true
+        break
+
+      default:
+        break
+    }
   }
 }
 </script>

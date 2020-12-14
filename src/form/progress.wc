@@ -11,14 +11,14 @@
     flex: 1;
     height: var(--size, 10px);
     border-radius: 9px;
-    background: nth($cp, 2);
+    background: var(--color-plain-2);
 
     span {
       display: block;
       width: 0;
       height: 100%;
       border-radius: 9px;
-      background: nth($ct, 1);
+      background: var(--color-teal-1);
     }
   }
 }
@@ -36,27 +36,27 @@
 }
 
 :host([color='red']) label span {
-  background: nth($cr, 1);
+  background: var(--color-red-1);
 }
 
 :host([color='blue']) label span {
-  background: nth($cb, 1);
+  background: var(--color-blue-1);
 }
 
 :host([color='green']) label span {
-  background: nth($cg, 1);
+  background: var(--color-green-1);
 }
 
 :host([color='orange']) label span {
-  background: nth($co, 1);
+  background: var(--color-orange-1);
 }
 
 :host([color='dark']) label span {
-  background: nth($cd, 1);
+  background: var(--color-dark-1);
 }
 
 :host([color='purple']) label span {
-  background: nth($cpp, 1);
+  background: var(--color-purple-1);
 }
 </style>
 

@@ -11,7 +11,7 @@
 :host {
   display: flex;
   width: 100%;
-  color: nth($cd, 1);
+  color: var(--color-dark-1);
 }
 .table {
   display: flex;
@@ -23,9 +23,9 @@
   .tfoot {
     overflow: hidden;
     width: 100%;
-    border: 1px solid nth($cp, 3);
+    border: 1px solid var(--color-plain-3);
     --border-bottom: 0;
-    background: nth($cp, 1);
+    background: var(--color-plain-1);
     user-select: none;
     -moz-user-select: none;
   }
@@ -38,7 +38,7 @@
   }
   .tbody {
     flex: 1;
-    border: 1px solid nth($cp, 3);
+    border: 1px solid var(--color-plain-3);
 
     ::slotted(wc-tr:last-child) {
       --border-bottom: 0;

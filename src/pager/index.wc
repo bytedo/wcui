@@ -12,7 +12,7 @@
 :host {
   display: block;
   line-height: 1;
-  color: nth($cd, 1);
+  color: var(--color-dark-1);
   font-size: 14px;
   user-select: none;
   -moz-user-select: none;
@@ -29,7 +29,7 @@
     height: 32px;
     padding: 0 8px;
     margin: 0 3px;
-    background: nth($cp, 1);
+    background: var(--color-plain-1);
     border: 0;
     border-radius: 2px;
     outline: none;
@@ -37,11 +37,11 @@
     color: inherit;
 
     &:hover {
-      background: nth($cp, 2);
+      background: var(--color-plain-2);
     }
 
     &[curr] {
-      background: nth($ct, 1);
+      background: var(--color-teal-1);
       color: #fff;
     }
   }
@@ -59,31 +59,31 @@
 }
 
 :host([color='red']) button[curr] {
-  background: nth($cr, 1);
+  background: var(--color-red-1);
 }
 
 :host([color='blue']) button[curr] {
-  background: nth($cb, 1);
+  background: var(--color-blue-1);
 }
 
 :host([color='green']) button[curr] {
-  background: nth($cg, 1);
+  background: var(--color-green-1);
 }
 
 :host([color='teal']) button[curr] {
-  background: nth($ct, 1);
+  background: var(--color-teal-1);
 }
 
 :host([color='orange']) button[curr] {
-  background: nth($co, 1);
+  background: var(--color-orange-1);
 }
 
 :host([color='dark']) button[curr] {
-  background: nth($cd, 1);
+  background: var(--color-dark-1);
 }
 
 :host([color='purple']) button[curr] {
-  background: nth($cpp, 1);
+  background: var(--color-purple-1);
 }
 </style>
 

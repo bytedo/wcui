@@ -31,6 +31,28 @@ export default {
     }
   })(),
 
+  //取得距离页面左上角的坐标
+  offset(node) {
+    try {
+      var rect = node.getBoundingClientRect()
+
+      if (rect.width || rect.height || node.getClientRects().length) {
+        var doc = node.ownerDocument
+        var root = doc.documentElement
+        var win = doc.defaultView
+        return {
+          top: rect.top + win.pageYOffset - root.clientTop,
+          left: rect.left + win.pageXOffset - root.clientLeft
+        }
+      }
+    } catch (e) {
+      return {
+        left: 0,
+        top: 0
+      }
+    }
+  },
+
   /**
    * 对象/数组遍历
    * 支持跳出
@@ -112,6 +134,7 @@ export default {
       fn(ev)
     })
   },
+
   clearOutside(fn = noop) {
     this.unbind(document, 'mousedown', fn)
   }

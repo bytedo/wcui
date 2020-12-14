@@ -24,7 +24,7 @@
   width: 100%;
   max-height: 610px;
   margin: 10px 0;
-  border: 1px solid nth($cp, 2);
+  border: 1px solid var(--color-plain-2);
   border-radius: 2px;
 
   .title {
@@ -36,7 +36,7 @@
     padding: 0 12px;
     line-height: 1;
     font-size: 12px;
-    background: nth($cp, 2);
+    background: var(--color-plain-2);
     user-select: none;
 
     i {
@@ -45,23 +45,23 @@
       height: 10px;
       margin-right: 6px;
       border-radius: 50%;
-      background: nth($cr, 1);
+      background: var(--color-red-1);
     }
     i:nth-child(2) {
-      background: nth($co, 1);
+      background: var(--color-orange-1);
     }
     i:nth-child(3) {
-      background: nth($cg, 1);
+      background: var(--color-green-1);
     }
 
     .act {
       --size: 16px;
       margin: 0 2px;
-      color: nth($cgr, 2);
+      color: var(--color-grey-2);
       cursor: pointer;
 
       &:hover {
-        color: nth($cgr, 3);
+        color: var(--color-grey-3);
       }
       &.run {
         display: none;
@@ -75,8 +75,8 @@
     line-height: 18px;
     font-family: Menlo, Monaco, Consolas, 'Courier New', monospace;
     font-size: 13px;
-    background: linear-gradient(to right, nth($cp, 1) 40px, #fff 40px);
-    color: nth($cd, 1);
+    background: linear-gradient(to right, var(--color-plain-1) 40px, #fff 40px);
+    color: var(--color-dark-1);
     cursor: text;
     counter-reset: code;
 
@@ -95,7 +95,7 @@
         height: 100%;
         padding-right: 5px;
         text-align: right;
-        color: nth($cgr, 1);
+        color: var(--color-grey-1);
         content: counter(code);
         counter-increment: code;
       }
@@ -113,18 +113,22 @@
 
 :host([dark]) {
   .code-box {
-    border-color: nth($cd, 2);
+    border-color: var(--color-dark-2);
 
     .title {
-      background: nth($cd, 2);
+      background: var(--color-dark-2);
     }
 
     .code {
-      background: linear-gradient(to right, #596b7f 40px, nth($cd, 1) 40px);
-      color: nth($cp, 3);
+      background: linear-gradient(
+        to right,
+        #596b7f 40px,
+        var(--color-dark-1) 40px
+      );
+      color: var(--color-plain-3);
 
       p::before {
-        color: nth($cgr, 3);
+        color: var(--color-grey-3);
       }
     }
   }
@@ -162,6 +166,10 @@ export default class Code {
 
   set value(txt) {
     this.props.content = txt
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+
     txt = txt
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')

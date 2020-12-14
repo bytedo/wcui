@@ -18,7 +18,7 @@
   display: inline-block;
   user-select: none;
   -moz-user-select: none;
-  color: nth($cd, 2);
+  color: var(--color-dark-2);
   border-radius: 2px;
 }
 .label {
@@ -30,7 +30,7 @@
   height: 32px;
   line-height: 0;
   font-size: 14px;
-  border: 1px solid nth($cp, 3);
+  border: 1px solid var(--color-plain-3);
   border-radius: inherit;
   background: #fff;
   color: inherit;
@@ -53,7 +53,7 @@
     cursor: inherit;
 
     &::placeholder {
-      color: nth($cgr, 1);
+      color: var(--color-grey-1);
     }
   }
 
@@ -66,14 +66,14 @@
     height: 30px;
     padding: 0 10px;
     white-space: nowrap;
-    background: nth($cp, 1);
+    background: var(--color-plain-1);
   }
   .prepend {
-    border-right: 1px solid nth($cp, 3);
+    border-right: 1px solid var(--color-plain-3);
     border-radius: 2px 0 0 2px;
   }
   .append {
-    border-left: 1px solid nth($cp, 3);
+    border-left: 1px solid var(--color-plain-3);
     border-radius: 0 2px 2px 0;
   }
   &[prepend] .prepend,
@@ -137,7 +137,7 @@
 
   dt {
     font-size: 12px;
-    color: nth($cgr, 1);
+    color: var(--color-grey-1);
   }
 
   dd {
@@ -145,16 +145,16 @@
 
     &:hover,
     &[focus] {
-      background: nth($cp, 1);
+      background: var(--color-plain-1);
     }
     &[focus] {
-      color: nth($ct, 1);
+      color: var(--color-teal-1);
     }
     &[sub] {
       text-indent: 1em;
     }
     &[disabled] {
-      color: nth($cgr, 1);
+      color: var(--color-grey-1);
       cursor: not-allowed;
       background: none;
     }
@@ -163,7 +163,7 @@
 
 /* --- */
 :host([disabled]) .label {
-  background: nth($cp, 1);
+  background: var(--color-plain-1);
   cursor: not-allowed;
   opacity: 0.6;
 }

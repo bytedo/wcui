@@ -1,0 +1,264 @@
+<template>
+  <div class="slider-box">
+    <div class="slider"></div>
+    <input type="range" max="100" min="0" step="1" />
+  </div>
+</template>
+
+<style lang="scss">
+:host {
+  display: flex;
+  width: 100%;
+  height: 6px;
+}
+
+.slider-box {
+  display: flex;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: var(--bg-color, --color-plain-3);
+  border-radius: 3px;
+
+  .slider {
+    position: relative;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--color-teal-1);
+  }
+
+  input {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    outline: none;
+    opacity: 0;
+    cursor: -webkit-grab;
+
+    &:active {
+      cursor: -webkit-grabbing;
+    }
+  }
+}
+
+:host([vertical]) {
+  width: 6px;
+  height: 100%;
+
+  .slider-box {
+    align-items: flex-end;
+
+    .slider {
+      height: 0;
+      width: 6px;
+    }
+    input {
+      appearance: slider-vertical;
+    }
+  }
+}
+
+:host([color='red']) {
+  .slider-box .slider {
+    background: var(--color-red-1);
+  }
+}
+:host([color='orange']) {
+  .slider-box .slider {
+    background: var(--color-orange-1);
+  }
+}
+:host([color='green']) {
+  .slider-box .slider {
+    background: var(--color-green-1);
+  }
+}
+:host([color='blue']) {
+  .slider-box .slider {
+    background: var(--color-blue-1);
+  }
+}
+:host([color='purple']) {
+  .slider-box .slider {
+    background: var(--color-purple-1);
+  }
+}
+:host([color='grey']) {
+  .slider-box .slider {
+    background: var(--color-grey-1);
+  }
+}
+:host([color='dark']) {
+  .slider-box .slider {
+    background: var(--color-dark-1);
+  }
+}
+
+:host([readonly]) {
+  .slider-box,
+  input {
+    cursor: default;
+  }
+}
+
+:host([disabled]) {
+  opacity: 0.6;
+  .slider-box,
+  input {
+    cursor: not-allowed;
+  }
+}
+</style>
+
+<script>
+import $ from '../utils'
+
+export default class Slider {
+  props = {
+    value: 0,
+    max: 100,
+    min: 0,
+    step: 1,
+    vertical: false, // 竖向
+    readonly: false,
+    disabled: false,
+    list: '' // input[type=range]的原生属性, 配合 datalist
+  }
+
+  state = {
+    decimal: 0
+  }
+
+  __init__() {
+    /* render */
+
+    var elem = this.root.children[1]
+    this.__SLIDER__ = elem.children[0]
+    this.__RANGE__ = elem.children[1]
+  }
+
+  _updateRange() {
+    var { max, min, step } = this.props
+    var _decimal = (step + '').split('.')
+    this.__RANGE__.setAttribute('max', max)
+    this.__RANGE__.setAttribute('min', min)
+    this.__RANGE__.setAttribute('step', step)
+    if (_decimal.length > 1) {
+      this.state.decimal = _decimal[1].length
+    } else {
+      this.state.decimal = 0
+    }
+  }
+
+  _updateValue(val) {
+    var { max, min, vertical } = this.props
+
+    this.props.value = +val
+    this.__RANGE__.value = +val
+
+    if (vertical) {
+      this.__SLIDER__.style.height = `${(100 * val) / (max - min)}%`
+    } else {
+      this.__SLIDER__.style.width = `${(100 * val) / (max - min)}%`
+    }
+  }
+
+  get value() {
+    return +this.props.value.toFixed(this.state.decimal)
+  }
+
+  set value(val) {
+    this._updateValue(+val || 0)
+  }
+
+  get readOnly() {
+    return this.props.readonly
+  }
+
+  set readOnly(val) {
+    var type = typeof val
+
+    if (val === this.props.readonly) {
+      return
+    }
+
+    if ((type === 'boolean' && val) || type !== 'boolean') {
+      this.props.readonly = true
+      this.setAttribute('readonly', '')
+      this.__RANGE__.setAttribute('disabled', '')
+    } else {
+      this.props.readonly = false
+      this.removeAttribute('readonly')
+      if (this.props.disabled === false) {
+        this.__RANGE__.removeAttribute('disabled')
+      }
+    }
+  }
+
+  get disabled() {
+    return this.props.disabled
+  }
+
+  set disabled(val) {
+    var type = typeof val
+
+    if (val === this.props.disabled) {
+      return
+    }
+    if ((type === 'boolean' && val) || type !== 'boolean') {
+      this.props.disabled = true
+      this.setAttribute('disabled', '')
+      this.__RANGE__.setAttribute('disabled', '')
+    } else {
+      this.props.disabled = false
+      this.removeAttribute('disabled')
+      if (this.props.readonly === false) {
+        this.__RANGE__.removeAttribute('disabled')
+      }
+    }
+  }
+
+  mounted() {
+    this._inputFn = $.bind(this.__RANGE__, 'input', ev => {
+      this._updateValue(this.__RANGE__.value)
+    })
+  }
+
+  unmount() {
+    $.bind(this.__RANGE__, 'input', this._inputFn)
+    delete this._inputFn
+  }
+
+  watch() {
+    switch (name) {
+      case 'max':
+      case 'min':
+      case 'step':
+        this.props[name] = +val
+        this._updateRange()
+        break
+
+      case 'value':
+        this._updateValue(+val || 0)
+        break
+
+      case 'vertical':
+        this.props.vertical = true
+        break
+
+      case 'readonly':
+        this.readOnly = true
+        break
+      case 'disabled':
+        this.disabled = true
+        break
+
+      case 'list':
+        this.__RANGE__.setAttribute('list', val)
+        break
+    }
+  }
+}
+</script>
