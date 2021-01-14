@@ -44,7 +44,7 @@ code,pre,samp {font-family:Menlo,Monaco,Consolas,"Courier New",monospace;}
 .text-thin {-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;}
 
 
-:host {
+:root {
   --color-teal-1: #4db6ac;
   --color-teal-2: #26a69a;
   --color-teal-3: #009688;
