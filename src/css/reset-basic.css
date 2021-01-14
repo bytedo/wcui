@@ -4,14 +4,9 @@
  * @authors yutent (yutent.io@gmail.com)
  * @date    2014-10-10 00:45:09
  *
- * doui的CSS规范
+ * CSS规范
  * 
  * 不能出现大写,以连字符风格命名 
- * 表示状态的应该用do-st-*命名 
- * 表示功能的应该用do-fn-*命名
- * 表示页面模块的应该用do-mod-modname 命名
- * 表示UI组件的应该用do-uiname命名, 它的子元素应该全部包在 .do-uiname这个根类下
- * 如 .do-layer .body { ... }
  * 
  * 样式规则的出现顺序
  * 1 display float position overflow z-index 表示定位/布局的属性
@@ -41,18 +36,40 @@ body {font-family:"Helvetica Neue", Arial,"WenQuanYi Micro Hei","PingFang SC","H
 code,pre,samp {font-family:Menlo,Monaco,Consolas,"Courier New",monospace;}
 [anot],[\:repeat],[\:if] {visibility:hidden;}
 
-.do-fn-cl { *zoom: 1; }
-.do-fn-cl::after { content: "."; display: block; height: 0; clear: both; visibility: hidden; overflow:hidden;} 
-.do-fn-clear {clear:both;display:inline;}
-
 .do-fn-show{display:block;}
 .do-fn-hide{display:none;}
-.do-fn-fl{float:left;}
-.do-fn-fr{float:right;}
-.do-fn-noselect {-webkit-touch-callout: none;-webkit-user-select: none;-moz-user-select: none;user-select: none;}
-.do-fn-noselect img, .do-fn-noselect a {-webkit-user-drag:none;}
-.do-fn-ell {overflow:hidden; white-space:nowrap; text-overflow:ellipsis }
-.do-st-thin {-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;}
-.do-st-hand {cursor:pointer;}
+.noselect {-webkit-touch-callout: none;-webkit-user-select: none;-moz-user-select: none;user-select: none;}
+.noselect img, .noselect a {-webkit-user-drag:none;}
+.text-ell {overflow:hidden; white-space:nowrap; text-overflow:ellipsis }
+.text-thin {-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;}
 
 
+:host {
+  --color-teal-1: #4db6ac;
+  --color-teal-2: #26a69a;
+  --color-teal-3: #009688;
+  --color-green-1: #81c784;
+  --color-green-2: #66bb6a;
+  --color-green-3: #4caf50;
+  --color-purple-1: #9575cd;
+  --color-purple-2: #9575cd;
+  --color-purple-3: #673ab7;
+  --color-blue-1: #64b5f6;
+  --color-blue-2: #42a5f5;
+  --color-blue-3: #2196f3;
+  --color-red-1: #ff5061;
+  --color-red-2: #eb3b48;
+  --color-red-3: #ce3742;
+  --color-orange-1: #ffb618;
+  --color-orange-2: #f39c12;
+  --color-orange-3: #e67e22;
+  --color-plain-1: #f2f5fc;
+  --color-plain-2: #e8ebf4;
+  --color-plain-3: #dae1e9;
+  --color-grey-1: #bdbdbd;
+  --color-grey-2: #9e9e9e;
+  --color-grey-3: #757575;
+  --color-dark-1: #62778d;
+  --color-dark-2: #526273;
+  --color-dark-3: #425064;
+}
