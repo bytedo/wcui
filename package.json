@@ -1,6 +1,6 @@
 {
   "name": "@bytedo/wcui",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "基于wc开发的一套UI库, 面向未来, 面向electron",
   "scripts": {
     "start": "node ./build.dev.js",
@@ -10,6 +10,7 @@
     "type": "git",
     "url": "git+https://github.com/bytedo/wcui.git"
   },
+  "main": "dist/",
   "keywords": ["web-components", "wc", "components", "yutent"],
   "author": "yutent",
   "license": "MIT",
