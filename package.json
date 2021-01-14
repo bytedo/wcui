@@ -2,7 +2,6 @@
   "name": "@bytedo/wcui",
   "version": "1.0.0",
   "description": "基于wc开发的一套UI库, 面向未来, 面向electron",
-  "main": "index.js",
   "scripts": {
     "start": "node ./build.dev.js",
     "prod": "node ./build.prod.js"
