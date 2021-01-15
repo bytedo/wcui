@@ -36,8 +36,7 @@ body {font-family:"Helvetica Neue", Arial,"WenQuanYi Micro Hei","PingFang SC","H
 code,pre,samp {font-family:Menlo,Monaco,Consolas,"Courier New",monospace;}
 [anot],[\:repeat],[\:if] {visibility:hidden;}
 
-.do-fn-show{display:block;}
-.do-fn-hide{display:none;}
+
 .noselect {-webkit-touch-callout: none;-webkit-user-select: none;-moz-user-select: none;user-select: none;}
 .noselect img, .noselect a {-webkit-user-drag:none;}
 .text-ell {overflow:hidden; white-space:nowrap; text-overflow:ellipsis }
