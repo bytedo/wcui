@@ -16,11 +16,11 @@ const BUILD_DATE = new Date().format()
 
 const BASE_SCSS = `
 @mixin focus1(){
-  box-shadow: 0 0 2px #88f7df;
+  box-shadow: 0 0 3px var(--color-blue-1);
 }
 
 @mixin focus2(){
-  box-shadow: 0 0 2px #f3be4d;
+  box-shadow: 0 0 3px var(--color-orange-1);
 }
 
 * {

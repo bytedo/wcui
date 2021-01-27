@@ -107,7 +107,7 @@
   }
 }
 
-:host([color='red']) label.checked {
+:host([type='danger']) label.checked {
   color: var(--color-red-1);
   .dot {
     border-color: var(--color-red-1);
@@ -117,7 +117,7 @@
   }
 }
 
-:host([color='blue']) label.checked {
+:host([type='info']) label.checked {
   color: var(--color-blue-1);
   .dot {
     border-color: var(--color-blue-1);
@@ -127,7 +127,7 @@
   }
 }
 
-:host([color='green']) label.checked {
+:host([type='success']) label.checked {
   color: var(--color-green-1);
   .dot {
     border-color: var(--color-green-1);
@@ -137,7 +137,7 @@
   }
 }
 
-:host([color='teal']) label.checked {
+:host([type='primary']) label.checked {
   color: var(--color-teal-1);
   .dot {
     border-color: var(--color-teal-1);
@@ -157,7 +157,7 @@
   }
 }
 
-:host([color='dark']) label.checked {
+:host([type='inverse']) label.checked {
   color: var(--color-dark-1);
   .dot {
     border-color: var(--color-dark-1);

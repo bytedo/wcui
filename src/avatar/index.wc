@@ -39,25 +39,25 @@
   }
 }
 
-:host([color='red']) {
+:host([type='danger']) {
   background: #ff5061;
 }
-:host([color='teal']) {
+:host([type='primary']) {
   background: #3fc2a7;
 }
 :host([color='purple']) {
   background: #ac61ce;
 }
-:host([color='green']) {
+:host([type='success']) {
   background: #58d68d;
 }
 :host([color='orange']) {
   background: #ffb618;
 }
-:host([color='dark']) {
+:host([type='inverse']) {
   background: #62778d;
 }
-:host([color='blue']) {
+:host([type='info']) {
   background: #66b1ff;
 }
 

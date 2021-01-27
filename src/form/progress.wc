@@ -35,15 +35,15 @@
   height: 6px;
 }
 
-:host([color='red']) label span {
+:host([type='danger']) label span {
   background: var(--color-red-1);
 }
 
-:host([color='blue']) label span {
+:host([type='info']) label span {
   background: var(--color-blue-1);
 }
 
-:host([color='green']) label span {
+:host([type='success']) label span {
   background: var(--color-green-1);
 }
 
@@ -51,7 +51,7 @@
   background: var(--color-orange-1);
 }
 
-:host([color='dark']) label span {
+:host([type='inverse']) label span {
   background: var(--color-dark-1);
 }
 

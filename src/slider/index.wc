@@ -60,7 +60,7 @@
   }
 }
 
-:host([color='red']) {
+:host([type='danger']) {
   .slider-box .slider {
     background: var(--color-red-1);
   }
@@ -70,12 +70,12 @@
     background: var(--color-orange-1);
   }
 }
-:host([color='green']) {
+:host([type='success']) {
   .slider-box .slider {
     background: var(--color-green-1);
   }
 }
-:host([color='blue']) {
+:host([type='info']) {
   .slider-box .slider {
     background: var(--color-blue-1);
   }
@@ -85,12 +85,12 @@
     background: var(--color-purple-1);
   }
 }
-:host([color='grey']) {
+:host([type='default']) {
   .slider-box .slider {
     background: var(--color-grey-1);
   }
 }
-:host([color='dark']) {
+:host([type='inverse']) {
   .slider-box .slider {
     background: var(--color-dark-1);
   }

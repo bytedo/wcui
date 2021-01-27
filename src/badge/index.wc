@@ -33,13 +33,13 @@
     padding: 2px 4px;
   }
 }
-:host([color='dark']) .dot {
+:host([type='inverse']) .dot {
   background: var(--color-dark-1);
 }
-:host([color='green']) .dot {
+:host([type='success']) .dot {
   background: var(--color-green-1);
 }
-:host([color='blue']) .dot {
+:host([type='info']) .dot {
   background: var(--color-blue-1);
 }
 :host([color='orange']) .dot {
@@ -48,7 +48,7 @@
 :host([color='purple']) .dot {
   background: var(--color-purple-1);
 }
-:host([color='teal']) .dot {
+:host([type='primary']) .dot {
   background: var(--color-teal-1);
 }
 </style>

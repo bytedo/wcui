@@ -74,7 +74,7 @@ li {
     width: auto;
     height: 30px;
     padding: 0 10px;
-    line-height: 0;
+    line-height: 1;
     background: var(--bg-color, --color-plain-1);
     white-space: nowrap;
   }

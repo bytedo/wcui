@@ -16,7 +16,7 @@
     justify-content: center;
     align-items: center;
     // vertical-align: middle;
-    line-height: 0;
+    line-height: 1;
     white-space: nowrap;
   }
   label {
@@ -82,19 +82,19 @@
   }
 }
 
-:host([color='red']) label.checked {
+:host([type='danger']) label.checked {
   background: var(--color-red-1);
 }
 
-:host([color='blue']) label.checked {
+:host([type='info']) label.checked {
   background: var(--color-blue-1);
 }
 
-:host([color='green']) label.checked {
+:host([type='success']) label.checked {
   background: var(--color-green-1);
 }
 
-:host([color='teal']) label.checked {
+:host([type='primary']) label.checked {
   background: var(--color-teal-1);
 }
 
@@ -102,7 +102,7 @@
   background: var(--color-orange-1);
 }
 
-:host([color='dark']) label.checked {
+:host([type='inverse']) label.checked {
   background: var(--color-dark-1);
 }
 

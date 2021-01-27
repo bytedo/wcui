@@ -24,7 +24,7 @@
 label {
   display: flex;
   align-items: center;
-  line-height: 0;
+  line-height: 1;
   cursor: inherit;
 
   wc-icon {
@@ -54,19 +54,19 @@ label {
   --size: 20px;
 }
 
-:host([color='red']) label span {
+:host([type='danger']) label span {
   color: var(--color-red-1);
 }
-:host([color='teal']) label span {
+:host([type='primary']) label span {
   color: var(--color-teal-1);
 }
-:host([color='green']) label span {
+:host([type='success']) label span {
   color: var(--color-green-1);
 }
-:host([color='grey']) label span {
+:host([type='default']) label span {
   color: var(--color-grey-1);
 }
-:host([color='blue']) label span {
+:host([type='info']) label span {
   color: var(--color-blue-1);
 }
 :host([color='purple']) label span {

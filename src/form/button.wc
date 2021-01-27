@@ -8,14 +8,15 @@
 <style lang="scss">
 :host {
   overflow: hidden;
-  display: inline-block;
+  display: inline-flex;
   min-width: 64px;
   height: 32px;
-  border-radius: 2px;
+  border-radius: 6px;
   user-select: none;
   -moz-user-select: none;
-  color: var(--color-dark-2);
+  color: var(--color-dark-1);
   font-size: 14px;
+  vertical-align: middle;
   cursor: pointer;
 
   button {
@@ -24,26 +25,19 @@
     align-items: center;
     width: 100%;
     height: inherit;
-    padding: 0 10px;
+    padding: var(--padding, 0 14px);
     margin: auto;
-    line-height: 0;
-    border: 1px solid var(--color-plain-3);
+    line-height: 1;
+    border: 0;
     border-radius: inherit;
     white-space: nowrap;
-    background: #fff;
+    background: var(--color-plain-2);
     font-size: inherit;
     font-family: inherit;
     outline: none;
     color: inherit;
     cursor: inherit;
-
-    &:hover {
-      background: var(--color-plain-1);
-    }
-
-    &:active {
-      border-color: var(--color-grey-1);
-    }
+    transition: background 0.2s linear;
 
     &::-moz-focus-inner {
       border: none;
@@ -51,30 +45,30 @@
   }
 
   .icon {
-    --size: 18px;
+    --size: var(--icon-size, 18px);
     margin-right: 3px;
   }
 }
 
 :host([size='large']) {
-  min-width: 120px;
-  height: 42px;
-  font-size: 16px;
+  min-width: 212px;
+  height: 52px;
+  font-size: 18px;
 
   .icon {
-    --size: 20px;
+    --size: 26px;
   }
 }
 :host([size='large'][circle]) {
-  min-width: 62px;
-  height: 62px;
+  min-width: 52px;
+  height: 52px;
 
   button {
-    padding: 0 20px;
+    padding: 0;
   }
 }
 :host([size='medium']) {
-  min-width: 90px;
+  min-width: 128px;
   height: 36px;
 
   button {
@@ -84,10 +78,9 @@
 :host([size='medium'][circle]) {
   min-width: 36px;
 }
-:host([size='mini']),
-:host([text]) {
-  min-width: 24px;
-  height: 24px;
+:host([size='mini']) {
+  min-width: 26px;
+  height: 26px;
   font-size: 12px;
 
   button {
@@ -99,25 +92,11 @@
   }
 }
 :host([size='mini'][circle]) {
-  min-width: 24px;
-}
-
-:host([text]) {
-  height: 18px;
-
-  button {
-    padding: 0;
-    border: 0;
-
-    &:hover {
-      background: none;
-      text-decoration: underline;
-    }
-  }
+  min-width: 26px;
 }
 
 :host([round]) {
-  border-radius: 21px;
+  border-radius: 26px;
 }
 :host([circle]) {
   min-width: 32px;
@@ -128,35 +107,48 @@
   .icon {
     margin-right: 0;
   }
-}
 
-:host([loading]),
-:host([disabled]) {
-  cursor: not-allowed;
-  color: var(--color-grey-1);
-  opacity: 0.6;
-
-  .icon {
-    color: var(--color-grey-1);
-  }
-  button {
-    background: #fff;
-    border-color: var(--color-plain-3);
+  slot {
+    display: none;
   }
 }
 
-:host([color]) {
+:host([type]) {
   color: #fff;
+}
+:host([link]) {
+  min-width: auto;
+  height: auto;
+  font-size: 14px;
+  color: var(--color-plain-3);
+
   button {
-    border-color: transparent;
-  }
-  .icon {
-    color: #fff;
+    padding: 0;
+    background: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
   }
 }
 
-:host([color='red']) button {
+:host(:not([disabled]):not([loading]):not([link])) button {
+  &:hover {
+    background: var(--color-plain-1);
+  }
+  &:active {
+    background: var(--color-plain-3);
+  }
+}
+
+// -------------
+:host([type='danger']:not([link])) button {
   background: var(--color-red-2);
+}
+:host([type='danger'][link]) button {
+  color: var(--color-red-1);
+}
+:host([type='danger']:not([disabled]):not([loading]):not([link])) button {
   &:hover {
     background: var(--color-red-1);
   }
@@ -165,24 +157,14 @@
   }
 }
 
-:host([color='red'][text]) button {
-  background: transparent;
-  color: var(--color-red-2);
-  &:hover {
-    color: var(--color-red-1);
-  }
-  &:active {
-    color: var(--color-red-3);
-  }
-}
-
-:host([color='red'][loading]) button,
-:host([color='red'][disabled]) button {
-  background: var(--color-red-1);
-}
-
-:host([color='blue']) button {
+// -------------
+:host([type='info']:not([link])) button {
   background: var(--color-blue-2);
+}
+:host([type='info'][link]) button {
+  color: var(--color-blue-2);
+}
+:host([type='info']:not([disabled]):not([loading]):not([link])) button {
   &:hover {
     background: var(--color-blue-1);
   }
@@ -191,23 +173,14 @@
   }
 }
 
-:host([color='blue'][text]) button {
-  background: transparent;
-  color: var(--color-blue-2);
-  &:hover {
-    color: var(--color-blue-1);
-  }
-  &:active {
-    color: var(--color-blue-3);
-  }
-}
-:host([color='blue'][loading]) button,
-:host([color='blue'][disabled]) button {
-  background: var(--color-blue-1);
-}
-
-:host([color='green']) button {
+// --------
+:host([type='sucess']:not([link])) button {
   background: var(--color-green-2);
+}
+:host([type='success'][link]) button {
+  color: var(--color-green-2);
+}
+:host([type='sucess']:not([disabled]):not([loading]):not([link])) button {
   &:hover {
     background: var(--color-green-1);
   }
@@ -215,23 +188,15 @@
     background: var(--color-green-3);
   }
 }
-:host([color='green'][text]) button {
-  background: transparent;
-  color: var(--color-green-2);
-  &:hover {
-    color: var(--color-green-1);
-  }
-  &:active {
-    color: var(--color-green-3);
-  }
-}
-:host([color='green'][loading]) button,
-:host([color='green'][disabled]) button {
-  background: var(--color-green-1);
-}
 
-:host([color='teal']) button {
+// ---------
+:host([type='primary']:not([link])) button {
   background: var(--color-teal-2);
+}
+:host([type='primary'][link]) button {
+  color: var(--color-teal-2);
+}
+:host([type='primary']:not([disabled]):not([loading]):not([link])) button {
   &:hover {
     background: var(--color-teal-1);
   }
@@ -239,23 +204,15 @@
     background: var(--color-teal-3);
   }
 }
-:host([color='teal'][text]) button {
-  background: transparent;
-  color: var(--color-teal-2);
-  &:hover {
-    color: var(--color-teal-1);
-  }
-  &:active {
-    color: var(--color-teal-3);
-  }
-}
-:host([color='teal'][loading]) button,
-:host([color='teal'][disabled]) button {
-  background: var(--color-teal-1);
-}
 
-:host([color='orange']) button {
+// ----------
+:host([type='warning']:not([link])) button {
   background: var(--color-orange-2);
+}
+:host([type='warning'][link]) button {
+  color: var(--color-orange-2);
+}
+:host([type='warning']:not([disabled]):not([loading]):not([link])) button {
   &:hover {
     background: var(--color-orange-1);
   }
@@ -263,23 +220,15 @@
     background: var(--color-orange-3);
   }
 }
-:host([color='orange'][text]) button {
-  background: transparent;
-  color: var(--color-orange-2);
-  &:hover {
-    color: var(--color-orange-1);
-  }
-  &:active {
-    color: var(--color-orange-3);
-  }
-}
-:host([color='orange'][loading]) button,
-:host([color='orange'][disabled]) button {
-  background: var(--color-orange-1);
-}
 
-:host([color='dark']) button {
+// -------
+:host([type='inverse']:not([link])) button {
   background: var(--color-dark-2);
+}
+:host([type='inverse'][link]) button {
+  color: var(--color-dark-2);
+}
+:host([type='inverse']:not([disabled]):not([loading]):not([link])) button {
   &:hover {
     background: var(--color-dark-1);
   }
@@ -287,47 +236,15 @@
     background: var(--color-dark-3);
   }
 }
-:host([color='dark'][text]) button {
-  background: transparent;
-  color: var(--color-dark-2);
-  &:hover {
-    color: var(--color-dark-1);
-  }
-  &:active {
-    color: var(--color-dark-3);
-  }
-}
-:host([color='dark'][loading]) button,
-:host([color='dark'][disabled]) button {
-  background: var(--color-dark-1);
-}
 
-:host([color='purple']) button {
-  background: var(--color-purple-2);
-  &:hover {
-    background: var(--color-purple-1);
-  }
-  &:active {
-    background: var(--color-purple-3);
-  }
-}
-:host([color='purple'][text]) button {
-  background: transparent;
-  color: var(--color-purple-2);
-  &:hover {
-    color: var(--color-purple-1);
-  }
-  &:active {
-    color: var(--color-purple-3);
-  }
-}
-:host([color='purple'][loading]) button,
-:host([color='purple'][disabled]) button {
-  background: var(--color-purple-1);
-}
-
-:host([color='grey']) button {
+// -------
+:host([type='default']:not([link])) button {
   background: var(--color-grey-2);
+}
+:host([type='default'][link]) button {
+  color: var(--color-grey-2);
+}
+:host([type='default']:not([disabled]):not([loading]):not([link])) button {
   &:hover {
     background: var(--color-grey-1);
   }
@@ -335,46 +252,25 @@
     background: var(--color-grey-3);
   }
 }
-:host([color='grey'][text]) button {
-  background: transparent;
-  color: var(--color-grey-2);
-  &:hover {
-    color: var(--color-grey-1);
-  }
-  &:active {
-    color: var(--color-grey-3);
-  }
-}
-:host([color='grey'][loading]) button,
-:host([color='grey'][disabled]) button {
-  background: var(--color-grey-1);
+
+:host([loading]),
+:host([disabled]) {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
-:host([no-border]) {
+:host([link][loading]),
+:host([link][disabled]) {
   button {
-    border-color: transparent;
-    background: inherit;
-  }
-}
-
-:host([text][loading]),
-:host([text][disabled]) {
-  button {
-    &,
     &:hover,
     &:active {
       text-decoration: none;
-      background: transparent;
     }
   }
 }
 
-:host(:focus-within) {
+:host(:focus-within:not([link]):not([disabled]):not([loading])) {
   @include focus1;
-}
-:host(:focus-within[disabled]),
-:host(:focus-within[loading]) {
-  box-shadow: none;
 }
 </style>
 
@@ -398,7 +294,7 @@ export default class Button {
 
     // 圆形按钮不允许文字
     if (this.hasAttribute('circle')) {
-      this.textContent = ''
+      // this.textContent = ''
     }
 
     this.__BTN__ = this.root.children[1]

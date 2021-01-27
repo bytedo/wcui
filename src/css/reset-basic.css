@@ -44,30 +44,35 @@ code,pre,samp {font-family:Menlo,Monaco,Consolas,"Courier New",monospace;}
 
 
 :root {
+  /* primary */
   --color-teal-1: #4db6ac;
   --color-teal-2: #26a69a;
   --color-teal-3: #009688;
+  /* sucess */
   --color-green-1: #81c784;
   --color-green-2: #66bb6a;
   --color-green-3: #4caf50;
-  --color-purple-1: #9575cd;
-  --color-purple-2: #9575cd;
-  --color-purple-3: #673ab7;
+  /* info */
   --color-blue-1: #64b5f6;
   --color-blue-2: #42a5f5;
   --color-blue-3: #2196f3;
+  /* danger */
   --color-red-1: #ff5061;
   --color-red-2: #eb3b48;
   --color-red-3: #ce3742;
+  /* warning */
   --color-orange-1: #ffb618;
   --color-orange-2: #f39c12;
   --color-orange-3: #e67e22;
+  /* default1 */
   --color-plain-1: #f2f5fc;
   --color-plain-2: #e8ebf4;
   --color-plain-3: #dae1e9;
-  --color-grey-1: #bdbdbd;
-  --color-grey-2: #9e9e9e;
-  --color-grey-3: #757575;
+  /* default2 */
+  --color-grey-1: #cacfd2;
+  --color-grey-2: #bdc3c7;
+  --color-grey-3: #a1a6a9;
+  /* inverse */
   --color-dark-1: #62778d;
   --color-dark-2: #526273;
   --color-dark-3: #425064;

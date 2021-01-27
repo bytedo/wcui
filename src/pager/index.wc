@@ -1,10 +1,15 @@
 <template>
   <div class="layout">
-    <button data-page="1" class="home">|<</button>
-    <button data-page="prev" class="prev"><</button>
+    <wc-button
+      color="plain"
+      data-page="1"
+      class="home"
+      icon="dbl-left"
+    ></wc-button>
+    <wc-button data-page="prev" class="prev" icon="left"></wc-button>
     <div class="pager"></div>
-    <button data-page="next" class="next">></button>
-    <button data-page="end" class="end">>|</button>
+    <wc-button data-page="next" class="next" icon="right"></wc-button>
+    <wc-button data-page="end" class="end" icon="dbl-right"></wc-button>
   </div>
 </template>
 
@@ -17,24 +22,22 @@
   user-select: none;
   -moz-user-select: none;
 
-  .layout {
+  .layout,
+  .pager {
     display: flex;
     justify-content: center;
     align-items: center;
+  }
+  .layout {
     margin: 10px auto;
   }
 
-  button {
+  wc-button {
     min-width: 32px;
-    height: 32px;
-    padding: 0 8px;
+    // height: 32px;
+    --padding: 0;
     margin: 0 3px;
-    background: var(--color-plain-1);
-    border: 0;
-    border-radius: 2px;
-    outline: none;
-    font-size: inherit;
-    color: inherit;
+    --icon-size: 14px;
 
     &:hover {
       background: var(--color-plain-2);
@@ -58,19 +61,19 @@
   border-radius: 50%;
 }
 
-:host([color='red']) button[curr] {
+:host([type='danger']) button[curr] {
   background: var(--color-red-1);
 }
 
-:host([color='blue']) button[curr] {
+:host([type='info']) button[curr] {
   background: var(--color-blue-1);
 }
 
-:host([color='green']) button[curr] {
+:host([type='success']) button[curr] {
   background: var(--color-green-1);
 }
 
-:host([color='teal']) button[curr] {
+:host([type='primary']) button[curr] {
   background: var(--color-teal-1);
 }
 
@@ -78,7 +81,7 @@
   background: var(--color-orange-1);
 }
 
-:host([color='dark']) button[curr] {
+:host([type='inverse']) button[curr] {
   background: var(--color-dark-1);
 }
 
@@ -89,6 +92,7 @@
 
 <script>
 import $ from '../utils'
+import '../form/button'
 
 // 计算页码
 function calculate(curr, total, simple) {
@@ -129,6 +133,7 @@ function calculate(curr, total, simple) {
 
   return arr
 }
+//
 export default class Pager {
   props = {
     layout: 'home, prev, next, end',
@@ -156,9 +161,9 @@ export default class Pager {
     this.__PAGE__.innerHTML = list
       .map(
         it =>
-          `<button ${curr === it.to ? 'curr' : ''} data-page="${it.to}">${
-            it.txt
-          }</button>`
+          `<wc-button ${curr === it.to ? 'color="teal"' : ''} data-page="${
+            it.to
+          }">${it.txt}</wc-button>`
       )
       .join('')
   }
@@ -170,7 +175,7 @@ export default class Pager {
     this.update()
 
     $.bind(this.__LAYOUT__, 'click', ev => {
-      if (ev.target.tagName === 'BUTTON') {
+      if (ev.target.tagName === 'WC-BUTTON') {
         var { curr, totalpage } = this.props
         var page = ev.target.dataset.page
         var num = +page
