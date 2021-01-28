@@ -15,14 +15,6 @@ const VERSION = require('./package.json').version
 const BUILD_DATE = new Date().format()
 
 const BASE_SCSS = `
-@mixin focus1(){
-  box-shadow: 0 0 3px var(--color-blue-1);
-}
-
-@mixin focus2(){
-  box-shadow: 0 0 3px var(--color-orange-1);
-}
-
 * {
   box-sizing: border-box;
   margin: 0;padding: 0;

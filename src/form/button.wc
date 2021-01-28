@@ -18,6 +18,7 @@
   font-size: 14px;
   vertical-align: middle;
   cursor: pointer;
+  transition: box-shadow 0.15s linear;
 
   button {
     display: flex;
@@ -37,7 +38,7 @@
     outline: none;
     color: inherit;
     cursor: inherit;
-    transition: background 0.2s linear;
+    transition: background 0.15s linear;
 
     &::-moz-focus-inner {
       border: none;
@@ -54,6 +55,10 @@
   min-width: 212px;
   height: 52px;
   font-size: 18px;
+
+  button {
+    padding: 0 24px;
+  }
 
   .icon {
     --size: 26px;
@@ -72,7 +77,7 @@
   height: 36px;
 
   button {
-    padding: 0 15px;
+    padding: 0 18px;
   }
 }
 :host([size='medium'][circle]) {
@@ -84,7 +89,7 @@
   font-size: 12px;
 
   button {
-    padding: 0 5px;
+    padding: 0 6px;
   }
 
   .icon {
@@ -140,6 +145,9 @@
     background: var(--color-plain-3);
   }
 }
+:host(:focus-within:not([link])) {
+  box-shadow: 0 0 0 2px rgba(242, 245, 252, 0.5);
+}
 
 // -------------
 :host([type='danger']:not([link])) button {
@@ -155,6 +163,9 @@
   &:active {
     background: var(--color-red-3);
   }
+}
+:host([type='danger']:focus-within:not([link])) {
+  box-shadow: 0 0 0 2px rgba(255, 107, 129, 0.5);
 }
 
 // -------------
@@ -172,6 +183,9 @@
     background: var(--color-blue-3);
   }
 }
+:host([type='info']:focus-within:not([link])) {
+  box-shadow: 0 0 0 2px rgba(100, 181, 246, 0.5);
+}
 
 // --------
 :host([type='sucess']:not([link])) button {
@@ -187,6 +201,9 @@
   &:active {
     background: var(--color-green-3);
   }
+}
+:host([type='sucess']:focus-within:not([link])) {
+  box-shadow: 0 0 0 2px rgba(88, 214, 141, 0.5);
 }
 
 // ---------
@@ -204,6 +221,9 @@
     background: var(--color-teal-3);
   }
 }
+:host([type='primary']:focus-within:not([link])) {
+  box-shadow: 0 0 0 2px rgba(72, 201, 176, 0.5);
+}
 
 // ----------
 :host([type='warning']:not([link])) button {
@@ -219,6 +239,9 @@
   &:active {
     background: var(--color-orange-3);
   }
+}
+:host([type='warning']:focus-within:not([link])) {
+  box-shadow: 0 0 0 2px rgba(244, 211, 19, 0.5);
 }
 
 // -------
@@ -236,6 +259,9 @@
     background: var(--color-dark-3);
   }
 }
+:host([type='inverse']:focus-within:not([link])) {
+  box-shadow: 0 0 0 2px rgba(65, 91, 118, 0.5);
+}
 
 // -------
 :host([type='default']:not([link])) button {
@@ -252,6 +278,9 @@
     background: var(--color-grey-3);
   }
 }
+:host([type='default']:focus-within:not([link])) {
+  box-shadow: 0 0 0 2px rgba(206, 214, 224, 0.5);
+}
 
 :host([loading]),
 :host([disabled]) {
@@ -267,10 +296,6 @@
       text-decoration: none;
     }
   }
-}
-
-:host(:focus-within:not([link]):not([disabled]):not([loading])) {
-  @include focus1;
 }
 </style>
 
@@ -314,10 +339,12 @@ export default class Button {
 
     if ((type === 'boolean' && val) || type !== 'boolean') {
       this.props.loading = true
+      this.__BTN__.disabled = true
       this.__ICO__.setAttribute('is', 'loading')
       this.setAttribute('loading', '')
     } else {
       this.props.loading = false
+      this.__BTN__.disabled = false
       this.__ICO__.setAttribute('is', this.props.icon)
       this.removeAttribute('loading')
     }
@@ -335,9 +362,11 @@ export default class Button {
     }
     if ((type === 'boolean' && val) || type !== 'boolean') {
       this.props.disabled = true
+      this.__BTN__.disabled = true
       this.setAttribute('disabled', '')
     } else {
       this.props.disabled = false
+      this.__BTN__.disabled = false
       this.removeAttribute('disabled')
     }
   }
