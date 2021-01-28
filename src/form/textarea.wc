@@ -1,7 +1,7 @@
 <template>
   <div class="label">
     <slot class="prepend" name="prepend"></slot>
-    <input spellcheck="false" />
+    ${input}
     <wc-icon class="icon"></wc-icon>
     <slot class="append" name="append"></slot>
 
@@ -27,7 +27,6 @@ li {
   color: var(--color-dark-1);
   border-radius: 6px;
   cursor: text;
-  transition: box-shadow 0.15s linear;
 }
 
 .label {
@@ -43,12 +42,13 @@ li {
   color: inherit;
   cursor: inherit;
 
-  input {
+  input,
+  textarea {
     flex: 1;
     min-width: 32px;
     width: 0;
     height: 100%;
-    padding: 0 6px;
+    padding: 0 5px;
     border: 0;
     border-radius: inherit;
     color: inherit;
@@ -62,26 +62,29 @@ li {
       color: var(--color-grey-1);
     }
   }
-
+  textarea {
+    padding: 5px 8px;
+    resize: none;
+  }
   .prepend,
   .append {
     display: none;
     justify-content: center;
     align-items: center;
     width: auto;
-    height: 28px;
+    height: 30px;
     padding: 0 10px;
     line-height: 1;
     background: var(--bg-color, --color-plain-1);
     white-space: nowrap;
   }
   .prepend {
-    border-right: 2px solid var(--color-plain-a);
-    border-radius: 6px 0 0 6px;
+    border-right: 1px solid var(--color-plain-3);
+    border-radius: 2px 0 0 2px;
   }
   .append {
-    border-left: 2px solid var(--color-plain-a);
-    border-radius: 0 6px 6px 0;
+    border-left: 1px solid var(--color-plain-3);
+    border-radius: 0 2px 2px 0;
   }
   &[prepend] .prepend,
   &[append] .append {
@@ -93,8 +96,9 @@ li {
   }
   /* ----- */
   .icon {
-    --size: 18px;
-    margin: 0 8px 0 4px;
+    --size: 20px;
+    padding: 0 5px;
+    margin: 0 5px;
     color: var(--color-grey-2);
   }
 }
@@ -150,6 +154,44 @@ li {
   }
 }
 
+/* --- */
+:host([auto-border]) .label {
+  border-color: transparent;
+}
+:host([disabled]) {
+  cursor: not-allowed;
+
+  .label {
+    background: var(--color-plain-1);
+    opacity: 0.6;
+  }
+}
+:host([readonly]) {
+  cursor: default;
+}
+:host(:focus-within) {
+  // @include focus1;
+  .label {
+    border-color: var(--color-plain-3);
+  }
+}
+:host(:focus-within[readonly]) {
+  // @include focus2;
+}
+
+:host([type='textarea']) {
+  display: flex;
+  height: 80px;
+  .label {
+    width: 100%;
+    height: 100%;
+  }
+  .icon,
+  .suggestion {
+    display: none;
+  }
+}
+
 /* 额外样式 */
 :host([round]) {
   border-radius: 21px;
@@ -172,145 +214,37 @@ li {
 }
 
 :host([size='large']) {
-  min-width: 212px;
   .label {
-    height: 52px;
-    font-size: 18px;
-
-    input {
-      padding: 0 16px;
-    }
+    height: 42px;
+    font-size: 16px;
   }
   .prepend,
   .append {
-    height: 48px;
-  }
-
-  .icon {
-    --size: 24px;
-    margin: 0 20px 0 4px;
+    height: 40px;
   }
 }
+
 :host([size='medium']) {
-  min-width: 160px;
   .label {
     height: 36px;
-
-    input {
-      padding: 0 10px;
-    }
   }
   .prepend,
   .append {
-    height: 32px;
+    height: 34px;
   }
 }
 :host([size='mini']) {
-  min-width: 72px;
   .label {
-    height: 26px;
+    height: 24px;
     font-size: 12px;
   }
   .icon {
-    --size: 14px;
+    --size: 16px;
   }
   .prepend,
   .append {
-    height: 22px;
+    height: 18px;
   }
-}
-
-/* ----- 类型(颜色) ----- */
-:host(:focus-within) {
-  box-shadow: 0 0 0 2px var(--color-plain-a);
-}
-:host([type='primary']:focus-within) {
-  box-shadow: 0 0 0 2px var(--color-teal-a);
-}
-:host([type='default']:focus-within) {
-  box-shadow: 0 0 0 2px var(--color-grey-a);
-}
-:host([type='info']:focus-within) {
-  box-shadow: 0 0 0 2px var(--color-blue-a);
-}
-:host([type='success']:focus-within) {
-  box-shadow: 0 0 0 2px var(--color-green-a);
-}
-:host([type='danger']:focus-within) {
-  box-shadow: 0 0 0 2px var(--color-red-a);
-}
-:host([type='warning']:focus-within) {
-  box-shadow: 0 0 0 2px var(--color-orange-a);
-}
-:host([type='inverse']:focus-within) {
-  box-shadow: 0 0 0 2px var(--color-dark-a);
-}
-
-:host([type='primary']) .label {
-  border-color: var(--color-teal-2);
-  .prepend,
-  .append {
-    border-color: var(--color-teal-a);
-  }
-}
-:host([type='default']) .label {
-  border-color: var(--color-grey-2);
-  .prepend,
-  .append {
-    border-color: var(--color-grey-a);
-  }
-}
-:host([type='info']) .label {
-  border-color: var(--color-blue-2);
-  .prepend,
-  .append {
-    border-color: var(--color-blue-a);
-  }
-}
-:host([type='success']) .label {
-  border-color: var(--color-green-2);
-  .prepend,
-  .append {
-    border-color: var(--color-green-a);
-  }
-}
-:host([type='danger']) .label {
-  border-color: var(--color-red-2);
-  .prepend,
-  .append {
-    border-color: var(--color-red-a);
-  }
-}
-:host([type='warning']) .label {
-  border-color: var(--color-orange-2);
-  .prepend,
-  .append {
-    border-color: var(--color-orange-a);
-  }
-}
-:host([type='inverse']) .label {
-  border-color: var(--color-dark-2);
-  .prepend,
-  .append {
-    border-color: var(--color-dark-a);
-  }
-}
-
-/* --- */
-:host([auto-border]) .label {
-  border-color: transparent;
-}
-:host([disabled]) {
-  cursor: not-allowed;
-
-  .label {
-    border-color: var(--color-grey-1);
-    background: var(--color-plain-1);
-    opacity: 0.6;
-  }
-}
-:host([readonly]) {
-  cursor: default;
 }
 
 :host([no-border]),
@@ -332,17 +266,23 @@ import '../scroll/index'
 import '../icon/index'
 import $ from '../utils'
 
+const TYPES = ['text', 'textarea', 'password']
+const INPUTS = {
+  text: '<input spellcheck="false">',
+  textarea: '<textarea spellcheck="false"></textarea>'
+}
+
 export default class Input {
   props = {
     value: '',
     icon: '',
+    type: 'text',
     placeholder: '',
     maxlength: null,
     minlength: null,
     autofocus: false,
     readonly: false,
-    disabled: false,
-    passwd: false
+    disabled: false
   }
 
   state = {
@@ -350,7 +290,18 @@ export default class Input {
   }
 
   __init__() {
+    var type = this.getAttribute('type')
+    var input = ''
+
+    if (type !== 'textarea') {
+      type = 'text'
+    }
+
+    input = INPUTS[type]
+
     /* render */
+
+    this.props.type = type
 
     this.__OUTER__ = this.root.children[1]
     this.__PREPEND__ = this.__OUTER__.children[0]
@@ -409,6 +360,16 @@ export default class Input {
 
   set value(val) {
     this.__INPUT__.value = val
+  }
+
+  get type() {
+    return this.__INPUT__.type
+  }
+
+  set type(val) {
+    if (val !== 'textarea') {
+      this.__INPUT__.type = val
+    }
   }
 
   // 移动光标选择下拉选项
@@ -473,7 +434,7 @@ export default class Input {
   mounted() {
     var prepend = this.__PREPEND__.assignedNodes()
     var append = this.__APPEND__.assignedNodes()
-    var { passwd } = this.props
+    var { type } = this.props
 
     // 相同插槽, 只允许1个
     while (prepend.length > 1) {
@@ -483,10 +444,10 @@ export default class Input {
       this.removeChild(append.pop())
     }
 
-    if (prepend.length) {
+    if (prepend.length && type !== 'textarea') {
       this.__OUTER__.setAttribute('prepend', '')
     }
-    if (append.length) {
+    if (append.length && type !== 'textarea') {
       this.__OUTER__.setAttribute('append', '')
     }
 
@@ -500,7 +461,7 @@ export default class Input {
       // up: 38, down: 40
       if (ev.keyCode === 38 || ev.keyCode === 40) {
         // 仅普通文本表单, 密码和多行文本框不做响应
-        if (!passwd) {
+        if (type === 'text') {
           return this._moveSelect(ev)
         }
       }
@@ -508,58 +469,72 @@ export default class Input {
       // textarea 要按Ctrl Or Cmd键, 才会触发
       if (ev.keyCode === 13) {
         // 如果是输入建议存在,则第1次回车的时候, 不触发提交
-        if (this.state.mvidx !== null) {
+        if (type === 'text' && this.state.mvidx !== null) {
           return this._fetchSelect(this.state.mvidx, ev)
         }
 
-        this.dispatchEvent(new CustomEvent('submit', { detail: this.value }))
+        if (
+          type === 'text' ||
+          (type === 'textarea' && (ev.ctrlKey || ev.metaKey))
+        ) {
+          this.dispatchEvent(
+            new CustomEvent('submit', {
+              detail: this.value
+            })
+          )
+        }
       }
     })
 
-    // 输入状态事件
-    this._handleChange = $.bind(this.__INPUT__, 'input', ev => {
-      ev.preventDefault()
-      this.dispatchEvent(
-        new CustomEvent('fetch-suggest', {
-          detail: {
-            value: this.value,
-            send: list => {
-              this.props.list = list
-              this._parseSuggestion()
+    // 非textarea, 可做输入建议功能
+    if (type === 'text') {
+      // 输入状态事件
+      this._handleChange = $.bind(this.__INPUT__, 'input', ev => {
+        ev.preventDefault()
+        this.dispatchEvent(
+          new CustomEvent('fetch-suggest', {
+            detail: {
+              value: this.value,
+              send: list => {
+                this.props.list = list
+                this._parseSuggestion()
+              }
             }
-          }
-        })
-      )
-    })
+          })
+        )
+      })
 
-    // 渲染建议列表
-    this._parseSuggestion = $.bind(this.__INPUT__, 'click', ev => {
-      var { list } = this.props
-      let { x, y, width } = this.getBoundingClientRect()
-      if (list && list.length) {
-        var html = list
-          .map((it, i) => `<li data-idx="${i}">${it.value}</li>`)
-          .join('')
-        this.__LIST__.firstElementChild.firstElementChild.innerHTML = html
-        this.__LIST__.classList.toggle('show', true)
-        this.__LIST__.style.cssText = `left:${x}px;top:${y +
-          50}px;width:${width}px;`
-      } else {
-        this.__LIST__.classList.toggle('show', false)
-      }
-    })
+      // 渲染建议列表
+      this._parseSuggestion = $.bind(this.__INPUT__, 'click', ev => {
+        var { list } = this.props
+        let { x, y, width } = this.getBoundingClientRect()
+        if (list && list.length) {
+          var html = list
+            .map((it, i) => `<li data-idx="${i}">${it.value}</li>`)
+            .join('')
+          this.__LIST__.firstElementChild.firstElementChild.innerHTML = html
+          this.__LIST__.classList.toggle('show', true)
+          this.__LIST__.style.cssText = `left:${x}px;top:${y +
+            50}px;width:${width}px;`
+        } else {
+          this.__LIST__.classList.toggle('show', false)
+        }
+      })
 
-    this._inactiveFn = $.outside(this, ev => {
-      this.__LIST__.classList.remove('show')
-    })
+      this._inactiveFn = $.outside(this, ev => {
+        this.__LIST__.classList.remove('show')
+      })
 
-    // 选择建议
-    this._handleSelect = $.bind(this.__LIST__, 'click', ev => {
-      if (ev.target.tagName === 'LI') {
-        this._fetchSelect(ev.target.dataset.idx, ev)
-        this.dispatchEvent(new CustomEvent('input'))
-      }
-    })
+      // 选择建议
+      this._handleSelect = $.bind(this.__LIST__, 'click', ev => {
+        if (ev.target.tagName === 'LI') {
+          this._fetchSelect(ev.target.dataset.idx, ev)
+          this.dispatchEvent(new CustomEvent('input'))
+        }
+      })
+    } else {
+      this._handleWheel = $.catch(this.__INPUT__, 'wheel')
+    }
   }
 
   unmount() {
@@ -595,6 +570,14 @@ export default class Input {
         this.__INPUT__.setAttribute('placeholder', val)
         break
 
+      case 'type':
+        if (~TYPES.indexOf(val)) {
+          this.type = val
+        } else {
+          this.type = 'text'
+        }
+        break
+
       case 'value':
         this.value = val
         break
@@ -611,17 +594,7 @@ export default class Input {
         if (k === 'readonly') {
           k = 'readOnly'
         }
-        this[k] = val !== null
-        break
-
-      case 'passwd':
-        if (val === null) {
-          this.props.passwd = false
-          this.__INPUT__.type = 'text'
-        } else {
-          this.props.passwd = true
-          this.__INPUT__.type = 'password'
-        }
+        this[k] = true
         break
     }
   }

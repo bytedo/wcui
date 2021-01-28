@@ -26,44 +26,41 @@
   }
 }
 
-:host([size='large']) .icon {
+:host([size='large']) {
   width: 52px;
   height: 52px;
 }
-:host([size='medium']) .icon {
+:host([size='medium']) {
   width: 36px;
   height: 36px;
 }
-:host([size='mini']) .icon {
+:host([size='mini']) {
   width: 26px;
   height: 26px;
 }
-:host([type='danger']) {
+
+:host([red]) {
   color: var(--color-red-1);
 }
 
-:host([type='info']) {
+:host([blue]) {
   color: var(--color-blue-1);
 }
 
-:host([type='success']) {
+:host([green]) {
   color: var(--color-green-1);
 }
 
-:host([type='primary']) {
-  color: var(--color-teal-1);
-}
-
-:host([type='warning']) {
+:host([orange]) {
   color: var(--color-orange-1);
 }
 
-:host([type='inverse']) {
-  color: var(--color-dark-1);
+:host([grey]) {
+  color: var(--color-grey-1);
 }
 
-:host([type='default']) {
-  color: var(--color-grey-1);
+:host([dark]) {
+  color: var(--color-dark-1);
 }
 
 @keyframes circle {

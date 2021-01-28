@@ -66,6 +66,10 @@
   background: var(--color-orange-1);
 }
 
+:host([grey]) .curr {
+  background: var(--color-grey-1);
+}
+
 :host([dark]) .curr {
   background: var(--color-dark-1);
 }

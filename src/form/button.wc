@@ -146,7 +146,7 @@
   }
 }
 :host(:focus-within:not([link])) {
-  box-shadow: 0 0 0 2px rgba(242, 245, 252, 0.5);
+  box-shadow: 0 0 0 2px var(--color-plain-a);
 }
 
 // -------------
@@ -165,7 +165,7 @@
   }
 }
 :host([type='danger']:focus-within:not([link])) {
-  box-shadow: 0 0 0 2px rgba(255, 107, 129, 0.5);
+  box-shadow: 0 0 0 2px var(--color-red-a);
 }
 
 // -------------
@@ -184,7 +184,7 @@
   }
 }
 :host([type='info']:focus-within:not([link])) {
-  box-shadow: 0 0 0 2px rgba(100, 181, 246, 0.5);
+  box-shadow: 0 0 0 2px var(--color-blue-a);
 }
 
 // --------
@@ -203,7 +203,7 @@
   }
 }
 :host([type='sucess']:focus-within:not([link])) {
-  box-shadow: 0 0 0 2px rgba(88, 214, 141, 0.5);
+  box-shadow: 0 0 0 2px var(--color-green-a);
 }
 
 // ---------
@@ -222,7 +222,7 @@
   }
 }
 :host([type='primary']:focus-within:not([link])) {
-  box-shadow: 0 0 0 2px rgba(72, 201, 176, 0.5);
+  box-shadow: 0 0 0 2px var(--color-teal-a);
 }
 
 // ----------
@@ -241,7 +241,7 @@
   }
 }
 :host([type='warning']:focus-within:not([link])) {
-  box-shadow: 0 0 0 2px rgba(244, 211, 19, 0.5);
+  box-shadow: 0 0 0 2px var(--color-orange-a);
 }
 
 // -------
@@ -260,7 +260,7 @@
   }
 }
 :host([type='inverse']:focus-within:not([link])) {
-  box-shadow: 0 0 0 2px rgba(65, 91, 118, 0.5);
+  box-shadow: 0 0 0 2px var(--color-dark-a);
 }
 
 // -------
@@ -279,7 +279,7 @@
   }
 }
 :host([type='default']:focus-within:not([link])) {
-  box-shadow: 0 0 0 2px rgba(206, 214, 224, 0.5);
+  box-shadow: 0 0 0 2px var(--color-grey-a);
 }
 
 :host([loading]),
@@ -423,7 +423,7 @@ export default class Button {
 
       case 'loading':
       case 'disabled':
-        this[name] = true
+        this[name] = val !== null
         break
     }
   }

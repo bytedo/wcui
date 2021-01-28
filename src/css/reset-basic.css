@@ -17,62 +17,65 @@
  * 
  */
 
-
-* {margin: 0;padding: 0;vertical-align: baseline;box-sizing:border-box;}
-::before,::after {box-sizing:border-box;}
+* {margin: 0;padding: 0;vertical-align: baseline;box-sizing: border-box;}
+::before, ::after {box-sizing: border-box;}
 /* HTML5 display-role reset for older browsers */
-article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section,content {display: block;}
-img {border:0;display:inline-block;}
-ol, ul {list-style: none;}
+article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section,content {display: block;}
+img {border: 0;display: inline-block;}
+ol,ul {list-style: none;}
 blockquote, q {quotes: none;}
-blockquote::before, blockquote::after,
-q::before, q::after {content: '';content: none;}
+blockquote::before, blockquote::after, q::before, q::after {content: '';content: none;}
 table {border-collapse: collapse;border-spacing: 0;}
-a:focus,input,textarea,button:focus,input:focus,textarea:focus {outline:none;}
-::-moz-focus-inner {
-  border:none;outline:none;
-}
-body {font-family:"Helvetica Neue", Arial,"WenQuanYi Micro Hei","PingFang SC","Hiragino Sans GB","Segoe UI", "Microsoft Yahei", sans-serif;-webkit-font-smoothing: antialiased;text-size-adjust: 100%;-webkit-tap-highlight-color: transparent;}
-code,pre,samp {font-family:Menlo,Monaco,Consolas,"Courier New",monospace;}
-[anot],[\:repeat],[\:if] {visibility:hidden;}
+a:focus,input,textarea,button:focus,input:focus,textarea:focus {outline: none;}
+::-moz-focus-inner {border: none;outline: none;}
 
+body {font-family: 'Helvetica Neue', Arial, 'WenQuanYi Micro Hei', 'PingFang SC', 'Hiragino Sans GB', 'Segoe UI', 'Microsoft Yahei', sans-serif;-webkit-font-smoothing: antialiased;text-size-adjust: 100%;-webkit-tap-highlight-color: transparent;}
+code, pre, samp {font-family: Menlo, Monaco, Consolas, 'Courier New', monospace;}
+[anot],[\:repeat],[\:if] {visibility: hidden;}
 
 .noselect {-webkit-touch-callout: none;-webkit-user-select: none;-moz-user-select: none;user-select: none;}
-.noselect img, .noselect a {-webkit-user-drag:none;}
-.text-ell {overflow:hidden; white-space:nowrap; text-overflow:ellipsis }
+.noselect img, .noselect a {-webkit-user-drag: none;}
+.text-ell {overflow: hidden;white-space: nowrap;text-overflow: ellipsis;}
 .text-thin {-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;}
-
 
 :root {
   /* primary */
+  --color-teal-a: rgba(72, 201, 176, 0.5);
   --color-teal-1: rgb(72, 201, 176);
   --color-teal-2: rgb(26, 188, 156);
   --color-teal-3: rgb(22, 160, 133);
   /* sucess */
+  --color-green-a: rgba(88, 214, 141, 0.5);
   --color-green-1: rgb(88, 214, 141);
   --color-green-2: rgb(46, 204, 113);
   --color-green-3: rgb(39, 173, 96);
   /* info */
+  --color-blue-a: rgba(100, 181, 246, 0.5);
   --color-blue-1: rgb(100, 181, 246);
   --color-blue-2: rgb(66, 165, 245);
   --color-blue-3: rgb(33, 150, 243);
   /* danger */
+  --color-red-a: rgba(255, 107, 129, 0.5);
   --color-red-1: rgb(255, 107, 129);
   --color-red-2: rgb(255, 71, 87);
   --color-red-3: rgb(230, 52, 67);
   /* warning */
+  --color-orange-a: rgba(244, 211, 19, 0.5);
   --color-orange-1: rgb(244, 211, 19);
   --color-orange-2: rgb(241, 196, 15);
   --color-orange-3: rgb(205, 167, 13);
   /* default1 */
+  --color-plain-a: rgba(242, 245, 252, 0.5);
   --color-plain-1: rgb(242, 245, 252);
   --color-plain-2: rgb(232, 235, 244);
   --color-plain-3: rgb(218, 225, 233);
   /* default2 */
+  --color-grey-a: rgba(206, 214, 224, 0.5);
   --color-grey-1: rgb(206, 214, 224);
   --color-grey-2: rgb(164, 176, 190);
   --color-grey-3: rgb(134, 144, 155);
   /* inverse */
+  --color-dark-a: rgba(65, 91, 118, 0.5);
   --color-dark-1: rgb(65, 91, 118);
   --color-dark-2: rgb(52, 73, 94);
   --color-dark-3: rgb(44, 62, 80);
