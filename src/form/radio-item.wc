@@ -147,7 +147,7 @@
   }
 }
 
-:host([color='orange']) label.checked {
+:host([type='warning']) label.checked {
   color: var(--color-orange-1);
   .dot {
     border-color: var(--color-orange-1);

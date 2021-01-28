@@ -72,7 +72,7 @@ label {
 :host([color='purple']) label span {
   color: var(--color-purple-1);
 }
-:host([color='orange']) label span {
+:host([type='warning']) label span {
   color: var(--color-orange-1);
 }
 

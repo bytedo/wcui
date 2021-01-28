@@ -65,7 +65,7 @@
     background: var(--color-red-1);
   }
 }
-:host([color='orange']) {
+:host([type='warning']) {
   .slider-box .slider {
     background: var(--color-orange-1);
   }

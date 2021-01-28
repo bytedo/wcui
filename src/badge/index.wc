@@ -42,7 +42,7 @@
 :host([type='info']) .dot {
   background: var(--color-blue-1);
 }
-:host([color='orange']) .dot {
+:host([type='warning']) .dot {
   background: var(--color-orange-1);
 }
 :host([color='purple']) .dot {

@@ -98,7 +98,7 @@
   background: var(--color-teal-1);
 }
 
-:host([color='orange']) label.checked {
+:host([type='warning']) label.checked {
   background: var(--color-orange-1);
 }
 

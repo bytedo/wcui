@@ -1,92 +1,73 @@
 <template>
-  <div class="layout">
-    <wc-button
-      color="plain"
-      data-page="1"
-      class="home"
-      icon="dbl-left"
-    ></wc-button>
-    <wc-button data-page="prev" class="prev" icon="left"></wc-button>
-    <div class="pager"></div>
-    <wc-button data-page="next" class="next" icon="right"></wc-button>
-    <wc-button data-page="end" class="end" icon="dbl-right"></wc-button>
-  </div>
+  <div class="layout"></div>
 </template>
 
 <style lang="scss">
 :host {
   display: block;
   line-height: 1;
-  color: var(--color-dark-1);
   font-size: 14px;
   user-select: none;
   -moz-user-select: none;
+  color: var(--color-dark-1);
 
-  .layout,
-  .pager {
+  .layout {
     display: flex;
     justify-content: center;
     align-items: center;
-  }
-  .layout {
     margin: 10px auto;
   }
 
-  wc-button {
+  .item {
     min-width: 32px;
-    // height: 32px;
     --padding: 0;
-    margin: 0 3px;
-    --icon-size: 14px;
+    margin: 0 5px;
+    --icon-size: 12px;
+    border-radius: 4px;
 
-    &:hover {
-      background: var(--color-plain-2);
-    }
-
-    &[curr] {
+    &.curr {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 32px;
       background: var(--color-teal-1);
       color: #fff;
     }
   }
-}
 
-:host([simple]) {
-  .home,
-  .end {
-    display: none;
+  input {
+    width: 48px;
+    height: 32px;
+    padding: 0 4px;
+    border: 2px solid var(--color-plain-2);
+    border-radius: 4px;
+    text-align: center;
+    outline: none;
   }
 }
 
-:host([circle]) button {
+:host([circle]) .item {
   border-radius: 50%;
 }
 
-:host([type='danger']) button[curr] {
+:host([red]) .curr {
   background: var(--color-red-1);
 }
 
-:host([type='info']) button[curr] {
+:host([blue]) .curr {
   background: var(--color-blue-1);
 }
 
-:host([type='success']) button[curr] {
+:host([green]) .curr {
   background: var(--color-green-1);
 }
 
-:host([type='primary']) button[curr] {
-  background: var(--color-teal-1);
-}
-
-:host([color='orange']) button[curr] {
+:host([orange]) .curr {
   background: var(--color-orange-1);
 }
 
-:host([type='inverse']) button[curr] {
+:host([dark]) .curr {
   background: var(--color-dark-1);
-}
-
-:host([color='purple']) button[curr] {
-  background: var(--color-purple-1);
 }
 </style>
 
@@ -95,13 +76,13 @@ import $ from '../utils'
 import '../form/button'
 
 // 计算页码
-function calculate(curr, total, simple) {
+function calculate(curr, total) {
   var arr = []
   var fixed = 0
   var half = curr < 3 ? 6 - curr : 2 // 中间页码
 
-  // 总页码小于2, 或者简单模式下
-  if (total < 2 || simple) {
+  // 总页码小于2
+  if (total < 2) {
     arr.push({ to: curr, txt: curr })
     return arr
   }
@@ -133,102 +114,198 @@ function calculate(curr, total, simple) {
 
   return arr
 }
+
+const LAYOUT_DICT = {
+  home: e =>
+    `<wc-button data-act="1" ${
+      e ? 'disabled' : ''
+    } class="item" icon="dbl-left"></wc-button>`,
+  end: e =>
+    `<wc-button data-act="end" ${
+      e ? 'disabled' : ''
+    } class="item" icon="dbl-right"></wc-button>`,
+  prev: e =>
+    `<wc-button data-act="prev" ${
+      e ? 'disabled' : ''
+    } class="item" icon="left"></wc-button>`,
+  next: e =>
+    `<wc-button data-act="next" ${
+      e ? 'disabled' : ''
+    } class="item" icon="right"></wc-button>`,
+  curr: n => `<span class="curr item">${n}</span>`,
+  info: (t, p) => `<span class="item">共 ${t}条, ${p}页</span>`,
+  jump: n =>
+    `<section class="item"><input maxlength="6" value="${n}"><wc-button data-act="go" class="item">Go</wc-button></section>`
+}
+
 //
 export default class Pager {
   props = {
-    layout: 'home, prev, next, end',
+    layout: 'home, prev, pages, next, end',
     total: 0,
     curr: 1,
-    pagesize: 20,
-    simple: false
+    pagesize: 20
   }
+
+  state = {
+    totalpage: 0
+  }
+
   __init__() {
     /* render */
-
     this.__LAYOUT__ = this.root.children[1]
-    this.__HOME__ = this.__LAYOUT__.children[0]
-    this.__PREV__ = this.__LAYOUT__.children[1]
-    this.__PAGE__ = this.__LAYOUT__.children[2]
-    this.__NEXT__ = this.__LAYOUT__.children[3]
-    this.__END__ = this.__LAYOUT__.children[4]
   }
 
   update() {
-    var { curr, totalpage, simple } = this.props
+    var { curr, total, layout } = this.props
+    var { totalpage } = this.state
 
-    var list = calculate(curr, totalpage, simple)
+    layout = layout.split(',').map(name => {
+      //
+      switch (name.trim()) {
+        case 'pages':
+          return calculate(curr, totalpage)
+            .map(it =>
+              curr === it.to
+                ? LAYOUT_DICT.curr(curr)
+                : `<wc-button class="item" data-act="${it.to}">${
+                    it.txt
+                  }</wc-button>`
+            )
+            .join('')
 
-    this.__PAGE__.innerHTML = list
-      .map(
-        it =>
-          `<wc-button ${curr === it.to ? 'color="teal"' : ''} data-page="${
-            it.to
-          }">${it.txt}</wc-button>`
-      )
-      .join('')
+        case 'home':
+          return LAYOUT_DICT.home(curr === 1)
+
+        case 'prev':
+          return LAYOUT_DICT.prev(curr === 1)
+
+        case 'next':
+          return LAYOUT_DICT.next(curr === totalpage)
+
+        case 'end':
+          return LAYOUT_DICT.end(curr === totalpage)
+
+        case 'curr':
+          return LAYOUT_DICT.curr(curr)
+
+        case 'info':
+          return LAYOUT_DICT.info(total, totalpage)
+
+        case 'jump':
+          return LAYOUT_DICT.jump(curr)
+
+        default:
+          return ''
+      }
+    })
+
+    this.__LAYOUT__.innerHTML = layout.join('')
+  }
+
+  get curr() {
+    return this.props.curr
+  }
+
+  set curr(n) {
+    n = +n
+    if (n > 0) {
+      if (n > this.state.totalpage) {
+        n = this.state.totalpage
+      }
+      this.props.curr = n
+      this.update()
+    }
+  }
+
+  set pagesize(n) {
+    n = +n
+    if (n > 0) {
+      this.props.pagesize = n
+      this.state.totalpage = Math.ceil(this.props.total / n)
+      this.update()
+    }
+  }
+
+  set total(n) {
+    n = +n
+    if (n > 0) {
+      this.props.total = n
+      this.state.totalpage = Math.ceil(n / this.props.pagesize)
+      this.update()
+    }
   }
 
   mounted() {
     var { pagesize, total } = this.props
-    this.props.totalpage = Math.ceil(total / pagesize)
+    this.state.totalpage = Math.ceil(total / pagesize)
 
     this.update()
 
     $.bind(this.__LAYOUT__, 'click', ev => {
       if (ev.target.tagName === 'WC-BUTTON') {
-        var { curr, totalpage } = this.props
-        var page = ev.target.dataset.page
-        var num = +page
-        if (num === num) {
-          if (num === curr) {
-            return
-          }
-        } else {
-          switch (page) {
-            case 'prev':
-              num = curr - 1
-              if (num < 1) {
-                return
-              }
-              break
-            case 'next':
-              num = curr + 1
-              if (num > totalpage) {
-                return
-              }
-              break
-            case 'end':
-              if (totalpage === curr) {
-                return
-              }
-              num = totalpage
-              break
-          }
+        let { curr } = this.props
+        let { totalpage } = this.state
+        let num = +ev.target.dataset.act
+
+        if (num !== num) {
+          num = ev.target.dataset.act
         }
+
+        switch (num) {
+          case 'prev':
+            if (curr > 1) {
+              num = curr - 1
+            } else {
+              num = 1
+            }
+            break
+          case 'next':
+            if (curr < totalpage) {
+              num = curr + 1
+            } else {
+              num = totalpage
+            }
+            break
+          case 'end':
+            num = totalpage
+            break
+
+          case 'go':
+            var n = +this.__LAYOUT__.querySelector('input').value
+            if (n > 0 && n <= totalpage) {
+              num = n
+            } else {
+              num = curr
+            }
+            this.__LAYOUT__.querySelector('input').value = num
+            break
+        }
+
+        if (num === curr) {
+          return
+        }
+
         this.props.curr = num
         this.update()
-        this.dispatchEvent(
-          new CustomEvent('pick', {
-            detail: num
-          })
-        )
+        this.dispatchEvent(new CustomEvent('page-change', { detail: num }))
       }
     })
   }
 
   watch() {
     switch (name) {
-      case 'total':
-      case 'pagesize':
-      case 'curr':
-        this.props[name] = +val || this.props[name]
-        var { pagesize, total } = this.props
-        this.props.totalpage = Math.ceil(total / pagesize)
+      case 'layout':
+        this.props.layout = val
         this.update()
         break
 
-      case 'simple':
-        this.props.simple = true
+      case 'total':
+      case 'pagesize':
+      case 'curr':
+        if (+val > 0) {
+          this[name] = +val
+        }
         break
     }
   }

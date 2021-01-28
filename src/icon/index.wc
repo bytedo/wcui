@@ -54,7 +54,7 @@
   color: var(--color-teal-1);
 }
 
-:host([color='orange']) {
+:host([type='warning']) {
   color: var(--color-orange-1);
 }
 

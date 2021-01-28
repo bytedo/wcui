@@ -51,7 +51,7 @@
 :host([type='success']) {
   background: #58d68d;
 }
-:host([color='orange']) {
+:host([type='warning']) {
   background: #ffb618;
 }
 :host([type='inverse']) {

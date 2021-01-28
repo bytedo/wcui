@@ -47,7 +47,7 @@
   background: var(--color-green-1);
 }
 
-:host([color='orange']) label span {
+:host([type='warning']) label span {
   background: var(--color-orange-1);
 }
 
