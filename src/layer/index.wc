@@ -177,7 +177,7 @@
       }
 
       &:focus {
-        @include focus1;
+        // @include focus1;
       }
 
       &:last-child {

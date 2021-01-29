@@ -18,31 +18,33 @@
 }
 
 .code-box {
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   position: relative;
   width: 100%;
   max-height: 610px;
   margin: 10px 0;
-  border: 1px solid var(--color-plain-2);
-  border-radius: 2px;
+  border-radius: 6px;
+  background: #f7f8fb;
+  color: var(--color-dark-1);
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.15);
 
   .title {
     display: flex;
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    height: 24px;
+    height: 32px;
     padding: 0 12px;
     line-height: 1;
-    font-size: 12px;
-    background: var(--color-plain-2);
+    font-size: 14px;
     user-select: none;
 
     i {
       display: inline-block;
-      width: 10px;
-      height: 10px;
+      width: 12px;
+      height: 12px;
       margin-right: 6px;
       border-radius: 50%;
       background: var(--color-red-1);
@@ -55,8 +57,8 @@
     }
 
     .act {
-      --size: 16px;
-      margin: 0 2px;
+      --size: 18px;
+      margin: 0 6px;
       color: var(--color-grey-2);
       cursor: pointer;
 
@@ -75,7 +77,6 @@
     line-height: 18px;
     font-family: Menlo, Monaco, Consolas, 'Courier New', monospace;
     font-size: 13px;
-    background: linear-gradient(to right, var(--color-plain-1) 40px, #fff 40px);
     color: var(--color-dark-1);
     cursor: text;
     counter-reset: code;
@@ -114,18 +115,11 @@
 :host([dark]) {
   .code-box {
     border-color: var(--color-dark-2);
-
-    .title {
-      background: var(--color-dark-2);
-    }
+    background: var(--color-dark-1);
+    color: var(--color-plain-3);
 
     .code {
-      background: linear-gradient(
-        to right,
-        #596b7f 40px,
-        var(--color-dark-1) 40px
-      );
-      color: var(--color-plain-3);
+      color: var(--color-plain-2);
 
       p::before {
         color: var(--color-grey-3);
@@ -180,7 +174,13 @@ export default class Code {
 
   mounted() {
     var txt = this.innerHTML || this.textContent
-    this.value = txt.replace(/^[\r\n]|\s{2,}$/g, '')
+
+    txt = txt.trim().replace(/^[\r\n]|\s{2,}$/g, '')
+    if (txt.startsWith('<xmp>') && txt.endsWith('</xmp>')) {
+      txt = txt.slice(5, -6).trim()
+    }
+
+    this.value = txt
     this.textContent = ''
 
     this._cpFN = $.bind(this.__CP__, 'click', ev => {
