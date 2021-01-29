@@ -65,7 +65,7 @@ code, pre, samp {font-family: Menlo, Monaco, Consolas, 'Courier New', monospace;
   --color-orange-2: rgb(241, 196, 15);
   --color-orange-3: rgb(205, 167, 13);
   /* default1 */
-  --color-plain-a: rgba(242, 245, 252, 0.5);
+  --color-plain-a: rgba(150, 204, 248, 0.5);
   --color-plain-1: rgb(242, 245, 252);
   --color-plain-2: rgb(232, 235, 244);
   --color-plain-3: rgb(218, 225, 233);

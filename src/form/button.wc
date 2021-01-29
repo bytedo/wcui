@@ -417,6 +417,8 @@ export default class Button {
           }, 10)
         }
         break
+
+      //
       case 'lazy':
         this.props.lazy = val >> 0
         break

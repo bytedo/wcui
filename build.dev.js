@@ -4,7 +4,7 @@ require('es.shim')
 const log = console.log
 const fs = require('iofs')
 const path = require('path')
-const scss = require('node-sass')
+const scss = require('sass')
 const chokidar = require('chokidar')
 const chalk = require('chalk')
 

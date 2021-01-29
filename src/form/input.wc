@@ -342,7 +342,8 @@ export default class Input {
     autofocus: false,
     readonly: false,
     disabled: false,
-    passwd: false
+    passwd: false,
+    lazy: 0 // 输入建议并发拦截时间, 单位毫秒
   }
 
   state = {
@@ -455,25 +456,11 @@ export default class Input {
     this.state.mvidx = null
   }
 
-  _updateAttr() {
-    var { maxlength, minlength } = this.props
-
-    if (maxlength && maxlength > 0) {
-      this.__INPUT__.setAttribute('maxlength', maxlength)
-    } else {
-      this.__INPUT__.removeAttribute('maxlength')
-    }
-    if (minlength && minlength > 0) {
-      this.__INPUT__.setAttribute('minlength', minlength)
-    } else {
-      this.__INPUT__.removeAttribute('minlength')
-    }
-  }
-
   mounted() {
     var prepend = this.__PREPEND__.assignedNodes()
     var append = this.__APPEND__.assignedNodes()
     var { passwd } = this.props
+    this.stamp = 0
 
     // 相同插槽, 只允许1个
     while (prepend.length > 1) {
@@ -489,8 +476,6 @@ export default class Input {
     if (append.length) {
       this.__OUTER__.setAttribute('append', '')
     }
-
-    this._updateAttr()
 
     // 键盘事件
     this._handleSubmit = $.catch(this.__INPUT__, 'keydown', ev => {
@@ -518,7 +503,15 @@ export default class Input {
 
     // 输入状态事件
     this._handleChange = $.bind(this.__INPUT__, 'input', ev => {
-      ev.preventDefault()
+      let now = Date.now()
+
+      // 并发拦截
+      if (lazy && now - this.stamp < lazy) {
+        return
+      }
+
+      this.stamp = now
+
       this.dispatchEvent(
         new CustomEvent('fetch-suggest', {
           detail: {
@@ -563,7 +556,6 @@ export default class Input {
   }
 
   unmount() {
-    $.unbind(this.__INPUT__, 'wheel', this._handleWheel)
     $.unbind(this.__INPUT__, 'keydown', this._handleSubmit)
     $.unbind(this.__INPUT__, 'input', this._handleChange)
     $.unbind(this.__LIST__, 'click', this._handleSelect)
@@ -601,8 +593,18 @@ export default class Input {
 
       case 'maxlength':
       case 'minlength':
-        this.props[name] = val
-        this._updateAttr()
+        if (val === null) {
+          this.__INPUT__.removeAttribute(name)
+        } else {
+          let n = +val
+          if (n > 0) {
+            this.__INPUT__.setAttribute(name, +val)
+          }
+        }
+        break
+
+      case 'lazy':
+        this.props.lazy = val >> 0
         break
 
       case 'readonly':
