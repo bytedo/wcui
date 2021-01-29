@@ -459,7 +459,7 @@ export default class Input {
   mounted() {
     var prepend = this.__PREPEND__.assignedNodes()
     var append = this.__APPEND__.assignedNodes()
-    var { passwd } = this.props
+
     this.stamp = 0
 
     // 相同插槽, 只允许1个
@@ -479,6 +479,8 @@ export default class Input {
 
     // 键盘事件
     this._handleSubmit = $.catch(this.__INPUT__, 'keydown', ev => {
+      let { passwd } = this.props
+
       if (this.disabled || this.readOnly) {
         return
       }
@@ -504,6 +506,7 @@ export default class Input {
     // 输入状态事件
     this._handleChange = $.bind(this.__INPUT__, 'input', ev => {
       let now = Date.now()
+      let { lazy } = this.props
 
       // 并发拦截
       if (lazy && now - this.stamp < lazy) {
