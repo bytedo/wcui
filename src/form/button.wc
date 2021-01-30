@@ -9,8 +9,8 @@
 :host {
   overflow: hidden;
   display: inline-flex;
-  min-width: 64px;
-  height: 32px;
+  min-width: 76px;
+  height: 36px;
   border-radius: 6px;
   user-select: none;
   -moz-user-select: none;
@@ -29,10 +29,10 @@
     padding: var(--padding, 0 14px);
     margin: auto;
     line-height: 1;
-    border: 0;
+    border: 2px solid var(--color-plain-2);
     border-radius: inherit;
     white-space: nowrap;
-    background: var(--color-plain-2);
+    background: #fff;
     font-size: inherit;
     font-family: inherit;
     outline: none;
@@ -74,17 +74,23 @@
 }
 :host([size='medium']) {
   min-width: 128px;
-  height: 36px;
+  height: 44px;
 
   button {
     padding: 0 18px;
   }
 }
 :host([size='medium'][circle]) {
-  min-width: 36px;
+  min-width: 44px;
+}
+:host([size='small']) {
+  height: 32px;
+}
+:host([size='small'][circle]) {
+  min-width: 32px;
 }
 :host([size='mini']) {
-  min-width: 26px;
+  min-width: 32px;
   height: 26px;
   font-size: 12px;
 
@@ -104,7 +110,7 @@
   border-radius: 26px;
 }
 :host([circle]) {
-  min-width: 32px;
+  min-width: 36px;
   border-radius: 50%;
   button {
     padding: 0;
@@ -120,43 +126,28 @@
 
 :host([type]) {
   color: #fff;
-}
-:host([link]) {
-  min-width: auto;
-  height: auto;
-  font-size: 14px;
-  color: var(--color-plain-3);
-
   button {
-    padding: 0;
-    background: none;
-
-    &:hover {
-      text-decoration: underline;
-    }
+    border: 0;
   }
 }
 
-:host(:not([disabled]):not([loading]):not([link])) button {
+:host(:not([disabled]):not([loading])) button {
   &:hover {
-    background: var(--color-plain-1);
+    border-color: var(--color-plain-1);
   }
   &:active {
-    background: var(--color-plain-3);
+    border-color: var(--color-plain-3);
   }
 }
-:host(:focus-within:not([link])) {
+:host(:focus-within) {
   box-shadow: 0 0 0 2px var(--color-plain-a);
 }
 
 // -------------
-:host([type='danger']:not([link])) button {
+:host([type='danger']) button {
   background: var(--color-red-2);
 }
-:host([type='danger'][link]) button {
-  color: var(--color-red-1);
-}
-:host([type='danger']:not([disabled]):not([loading]):not([link])) button {
+:host([type='danger']:not([disabled]):not([loading])) button {
   &:hover {
     background: var(--color-red-1);
   }
@@ -164,18 +155,15 @@
     background: var(--color-red-3);
   }
 }
-:host([type='danger']:focus-within:not([link])) {
+:host([type='danger']:focus-within) {
   box-shadow: 0 0 0 2px var(--color-red-a);
 }
 
 // -------------
-:host([type='info']:not([link])) button {
+:host([type='info']) button {
   background: var(--color-blue-2);
 }
-:host([type='info'][link]) button {
-  color: var(--color-blue-2);
-}
-:host([type='info']:not([disabled]):not([loading]):not([link])) button {
+:host([type='info']:not([disabled]):not([loading])) button {
   &:hover {
     background: var(--color-blue-1);
   }
@@ -183,18 +171,15 @@
     background: var(--color-blue-3);
   }
 }
-:host([type='info']:focus-within:not([link])) {
+:host([type='info']:focus-within) {
   box-shadow: 0 0 0 2px var(--color-blue-a);
 }
 
 // --------
-:host([type='success']:not([link])) button {
+:host([type='success']) button {
   background: var(--color-green-2);
 }
-:host([type='success'][link]) button {
-  color: var(--color-green-2);
-}
-:host([type='success']:not([disabled]):not([loading]):not([link])) button {
+:host([type='success']:not([disabled]):not([loading])) button {
   &:hover {
     background: var(--color-green-1);
   }
@@ -202,18 +187,15 @@
     background: var(--color-green-3);
   }
 }
-:host([type='success']:focus-within:not([link])) {
+:host([type='success']:focus-within) {
   box-shadow: 0 0 0 2px var(--color-green-a);
 }
 
 // ---------
-:host([type='primary']:not([link])) button {
+:host([type='primary']) button {
   background: var(--color-teal-2);
 }
-:host([type='primary'][link]) button {
-  color: var(--color-teal-2);
-}
-:host([type='primary']:not([disabled]):not([loading]):not([link])) button {
+:host([type='primary']:not([disabled]):not([loading])) button {
   &:hover {
     background: var(--color-teal-1);
   }
@@ -221,18 +203,15 @@
     background: var(--color-teal-3);
   }
 }
-:host([type='primary']:focus-within:not([link])) {
+:host([type='primary']:focus-within) {
   box-shadow: 0 0 0 2px var(--color-teal-a);
 }
 
 // ----------
-:host([type='warning']:not([link])) button {
+:host([type='warning']) button {
   background: var(--color-orange-2);
 }
-:host([type='warning'][link]) button {
-  color: var(--color-orange-2);
-}
-:host([type='warning']:not([disabled]):not([loading]):not([link])) button {
+:host([type='warning']:not([disabled]):not([loading])) button {
   &:hover {
     background: var(--color-orange-1);
   }
@@ -240,18 +219,15 @@
     background: var(--color-orange-3);
   }
 }
-:host([type='warning']:focus-within:not([link])) {
+:host([type='warning']:focus-within) {
   box-shadow: 0 0 0 2px var(--color-orange-a);
 }
 
 // -------
-:host([type='inverse']:not([link])) button {
+:host([type='inverse']) button {
   background: var(--color-dark-2);
 }
-:host([type='inverse'][link]) button {
-  color: var(--color-dark-2);
-}
-:host([type='inverse']:not([disabled]):not([loading]):not([link])) button {
+:host([type='inverse']:not([disabled]):not([loading])) button {
   &:hover {
     background: var(--color-dark-1);
   }
@@ -259,18 +235,15 @@
     background: var(--color-dark-3);
   }
 }
-:host([type='inverse']:focus-within:not([link])) {
+:host([type='inverse']:focus-within) {
   box-shadow: 0 0 0 2px var(--color-dark-a);
 }
 
 // -------
-:host([type='default']:not([link])) button {
+:host([type='default']) button {
   background: var(--color-grey-2);
 }
-:host([type='default'][link]) button {
-  color: var(--color-grey-2);
-}
-:host([type='default']:not([disabled]):not([loading]):not([link])) button {
+:host([type='default']:not([disabled]):not([loading])) button {
   &:hover {
     background: var(--color-grey-1);
   }
@@ -278,7 +251,7 @@
     background: var(--color-grey-3);
   }
 }
-:host([type='default']:focus-within:not([link])) {
+:host([type='default']:focus-within) {
   box-shadow: 0 0 0 2px var(--color-grey-a);
 }
 
@@ -286,16 +259,6 @@
 :host([disabled]) {
   cursor: not-allowed;
   opacity: 0.6;
-}
-
-:host([link][loading]),
-:host([link][disabled]) {
-  button {
-    &:hover,
-    &:active {
-      text-decoration: none;
-    }
-  }
 }
 </style>
 

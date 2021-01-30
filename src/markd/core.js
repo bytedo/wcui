@@ -148,6 +148,22 @@ const Decoder = {
   }
 }
 
+function fixed(str) {
+  // 去掉\r, 将\t转为空格(2个)
+  return str
+    .replace(/\r\n|\r/g, '\n')
+    .replace(/\t/g, '  ')
+    .replace(/\u00a0/g, ' ')
+    .replace(/\u2424/g, '\n')
+    .replace(TAG_REG, (m, name, attr) => {
+      let tmp = attr.replace(/\n/g, '⨨☇') // 标签内的换行, 转为一组特殊字符, 方便后面还原
+      if (tmp !== attr) {
+        tmp = ' ' + tmp
+      }
+      return `<${name + tmp}>`
+    })
+}
+
 class Tool {
   constructor(list, links) {
     this.list = list
@@ -156,20 +172,6 @@ class Tool {
 
   // 初始化字符串, 处理多余换行等
   static init(str) {
-    // 去掉\r, 将\t转为空格(2个)
-    str = str
-      .replace(/\r\n|\r/g, '\n')
-      .replace(/\t/g, '  ')
-      .replace(/\u00a0/g, ' ')
-      .replace(/\u2424/g, '\n')
-      .replace(TAG_REG, (m, name, attr) => {
-        attr = attr.replace(/\n/g, '⨨☇') // 标签内的换行, 转为一组特殊字符, 方便后面还原
-        if (attr) {
-          attr = ' ' + attr
-        }
-        return `<${name + attr}>`
-      })
-
     var links = {}
     var list = []
     var lines = str.split('\n')
@@ -508,5 +510,5 @@ class Tool {
 }
 
 export default function(str) {
-  return Tool.init(str).parse()
+  return Tool.init(fixed(str)).parse()
 }

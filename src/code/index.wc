@@ -8,7 +8,7 @@
         <wc-icon title="复制" class="act cp" is="doc"></wc-icon>
       </span>
     </header>
-    <wc-scroll axis="y" class="code"></wc-scroll>
+    <wc-scroll axis="y" class="scoll"></wc-scroll>
   </div>
 </template>
 
@@ -25,6 +25,7 @@
   width: 100%;
   max-height: 610px;
   margin: 10px 0;
+  padding-bottom: 8px;
   border-radius: 6px;
   background: #f7f8fb;
   color: var(--color-dark-1);
@@ -71,23 +72,23 @@
     }
   }
 
-  .code {
+  .scoll {
     flex: 1;
     padding: 5px 0;
-    line-height: 18px;
+    line-height: 20px;
     font-family: Menlo, Monaco, Consolas, 'Courier New', monospace;
-    font-size: 13px;
+    font-size: 14px;
     color: var(--color-dark-1);
     cursor: text;
     counter-reset: code;
 
-    p {
-      display: flex;
+    code {
+      display: block;
       position: relative;
-      min-height: 18px;
+      min-height: 20px;
       padding: 0 8px 0 45px;
       white-space: pre-wrap;
-      word-wrap: break-word;
+      word-break: break-word;
 
       &::before {
         position: absolute;
@@ -99,6 +100,26 @@
         color: var(--color-grey-1);
         content: counter(code);
         counter-increment: code;
+      }
+
+      i {
+        font-style: normal;
+      }
+
+      .r {
+        color: var(--color-red-1);
+      }
+      .b {
+        color: var(--color-blue-1);
+      }
+      .g {
+        color: var(--color-green-1);
+      }
+      .gr {
+        color: var(--color-grey-2);
+      }
+      .o {
+        color: var(--color-orange-2);
       }
     }
   }
@@ -133,6 +154,7 @@
 import '../scroll/index'
 import '../layer/index'
 import $ from '../utils'
+import { colorHtml, colorCss } from './colorful'
 
 export default class Code {
   props = {
@@ -159,16 +181,33 @@ export default class Code {
   }
 
   set value(txt) {
-    this.props.content = txt
+    txt = txt
       .replace(/&amp;/g, '&')
       .replace(/&lt;/g, '<')
       .replace(/&gt;/g, '>')
 
+    this.props.content = txt
+
+    switch (this.props.lang) {
+      case 'html':
+        txt = colorHtml(txt)
+        break
+
+      case 'css':
+      case 'scss':
+      case 'less':
+        txt = colorCss(txt)
+        break
+
+      default:
+        txt = txt.replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        break
+    }
+
     txt = txt
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
       .split('\n')
-    txt = txt.map(s => `<p>${s}</p>`).join('')
+      .map(s => `<code>${s}</code>`)
+      .join('')
     this.__CODE__.innerHTML = txt
   }
 
