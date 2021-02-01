@@ -1,0 +1,267 @@
+<template>
+  <a tabindex="0" class="link">
+    <slot />
+  </a>
+</template>
+
+<style lang="scss">
+:host {
+  position: relative;
+  display: inline-flex;
+  user-select: none;
+  -moz-user-select: none;
+  font-size: 14px;
+  cursor: pointer;
+
+  .link {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: var(--padding, 0 2px);
+    line-height: 1;
+    font-size: inherit;
+    font-family: inherit;
+    outline: none;
+    color: inherit;
+    cursor: inherit;
+    text-decoration: none;
+    transition: color 0.15s linear;
+
+    &::-moz-focus-inner {
+      border: none;
+    }
+  }
+
+  &::after {
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    border-bottom: 1px dashed var(--color-plain-3);
+    content: '';
+    opacity: 0;
+    transition: opacity 0.15s linear;
+  }
+}
+
+:host(:not([disabled]):focus-within) {
+  &::after {
+    height: 2px;
+    border-width: 2px;
+    opacity: 1;
+  }
+}
+
+:host(:not([disabled]):hover),
+:host([underline]) {
+  &::after {
+    opacity: 1;
+  }
+}
+
+:host([loading]),
+:host([disabled]) {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+// -------------
+:host([type='danger']) {
+  color: var(--color-red-2);
+  &::after {
+    border-color: var(--color-red-1);
+  }
+}
+:host([type='danger']:not([disabled]):hover) {
+  color: var(--color-red-1);
+}
+:host([type='danger']:not([disabled]):active) {
+  color: var(--color-red-3);
+}
+
+// -------------
+:host([type='info']) {
+  color: var(--color-blue-2);
+  &::after {
+    border-color: var(--color-blue-1);
+  }
+}
+:host([type='info']:not([disabled]):hover) {
+  color: var(--color-blue-1);
+}
+:host([type='info']:not([disabled]):active) {
+  color: var(--color-blue-3);
+}
+
+// --------
+:host([type='success']) {
+  color: var(--color-green-2);
+  &::after {
+    border-color: var(--color-green-1);
+  }
+}
+:host([type='success']:not([disabled]):hover) {
+  color: var(--color-green-1);
+}
+:host([type='success']:not([disabled]):active) {
+  color: var(--color-green-3);
+}
+// ---------
+:host([type='primary']) {
+  color: var(--color-teal-2);
+  &::after {
+    border-color: var(--color-teal-1);
+  }
+}
+:host([type='primary']:not([disabled]):hover) {
+  color: var(--color-teal-1);
+}
+:host([type='primary']:not([disabled]):active) {
+  color: var(--color-teal-3);
+}
+
+// ----------
+:host([type='warning']) {
+  color: var(--color-orange-2);
+  &::after {
+    border-color: var(--color-orange-1);
+  }
+}
+:host([type='warning']:not([disabled]):hover) {
+  color: var(--color-orange-1);
+}
+:host([type='warning']:not([disabled]):active) {
+  color: var(--color-orange-3);
+}
+
+// -------
+:host([type='inverse']) {
+  color: var(--color-dark-2);
+  &::after {
+    border-color: var(--color-dark-1);
+  }
+}
+:host([type='inverse']:not([disabled]):hover) {
+  color: var(--color-dark-1);
+}
+:host([type='inverse']:not([disabled]):active) {
+  color: var(--color-dark-3);
+}
+
+// -------
+:host([type='default']) {
+  color: var(--color-grey-2);
+  &::after {
+    border-color: var(--color-grey-1);
+  }
+}
+:host([type='default']:not([disabled]):hover) {
+  color: var(--color-grey-1);
+}
+:host([type='default']:not([disabled]):active) {
+  color: var(--color-grey-3);
+}
+</style>
+
+<script>
+import '../icon/index'
+import $ from '../utils'
+
+const IS_FIREFOX = !!window.sidebar
+
+export default class Link {
+  props = {
+    to: null, // 跳转的地址
+    autofocus: '',
+    disabled: false,
+    lazy: 0 // 并发拦截时间, 单位毫秒
+  }
+
+  __init__() {
+    /* render */
+
+    this.__LINK__ = this.root.children[1]
+  }
+
+  get disabled() {
+    return this.props.disabled
+  }
+
+  set disabled(val) {
+    var type = typeof val
+
+    if (val === this.props.disabled) {
+      return
+    }
+    if ((type === 'boolean' && val) || type !== 'boolean') {
+      this.props.disabled = true
+      this.setAttribute('disabled', '')
+      this.__LINK__.removeAttribute('tabindex')
+    } else {
+      this.props.disabled = false
+      this.removeAttribute('disabled')
+      this.__LINK__.setAttribute('tabindex', 0)
+    }
+  }
+
+  mounted() {
+    this.stamp = 0
+
+    // 阻止事件冒泡, 避免用户自己绑定click事件不受这2个值的限制
+    this._handleClick = $.bind(this.__LINK__, 'click', ev => {
+      var { disabled, lazy } = this.props
+      var now = Date.now()
+
+      if (disabled) {
+        ev.stopPropagation()
+        ev.preventDefault()
+        return
+      }
+      // 并发拦截
+      if (lazy && now - this.stamp < lazy) {
+        ev.preventDefault()
+        ev.stopPropagation()
+        return
+      }
+      this.stamp = now
+    })
+  }
+
+  unmount() {
+    $.unbind(this.__LINK__, 'click', this._handleClick)
+  }
+
+  watch() {
+    switch (name) {
+      case 'autofocus':
+        this.__LINK__.setAttribute('autofocus', '')
+        // 辣鸡火狐, 要触发一下focus, 才能聚焦
+        if (IS_FIREFOX) {
+          setTimeout(_ => {
+            this.__LINK__.focus()
+          }, 10)
+        }
+        break
+
+      case 'to':
+        if (val === null) {
+          this.__LINK__.removeAttribute('href')
+        } else {
+          this.__LINK__.setAttribute('href', val)
+        }
+        break
+
+      //
+      case 'lazy':
+        this.props.lazy = val >> 0
+        break
+
+      case 'disabled':
+        this[name] = val !== null
+        break
+    }
+  }
+}
+</script>

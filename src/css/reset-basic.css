@@ -75,8 +75,8 @@ code, pre, samp {font-family: Menlo, Monaco, Consolas, 'Courier New', monospace;
   --color-grey-2: rgb(164, 176, 190);
   --color-grey-3: rgb(134, 144, 155);
   /* inverse */
-  --color-dark-a: rgba(65, 91, 118, 0.5);
-  --color-dark-1: rgb(65, 91, 118);
+  --color-dark-a: rgba(87, 96, 111, 0.5);
+  --color-dark-1: rgb(87, 96, 111);
   --color-dark-2: rgb(52, 73, 94);
   --color-dark-3: rgb(44, 62, 80);
 }

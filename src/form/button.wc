@@ -16,7 +16,6 @@
   -moz-user-select: none;
   color: var(--color-dark-1);
   font-size: 14px;
-  vertical-align: middle;
   cursor: pointer;
   transition: box-shadow 0.15s linear;
 
@@ -27,7 +26,6 @@
     width: 100%;
     height: inherit;
     padding: var(--padding, 0 14px);
-    margin: auto;
     line-height: 1;
     border: 2px solid var(--color-plain-2);
     border-radius: inherit;
@@ -282,7 +280,7 @@ export default class Button {
 
     // 圆形按钮不允许文字
     if (this.hasAttribute('circle')) {
-      // this.textContent = ''
+      this.textContent = ''
     }
 
     this.__BTN__ = this.root.children[1]

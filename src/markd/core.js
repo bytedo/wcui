@@ -294,7 +294,10 @@ class Tool {
             continue
           }
           html += `<tr>${tmp
-            .map((_, i) => `<td ${tableAlign[i]}>${_}</td>`)
+            .map(
+              (_, i) =>
+                `<td ${tableAlign[i]}>${Decoder.inline.call(this, _)}</td>`
+            )
             .join('')}</tr>`
           continue
         }
