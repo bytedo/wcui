@@ -255,11 +255,11 @@ export default class Scroll {
         xw = 50
       }
 
-      // 100%时不显示
-      if (xw === ow) {
+      // 100%或主体高度比滚动条还短时不显示
+      if (xw >= ow) {
         xw = 0
       }
-      if (yh === oh) {
+      if (yh >= oh) {
         yh = 0
       }
 
