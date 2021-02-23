@@ -101,6 +101,7 @@ li {
 
 .suggestion {
   display: none;
+  overflow: hidden;
   position: fixed;
   z-index: 10240;
   left: 0;
@@ -109,25 +110,13 @@ li {
   height: auto;
   max-height: 200px;
   min-height: 46px;
-  padding: 8px 0;
-  border-radius: 2px;
-  background: #fff;
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.25);
+  padding: 4px 0;
+  border-radius: 4px;
+  background: var(--color-plain-1);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
 
   .list {
     width: 100%;
-  }
-
-  &::after {
-    position: absolute;
-    left: 30px;
-    top: -4px;
-    width: 8px;
-    height: 8px;
-    background: #fff;
-    box-shadow: -1px -1px 2px rgba(0, 0, 0, 0.1);
-    transform: rotate(45deg);
-    content: '';
   }
   &.show {
     display: flex;
@@ -145,7 +134,7 @@ li {
 
     &:hover,
     &[focus] {
-      background: var(--color-plain-1);
+      background: var(--color-plain-2);
     }
   }
 }
@@ -531,7 +520,7 @@ export default class Input {
     // 渲染建议列表
     this._parseSuggestion = $.bind(this.__INPUT__, 'click', ev => {
       var { list } = this.props
-      let { x, y, width } = this.getBoundingClientRect()
+      let { x, y, width, height } = this.getBoundingClientRect()
       if (list && list.length) {
         var html = list
           .map((it, i) => `<li data-idx="${i}">${it.value}</li>`)
@@ -539,7 +528,8 @@ export default class Input {
         this.__LIST__.firstElementChild.firstElementChild.innerHTML = html
         this.__LIST__.classList.toggle('show', true)
         this.__LIST__.style.cssText = `left:${x}px;top:${y +
-          50}px;width:${width}px;`
+          height +
+          5}px;width:${width}px;`
       } else {
         this.__LIST__.classList.toggle('show', false)
       }
