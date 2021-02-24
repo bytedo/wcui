@@ -72,15 +72,14 @@ li {
     height: 28px;
     padding: 0 10px;
     line-height: 1;
-    background: var(--bg-color, --color-plain-1);
     white-space: nowrap;
   }
   .prepend {
-    border-right: 2px solid var(--color-plain-a);
+    border-right: 2px solid var(--color-plain-1);
     border-radius: 6px 0 0 6px;
   }
   .append {
-    border-left: 2px solid var(--color-plain-a);
+    border-left: 2px solid var(--color-plain-1);
     border-radius: 0 6px 6px 0;
   }
   &[prepend] .prepend,
@@ -141,27 +140,34 @@ li {
 
 /* 额外样式 */
 :host([round]) {
-  border-radius: 21px;
+  border-radius: 26px;
 
   .label input {
     padding: 0 10px;
+    margin: 0 18px;
   }
 
   .label[prepend] input,
   .label[append] input {
     padding: 0 5px;
   }
+  .label[prepend] input {
+    margin-left: 0;
+  }
+  .label[append] input {
+    margin-right: 0;
+  }
 
   .prepend {
-    border-radius: 21px 0 0 21px;
+    border-radius: 26px 0 0 26px;
   }
   .append {
-    border-radius: 0 21px 21px 0;
+    border-radius: 0 26px 26px 0;
   }
 }
 
 :host([size='large']) {
-  min-width: 212px;
+  min-width: 232px;
   .label {
     height: 52px;
     font-size: 18px;
@@ -173,6 +179,7 @@ li {
   .prepend,
   .append {
     height: 48px;
+    padding: 0 16px;
   }
 
   .icon {
@@ -286,9 +293,6 @@ li {
 }
 
 /* --- */
-:host([auto-border]) .label {
-  border-color: transparent;
-}
 :host([disabled]) {
   cursor: not-allowed;
 
@@ -304,14 +308,19 @@ li {
 
 :host([no-border]),
 :host(:focus-within[no-border]) {
-  box-shadow: none;
   .label {
     border: 0;
+
+    &[prepend] input {
+      padding-left: 2px;
+    }
+    &[append] input {
+      padding-right: 2px;
+    }
   }
-}
-:host([transparent]) {
-  .label {
-    background: transparent;
+  .prepend,
+  .append {
+    border: 0;
   }
 }
 </style>
@@ -495,7 +504,12 @@ export default class Input {
     // 输入状态事件
     this._handleChange = $.bind(this.__INPUT__, 'input', ev => {
       let now = Date.now()
-      let { lazy } = this.props
+      let { lazy, passwd } = this.props
+
+      // 密码类型不触发输入建议
+      if (passwd) {
+        return
+      }
 
       // 并发拦截
       if (lazy && now - this.stamp < lazy) {
