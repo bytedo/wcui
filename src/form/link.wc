@@ -8,10 +8,12 @@
 :host {
   position: relative;
   display: inline-flex;
+  border-radius: 2px;
   user-select: none;
   -moz-user-select: none;
-  font-size: 14px;
+  font-size: inherit;
   cursor: pointer;
+  transition: box-shadow 0.15s linear;
 
   .link {
     display: flex;
@@ -39,7 +41,7 @@
     left: 0;
     width: 100%;
     height: 1px;
-    border-bottom: 1px dashed var(--color-plain-3);
+    border-bottom: 1px dashed var(--color-grey-1);
     content: '';
     opacity: 0;
     transition: opacity 0.15s linear;
@@ -48,10 +50,9 @@
 
 :host(:not([disabled]):focus-within) {
   &::after {
-    height: 2px;
-    border-width: 2px;
     opacity: 1;
   }
+  box-shadow: 0 0 0 2px var(--color-plain-a);
 }
 
 :host(:not([disabled]):hover),
@@ -80,6 +81,9 @@
 :host([type='danger']:not([disabled]):active) {
   color: var(--color-red-3);
 }
+:host([type='danger']:not([disabled]):focus-within) {
+  box-shadow: 0 0 0 2px var(--color-red-a);
+}
 
 // -------------
 :host([type='info']) {
@@ -93,6 +97,9 @@
 }
 :host([type='info']:not([disabled]):active) {
   color: var(--color-blue-3);
+}
+:host([type='info']:not([disabled]):focus-within) {
+  box-shadow: 0 0 0 2px var(--color-blue-a);
 }
 
 // --------
@@ -108,6 +115,9 @@
 :host([type='success']:not([disabled]):active) {
   color: var(--color-green-3);
 }
+:host([type='success']:not([disabled]):focus-within) {
+  box-shadow: 0 0 0 2px var(--color-green-a);
+}
 // ---------
 :host([type='primary']) {
   color: var(--color-teal-2);
@@ -120,6 +130,9 @@
 }
 :host([type='primary']:not([disabled]):active) {
   color: var(--color-teal-3);
+}
+:host([type='primary']:not([disabled]):focus-within) {
+  box-shadow: 0 0 0 2px var(--color-teal-a);
 }
 
 // ----------
@@ -135,6 +148,9 @@
 :host([type='warning']:not([disabled]):active) {
   color: var(--color-orange-3);
 }
+:host([type='warning']:not([disabled]):focus-within) {
+  box-shadow: 0 0 0 2px var(--color-orange-a);
+}
 
 // -------
 :host([type='inverse']) {
@@ -149,6 +165,9 @@
 :host([type='inverse']:not([disabled]):active) {
   color: var(--color-dark-3);
 }
+:host([type='inverse']:not([disabled]):focus-within) {
+  box-shadow: 0 0 0 2px var(--color-dark-a);
+}
 
 // -------
 :host([type='default']) {
@@ -162,6 +181,9 @@
 }
 :host([type='default']:not([disabled]):active) {
   color: var(--color-grey-3);
+}
+:host([type='default']:not([disabled]):focus-within) {
+  box-shadow: 0 0 0 2px var(--color-grey-a);
 }
 </style>
 
