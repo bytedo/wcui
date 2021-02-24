@@ -1,23 +1,23 @@
 <template>
   <div class="label">
     <span data-act="-">-</span>
-    <!-- <wc-icon class="icon" is="minus"></wc-icon> -->
     <input value="0" maxlength="9" />
     <span data-act="+">+</span>
-    <!-- <wc-icon class="icon" is="plus"></wc-icon> -->
   </div>
 </template>
 
 <style lang="scss">
 :host {
   overflow: hidden;
-  display: inline-block;
-  width: 128px;
-  height: 32px;
+  display: inline-flex;
+  min-width: 128px;
+  height: 36px;
   user-select: none;
   -moz-user-select: none;
-  color: var(--color-dark-2);
-  border-radius: 2px;
+  color: var(--color-dark-1);
+  border-radius: 6px;
+  cursor: text;
+  transition: box-shadow 0.15s linear;
 }
 
 .label {
@@ -27,7 +27,7 @@
   margin: 0 auto;
   line-height: 1;
   font-size: 14px;
-  border: 1px solid var(--color-plain-3);
+  border: 2px solid var(--color-plain-2);
   border-radius: inherit;
   background: var(--bg-color, #fff);
   color: inherit;
@@ -39,17 +39,16 @@
     align-items: center;
     width: 32px;
     height: 100%;
-    background: var(--bg-color, --color-plain-1);
     font-size: 18px;
     cursor: pointer;
 
     &:first-child {
-      border-radius: 2px 0 0 2px;
-      border-right: 1px solid var(--color-plain-3);
+      border-radius: 4px 0 0 4px;
+      border-right: 2px solid var(--color-plain-1);
     }
     &:last-child {
-      border-radius: 0 2px 2px 0;
-      border-left: 1px solid var(--color-plain-3);
+      border-radius: 0 4px 4px 0;
+      border-left: 2px solid var(--color-plain-1);
     }
 
     &.disabled {
@@ -60,16 +59,15 @@
 
   input {
     flex: 1;
-    min-width: 0;
+    min-width: 32px;
     width: 0;
     height: 100%;
-    padding: 0 5px;
+    padding: 0 6px;
     border: 0;
     border-radius: inherit;
     color: inherit;
+    font: inherit;
     text-align: center;
-    font-size: inherit;
-    font-family: inherit;
     background: none;
     outline: none;
     box-shadow: none;
@@ -104,12 +102,6 @@
     cursor: inherit;
   }
 }
-:host(:focus-within) {
-  @include focus1;
-}
-:host(:focus-within[readonly]) {
-  @include focus2;
-}
 
 /* 额外样式 */
 :host([round]) {
@@ -124,48 +116,111 @@
 }
 
 :host([size='large']) {
-  width: 192px;
-  height: 42px;
+  min-width: 234px;
+  height: 52px;
   .label {
-    font-size: 16px;
+    font-size: 18px;
     span {
-      width: 48px;
+      width: 52px;
+      font-size: 24px;
     }
-  }
-  .prepend,
-  .append {
-    height: 40px;
   }
 }
 
 :host([size='medium']) {
-  width: 144px;
-  height: 36px;
+  min-width: 160px;
+  height: 44px;
   .label {
     span {
-      width: 36px;
+      width: 44px;
+      font-size: 22px;
     }
   }
-  .prepend,
-  .append {
-    height: 34px;
+}
+:host([size='small']) {
+  min-width: 96px;
+  height: 32px;
+  .label {
+    span {
+      width: 32px;
+    }
   }
 }
 :host([size='mini']) {
-  width: 96px;
-  height: 24px;
+  min-width: 72px;
+  height: 26px;
   .label {
     font-size: 12px;
     span {
-      width: 28px;
+      width: 26px;
     }
   }
-  .icon {
-    --size: 16px;
+}
+//
+:host(:focus-within) {
+  box-shadow: 0 0 0 2px var(--color-plain-a);
+}
+:host([type='primary']:focus-within) {
+  box-shadow: 0 0 0 2px var(--color-teal-a);
+}
+:host([type='default']:focus-within) {
+  box-shadow: 0 0 0 2px var(--color-grey-a);
+}
+:host([type='info']:focus-within) {
+  box-shadow: 0 0 0 2px var(--color-blue-a);
+}
+:host([type='success']:focus-within) {
+  box-shadow: 0 0 0 2px var(--color-green-a);
+}
+:host([type='danger']:focus-within) {
+  box-shadow: 0 0 0 2px var(--color-red-a);
+}
+:host([type='warning']:focus-within) {
+  box-shadow: 0 0 0 2px var(--color-orange-a);
+}
+:host([type='inverse']:focus-within) {
+  box-shadow: 0 0 0 2px var(--color-dark-a);
+}
+:host([type='primary']) .label {
+  border-color: var(--color-teal-2);
+  span {
+    border-color: var(--color-teal-a);
   }
-  .prepend,
-  .append {
-    height: 18px;
+}
+:host([type='default']) .label {
+  border-color: var(--color-grey-2);
+  span {
+    border-color: var(--color-grey-a);
+  }
+}
+:host([type='info']) .label {
+  border-color: var(--color-blue-2);
+  span {
+    border-color: var(--color-blue-a);
+  }
+}
+:host([type='success']) .label {
+  border-color: var(--color-green-2);
+  span {
+    border-color: var(--color-green-a);
+  }
+}
+:host([type='danger']) .label {
+  border-color: var(--color-red-2);
+  span {
+    border-color: var(--color-red-a);
+  }
+}
+:host([type='warning']) .label {
+  border-color: var(--color-orange-2);
+  span {
+    border-color: var(--color-orange-a);
+  }
+}
+:host([type='inverse']) .label {
+  border-color: var(--color-dark-2);
+  span {
+    border-color: var(--color-dark-a);
   }
 }
 </style>

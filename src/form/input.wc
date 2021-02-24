@@ -35,7 +35,7 @@ li {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 32px;
+  height: 36px;
   font-size: 14px;
   border: 2px solid var(--color-plain-2);
   border-radius: inherit;
@@ -45,10 +45,10 @@ li {
 
   input {
     flex: 1;
-    min-width: 32px;
+    min-width: 36px;
     width: 0;
     height: 100%;
-    padding: 0 6px;
+    padding: 0 8px;
     border: 0;
     border-radius: inherit;
     color: inherit;
@@ -69,7 +69,7 @@ li {
     justify-content: center;
     align-items: center;
     width: auto;
-    height: 28px;
+    height: 32px;
     padding: 0 10px;
     line-height: 1;
     white-space: nowrap;
@@ -167,7 +167,7 @@ li {
 }
 
 :host([size='large']) {
-  min-width: 232px;
+  min-width: 234px;
   .label {
     height: 52px;
     font-size: 18px;
@@ -190,7 +190,7 @@ li {
 :host([size='medium']) {
   min-width: 160px;
   .label {
-    height: 36px;
+    height: 44px;
 
     input {
       padding: 0 10px;
@@ -198,7 +198,21 @@ li {
   }
   .prepend,
   .append {
+    height: 40px;
+  }
+}
+:host([size='small']) {
+  min-width: 96px;
+  .label {
     height: 32px;
+
+    input {
+      padding: 0 6px;
+    }
+  }
+  .prepend,
+  .append {
+    height: 28px;
   }
 }
 :host([size='mini']) {
