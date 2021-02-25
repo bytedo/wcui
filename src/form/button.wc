@@ -9,7 +9,8 @@
 :host {
   overflow: hidden;
   display: inline-flex;
-  min-width: 76px;
+  min-width: 72px;
+  width: 128px;
   height: 36px;
   border-radius: 6px;
   user-select: none;
@@ -50,7 +51,7 @@
 }
 
 :host([size='large']) {
-  min-width: 212px;
+  width: 212px;
   height: 52px;
   font-size: 18px;
 
@@ -71,7 +72,7 @@
   }
 }
 :host([size='medium']) {
-  min-width: 128px;
+  width: 160px;
   height: 44px;
 
   button {
@@ -82,13 +83,15 @@
   min-width: 44px;
 }
 :host([size='small']) {
+  width: 96px;
   height: 32px;
 }
 :host([size='small'][circle]) {
   min-width: 32px;
+  width: 32px;
 }
 :host([size='mini']) {
-  min-width: 32px;
+  width: 72px;
   height: 26px;
   font-size: 12px;
 
@@ -102,6 +105,7 @@
 }
 :host([size='mini'][circle]) {
   min-width: 26px;
+  width: 26px;
 }
 
 :host([round]) {

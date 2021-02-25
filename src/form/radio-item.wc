@@ -10,20 +10,20 @@
   display: inline-flex;
   line-height: 1;
   font-size: 14px;
+  cursor: pointer;
 
   label {
     display: flex;
     justify-content: center;
     align-items: center;
     min-width: 32px;
-    height: 32px;
     padding: 0 5px;
     line-height: 1;
     -moz-user-select: none;
     user-select: none;
     white-space: nowrap;
     cursor: inherit;
-    color: var(--color-grey-3);
+    color: var(--color-dark-1);
 
     &.checked .dot::after {
       visibility: visible;
@@ -34,80 +34,26 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 18px;
-    height: 18px;
+    width: 14px;
+    height: 14px;
     margin-right: 3px;
-    border: 1px solid var(--color-grey-1);
+    border: 2px solid var(--color-dark-1);
     border-radius: 50%;
     background: #fff;
 
     &::after {
       display: block;
       visibility: hidden;
-      width: 12px;
-      height: 12px;
+      width: 4px;
+      height: 4px;
       border-radius: 50%;
-      background: var(--color-grey-1);
+      background: var(--color-dark-1);
       content: '';
     }
   }
 }
 
-:host([readonly]) {
-  opacity: 0.8;
-}
-
-:host([disabled]) {
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-:host([size='large']) {
-  label {
-    min-width: 58px;
-    height: 32px;
-  }
-  .dot {
-    width: 26px;
-    height: 26px;
-
-    &::after {
-      width: 18px;
-      height: 18px;
-    }
-  }
-}
-:host([size='medium']) {
-  label {
-    min-width: 50px;
-    height: 28px;
-  }
-  .dot {
-    width: 22px;
-    height: 22px;
-
-    &::after {
-      width: 14px;
-      height: 14px;
-    }
-  }
-}
-:host([size='mini']) {
-  label {
-    height: 14px;
-  }
-  .dot {
-    width: 14px;
-    height: 14px;
-
-    &::after {
-      width: 8px;
-      height: 8px;
-    }
-  }
-}
-
-:host([type='danger']) label.checked {
+:host([type='danger']) label {
   color: var(--color-red-1);
   .dot {
     border-color: var(--color-red-1);
@@ -117,7 +63,7 @@
   }
 }
 
-:host([type='info']) label.checked {
+:host([type='info']) label {
   color: var(--color-blue-1);
   .dot {
     border-color: var(--color-blue-1);
@@ -127,7 +73,7 @@
   }
 }
 
-:host([type='success']) label.checked {
+:host([type='success']) label {
   color: var(--color-green-1);
   .dot {
     border-color: var(--color-green-1);
@@ -137,7 +83,7 @@
   }
 }
 
-:host([type='primary']) label.checked {
+:host([type='primary']) label {
   color: var(--color-teal-1);
   .dot {
     border-color: var(--color-teal-1);
@@ -147,7 +93,7 @@
   }
 }
 
-:host([type='warning']) label.checked {
+:host([type='warning']) label {
   color: var(--color-orange-1);
   .dot {
     border-color: var(--color-orange-1);
@@ -157,23 +103,23 @@
   }
 }
 
-:host([type='inverse']) label.checked {
-  color: var(--color-dark-1);
-  .dot {
-    border-color: var(--color-dark-1);
-  }
-  .dot::after {
-    background: var(--color-dark-1);
-  }
+:host([readonly]) {
+  cursor: default;
+  opacity: 0.8;
 }
 
-:host([color='purple']) label.checked {
-  color: var(--color-purple-1);
-  .dot {
-    border-color: var(--color-purple-1);
-  }
-  .dot::after {
-    background: var(--color-purple-1);
+:host([disabled]) {
+  cursor: not-allowed;
+  opacity: 0.6;
+
+  label {
+    color: var(--color-grey-2);
+    .dot {
+      border-color: var(--color-grey-1);
+    }
+    .dot::after {
+      background: var(--color-grey-1);
+    }
   }
 }
 </style>
@@ -181,7 +127,7 @@
 <script>
 import $ from '../utils'
 
-export default class RadioItem {
+export default class Radio {
   props = {
     value: '',
     checked: false,
@@ -258,6 +204,8 @@ export default class RadioItem {
       if (this.disabled || this.readOnly || this.checked) {
         return
       }
+
+      this.checked = true
 
       this.parentNode.dispatchEvent(
         new CustomEvent('child-picked', { detail: this.value })

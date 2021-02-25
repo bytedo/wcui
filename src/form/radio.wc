@@ -12,7 +12,7 @@
 import $ from '../utils'
 import './radio-item'
 
-export default class Radio {
+export default class RadioGroup {
   props = {
     value: null
   }
@@ -23,7 +23,7 @@ export default class Radio {
 
   _updateChildrenStat() {
     Array.from(this.children).forEach(it => {
-      if (it.tagName === 'WC-RADIO-ITEM' && it.root) {
+      if (it.tagName === 'WC-RADIO' && it.root) {
         if (it.value === this.props.value) {
           it.checked = true
         } else {
@@ -47,7 +47,6 @@ export default class Radio {
 
   mounted() {
     this._pickedFn = $.bind(this, 'child-picked', ev => {
-      log('radio picked: ', ev.detail)
       this.value = ev.detail
       this.dispatchEvent(new CustomEvent('input'))
     })
