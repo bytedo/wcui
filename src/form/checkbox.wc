@@ -12,7 +12,7 @@
 import $ from '../utils'
 import './checkbox-item'
 
-export default class Checkbox {
+export default class CheckboxGroup {
   props = {
     value: []
   }
@@ -23,7 +23,7 @@ export default class Checkbox {
 
   _updateChildrenStat() {
     Array.from(this.children).forEach(it => {
-      if (it.tagName === 'WC-CHECKBOX-ITEM' && it.root) {
+      if (it.tagName === 'WC-CHECKBOX' && it.root) {
         if (this.value.includes(it.value)) {
           it.checked = true
         } else {
@@ -38,10 +38,11 @@ export default class Checkbox {
   }
 
   set value(val) {
+    console.log(this, val, this.props.value, val === this.props.value)
     if (val === this.props.value) {
       return
     }
-    this.props.value = val
+    this.props.value = [...val]
     this._updateChildrenStat()
   }
 
@@ -58,7 +59,7 @@ export default class Checkbox {
           tmp.splice(idx, 1)
         }
       }
-      this.props.value = tmp
+      this.value = tmp
       this.dispatchEvent(new CustomEvent('input'))
     })
   }
@@ -70,6 +71,7 @@ export default class Checkbox {
   watch() {
     switch (name) {
       case 'value':
+        console.log(val)
         if (val) {
           this.value = val.split(/,\s*?/)
         }

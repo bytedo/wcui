@@ -144,7 +144,7 @@
 import '../icon/index'
 import $ from '../utils'
 
-export default class CheckboxItem {
+export default class Checkbox {
   props = {
     color: '',
     value: '',
@@ -162,7 +162,7 @@ export default class CheckboxItem {
   }
 
   _checkGroup() {
-    this._isInGroup = this.parentNode.tagName === 'WC-CHECKBOX'
+    this._isInGroup = this.parentNode.tagName === 'WC-CHECKBOX-GROUP'
     if (this._isInGroup && this.parentNode.root) {
       if (this.parentNode.value.includes(this.value)) {
         this.checked = true
