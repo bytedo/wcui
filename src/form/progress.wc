@@ -1,5 +1,13 @@
 <template>
-  <label><span></span></label>
+  <label>
+    <svg>
+      <circle cx="70" cy="70" r="70"></circle>
+      <circle cx="70" cy="70" r="70"></circle>
+    </svg>
+    <svg width="140" height="30">
+      <line x1="0" y1="0" x2="140" y2="0" stroke="black" />
+    </svg>
+  </label>
 </template>
 
 <style lang="scss">
@@ -8,31 +16,56 @@
   align-items: center;
 
   label {
-    flex: 1;
-    height: var(--size, 10px);
-    border-radius: 9px;
-    background: var(--color-plain-2);
+    // flex: 1;
+    // height: var(--size, 10px);
+    // border-radius: 9px;
+    // background: var(--color-plain-2);
 
-    span {
-      display: block;
-      width: 0;
-      height: 100%;
-      border-radius: 9px;
-      background: var(--color-teal-1);
-    }
+    // span {
+    //   display: block;
+    //   width: 0;
+    //   height: 100%;
+    //   border-radius: 9px;
+    //   background: var(--color-teal-1);
+    // }
+  }
+}
+label {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  // border-radius: 50%;
+  // box-shadow: inset 0 0 50px #000;
+  // background: #222;
+  // z-index: 1000;
+}
+svg {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  z-index: 1000;
+
+  line {
+    stroke: #efefef;
+    stroke-width: 30;
+    stroke-linecap: round;
   }
 }
 
-:host([size='large']) label {
-  height: 18px;
-}
+svg circle {
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: #efefef;
+  stroke-width: 10;
+  stroke-linecap: round;
+  transform: translate(5px, 5px);
 
-:host([size='medium']) label {
-  height: 14px;
-}
-
-:host([size='mini']) label {
-  height: 6px;
+  &:last-child {
+    stroke-dasharray: 440;
+    stroke-dashoffset: calc(440 - (440 * 85) / 100);
+    stroke: #00a1ff;
+  }
 }
 
 :host([type='danger']) label span {
@@ -51,12 +84,8 @@
   background: var(--color-orange-1);
 }
 
-:host([type='inverse']) label span {
-  background: var(--color-dark-1);
-}
-
-:host([color='purple']) label span {
-  background: var(--color-purple-1);
+:host([type='primary']) label span {
+  background: var(--color-teal-1);
 }
 </style>
 
@@ -83,7 +112,7 @@ export default class Progress {
 
   calculate() {
     var { max, value } = this.props
-    this.__THUMB__.style.width = `${(100 * value) / max}%`
+    // this.__THUMB__.style.width = `${(100 * value) / max}%`
   }
 
   mounted() {
