@@ -10,6 +10,7 @@
   display: inline-flex;
   line-height: 1;
   font-size: 14px;
+  cursor: pointer;
 
   label {
     display: flex;
@@ -23,120 +24,48 @@
     user-select: none;
     white-space: nowrap;
     cursor: inherit;
-    color: var(--color-grey-3);
+    color: var(--color-dark-1);
   }
 
   .dot {
-    --size: 18px;
+    --size: 20px;
     padding: 2px;
-    margin-right: 3px;
+    margin-right: 4px;
   }
 }
 
 :host([readonly]) {
+  cursor: default;
   opacity: 0.8;
 }
 
 :host([disabled]) {
   cursor: not-allowed;
   opacity: 0.6;
-}
 
-:host([size='large']) {
-  font-size: 16px;
   label {
-    height: 42px;
-  }
-  .dot {
-    --size: 22px;
-  }
-}
-:host([size='medium']) {
-  label {
-    height: 38px;
-  }
-  .dot {
-    --size: 20px;
-  }
-}
-:host([size='mini']) {
-  font-size: 12px;
-  label {
-    height: 20px;
-  }
-  .dot {
-    --size: 14px;
+    color: var(--color-grey-2);
   }
 }
 
-:host([type='danger']) label.checked {
+:host([type='danger']) label {
   color: var(--color-red-1);
-  .dot {
-    border-color: var(--color-red-1);
-  }
-  .dot::after {
-    background: var(--color-red-1);
-  }
 }
 
-:host([type='info']) label.checked {
+:host([type='info']) label {
   color: var(--color-blue-1);
-  .dot {
-    border-color: var(--color-blue-1);
-  }
-  .dot::after {
-    background: var(--color-blue-1);
-  }
 }
 
-:host([type='success']) label.checked {
+:host([type='success']) label {
   color: var(--color-green-1);
-  .dot {
-    border-color: var(--color-green-1);
-  }
-  .dot::after {
-    background: var(--color-green-1);
-  }
 }
 
-:host([type='primary']) label.checked {
+:host([type='primary']) label {
   color: var(--color-teal-1);
-  .dot {
-    border-color: var(--color-teal-1);
-  }
-  .dot::after {
-    background: var(--color-teal-1);
-  }
 }
 
-:host([type='warning']) label.checked {
+:host([type='warning']) label {
   color: var(--color-orange-1);
-  .dot {
-    border-color: var(--color-orange-1);
-  }
-  .dot::after {
-    background: var(--color-orange-1);
-  }
-}
-
-:host([type='inverse']) label.checked {
-  color: var(--color-dark-1);
-  .dot {
-    border-color: var(--color-dark-1);
-  }
-  .dot::after {
-    background: var(--color-dark-1);
-  }
-}
-
-:host([color='purple']) label.checked {
-  color: var(--color-purple-1);
-  .dot {
-    border-color: var(--color-purple-1);
-  }
-  .dot::after {
-    background: var(--color-purple-1);
-  }
 }
 </style>
 
