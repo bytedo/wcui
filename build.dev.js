@@ -64,7 +64,7 @@ function mkWCFile({ style, html, js }) {
       .slice(1, -1)
       .map(it => {
         var tmp = it.split(':')
-        return tmp[0].trim()
+        return tmp[0].trim().replace(/^['"]|['"]$/g, '')
       })
     return `
     

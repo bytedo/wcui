@@ -193,6 +193,7 @@ export default class Switch {
         break
       case 'active-text':
       case 'inactive-text':
+        console.log('------------->>>')
         this.props[name] = val + ''
         break
     }
