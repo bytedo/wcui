@@ -22,7 +22,136 @@
 </style>
 
 <script>
-import { drawLine, drawCircle } from './canvas'
+function getColor(opt) {
+  var { colors, value } = opt
+  var idx = 0
+  if (colors.length > 1) {
+    idx = Math.floor(value / (100 / colors.length))
+    if (idx === colors.length) {
+      idx--
+    }
+  }
+  return colors[idx]
+}
+
+function drawLine(el, size, opt) {
+  var ctx = el.getContext('2d')
+  var { width, height } = size
+  var {
+    value,
+    'show-text': showText,
+    'default-color': bg,
+    'line-size': line,
+    'font-size': font
+  } = opt
+  var color = getColor(opt)
+  var half
+
+  //
+  line = line || 10
+  font = font || 10
+  half = line / 2
+
+  el.width = width
+  el.height = height
+
+  ctx.clearRect(0, 0, width, height)
+
+  ctx.strokeStyle = bg
+  ctx.lineWidth = line
+  ctx.lineCap = 'round'
+
+  ctx.beginPath()
+  ctx.moveTo(half, half)
+  ctx.lineTo(width - half, half)
+  ctx.stroke()
+  ctx.closePath()
+
+  if (value > 0) {
+    ctx.strokeStyle = color
+    ctx.beginPath()
+    ctx.moveTo(half, half)
+    ctx.lineTo(((width - half) * value) / 100, half)
+    ctx.stroke()
+    ctx.closePath()
+
+    if (showText) {
+      ctx.fillStyle = '#fff'
+      ctx.font = `bold ${font}px Arial`
+      ctx.textBaseline = 'middle'
+      ctx.textAlign = 'right'
+      ctx.fillText(
+        (value < 100 ? value.toFixed(1) : 100) + '%',
+        ((width - half) * value) / 100,
+        half
+      )
+    }
+  }
+}
+
+function drawCircle(el, size, opt, start = -90, end = 270) {
+  var ctx = el.getContext('2d')
+  var { width } = size
+  var {
+    value,
+    'show-text': showText,
+    'default-color': bg,
+    'line-size': line,
+    'font-size': font
+  } = opt
+  var color = getColor(opt)
+  var half = width / 2
+
+  if (width === 0) {
+    return
+  }
+
+  //
+  line = line || 10
+  font = font || 32
+  el.width = width
+  el.height = width
+
+  ctx.clearRect(0, 0, width, width)
+
+  ctx.strokeStyle = bg
+  ctx.lineWidth = line
+  ctx.lineCap = 'round'
+
+  ctx.beginPath()
+  ctx.arc(
+    half,
+    half,
+    half - line / 2,
+    (Math.PI / 180) * start,
+    (Math.PI / 180) * end,
+    false
+  ) //整圆
+  ctx.stroke()
+  ctx.closePath()
+
+  if (value > 0) {
+    ctx.strokeStyle = color
+    ctx.beginPath()
+    ctx.arc(
+      half,
+      half,
+      half - line / 2,
+      (Math.PI / 180) * start,
+      (Math.PI / 180) * (((end - start) * value) / 100 + start),
+      false
+    ) //整圆
+    ctx.stroke()
+    ctx.closePath()
+  }
+  if (showText) {
+    ctx.fillStyle = color
+    ctx.font = `${font}px Arial`
+    ctx.textBaseline = 'middle'
+    ctx.textAlign = 'center'
+    ctx.fillText((value < 100 ? value.toFixed(1) : 100) + '%', half, half)
+  }
+}
 
 export default class Progress {
   props = {
@@ -44,10 +173,6 @@ export default class Progress {
     /* render */
 
     this.__CANVAS__ = this.root.children[1]
-    // // 圆形进度条默认值为32
-    // if (this.props.type === 'circle' || this.props.type === 'dashboard') {
-    //   this.props['font-size'] = 32
-    // }
   }
 
   get value() {
@@ -93,7 +218,7 @@ export default class Progress {
     switch (name) {
       case 'line-size':
       case 'font-size':
-        this.props[name] = val || 10
+        this.props[name] = val
         break
 
       case 'default-color':
