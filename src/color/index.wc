@@ -1,7 +1,7 @@
 <template>
   <div class="color-picker">
     <section class="preview alpha-bg">
-      <span></span>
+      <span tabindex="0"></span>
     </section>
     <div class="color-panel">
       <section class="dashboard">
@@ -19,13 +19,16 @@
       <section class="input-box">
         <input class="input" maxlength="28" />
         <a class="clear">清除</a>
-        <a class="submit">确定</a>
+        <a tabindex="0" class="submit">确定</a>
       </section>
     </div>
   </div>
 </template>
 
 <style lang="scss">
+:host {
+  display: inline-flex;
+}
 .alpha-bg {
   background: linear-gradient(
       45deg,
@@ -48,27 +51,36 @@
 }
 .color-picker {
   position: relative;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
 
   .preview {
     display: flex;
     width: 100%;
     height: 100%;
-    border: 1px solid var(--color-grey-1);
+    border: 2px solid var(--color-plain-2);
+    border-radius: 6px;
     cursor: pointer;
+    transition: box-shadow 0.15s linear;
 
     span {
       width: 100%;
       height: 100%;
       border: 3px solid #fff;
+      border-radius: 6px;
+      outline: none;
+    }
+
+    &:focus-within {
+      box-shadow: 0 0 0 2px var(--color-plain-a);
     }
   }
 
   .color-panel {
+    display: none;
     position: absolute;
     left: 0;
-    top: 32px;
+    top: 38px;
     width: 310px;
     padding: 5px;
     background: #fff;
@@ -227,10 +239,20 @@
         height: 24px;
         padding: 0 6px;
         line-height: 22px;
-        border: 1px solid var(--color-plain-3);
-        border-radius: 2px;
+        font: inherit;
+        font-size: 12px;
+        border: 2px solid var(--color-plain-2);
+        border-radius: 4px;
         outline: none;
         color: var(--color-dark-1);
+        transition: box-shadow 0.15s linear;
+
+        &::placeholder {
+          color: var(--color-grey-1);
+        }
+        &:focus {
+          box-shadow: 0 0 0 2px var(--color-plain-a);
+        }
       }
 
       .clear,
@@ -241,14 +263,24 @@
       }
 
       .clear {
-        color: var(--color-teal-1);
+        color: var(--color-grey-3);
       }
 
       .submit {
         padding: 2px 6px;
         border-radius: 2px;
         color: var(--color-plain-1);
-        background: var(--color-teal-1);
+        background: var(--color-teal-2);
+        outline: none;
+        transition: box-shadow 0.15s linear, background 0.15s linear;
+
+        &:hover {
+          background: var(--color-teal-1);
+        }
+
+        &:focus {
+          box-shadow: 0 0 0 2px var(--color-teal-a);
+        }
       }
     }
   }
@@ -275,6 +307,7 @@ export default class Color {
     var elem = this.root.children[1]
 
     this.__PREVIEW__ = elem.children[0].children[0]
+    this.__PANEL__ = elem.children[1]
     this.__SCENE__ = elem.querySelector('.scene')
     this.__SCENE_THUMB__ = this.__SCENE__.querySelector('.thumb')
     this.__HUE__ = elem.querySelector('.hue')
@@ -283,6 +316,8 @@ export default class Color {
     this.__ALPHA_BAR__ = elem.querySelector('.alpha-box .bar')
     this.__ALPHA_THUMB__ = elem.querySelector('.alpha-thumb')
     this.__INPUT__ = elem.querySelector('.input')
+    this.__CLEAR__ = elem.querySelector('.clear')
+    this.__PICKED__ = elem.querySelector('.submit')
   }
 
   _updateView() {
@@ -308,8 +343,11 @@ export default class Color {
     this.__SCENE__.style.backgroundColor = scene
     this.__PREVIEW__.style.backgroundColor = color
     this.__ALPHA_BAR__.style.background = `linear-gradient(to right, transparent, ${alphaColor})`
+    this.__ALPHA__.value = rgba.a
+    this.__ALPHA_THUMB__.style.left = rgba.a + '%'
 
     this.__INPUT__.value = color
+    this.props.value = color
   }
 
   _moveSceneThumb(x, y) {
@@ -341,7 +379,7 @@ export default class Color {
   }
 
   get value() {
-    return this.__INPUT__.value
+    return this.props.value
   }
 
   set value(val) {
@@ -376,10 +414,6 @@ export default class Color {
 
   mounted() {
     var handleMove
-
-    this.handleChange = $.bind(this.__INPUT__, 'change', ev => {
-      this.value = this.__INPUT__.value
-    })
 
     this.handleDown = $.bind(this.__SCENE__, 'mousedown', ev => {
       ev.preventDefault()
@@ -451,19 +485,51 @@ export default class Color {
       var color = `rgba(${r}, ${g}, ${b}, ${a / 100})`
 
       this.state.rgba.a = a
-
       this.__ALPHA_THUMB__.style.left = a + '%'
       this.__PREVIEW__.style.backgroundColor = color
       this.__INPUT__.value = color
+    })
+
+    this._clickFn = $.bind(this.__PREVIEW__, 'click', ev => {
+      this.__PANEL__.style.display = 'block'
+      this._tmpval = this.props.value
+    })
+
+    this._clearFn = $.bind(this.__CLEAR__, 'click', ev => {
+      this.__PANEL__.style.display = ''
+      this.__INPUT__.value = ''
+      this.__PREVIEW__.style = ''
+      this.props.value = this.__INPUT__.value
+      delete this._tmpval
+      this.dispatchEvent(new CustomEvent('input'))
+    })
+    this._pickedFn = $.bind(this.__PICKED__, 'click', ev => {
+      this.__PANEL__.style.display = ''
+      this.__PREVIEW__.style.backgroundColor = this.__INPUT__.value
+      this.props.value = this.__INPUT__.value
+      delete this._tmpval
+      this.dispatchEvent(new CustomEvent('input'))
+    })
+
+    // 点击外部区别时,还原之前的颜色值
+    this._outsideFn = $.outside(this.__PANEL__, ev => {
+      if (this.hasOwnProperty('_tmpval')) {
+        this.__PANEL__.style.display = ''
+        this.value = this._tmpval
+        delete this._tmpval
+      }
     })
   }
 
   unmount() {
     $.unbind(this.__SCENE__, 'mousedown', this.handleDown)
     $.unbind(document, 'mousedown', this.handleUp)
-    $.unbind(this.__INPUT__, 'change', this.handleChange)
     $.unbind(this.__HUE__, 'input', this.handleInput1)
     $.unbind(this.__ALPHA__, 'input', this.handleInput2)
+    $.unbind(this.__PREVIEW__, 'input', this._clickFn)
+    $.unbind(this.__CLEAR__, 'input', this._clearFn)
+    $.unbind(this.__PICKED__, 'input', this._pickedFn)
+    $.clearOutside(this._outsideFn)
 
     delete this.handleDown
     delete this.handleUp
