@@ -37,7 +37,7 @@ li {
   align-items: center;
   height: 36px;
   font-size: 14px;
-  border: 2px solid var(--color-plain-2);
+  border: 2px solid var(--color-grey-2);
   border-radius: inherit;
   background: var(--bg-color, #fff);
   color: inherit;
@@ -75,11 +75,11 @@ li {
     white-space: nowrap;
   }
   .prepend {
-    border-right: 2px solid var(--color-plain-1);
+    border-right: 2px solid var(--color-grey-a);
     border-radius: 6px 0 0 6px;
   }
   .append {
-    border-left: 2px solid var(--color-plain-1);
+    border-left: 2px solid var(--color-grey-a);
     border-radius: 0 6px 6px 0;
   }
   &[prepend] .prepend,
@@ -232,13 +232,10 @@ li {
 
 /* ----- 类型(颜色) ----- */
 :host(:focus-within) {
-  box-shadow: 0 0 0 2px var(--color-plain-a);
+  box-shadow: 0 0 0 2px var(--color-grey-a);
 }
 :host([type='primary']:focus-within) {
   box-shadow: 0 0 0 2px var(--color-teal-a);
-}
-:host([type='default']:focus-within) {
-  box-shadow: 0 0 0 2px var(--color-grey-a);
 }
 :host([type='info']:focus-within) {
   box-shadow: 0 0 0 2px var(--color-blue-a);
@@ -252,22 +249,12 @@ li {
 :host([type='warning']:focus-within) {
   box-shadow: 0 0 0 2px var(--color-orange-a);
 }
-:host([type='inverse']:focus-within) {
-  box-shadow: 0 0 0 2px var(--color-dark-a);
-}
 
 :host([type='primary']) .label {
   border-color: var(--color-teal-2);
   .prepend,
   .append {
     border-color: var(--color-teal-a);
-  }
-}
-:host([type='default']) .label {
-  border-color: var(--color-grey-2);
-  .prepend,
-  .append {
-    border-color: var(--color-grey-a);
   }
 }
 :host([type='info']) .label {
@@ -296,13 +283,6 @@ li {
   .prepend,
   .append {
     border-color: var(--color-orange-a);
-  }
-}
-:host([type='inverse']) .label {
-  border-color: var(--color-dark-2);
-  .prepend,
-  .append {
-    border-color: var(--color-dark-a);
   }
 }
 
