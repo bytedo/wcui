@@ -537,5 +537,16 @@ export default class Color {
     delete this.handleInput1
     delete this.handleInput2
   }
+
+  watch() {
+    switch (name) {
+      case 'value':
+        this.value = val
+        break
+
+      default:
+        break
+    }
+  }
 }
 </script>
