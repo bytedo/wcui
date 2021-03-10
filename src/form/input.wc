@@ -339,6 +339,7 @@ export default class Input {
   }
 
   state = {
+    list: [], // 补全列表
     mvidx: null //下拉列表光标的索引ID
   }
 
@@ -406,7 +407,7 @@ export default class Input {
 
   // 移动光标选择下拉选项
   _moveSelect(ev) {
-    var { list } = this.props
+    var { list } = this.state
     if (list && list.length) {
       ev.preventDefault()
       var step = ev.keyCode === 38 ? -1 : 1
@@ -436,7 +437,7 @@ export default class Input {
 
   // 触发列表选择
   _fetchSelect(idx, ev) {
-    var item = this.props.list[idx]
+    var item = this.state.list[idx]
     this.value = item.value
     this.dispatchEvent(
       new CustomEvent('select', {
@@ -471,7 +472,8 @@ export default class Input {
 
     // 键盘事件
     this._handleSubmit = $.catch(this.__INPUT__, 'keydown', ev => {
-      let { passwd } = this.props
+      let { passwd, minlength } = this.props
+      let val = this.value
       let now = Date.now()
 
       if (this.disabled || this.readOnly) {
@@ -495,6 +497,13 @@ export default class Input {
         // 并发拦截
         if (lazy && now - this.stamp < lazy) {
           return
+        }
+
+        // 长度不够,拦截submit
+        if (minlength && minlength > 0) {
+          if (val.length < minlength) {
+            return
+          }
         }
 
         this.stamp = now
@@ -524,7 +533,7 @@ export default class Input {
           detail: {
             value: this.value,
             send: list => {
-              this.props.list = list
+              this.state.list = list
               this._parseSuggestion()
             }
           }
@@ -534,7 +543,7 @@ export default class Input {
 
     // 渲染建议列表
     this._parseSuggestion = $.bind(this.__INPUT__, 'click', ev => {
-      var { list } = this.props
+      var { list } = this.state
       let { x, y, width, height } = this.getBoundingClientRect()
       if (list && list.length) {
         var html = list
@@ -566,6 +575,7 @@ export default class Input {
   unmount() {
     $.unbind(this.__INPUT__, 'keydown', this._handleSubmit)
     $.unbind(this.__INPUT__, 'input', this._handleChange)
+    $.unbind(this.__INPUT__, 'click', this._parseSuggestion)
     $.unbind(this.__LIST__, 'click', this._handleSelect)
     $.clearOutside(this._inactiveFn)
   }

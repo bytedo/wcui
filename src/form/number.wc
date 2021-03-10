@@ -27,7 +27,7 @@
   margin: 0 auto;
   line-height: 1;
   font-size: 14px;
-  border: 2px solid var(--color-plain-2);
+  border: 2px solid var(--color-grey-2);
   border-radius: inherit;
   background: var(--bg-color, #fff);
   color: inherit;
@@ -44,11 +44,11 @@
 
     &:first-child {
       border-radius: 4px 0 0 4px;
-      border-right: 2px solid var(--color-plain-1);
+      border-right: 2px solid var(--color-grey-a);
     }
     &:last-child {
       border-radius: 0 4px 4px 0;
-      border-left: 2px solid var(--color-plain-1);
+      border-left: 2px solid var(--color-grey-a);
     }
 
     &.disabled {
@@ -158,13 +158,10 @@
 }
 //
 :host(:focus-within) {
-  box-shadow: 0 0 0 2px var(--color-plain-a);
+  box-shadow: 0 0 0 2px var(--color-grey-a);
 }
 :host([type='primary']:focus-within) {
   box-shadow: 0 0 0 2px var(--color-teal-a);
-}
-:host([type='default']:focus-within) {
-  box-shadow: 0 0 0 2px var(--color-grey-a);
 }
 :host([type='info']:focus-within) {
   box-shadow: 0 0 0 2px var(--color-blue-a);
@@ -178,19 +175,10 @@
 :host([type='warning']:focus-within) {
   box-shadow: 0 0 0 2px var(--color-orange-a);
 }
-:host([type='inverse']:focus-within) {
-  box-shadow: 0 0 0 2px var(--color-dark-a);
-}
 :host([type='primary']) .label {
   border-color: var(--color-teal-2);
   span {
     border-color: var(--color-teal-a);
-  }
-}
-:host([type='default']) .label {
-  border-color: var(--color-grey-2);
-  span {
-    border-color: var(--color-grey-a);
   }
 }
 :host([type='info']) .label {
@@ -217,17 +205,9 @@
     border-color: var(--color-orange-a);
   }
 }
-:host([type='inverse']) .label {
-  border-color: var(--color-dark-2);
-  span {
-    border-color: var(--color-dark-a);
-  }
-}
 </style>
 
 <script>
-import '../scroll/index'
-import '../icon/index'
 import $ from '../utils'
 
 export default class Number {
@@ -305,6 +285,7 @@ export default class Number {
     this.__INPUT__.value = val
 
     this._checkActionEnable()
+    this.dispatchEvent(new CustomEvent('input'))
   }
 
   _checkActionEnable() {
@@ -326,7 +307,6 @@ export default class Number {
     if (n !== value) {
       this.props.value = n
       this.__INPUT__.value = n
-      this.dispatchEvent(new CustomEvent('input'))
     }
   }
 
@@ -372,34 +352,28 @@ export default class Number {
       }
     })
 
-    this._handleChange = $.catch(this.__INPUT__, 'change', ev => {
+    this._handleChange = $.bind(this.__INPUT__, 'change', ev => {
       if (isFinite(this.__INPUT__.value)) {
-        this.props.value = +this.__INPUT__.value
-        if (!this.__INPUT__.value.endsWith('.')) {
-          this.__INPUT__.value = this.props.value
-        }
+        this.value = this.__INPUT__.value
       } else {
-        this.__INPUT__.value = this.props.value = 0
+        this.value = 0
       }
-      this.dispatchEvent(new CustomEvent('input'))
     })
 
     this._handleAction = $.bind(this.__OUTER__, 'click', ev => {
       if (this.disabled || this.readOnly) {
         return
       }
-      var target = ev.target
 
-      if (target.tagName === 'SPAN' || target.parentNode === 'SPAN') {
-        var act = target.dataset.act || target.parentNode.dataset.act
-
-        this._updateValue(act)
+      if (ev.target.tagName === 'SPAN') {
+        this._updateValue(ev.target.dataset.act)
       }
     })
   }
 
   unmount() {
     $.unbind(this.__INPUT__, 'keydown', this._handleSubmit)
+    $.unbind(this.__OUTER__, 'click', this._handleAction)
   }
 
   watch() {
