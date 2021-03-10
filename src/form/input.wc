@@ -472,6 +472,7 @@ export default class Input {
     // 键盘事件
     this._handleSubmit = $.catch(this.__INPUT__, 'keydown', ev => {
       let { passwd } = this.props
+      let now = Date.now()
 
       if (this.disabled || this.readOnly) {
         return
@@ -491,6 +492,12 @@ export default class Input {
           return this._fetchSelect(this.state.mvidx, ev)
         }
 
+        // 并发拦截
+        if (lazy && now - this.stamp < lazy) {
+          return
+        }
+
+        this.stamp = now
         this.dispatchEvent(new CustomEvent('submit', { detail: this.value }))
       }
     })

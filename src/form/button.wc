@@ -65,6 +65,7 @@
 }
 :host([size='large'][circle]) {
   min-width: 52px;
+  width: 52px;
   height: 52px;
 
   button {
@@ -81,6 +82,7 @@
 }
 :host([size='medium'][circle]) {
   min-width: 44px;
+  width: 44px;
 }
 :host([size='small']) {
   width: 96px;
