@@ -472,7 +472,7 @@ export default class Input {
 
     // 键盘事件
     this._handleSubmit = $.catch(this.__INPUT__, 'keydown', ev => {
-      let { passwd, minlength } = this.props
+      let { passwd, minlength, lazy } = this.props
       let val = this.value
       let now = Date.now()
 
