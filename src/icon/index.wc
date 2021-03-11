@@ -5,8 +5,8 @@
 <style lang="scss">
 :host {
   display: inline-flex;
-  width: var(--size, 32px);
-  height: var(--size, 32px);
+  width: var(--size, 36px);
+  height: var(--size, 36px);
   color: inherit;
 }
 :host(:not([is])) {
@@ -31,36 +31,16 @@
   height: 52px;
 }
 :host([size='medium']) {
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
+}
+:host([size='small']) {
+  width: 32px;
+  height: 32px;
 }
 :host([size='mini']) {
   width: 26px;
   height: 26px;
-}
-
-:host([red]) {
-  color: var(--color-red-1);
-}
-
-:host([blue]) {
-  color: var(--color-blue-1);
-}
-
-:host([green]) {
-  color: var(--color-green-1);
-}
-
-:host([orange]) {
-  color: var(--color-orange-1);
-}
-
-:host([grey]) {
-  color: var(--color-grey-1);
-}
-
-:host([dark]) {
-  color: var(--color-dark-1);
 }
 
 @keyframes circle {

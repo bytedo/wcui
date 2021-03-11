@@ -1,35 +1,41 @@
 <template>
   <label>
-    <wc-icon data-idx="0" is="star" color="grey"></wc-icon>
-    <wc-icon data-idx="1" is="star" color="grey"></wc-icon>
-    <wc-icon data-idx="2" is="star" color="grey"></wc-icon>
-    <wc-icon data-idx="3" is="star" color="grey"></wc-icon>
-    <wc-icon data-idx="4" is="star" color="grey"></wc-icon>
-    <span class="text"></span>
+    <wc-icon data-idx="0" is="star"></wc-icon>
+    <wc-icon data-idx="1" is="star"></wc-icon>
+    <wc-icon data-idx="2" is="star"></wc-icon>
+    <wc-icon data-idx="3" is="star"></wc-icon>
+    <wc-icon data-idx="4" is="star"></wc-icon>
+    <span class="text">5分</span>
   </label>
 </template>
 
 <style lang="scss">
 :host {
   display: flex;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  user-select: none;
+  font-size: 18px;
   cursor: pointer;
-  font-size: 14px;
-  --size: 24px;
+  --size: 36px;
 }
 
 label {
   display: flex;
   align-items: center;
   line-height: 1;
+  color: var(--color-grey-1);
   cursor: inherit;
 
   wc-icon {
     margin: 0 3px;
-    transition: transform 0.1s easein-out;
+    transition: transform 0.15s linear, color 0.15s linear;
+
+    &[is='star'] {
+      color: var(--default-color, inherit);
+    }
+
+    &[is='star-full'],
+    &[is='star-half'] {
+      color: var(--color-teal-1);
+    }
 
     &:hover {
       transform: scale(1.05);
@@ -37,43 +43,26 @@ label {
   }
 
   span {
-    padding: 0 8px;
-    margin: 0 3px;
+    padding: 2px 8px 0;
+    margin: 0 6px;
   }
 }
 
 :host([size='large']) {
-  font-size: 16px;
-  --size: 36px;
+  font-size: 26px;
+  --size: 52px;
 }
 :host([size='medium']) {
-  --size: 30px;
+  font-size: 22px;
+  --size: 44px;
+}
+:host([size='small']) {
+  font-size: 16px;
+  --size: 32px;
 }
 :host([size='mini']) {
-  font-size: 12px;
-  --size: 20px;
-}
-
-:host([type='danger']) label span {
-  color: var(--color-red-1);
-}
-:host([type='primary']) label span {
-  color: var(--color-teal-1);
-}
-:host([type='success']) label span {
-  color: var(--color-green-1);
-}
-:host([type='default']) label span {
-  color: var(--color-grey-1);
-}
-:host([type='info']) label span {
-  color: var(--color-blue-1);
-}
-:host([color='purple']) label span {
-  color: var(--color-purple-1);
-}
-:host([type='warning']) label span {
-  color: var(--color-orange-1);
+  font-size: 14px;
+  --size: 26px;
 }
 
 :host([disabled]) {
@@ -94,7 +83,8 @@ export default class Star {
     value: 0,
     text: [],
     size: '',
-    color: '',
+    'default-color': null,
+    colors: '',
     'allow-half': false,
     'show-value': false,
     starSize: 32, // 星星的宽度, 用于实现半星
@@ -227,9 +217,18 @@ export default class Star {
         this.props[name] = true
         break
 
-      case 'color':
+      case 'default-color':
         if (val) {
-          this.props.color = val
+          this.__BOX__.style.cssText += `--default-color:${val}`
+        } else {
+          this.__BOX__.style = ''
+        }
+        break
+      case 'colors':
+        if (val === null) {
+          this.props.colors = ['#48c9b0']
+        } else {
+          this.props.colors = val.split(',').map(s => s.trim())
         }
         break
 
