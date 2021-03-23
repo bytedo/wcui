@@ -1,5 +1,5 @@
 <template>
-  <label>
+  <label tabindex="0">
     <span class="dot"></span>
     <slot />
   </label>
@@ -23,6 +23,7 @@
     user-select: none;
     white-space: nowrap;
     cursor: inherit;
+    outline: none;
     color: var(--color-dark-1);
 
     &.checked .dot::after {
@@ -37,9 +38,10 @@
     width: 16px;
     height: 16px;
     margin-right: 4px;
-    border: 2px solid var(--color-dark-1);
+    border: 1px solid var(--color-dark-1);
     border-radius: 50%;
     background: #fff;
+    transition: box-shadow 0.15s linear;
 
     &::after {
       display: block;
@@ -53,6 +55,10 @@
   }
 }
 
+:host(:focus-within) .dot {
+  box-shadow: 0 0 0 2px var(--color-plain-a);
+}
+
 :host([type='danger']) label {
   color: var(--color-red-1);
   .dot {
@@ -62,15 +68,8 @@
     background: var(--color-red-1);
   }
 }
-
-:host([type='info']) label {
-  color: var(--color-blue-1);
-  .dot {
-    border-color: var(--color-blue-1);
-  }
-  .dot::after {
-    background: var(--color-blue-1);
-  }
+:host([type='danger']:focus-within) .dot {
+  box-shadow: 0 0 0 2px var(--color-red-a);
 }
 
 :host([type='success']) label {
@@ -82,6 +81,9 @@
     background: var(--color-green-1);
   }
 }
+:host([type='success']:focus-within) .dot {
+  box-shadow: 0 0 0 2px var(--color-green-a);
+}
 
 :host([type='primary']) label {
   color: var(--color-teal-1);
@@ -92,6 +94,9 @@
     background: var(--color-teal-1);
   }
 }
+:host([type='primary']:focus-within) .dot {
+  box-shadow: 0 0 0 2px var(--color-teal-a);
+}
 
 :host([type='warning']) label {
   color: var(--color-orange-1);
@@ -101,6 +106,22 @@
   .dot::after {
     background: var(--color-orange-1);
   }
+}
+:host([type='warning']:focus-within) .dot {
+  box-shadow: 0 0 0 2px var(--color-orange-a);
+}
+
+:host([type='info']) label {
+  color: var(--color-blue-1);
+  .dot {
+    border-color: var(--color-blue-1);
+  }
+  .dot::after {
+    background: var(--color-blue-1);
+  }
+}
+:host([type='info']:focus-within) .dot {
+  box-shadow: 0 0 0 2px var(--color-blue-a);
 }
 
 :host([readonly]) {
@@ -116,6 +137,7 @@
     color: var(--color-grey-2);
     .dot {
       border-color: var(--color-grey-1);
+      box-shadow: none;
     }
     .dot::after {
       background: var(--color-grey-1);
@@ -189,6 +211,7 @@ export default class Radio {
     if ((type === 'boolean' && val) || type !== 'boolean') {
       this.props.disabled = true
       this.setAttribute('disabled', '')
+      this.__SWITCH__.removeAttribute('tabindex')
     } else {
       this.props.disabled = false
       this.removeAttribute('disabled')

@@ -1,15 +1,9 @@
 <template>
   <div class="label">
     <slot class="prepend" name="prepend"></slot>
-    <input spellcheck="false" />
-    <wc-icon class="close" is="close"></wc-icon>
+    <input spellcheck="false" type="password" />
+    <wc-icon class="icon" is="eye"></wc-icon>
     <slot class="append" name="append"></slot>
-
-    <div class="suggestion">
-      <wc-scroll>
-        <ul class="list"></ul>
-      </wc-scroll>
-    </div>
   </div>
 </template>
 
@@ -91,65 +85,11 @@ li {
     min-width: 64px;
   }
   /* ----- */
-  .close {
-    display: none;
-    --size: 16px;
+  .icon {
+    --size: 18px;
     margin: 0 8px 0 4px;
-    padding: 4px;
-    border-radius: 50%;
     color: var(--color-grey-2);
     cursor: pointer;
-    transition: background 0.15s linear;
-
-    &:hover {
-      background: var(--color-plain-1);
-    }
-  }
-}
-
-:host([clearable]) {
-  .label .close {
-    display: block;
-  }
-}
-
-.suggestion {
-  display: none;
-  overflow: hidden;
-  position: fixed;
-  z-index: 10240;
-  left: 0;
-  top: 0;
-  width: 200px;
-  height: auto;
-  max-height: 200px;
-  min-height: 46px;
-  padding: 4px 0;
-  border-radius: 4px;
-  background: var(--color-plain-1);
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
-
-  .list {
-    width: 100%;
-  }
-  &.show {
-    display: flex;
-  }
-
-  li {
-    overflow: hidden;
-    width: 100%;
-    height: 30px;
-    line-height: 30px;
-    padding: 0 8px;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    cursor: pointer;
-
-    &:hover,
-    &[focus] {
-      background: var(--color-plain-2);
-    }
   }
 }
 
@@ -339,22 +279,16 @@ import '../scroll/index'
 import '../icon/index'
 import $ from '../utils'
 
-export default class Input {
+export default class Passwd {
   props = {
     value: '',
     placeholder: '',
     maxlength: null,
     minlength: null,
-    clearable: false,
     autofocus: false,
     readonly: false,
     disabled: false,
     lazy: 0 // 输入建议并发拦截时间, 单位毫秒
-  }
-
-  state = {
-    list: [], // 补全列表
-    mvidx: null //下拉列表光标的索引ID
   }
 
   __init__() {
@@ -363,9 +297,8 @@ export default class Input {
     this.__OUTER__ = this.root.children[1]
     this.__PREPEND__ = this.__OUTER__.children[0]
     this.__INPUT__ = this.__OUTER__.children[1]
-    this.__CLOSE__ = this.__OUTER__.children[2]
+    this.__EYE__ = this.__OUTER__.children[2]
     this.__APPEND__ = this.__OUTER__.children[3]
-    this.__LIST__ = this.__OUTER__.children[4]
   }
 
   get readOnly() {
@@ -419,50 +352,6 @@ export default class Input {
     this.__INPUT__.value = val
   }
 
-  // 移动光标选择下拉选项
-  _moveSelect(ev) {
-    var { list } = this.state
-    if (list && list.length) {
-      ev.preventDefault()
-      var step = ev.keyCode === 38 ? -1 : 1
-      var items = Array.from(
-        this.__LIST__.firstElementChild.firstElementChild.children
-      )
-      if (this.state.mvidx === null) {
-        this.state.mvidx = 0
-      } else {
-        this.state.mvidx += step
-      }
-      if (this.state.mvidx < 0) {
-        this.state.mvidx = 0
-      } else if (this.state.mvidx > items.length - 1) {
-        this.state.mvidx = items.length - 1
-      }
-      items.forEach((it, i) => {
-        if (i === this.state.mvidx) {
-          this.__LIST__.firstElementChild.scrollTop = it.offsetTop - 150
-          it.setAttribute('focus', '')
-        } else {
-          it.removeAttribute('focus')
-        }
-      })
-    }
-  }
-
-  // 触发列表选择
-  _fetchSelect(idx, ev) {
-    var item = this.state.list[idx]
-    this.value = item.value
-    this.dispatchEvent(
-      new CustomEvent('select', {
-        detail: item
-      })
-    )
-    this._handleChange(ev)
-    this.__LIST__.classList.remove('show')
-    this.state.mvidx = null
-  }
-
   mounted() {
     var prepend = this.__PREPEND__.assignedNodes()
     var append = this.__APPEND__.assignedNodes()
@@ -493,18 +382,9 @@ export default class Input {
       if (this.disabled || this.readOnly) {
         return
       }
-      // up: 38, down: 40
-      if (ev.keyCode === 38 || ev.keyCode === 40) {
-        return this._moveSelect(ev)
-      }
 
       // 回车触发submit事件
       if (ev.keyCode === 13) {
-        // 如果是输入建议存在,则第1次回车的时候, 不触发提交
-        if (this.state.mvidx !== null) {
-          return this._fetchSelect(this.state.mvidx, ev)
-        }
-
         // 并发拦截
         if (lazy && now - this.stamp < lazy) {
           return
@@ -522,74 +402,20 @@ export default class Input {
       }
     })
 
-    // 输入状态事件
-    this._handleChange = $.bind(this.__INPUT__, 'input', ev => {
-      let now = Date.now()
-      let { lazy } = this.props
-
-      // 并发拦截
-      if (lazy && now - this.stamp < lazy) {
-        return
-      }
-
-      this.stamp = now
-
-      this.dispatchEvent(
-        new CustomEvent('fetch-suggest', {
-          detail: {
-            value: this.value,
-            send: list => {
-              this.state.list = list
-              this._parseSuggestion()
-            }
-          }
-        })
-      )
-    })
-
-    // 渲染建议列表
-    this._parseSuggestion = $.bind(this.__INPUT__, 'click', ev => {
-      var { list } = this.state
-      let { x, y, width, height } = this.getBoundingClientRect()
-      if (list && list.length) {
-        var html = list
-          .map((it, i) => `<li data-idx="${i}">${it.value}</li>`)
-          .join('')
-        this.__LIST__.firstElementChild.firstElementChild.innerHTML = html
-        this.__LIST__.classList.toggle('show', true)
-        this.__LIST__.style.cssText = `left:${x}px;top:${y +
-          height +
-          5}px;width:${width}px;`
+    this._eyeFn = $.bind(this.__EYE__, 'click', ev => {
+      if (this.__INPUT__.type === 'password') {
+        this.__INPUT__.type = 'text'
+        this.__EYE__.is = 'eye-off'
       } else {
-        this.__LIST__.classList.toggle('show', false)
+        this.__INPUT__.type = 'password'
+        this.__EYE__.is = 'eye'
       }
-    })
-
-    this._inactiveFn = $.outside(this, ev => {
-      this.__LIST__.classList.remove('show')
-    })
-
-    // 选择建议
-    this._handleSelect = $.bind(this.__LIST__, 'click', ev => {
-      if (ev.target.tagName === 'LI') {
-        this._fetchSelect(ev.target.dataset.idx, ev)
-        this.dispatchEvent(new CustomEvent('input'))
-      }
-    })
-
-    this._clearFn = $.bind(this.__CLOSE__, 'click', ev => {
-      this.value = ''
-      this.dispatchEvent(new CustomEvent('input'))
     })
   }
 
   unmount() {
     $.unbind(this.__INPUT__, 'keydown', this._handleSubmit)
-    $.unbind(this.__INPUT__, 'input', this._handleChange)
-    $.unbind(this.__INPUT__, 'click', this._parseSuggestion)
-    $.unbind(this.__LIST__, 'click', this._handleSelect)
-    $.unbind(this.__CLOSE__, 'click', this._clearFn)
-    $.clearOutside(this._inactiveFn)
+    $.unbind(this.__EYE__, 'click', this._eyeFn)
   }
 
   watch() {

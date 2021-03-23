@@ -1,6 +1,7 @@
 import './button'
 import './link'
 import './input'
+import './passwd'
 import './textarea'
 import './number'
 import './radio'

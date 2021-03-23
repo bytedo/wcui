@@ -1,5 +1,5 @@
 <template>
-  <label>
+  <label tabindex="0">
     <wc-icon class="dot" is="checkbox-off"></wc-icon>
     <slot />
   </label>
@@ -156,6 +156,7 @@ export default class Checkbox {
     if ((type === 'boolean' && val) || type !== 'boolean') {
       this.props.disabled = true
       this.setAttribute('disabled', '')
+      this.__SWITCH__.removeAttribute('tabindex')
     } else {
       this.props.disabled = false
       this.removeAttribute('disabled')

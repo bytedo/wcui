@@ -12,7 +12,7 @@
   min-width: 72px;
   width: 128px;
   height: 36px;
-  border-radius: 6px;
+  border-radius: 3px;
   user-select: none;
   -moz-user-select: none;
   color: var(--color-dark-1);
@@ -28,7 +28,7 @@
     height: inherit;
     padding: var(--padding, 0 14px);
     line-height: 1;
-    border: 2px solid var(--color-plain-2);
+    border: 1px solid var(--color-grey-2);
     border-radius: inherit;
     white-space: nowrap;
     background: #fff;
@@ -138,10 +138,10 @@
 
 :host(:not([disabled]):not([loading])) button {
   &:hover {
-    border-color: var(--color-plain-1);
+    border-color: var(--color-grey-1);
   }
   &:active {
-    border-color: var(--color-plain-3);
+    border-color: var(--color-grey-3);
   }
 }
 :host(:focus-within) {
@@ -245,10 +245,10 @@
 }
 
 // -------
-:host([type='default']) button {
+:host([type='help']) button {
   background: var(--color-grey-2);
 }
-:host([type='default']:not([disabled]):not([loading])) button {
+:host([type='help']:not([disabled]):not([loading])) button {
   &:hover {
     background: var(--color-grey-1);
   }
@@ -256,7 +256,7 @@
     background: var(--color-grey-3);
   }
 }
-:host([type='default']:focus-within) {
+:host([type='help']:focus-within) {
   box-shadow: 0 0 0 2px var(--color-grey-a);
 }
 
