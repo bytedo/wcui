@@ -343,7 +343,7 @@ import $ from '../utils'
 
 import '../form/input'
 import '../form/button'
-import '../form/radio-group'
+import '../form/radio'
 import '../layer/index'
 import '../markd/index'
 
