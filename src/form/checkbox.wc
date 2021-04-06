@@ -14,7 +14,9 @@ import './checkbox-item'
 
 export default class CheckboxGroup {
   props = {
-    value: []
+    value: '',
+    disabled: false,
+    readonly: false
   }
 
   __init__() {
@@ -71,8 +73,21 @@ export default class CheckboxGroup {
     switch (name) {
       case 'value':
         if (val) {
-          this.value = val.split(/,\s*?/)
+          this.value = val.split(',').map(it => it.trim())
         }
+        break
+
+      case 'readonly':
+      case 'disabled':
+        Array.from(this.children).forEach(it => {
+          if (it.tagName === 'WC-CHECKBOX' && it.root) {
+            if (val === null) {
+              it.removeAttribute(name)
+            } else {
+              it.setAttribute(name, '')
+            }
+          }
+        })
         break
     }
   }

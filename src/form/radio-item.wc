@@ -28,6 +28,7 @@
 
     &.checked .dot::after {
       visibility: visible;
+      transform: scale(1);
     }
   }
 
@@ -51,6 +52,8 @@
       border-radius: 50%;
       background: var(--color-dark-1);
       content: '';
+      transform: scale(0);
+      transition: transform 0.15s linear;
     }
   }
 }
@@ -218,26 +221,39 @@ export default class Radio {
     }
   }
 
+  _toggleCheck() {
+    if (this.disabled || this.readOnly || this.checked) {
+      return
+    }
+
+    this.checked = true
+
+    this.parentNode.dispatchEvent(
+      new CustomEvent('child-picked', { detail: this.value })
+    )
+  }
+
   mounted() {
     if (this.value === this.parentNode.value) {
       this.checked = true
     }
 
     this._handleClick = $.catch(this, 'click', ev => {
-      if (this.disabled || this.readOnly || this.checked) {
-        return
+      ev.preventDefault()
+      this._toggleCheck()
+    })
+
+    this._handlKeydown = $.bind(this, 'keydown', ev => {
+      // 空格交互
+      if (ev.keyCode === 32) {
+        this._toggleCheck()
       }
-
-      this.checked = true
-
-      this.parentNode.dispatchEvent(
-        new CustomEvent('child-picked', { detail: this.value })
-      )
     })
   }
 
   unmount() {
     $.unbind(this, 'click', this._handleClick)
+    $.unbind(this, 'keydown', this._handlKeydown)
   }
 
   watch() {

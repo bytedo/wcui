@@ -14,7 +14,9 @@ import './radio-item'
 
 export default class RadioGroup {
   props = {
-    value: null
+    value: null,
+    disabled: false,
+    readonly: false
   }
 
   __init__() {
@@ -60,6 +62,19 @@ export default class RadioGroup {
     switch (name) {
       case 'value':
         this.value = val
+        break
+
+      case 'readonly':
+      case 'disabled':
+        Array.from(this.children).forEach(it => {
+          if (it.tagName === 'WC-RADIO' && it.root) {
+            if (val === null) {
+              it.removeAttribute(name)
+            } else {
+              it.setAttribute(name, '')
+            }
+          }
+        })
         break
     }
   }

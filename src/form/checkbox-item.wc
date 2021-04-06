@@ -1,6 +1,6 @@
 <template>
   <label tabindex="0">
-    <wc-icon class="dot" is="checkbox-off"></wc-icon>
+    <span class="dot"><wc-icon is="get"></wc-icon></span>
     <slot />
   </label>
 </template>
@@ -24,14 +24,111 @@
     user-select: none;
     white-space: nowrap;
     cursor: inherit;
+    outline: none;
     color: var(--color-dark-1);
+
+    &.checked .dot {
+      background: var(--color-dark-1);
+
+      wc-icon {
+        --size: 14px;
+      }
+    }
   }
 
   .dot {
-    --size: 20px;
-    padding: 2px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 16px;
+    height: 16px;
     margin-right: 4px;
+    border: 1px solid var(--color-dark-1);
+    border-radius: 4px;
+    background: #fff;
+    color: #fff;
+    transition: box-shadow 0.15s linear, background 0.15s linear;
+
+    wc-icon {
+      --size: 0px;
+      transition: width 0.15s linear;
+    }
   }
+}
+
+:host(:focus-within) .dot {
+  box-shadow: 0 0 0 2px var(--color-plain-a);
+}
+
+:host([type='danger']) label {
+  color: var(--color-red-1);
+  .dot {
+    border-color: var(--color-red-1);
+  }
+
+  &.checked .dot {
+    background: var(--color-red-1);
+  }
+}
+:host([type='danger']:focus-within) .dot {
+  box-shadow: 0 0 0 2px var(--color-red-a);
+}
+
+:host([type='info']) label {
+  color: var(--color-blue-1);
+  .dot {
+    border-color: var(--color-bule-1);
+  }
+
+  &.checked .dot {
+    background: var(--color-bule-1);
+  }
+}
+:host([type='info']:focus-within) .dot {
+  box-shadow: 0 0 0 2px var(--color-blue-a);
+}
+
+:host([type='success']) label {
+  color: var(--color-green-1);
+  .dot {
+    border-color: var(--color-green-1);
+  }
+
+  &.checked .dot {
+    background: var(--color-green-1);
+  }
+}
+:host([type='success']:focus-within) .dot {
+  box-shadow: 0 0 0 2px var(--color-green-a);
+}
+
+:host([type='primary']) label {
+  color: var(--color-teal-1);
+
+  .dot {
+    border-color: var(--color-teal-1);
+  }
+
+  &.checked .dot {
+    background: var(--color-teal-1);
+  }
+}
+:host([type='primary']:focus-within) .dot {
+  box-shadow: 0 0 0 2px var(--color-teal-a);
+}
+
+:host([type='warning']) label {
+  color: var(--color-orange-1);
+  .dot {
+    border-color: var(--color-orange-1);
+  }
+
+  &.checked .dot {
+    background: var(--color-orange-1);
+  }
+}
+:host([type='warning']:focus-within) .dot {
+  box-shadow: 0 0 0 2px var(--color-orange-a);
 }
 
 :host([readonly]) {
@@ -46,26 +143,6 @@
   label {
     color: var(--color-grey-2);
   }
-}
-
-:host([type='danger']) label {
-  color: var(--color-red-1);
-}
-
-:host([type='info']) label {
-  color: var(--color-blue-1);
-}
-
-:host([type='success']) label {
-  color: var(--color-green-1);
-}
-
-:host([type='primary']) label {
-  color: var(--color-teal-1);
-}
-
-:host([type='warning']) label {
-  color: var(--color-orange-1);
 }
 </style>
 
@@ -163,32 +240,43 @@ export default class Checkbox {
     }
   }
 
+  _toggleCheck() {
+    if (this.disabled || this.readOnly) {
+      return
+    }
+
+    this.checked = !this.checked
+
+    if (this._isInGroup) {
+      this.parentNode.dispatchEvent(
+        new CustomEvent('child-picked', {
+          detail: { value: this.value, checked: this.checked }
+        })
+      )
+    } else {
+      this.dispatchEvent(new CustomEvent('input'))
+    }
+  }
+
   mounted() {
     this._checkGroup()
 
     this._handlClick = $.bind(this, 'click', ev => {
       ev.preventDefault()
+      this._toggleCheck()
+    })
 
-      if (this.disabled || this.readOnly) {
-        return
-      }
-
-      this.checked = !this.checked
-
-      if (this._isInGroup) {
-        this.parentNode.dispatchEvent(
-          new CustomEvent('child-picked', {
-            detail: { value: this.value, checked: this.checked }
-          })
-        )
-      } else {
-        this.dispatchEvent(new CustomEvent('input'))
+    this._handlKeydown = $.bind(this, 'keydown', ev => {
+      // 空格交互
+      if (ev.keyCode === 32) {
+        this._toggleCheck()
       }
     })
   }
 
   unmount() {
     $.unbind(this, 'click', this._handlClick)
+    $.unbind(this, 'keydown', this._handlKeydown)
   }
 
   watch() {

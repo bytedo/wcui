@@ -345,7 +345,7 @@
 }
 
 :host([readonly]) {
-  opacity: 0.6;
+  opacity: 0.8;
 
   .toolbar {
     span:hover {
