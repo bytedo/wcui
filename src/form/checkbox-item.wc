@@ -77,11 +77,11 @@
 :host([type='info']) label {
   color: var(--color-blue-1);
   .dot {
-    border-color: var(--color-bule-1);
+    border-color: var(--color-blue-1);
   }
 
   &.checked .dot {
-    background: var(--color-bule-1);
+    background: var(--color-blue-1);
   }
 }
 :host([type='info']:focus-within) .dot {
@@ -152,7 +152,6 @@ import $ from '../utils'
 
 export default class Checkbox {
   props = {
-    color: '',
     value: '',
     checked: false,
     readonly: false,
@@ -190,15 +189,7 @@ export default class Checkbox {
 
   set checked(val) {
     this.props.checked = !!val
-    var { checked, color } = this.props
-    this.__SWITCH__.classList.toggle('checked', checked)
-    this.__ICO__.setAttribute('is', 'checkbox-' + (checked ? 'on' : 'off'))
-
-    if (checked) {
-      this.__ICO__.setAttribute('color', color)
-    } else {
-      this.__ICO__.removeAttribute('color')
-    }
+    this.__SWITCH__.classList.toggle('checked', this.props.checked)
   }
 
   get readOnly() {
@@ -282,7 +273,6 @@ export default class Checkbox {
   watch() {
     switch (name) {
       case 'value':
-      case 'color':
         this.props[name] = val
         break
 
