@@ -25,7 +25,7 @@
       </li>
       <li>
         <label></label>
-        <wc-button class="submit" color="teal" size="mini">确定</wc-button>
+        <wc-button class="submit" type="primary" size="mini">确定</wc-button>
       </li>
     </ul>
   </wc-layer>
@@ -44,7 +44,7 @@
         </li>
         <li>
           <label></label>
-          <wc-button class="submit" color="teal" size="mini">确定</wc-button>
+          <wc-button class="submit" type="primary" size="mini">确定</wc-button>
         </li>
       </ul>
       <div class="locale">
@@ -59,7 +59,7 @@
   display: flex;
   min-width: 200px;
   min-height: 100px;
-  // max-height: 360px;
+  height: 100%;
   border-radius: 3px;
   transition: box-shadow 0.15s linear;
 }
@@ -69,9 +69,10 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--color-plain-2);
+  border: 1px solid var(--color-grey-2);
   border-radius: inherit;
   font-size: 14px;
+  background: #fff;
 }
 
 .toolbar {
@@ -79,7 +80,7 @@
   height: 34px;
   padding: 5px;
   line-height: 24px;
-  border-bottom: 1px solid var(--color-plain-2);
+  border-bottom: 1px solid var(--color-grey-1);
 
   span {
     position: relative;
@@ -91,7 +92,7 @@
     height: 24px;
     margin: 0 3px;
     border-radius: 3px;
-    color: var(--color-dark-1);
+    color: var(--color-grey-3);
 
     .icon {
       overflow: hidden;
@@ -118,6 +119,7 @@
   flex: 1;
   display: flex;
   min-height: 300px;
+  border-radius: 3px;
   background: #fff;
 
   .editor,
@@ -132,11 +134,15 @@
     border: 0;
     font-size: 14px;
     font-family: Menlo, Monaco, Consolas, 'Courier New', monospace;
-    color: var(--color-grey-3);
+    color: var(--color-dark-1);
     background: none;
     outline: none;
     resize: none;
     cursor: inherit;
+
+    &::placeholder {
+      color: var(--color-grey-1);
+    }
   }
 
   .preview {
@@ -324,13 +330,31 @@
 }
 
 :host([disabled]) {
-  .meditor {
+  opacity: 0.6;
+
+  .meditor,
+  .toolbar {
     cursor: not-allowed;
-    opacity: 0.6;
+  }
+
+  .toolbar {
+    span:hover {
+      background: none;
+    }
   }
 }
 
-:host(.fullscreen) {
+:host([readonly]) {
+  opacity: 0.6;
+
+  .toolbar {
+    span:hover {
+      background: none;
+    }
+  }
+}
+
+:host([fullscreen]) {
   position: fixed;
   left: 0;
   top: 0;
@@ -358,16 +382,17 @@ import Addon from './addon'
 
 export default class Meditor {
   props = {
-    toolbar: null,
+    toolbar: '',
     value: '',
     readonly: false,
     disabled: false,
-    height: 180,
-    preview: window.innerWidth > 768
+    preview: '',
+    placeholder: ''
   }
 
   state = {
-    toolbar: []
+    toolbar: null,
+    preview: window.innerWidth > 768
   }
 
   __init__() {
@@ -385,20 +410,22 @@ export default class Meditor {
   }
 
   _updateToolbar() {
-    var { toolbar, preview } = this.props
+    var { toolbar, preview } = this.state
     var isToolbarShow = true
-    if (Array.isArray(toolbar)) {
+    if (toolbar === null) {
+      this.__TOOLBAR__.innerHTML = renderToolbar(null, 'span', TOOL_TITLE)
+    } else {
       if (toolbar.length) {
         this.__TOOLBAR__.innerHTML = renderToolbar(toolbar, 'span', TOOL_TITLE)
       } else {
         isToolbarShow = false
       }
-    } else {
-      this.__TOOLBAR__.innerHTML = renderToolbar(null, 'span', TOOL_TITLE)
     }
-    this.__TOOLBAR__.classList.toggle('active', isToolbarShow)
-    this.__TOOLBAR__.lastElementChild.classList.toggle('active', preview)
-    this.__VIEW__.classList.toggle('active', preview)
+    if (isToolbarShow) {
+      this.__TOOLBAR__.classList.toggle('active', isToolbarShow)
+      this.__TOOLBAR__.lastElementChild.classList.toggle('active', preview)
+      this.__VIEW__.classList.toggle('active', preview)
+    }
   }
 
   _createTableAddon() {
@@ -506,7 +533,6 @@ export default class Meditor {
     var $submit = $link.querySelector('.submit')
 
     this.__LINK_ADDON__.__txt__ = $txt
-    // Addon.link.call(this, this.__TOOLBAR__.children[12])
 
     $.bind($submit, 'click', ev => {
       var txt = $txt.value.trim()
@@ -738,8 +764,29 @@ export default class Meditor {
 
   set value(val) {
     this.__EDITOR__.value = val
-    if (this.props.preview) {
+    if (this.state.preview) {
       this.__VIEW__.value = val
+    }
+  }
+
+  get readOnly() {
+    return this.props.readonly
+  }
+
+  set readOnly(val) {
+    var type = typeof val
+
+    if (val === this.props.readonly) {
+      return
+    }
+    if ((type === 'boolean' && val) || type !== 'boolean') {
+      this.props.readonly = true
+      this.__EDITOR__.readOnly = true
+      this.setAttribute('readonly', '')
+    } else {
+      this.props.readonly = false
+      this.__EDITOR__.readOnly = false
+      this.removeAttribute('readonly')
     }
   }
 
@@ -772,8 +819,8 @@ export default class Meditor {
     this._createLinkAddon()
     this._createAttachAddon()
 
-    $.bind(this.__EDITOR__, 'input', _ => {
-      if (this.props.preview) {
+    this._inputFn = $.bind(this.__EDITOR__, 'input', _ => {
+      if (this.state.preview) {
         var txt = this.__EDITOR__.value.trim()
         if (txt) {
           this.__VIEW__.value = txt
@@ -783,9 +830,13 @@ export default class Meditor {
       }
     })
 
-    $.bind(this.__EDITOR__, 'keydown', ev => {
+    this._keydownFn = $.bind(this.__EDITOR__, 'keydown', ev => {
       let wrap = this.selection() || ''
       let select = !!wrap
+
+      if (this.readOnly || this.disabled) {
+        return
+      }
 
       switch (ev.keyCode) {
         //tab键改为插入2个空格,阻止默认事件,防止焦点失去
@@ -871,11 +922,15 @@ export default class Meditor {
       }
     })
 
-    $.bind(this.__EDITOR__, 'paste', ev => {
+    this._pasteFn = $.bind(this.__EDITOR__, 'paste', ev => {
       ev.preventDefault()
       var txt = ev.clipboardData.getData('text/plain').trim()
       var html = ev.clipboardData.getData('text/html').trim()
       var items = ev.clipboardData.items
+
+      if (this.readOnly || this.disabled) {
+        return
+      }
 
       if (html) {
         html = html2md(html)
@@ -903,13 +958,20 @@ export default class Meditor {
       }
     })
 
-    $.bind(this.__TOOLBAR__, 'click', ev => {
+    this._clickFn = $.bind(this.__TOOLBAR__, 'click', ev => {
       ev.preventDefault()
+
       var elem = ev.target
       var act
+
       if (elem === ev.currentTarget) {
         return
       }
+
+      if (this.readOnly || this.disabled) {
+        return
+      }
+
       while (elem.tagName !== 'SPAN') {
         elem = elem.parentNode
       }
@@ -918,12 +980,23 @@ export default class Meditor {
     })
   }
 
+  unmount() {
+    $.unbind(this.__EDITOR__, 'input', this._inputFn)
+    $.unbind(this.__EDITOR__, 'keydown', this._keydownFn)
+    $.unbind(this.__EDITOR__, 'paste', this._pasteFn)
+    $.unbind(this.__TOOLBAR__, 'click', this._clickFn)
+  }
+
   watch() {
     switch (name) {
       case 'toolbar':
-        if (val) {
-          val = val.split(',').map(it => it.trim())
-          this.props.toolbar = val
+        if (val === null) {
+          this.state.toolbar = null
+        } else {
+          this.state.toolbar = val
+            .split(',')
+            .map(it => it.trim())
+            .filter(it => it)
         }
         break
 
@@ -931,11 +1004,15 @@ export default class Meditor {
         this.value = val
         break
 
+      case 'placeholder':
+        this.__EDITOR__.setAttribute('placeholder', val || '')
+        break
+
       case 'preview':
         if (val === 'false') {
-          this.props.preview = false
+          this.state.preview = false
         } else {
-          this.props.preview = window.innerWidth > 768
+          this.state.preview = window.innerWidth > 768
         }
         break
 

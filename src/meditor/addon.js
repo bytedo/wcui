@@ -120,7 +120,11 @@ export default {
   fullscreen(elem) {
     //
     this.props.fullscreen = !this.props.fullscreen
-    this.classList.toggle('fullscreen', this.props.fullscreen)
+    if (this.props.fullscreen) {
+      this.setAttribute('fullscreen', '')
+    } else {
+      this.removeAttribute('fullscreen')
+    }
     elem.classList.toggle('active', this.props.fullscreen)
   },
   preview(elem) {
