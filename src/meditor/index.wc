@@ -677,8 +677,10 @@ export default class Meditor {
       dom.value =
         dom.value.slice(0, start) + val + dom.value.slice(end, dom.value.length)
 
-      dom.selectionStart = (isSelect ? start : start + val.length) + offset
-      dom.selectionEnd = start + val.length - offset
+      this.select(
+        (isSelect ? start : start + val.length) + offset,
+        start + val.length - offset
+      )
       dom.scrollTop = scrollTop
       dom.focus()
     } else {
@@ -746,14 +748,10 @@ export default class Meditor {
   _getCursorText(n) {
     var dom = this.__EDITOR__
     var start = dom.selectionStart
-    var end = dom.selectionEnd
-    var pos = end
+    var pos = dom.selectionEnd
 
     if (n < 0) {
       pos = start - 1
-      if (pos < 0) {
-        pos = 0
-      }
     }
     return this.value[pos] || ''
   }
@@ -860,6 +858,7 @@ export default class Meditor {
 
             if (
               (prev === next && (prev === '"' || prev === "'")) ||
+              (prev === next && prev === '`') ||
               (prev === '[' && next === ']') ||
               (prev === '{' && next === '}') ||
               (prev === '(' && next === ')')
@@ -867,7 +866,6 @@ export default class Meditor {
               this.select(pos - 1, pos + 1)
             }
           }
-
           break
 
         // (
@@ -879,46 +877,73 @@ export default class Meditor {
             this.cursor(select ? 0 : -1)
           }
           break
+        // )
+        case 48:
+          if (ev.shiftKey) {
+            let prev = this._getCursorText(-1)
+            let next = this._getCursorText(1)
+            if (prev === '(' && next === ')') {
+              ev.preventDefault()
+              this.cursor(1)
+            }
+          }
+          break
 
         case 219: // [ & {
           ev.preventDefault()
           this.insert(
             ev.shiftKey ? `{${wrap}}` : `[${wrap}]`,
             select,
-            (select && 1) || 0
+            select ^ 0
           )
           this.cursor(select ? 0 : -1)
-
           break
+        // } & ]
+        case 221: {
+          let prev = this._getCursorText(-1)
+          let next = this._getCursorText(1)
+          if (ev.shiftKey) {
+            if (prev === '{' && next === '}') {
+              ev.preventDefault()
+              this.cursor(1)
+            }
+          } else {
+            if (prev === '[' && next === ']') {
+              ev.preventDefault()
+              this.cursor(1)
+            }
+          }
+          break
+        }
 
+        //  `
+        case 192:
         // ' & "
         case 222:
-          {
-            ev.preventDefault()
-            let val = "'"
+          if (ev.shiftKey && ev.keyCode === 192) {
+            break
+          } else {
+            let val = ev.keyCode === 192 ? '`' : ev.shiftKey ? '"' : "'"
             let prev = this._getCursorText(-1)
             let next = this._getCursorText(1)
+
+            if (prev === '' && next === val) {
+              break
+            }
+            ev.preventDefault()
 
             if (select) {
               this.insert(val + wrap + val, true, 1)
             } else {
-              if (ev.shiftKey) {
-                val = '"'
-              }
               if (prev === next && prev === val) {
                 this.cursor(1)
               } else {
-                if (prev === val || next === val) {
-                  this.insert(val)
-                } else {
-                  this.insert(val.repeat(2))
-                  this.cursor(-1)
-                }
+                this.insert(val + wrap + val)
+                this.cursor(-1)
               }
             }
+            break
           }
-
-          break
       }
     })
 
