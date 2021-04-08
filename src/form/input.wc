@@ -51,8 +51,8 @@ li {
     padding: 0 8px;
     border: 0;
     border-radius: inherit;
-    color: inherit;
     font: inherit;
+    color: inherit;
     background: none;
     outline: none;
     box-shadow: none;

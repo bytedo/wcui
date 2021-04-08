@@ -1,54 +1,40 @@
 <template>
   <div class="label">
-    <slot class="prepend" name="prepend"></slot>
-    ${input}
-    <wc-icon class="icon"></wc-icon>
-    <slot class="append" name="append"></slot>
-
-    <div class="suggestion">
-      <wc-scroll>
-        <ul class="list"></ul>
-      </wc-scroll>
-    </div>
+    <textarea spellcheck="false"></textarea>
+    <div class="input-stat">0/100</div>
   </div>
 </template>
 
 <style lang="scss">
-ul,
-li {
-  list-style: none;
-}
 :host {
-  overflow: hidden;
-  display: inline-flex;
-  min-width: 128px;
+  display: flex;
+  width: 100%;
+  height: 80px;
   user-select: none;
   -moz-user-select: none;
   color: var(--color-dark-1);
-  border-radius: 6px;
+  border-radius: 3px;
   cursor: text;
+  transition: box-shadow 0.15s linear;
 }
 
 .label {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 32px;
+  position: relative;
+  width: 100%;
+  height: 100%;
   font-size: 14px;
-  border: 2px solid var(--color-plain-2);
+  border: 1px solid var(--color-grey-2);
   border-radius: inherit;
   background: var(--bg-color, #fff);
   color: inherit;
   cursor: inherit;
 
-  input,
   textarea {
     flex: 1;
-    min-width: 32px;
-    width: 0;
+    min-width: 36px;
+    width: 100%;
     height: 100%;
-    padding: 0 5px;
+    padding: 5px 8px;
     border: 0;
     border-radius: inherit;
     color: inherit;
@@ -57,107 +43,37 @@ li {
     outline: none;
     box-shadow: none;
     cursor: inherit;
+    resize: none;
 
     &::placeholder {
       color: var(--color-grey-1);
     }
   }
-  textarea {
-    padding: 5px 8px;
-    resize: none;
-  }
-  .prepend,
-  .append {
+
+  .input-stat {
     display: none;
-    justify-content: center;
-    align-items: center;
-    width: auto;
-    height: 30px;
-    padding: 0 10px;
+    position: absolute;
+    right: 4px;
+    bottom: 2px;
+    z-index: 1;
     line-height: 1;
-    background: var(--bg-color, --color-plain-1);
-    white-space: nowrap;
-  }
-  .prepend {
-    border-right: 1px solid var(--color-plain-3);
-    border-radius: 2px 0 0 2px;
-  }
-  .append {
-    border-left: 1px solid var(--color-plain-3);
-    border-radius: 0 2px 2px 0;
-  }
-  &[prepend] .prepend,
-  &[append] .append {
-    display: flex;
-  }
-  &[prepend] input,
-  &[append] input {
-    min-width: 64px;
-  }
-  /* ----- */
-  .icon {
-    --size: 20px;
-    padding: 0 5px;
-    margin: 0 5px;
+    font-size: 12px;
     color: var(--color-grey-2);
   }
 }
 
-.suggestion {
-  display: none;
-  position: fixed;
-  z-index: 10240;
-  left: 0;
-  top: 0;
-  width: 200px;
-  height: auto;
-  max-height: 200px;
-  min-height: 46px;
-  padding: 8px 0;
-  border-radius: 2px;
-  background: #fff;
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.25);
+:host([show-limit]) {
+  .label {
+    padding-bottom: 14px;
 
-  .list {
-    width: 100%;
-  }
-
-  &::after {
-    position: absolute;
-    left: 30px;
-    top: -4px;
-    width: 8px;
-    height: 8px;
-    background: #fff;
-    box-shadow: -1px -1px 2px rgba(0, 0, 0, 0.1);
-    transform: rotate(45deg);
-    content: '';
-  }
-  &.show {
-    display: flex;
-  }
-
-  li {
-    overflow: hidden;
-    width: 100%;
-    height: 30px;
-    line-height: 30px;
-    padding: 0 8px;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    cursor: pointer;
-
-    &:hover,
-    &[focus] {
-      background: var(--color-plain-1);
+    .input-stat {
+      display: block;
     }
   }
 }
 
 /* --- */
-:host([auto-border]) .label {
-  border-color: transparent;
-}
+
 :host([disabled]) {
   cursor: not-allowed;
 
@@ -166,85 +82,45 @@ li {
     opacity: 0.6;
   }
 }
+
 :host([readonly]) {
   cursor: default;
 }
+
+/* ----- 类型(颜色) ----- */
 :host(:focus-within) {
-  // @include focus1;
-  .label {
-    border-color: var(--color-plain-3);
-  }
+  box-shadow: 0 0 0 2px var(--color-plain-a);
 }
-:host(:focus-within[readonly]) {
-  // @include focus2;
+:host([type='primary']:focus-within) {
+  box-shadow: 0 0 0 2px var(--color-teal-a);
 }
-
-:host([type='textarea']) {
-  display: flex;
-  height: 80px;
-  .label {
-    width: 100%;
-    height: 100%;
-  }
-  .icon,
-  .suggestion {
-    display: none;
-  }
+:host([type='info']:focus-within) {
+  box-shadow: 0 0 0 2px var(--color-blue-a);
+}
+:host([type='success']:focus-within) {
+  box-shadow: 0 0 0 2px var(--color-green-a);
+}
+:host([type='danger']:focus-within) {
+  box-shadow: 0 0 0 2px var(--color-red-a);
+}
+:host([type='warning']:focus-within) {
+  box-shadow: 0 0 0 2px var(--color-orange-a);
 }
 
-/* 额外样式 */
-:host([round]) {
-  border-radius: 21px;
-
-  .label input {
-    padding: 0 10px;
-  }
-
-  .label[prepend] input,
-  .label[append] input {
-    padding: 0 5px;
-  }
-
-  .prepend {
-    border-radius: 21px 0 0 21px;
-  }
-  .append {
-    border-radius: 0 21px 21px 0;
-  }
+:host([type='primary']) .label {
+  border-color: var(--color-teal-2);
 }
-
-:host([size='large']) {
-  .label {
-    height: 42px;
-    font-size: 16px;
-  }
-  .prepend,
-  .append {
-    height: 40px;
-  }
+:host([type='info']) .label {
+  border-color: var(--color-blue-2);
 }
-
-:host([size='medium']) {
-  .label {
-    height: 36px;
-  }
-  .prepend,
-  .append {
-    height: 34px;
-  }
+:host([type='success']) .label {
+  border-color: var(--color-green-2);
 }
-:host([size='mini']) {
-  .label {
-    height: 24px;
-    font-size: 12px;
-  }
-  .icon {
-    --size: 16px;
-  }
-  .prepend,
-  .append {
-    height: 18px;
-  }
+:host([type='danger']) .label {
+  border-color: var(--color-red-2);
+}
+:host([type='warning']) .label {
+  border-color: var(--color-orange-2);
 }
 
 :host([no-border]),
@@ -254,61 +130,29 @@ li {
     border: 0;
   }
 }
-:host([transparent]) {
-  .label {
-    background: transparent;
-  }
-}
 </style>
 
 <script>
-import '../scroll/index'
-import '../icon/index'
 import $ from '../utils'
 
-const TYPES = ['text', 'textarea', 'password']
-const INPUTS = {
-  text: '<input spellcheck="false">',
-  textarea: '<textarea spellcheck="false"></textarea>'
-}
-
-export default class Input {
+export default class Textarea {
   props = {
     value: '',
-    icon: '',
-    type: 'text',
     placeholder: '',
     maxlength: null,
     minlength: null,
     autofocus: false,
     readonly: false,
-    disabled: false
-  }
-
-  state = {
-    mvidx: null //下拉列表光标的索引ID
+    disabled: false,
+    lazy: 0
   }
 
   __init__() {
-    var type = this.getAttribute('type')
-    var input = ''
-
-    if (type !== 'textarea') {
-      type = 'text'
-    }
-
-    input = INPUTS[type]
-
     /* render */
 
-    this.props.type = type
-
     this.__OUTER__ = this.root.children[1]
-    this.__PREPEND__ = this.__OUTER__.children[0]
-    this.__INPUT__ = this.__OUTER__.children[1]
-    this.__ICO__ = this.__OUTER__.children[2]
-    this.__APPEND__ = this.__OUTER__.children[3]
-    this.__LIST__ = this.__OUTER__.children[4]
+    this.__INPUT__ = this.__OUTER__.children[0]
+    this.__STAT__ = this.__OUTER__.children[1]
   }
 
   get readOnly() {
@@ -362,201 +206,54 @@ export default class Input {
     this.__INPUT__.value = val
   }
 
-  get type() {
-    return this.__INPUT__.type
-  }
-
-  set type(val) {
-    if (val !== 'textarea') {
-      this.__INPUT__.type = val
-    }
-  }
-
-  // 移动光标选择下拉选项
-  _moveSelect(ev) {
-    var { list } = this.props
-    if (list && list.length) {
-      ev.preventDefault()
-      var step = ev.keyCode === 38 ? -1 : 1
-      var items = Array.from(
-        this.__LIST__.firstElementChild.firstElementChild.children
-      )
-      if (this.state.mvidx === null) {
-        this.state.mvidx = 0
-      } else {
-        this.state.mvidx += step
-      }
-      if (this.state.mvidx < 0) {
-        this.state.mvidx = 0
-      } else if (this.state.mvidx > items.length - 1) {
-        this.state.mvidx = items.length - 1
-      }
-      items.forEach((it, i) => {
-        if (i === this.state.mvidx) {
-          this.__LIST__.firstElementChild.scrollTop = it.offsetTop - 150
-          it.setAttribute('focus', '')
-        } else {
-          it.removeAttribute('focus')
-        }
-      })
-    }
-  }
-
-  // 触发列表选择
-  _fetchSelect(idx, ev) {
-    var item = this.props.list[idx]
-    this.value = item.value
-    this.dispatchEvent(
-      new CustomEvent('select', {
-        detail: item
-      })
-    )
-    this._handleChange(ev)
-    this.__LIST__.classList.remove('show')
-    this.state.mvidx = null
-  }
-
-  _updateAttr() {
-    var { maxlength, minlength } = this.props
-
-    if (maxlength && maxlength > 0) {
-      this.__INPUT__.setAttribute('maxlength', maxlength)
-    } else {
-      this.__INPUT__.removeAttribute('maxlength')
-    }
-    if (minlength && minlength > 0) {
-      this.__INPUT__.setAttribute('minlength', minlength)
-    } else {
-      this.__INPUT__.removeAttribute('minlength')
-    }
-  }
-
   mounted() {
-    var prepend = this.__PREPEND__.assignedNodes()
-    var append = this.__APPEND__.assignedNodes()
-    var { type } = this.props
-
-    // 相同插槽, 只允许1个
-    while (prepend.length > 1) {
-      this.removeChild(prepend.pop())
-    }
-    while (append.length > 1) {
-      this.removeChild(append.pop())
-    }
-
-    if (prepend.length && type !== 'textarea') {
-      this.__OUTER__.setAttribute('prepend', '')
-    }
-    if (append.length && type !== 'textarea') {
-      this.__OUTER__.setAttribute('append', '')
-    }
-
-    this._updateAttr()
+    this.stamp = 0
 
     // 键盘事件
     this._handleSubmit = $.catch(this.__INPUT__, 'keydown', ev => {
-      if (this.disabled || this.readOnly) {
-        return
-      }
-      // up: 38, down: 40
-      if (ev.keyCode === 38 || ev.keyCode === 40) {
-        // 仅普通文本表单, 密码和多行文本框不做响应
-        if (type === 'text') {
-          return this._moveSelect(ev)
-        }
-      }
+      let { minlength, lazy } = this.props
+      let val = this.value
+      let now = Date.now()
+
       // 回车触发submit事件
-      // textarea 要按Ctrl Or Cmd键, 才会触发
-      if (ev.keyCode === 13) {
-        // 如果是输入建议存在,则第1次回车的时候, 不触发提交
-        if (type === 'text' && this.state.mvidx !== null) {
-          return this._fetchSelect(this.state.mvidx, ev)
+      // 要按Ctrl Or Cmd键, 才会触发
+      if (ev.keyCode === 13 && (ev.ctrlKey || ev.metaKey)) {
+        //
+        if (this.disabled || this.readOnly) {
+          return
         }
 
-        if (
-          type === 'text' ||
-          (type === 'textarea' && (ev.ctrlKey || ev.metaKey))
-        ) {
-          this.dispatchEvent(
-            new CustomEvent('submit', {
-              detail: this.value
-            })
-          )
+        // 并发拦截
+        if (lazy && now - this.stamp < lazy) {
+          return
         }
+        if (minlength && minlength > 0) {
+          if (val.length < minlength) {
+            return
+          }
+        }
+
+        this.stamp = now
+        this.dispatchEvent(new CustomEvent('submit', { detail: this.value }))
       }
     })
 
-    // 非textarea, 可做输入建议功能
-    if (type === 'text') {
-      // 输入状态事件
-      this._handleChange = $.bind(this.__INPUT__, 'input', ev => {
-        ev.preventDefault()
-        this.dispatchEvent(
-          new CustomEvent('fetch-suggest', {
-            detail: {
-              value: this.value,
-              send: list => {
-                this.props.list = list
-                this._parseSuggestion()
-              }
-            }
-          })
-        )
-      })
+    this._statFn = $.bind(this.__INPUT__, 'input,change', ev => {
+      let { maxlength } = this.props
+      let len = this.value.length
+      maxlength = maxlength || '∞'
 
-      // 渲染建议列表
-      this._parseSuggestion = $.bind(this.__INPUT__, 'click', ev => {
-        var { list } = this.props
-        let { x, y, width } = this.getBoundingClientRect()
-        if (list && list.length) {
-          var html = list
-            .map((it, i) => `<li data-idx="${i}">${it.value}</li>`)
-            .join('')
-          this.__LIST__.firstElementChild.firstElementChild.innerHTML = html
-          this.__LIST__.classList.toggle('show', true)
-          this.__LIST__.style.cssText = `left:${x}px;top:${y +
-            50}px;width:${width}px;`
-        } else {
-          this.__LIST__.classList.toggle('show', false)
-        }
-      })
-
-      this._inactiveFn = $.outside(this, ev => {
-        this.__LIST__.classList.remove('show')
-      })
-
-      // 选择建议
-      this._handleSelect = $.bind(this.__LIST__, 'click', ev => {
-        if (ev.target.tagName === 'LI') {
-          this._fetchSelect(ev.target.dataset.idx, ev)
-          this.dispatchEvent(new CustomEvent('input'))
-        }
-      })
-    } else {
-      this._handleWheel = $.catch(this.__INPUT__, 'wheel')
-    }
+      this.__STAT__.textContent = `${len}/${maxlength}`
+    })
   }
 
   unmount() {
-    $.unbind(this.__INPUT__, 'wheel', this._handleWheel)
     $.unbind(this.__INPUT__, 'keydown', this._handleSubmit)
-    $.unbind(this.__INPUT__, 'input', this._handleChange)
-    $.unbind(this.__LIST__, 'click', this._handleSelect)
-    $.clearOutside(this._inactiveFn)
+    $.unbind(this.__INPUT__, 'input,change', this._statFn)
   }
 
   watch() {
     switch (name) {
-      case 'icon':
-        this.props.icon = val
-        if (val) {
-          this.__ICO__.setAttribute('is', val)
-        } else {
-          this.removeAttribute('icon')
-          this.__ICO__.removeAttribute('is')
-        }
-        break
-
       case 'autofocus':
         this.__INPUT__.setAttribute('autofocus', '')
         // 辣鸡火狐, 要触发一下focus, 才能聚焦
@@ -570,22 +267,24 @@ export default class Input {
         this.__INPUT__.setAttribute('placeholder', val)
         break
 
-      case 'type':
-        if (~TYPES.indexOf(val)) {
-          this.type = val
-        } else {
-          this.type = 'text'
-        }
-        break
-
       case 'value':
         this.value = val
         break
 
       case 'maxlength':
       case 'minlength':
-        this.props[name] = val
-        this._updateAttr()
+        if (val === null) {
+          this.__INPUT__.removeAttribute(name)
+        } else {
+          let n = +val
+          if (n > 0) {
+            this.__INPUT__.setAttribute(name, +val)
+          }
+        }
+        break
+
+      case 'lazy':
+        this.props.lazy = val >> 0
         break
 
       case 'readonly':
