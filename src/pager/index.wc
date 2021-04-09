@@ -19,7 +19,8 @@
   }
 
   .item {
-    min-width: 32px;
+    min-width: 36px;
+    width: auto;
     --padding: 0;
     margin: 0 5px;
     --icon-size: 12px;
@@ -29,7 +30,7 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      height: 32px;
+      height: 36px;
       background: var(--color-teal-1);
       color: #fff;
     }
@@ -37,7 +38,7 @@
 
   input {
     width: 48px;
-    height: 32px;
+    height: 36px;
     padding: 0 4px;
     border: 2px solid var(--color-plain-2);
     border-radius: 4px;
@@ -152,7 +153,7 @@ export default class Pager {
   }
 
   state = {
-    totalpage: 0
+    totalpage: 1
   }
 
   __init__() {
@@ -185,10 +186,10 @@ export default class Pager {
           return LAYOUT_DICT.prev(curr === 1)
 
         case 'next':
-          return LAYOUT_DICT.next(curr === totalpage)
+          return LAYOUT_DICT.next(curr >= totalpage)
 
         case 'end':
-          return LAYOUT_DICT.end(curr === totalpage)
+          return LAYOUT_DICT.end(curr >= totalpage)
 
         case 'curr':
           return LAYOUT_DICT.curr(curr)
@@ -226,7 +227,8 @@ export default class Pager {
     n = +n
     if (n > 0) {
       this.props.pagesize = n
-      this.state.totalpage = Math.ceil(this.props.total / n)
+      this.state.totalpage = Math.ceil(this.props.total / n) || 1
+      this.props.page = 1
       this.update()
     }
   }
@@ -235,14 +237,14 @@ export default class Pager {
     n = +n
     if (n > 0) {
       this.props.total = n
-      this.state.totalpage = Math.ceil(n / this.props.pagesize)
+      this.state.totalpage = Math.ceil(n / this.props.pagesize) || 1
       this.update()
     }
   }
 
   mounted() {
     var { pagesize, total } = this.props
-    this.state.totalpage = Math.ceil(total / pagesize)
+    this.state.totalpage = Math.ceil(total / pagesize) || 1
 
     this.update()
 
@@ -251,6 +253,10 @@ export default class Pager {
         let { curr } = this.props
         let { totalpage } = this.state
         let num = +ev.target.dataset.act
+
+        if (ev.target.disabled) {
+          return
+        }
 
         if (num !== num) {
           num = ev.target.dataset.act

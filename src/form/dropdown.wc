@@ -2,7 +2,7 @@
   <div class="label">
     <section class="preview">
       <input readonly />
-      <wc-icon is="left"></wc-icon>
+      <wc-icon is="trigon-down"></wc-icon>
     </section>
     <ul class="options-box"></ul>
     <slot name="option"></slot>
@@ -66,8 +66,8 @@ slot {
       }
     }
     wc-icon {
-      --size: 16px;
-      transform: rotate(-90deg);
+      --size: 14px;
+      color: var(--color-grey-2);
     }
   }
 
@@ -79,6 +79,7 @@ slot {
     position: absolute;
     left: 0;
     top: 36px;
+    z-index: 99;
     width: 100%;
     height: 0;
     border-radius: 3px;
