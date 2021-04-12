@@ -160,6 +160,7 @@ table {
   td {
     padding: 6px 13px;
     border: 1px solid var(--color-plain-2);
+    vertical-align: middle;
   }
   th {
     font-weight: bold;
@@ -173,7 +174,7 @@ code.inline {
   display: inline;
   margin: 0 2px;
   padding: 0 2px;
-  color: var(--color-orange-3);
+  color: var(--color-red-1);
   background: var(--color-plain-1);
   border-radius: 2px;
   font-family: Menlo, Monaco, Consolas, 'Courier New', monospace;
