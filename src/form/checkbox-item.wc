@@ -253,7 +253,7 @@ export default class Checkbox {
     this._checkGroup()
 
     this._handlClick = $.bind(this, 'click', ev => {
-      ev.preventDefault()
+      ev.stopPropagation()
       this._toggleCheck()
     })
 

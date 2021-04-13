@@ -239,7 +239,7 @@ export default class Radio {
     }
 
     this._handleClick = $.catch(this, 'click', ev => {
-      ev.preventDefault()
+      ev.stopPropagation()
       this._toggleCheck()
     })
 

@@ -4,19 +4,11 @@
       <input readonly />
       <wc-icon is="trigon-down"></wc-icon>
     </section>
-    <ul class="options-box"></ul>
-    <slot name="option"></slot>
+    <div class="options-box"><slot /></div>
   </div>
 </template>
 
 <style lang="scss" scoped>
-ul,
-li {
-  list-style: none;
-}
-slot {
-  display: none;
-}
 :host {
   display: inline-flex;
   min-width: 72px;
@@ -74,8 +66,6 @@ slot {
   .options-box {
     overflow: hidden;
     visibility: hidden;
-    display: flex;
-    flex-direction: column;
     position: absolute;
     left: 0;
     top: 36px;
@@ -86,19 +76,6 @@ slot {
     background: #fff;
     box-shadow: 0 3px 5px rgba(0, 0, 0, 0.15);
     transition: height 0.15s linear;
-
-    li {
-      display: flex;
-      align-items: center;
-      height: 32px;
-      padding: 0 8px;
-      transition: background 0.15s linear;
-
-      &:hover,
-      &.active {
-        background: var(--color-plain-1);
-      }
-    }
 
     &.active {
       visibility: visible;
@@ -126,6 +103,7 @@ slot {
 
 <script>
 import '../icon/index'
+import './option'
 import $ from '../utils'
 
 export default class Dropdown {
@@ -136,8 +114,7 @@ export default class Dropdown {
   }
 
   state = {
-    optionShow: false,
-    options: []
+    optionShow: false
   }
 
   __init__() {
@@ -146,9 +123,21 @@ export default class Dropdown {
     var outbox = this.root.children[1]
     this.__PREVIEW__ = outbox.children[0]
     this.__OPTIONS__ = outbox.children[1]
-    this.__SLOT__ = outbox.children[2]
     this.__INPUT__ = this.__PREVIEW__.children[0]
     this.__ICO__ = this.__PREVIEW__.children[1]
+  }
+
+  _updateChildrenStat() {
+    Array.from(this.children).forEach(it => {
+      if (it.tagName === 'WC-OPTION' && it.root) {
+        if (it.value === this.props.value) {
+          it.setAttribute('active', '')
+          this.__INPUT__.value = it.label || it.textContent
+        } else {
+          it.removeAttribute('active')
+        }
+      }
+    })
   }
 
   get value() {
@@ -157,12 +146,7 @@ export default class Dropdown {
 
   set value(val) {
     this.props.value = val
-    for (let it of this.state.options) {
-      if (it.opt.value === val) {
-        this.__INPUT__.value = it.label
-        break
-      }
-    }
+    this._updateChildrenStat()
   }
 
   get disabled() {
@@ -187,24 +171,6 @@ export default class Dropdown {
   }
 
   mounted() {
-    let opts = this.__SLOT__.assignedNodes()
-    this.state.options = []
-
-    this.__OPTIONS__.innerHTML = opts
-      .map(it => {
-        let attr = ''
-        let tmp = { label: it.textContent, opt: { ...it.dataset } }
-        for (let k in tmp.opt) {
-          attr += `data-${k}="${tmp.opt[k]}" `
-        }
-        tmp.label = tmp.label || tmp.opt.value
-        tmp.opt.value = tmp.opt.value || tmp.label
-
-        this.state.options.push(tmp)
-        return `<li ${attr}>${tmp.label}</li>`
-      })
-      .join('')
-
     this._activeFn = $.bind(this.__PREVIEW__, 'click', ev => {
       if (this.disabled) {
         return
@@ -214,16 +180,20 @@ export default class Dropdown {
     })
 
     this._pickedFn = $.bind(this.__OPTIONS__, 'click', ev => {
-      if (ev.target === ev.currentTarget) {
+      let elem = ev.target
+
+      if (elem === ev.currentTarget) {
         return
       }
 
-      let detail = { ...ev.target.dataset }
-      this.__INPUT__.value = ev.target.textContent
-      this.props.value = detail.value || ev.target.textContent
+      while (elem.tagName !== 'WC-OPTION') {
+        elem = elem.parentNode
+      }
 
+      this.props.value = elem.value
+
+      this._updateChildrenStat()
       this.dispatchEvent(new CustomEvent('input'))
-      this.dispatchEvent(new CustomEvent('select', { detail }))
 
       this.state.optionShow = false
       this.__OPTIONS__.classList.toggle('active', false)

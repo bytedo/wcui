@@ -1,0 +1,118 @@
+<template>
+  <label><slot /></label>
+</template>
+
+<style lang="scss" scoped>
+:host {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 32px;
+  transition: background 0.15s linear;
+  color: var(--color-dark-1);
+  cursor: pointer;
+
+  label {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+    padding: 0 8px;
+    cursor: inherit;
+  }
+}
+
+:host(:hover),
+:host([active]) {
+  label {
+    background: var(--color-plain-1);
+  }
+}
+:host([disabled]) {
+  color: var(--color-grey-1);
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+</style>
+
+<script>
+import $ from '../utils'
+export default class Option {
+  props = {
+    value: '',
+    label: '',
+    disabled: false
+  }
+
+  __init__() {
+    /* render */
+  }
+
+  get value() {
+    return this.props.value
+  }
+
+  set value(val) {
+    if (val === this.props.value) {
+      return
+    }
+    this.props.value = val
+  }
+
+  get label() {
+    return this.props.label
+  }
+
+  set label(val) {
+    if (val === this.props.label) {
+      return
+    }
+    this.props.label = val
+  }
+
+  get disabled() {
+    return this.props.disabled
+  }
+
+  set disabled(val) {
+    var type = typeof val
+
+    if (val === this.props.disabled) {
+      return
+    }
+    if ((type === 'boolean' && val) || type !== 'boolean') {
+      this.props.disabled = true
+      this.setAttribute('disabled', '')
+    } else {
+      this.props.disabled = false
+      this.removeAttribute('disabled')
+    }
+  }
+
+  mounted() {
+    this._clickFn = $.bind(this, 'click', ev => {
+      if (this.disabled) {
+        ev.stopPropagation()
+      }
+    })
+  }
+
+  unmount() {
+    $.unbind(this, 'click', this._clickFn)
+  }
+
+  watch() {
+    switch (name) {
+      case 'value':
+      case 'label':
+        this[name] = val
+        break
+
+      case 'disabled':
+        this.disabled = val !== null
+        break
+    }
+  }
+}
+</script>
