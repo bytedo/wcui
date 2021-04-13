@@ -111,6 +111,17 @@ slot {
 :host(:focus-within) {
   box-shadow: 0 0 0 2px var(--color-plain-a);
 }
+
+/* --- */
+:host([disabled]) {
+  cursor: not-allowed;
+
+  .label {
+    border-color: var(--color-grey-1);
+    background: var(--color-plain-1);
+    opacity: 0.6;
+  }
+}
 </style>
 
 <script>
@@ -120,7 +131,8 @@ import $ from '../utils'
 export default class Dropdown {
   props = {
     value: '',
-    placeholder: ''
+    placeholder: '',
+    disabled: false
   }
 
   state = {
@@ -153,6 +165,27 @@ export default class Dropdown {
     }
   }
 
+  get disabled() {
+    return this.props.disabled
+  }
+
+  set disabled(val) {
+    var type = typeof val
+
+    if (val === this.props.disabled) {
+      return
+    }
+    if ((type === 'boolean' && val) || type !== 'boolean') {
+      this.props.disabled = true
+      this.setAttribute('disabled', '')
+      this.__INPUT__.disabled = true
+    } else {
+      this.props.disabled = false
+      this.removeAttribute('disabled')
+      this.__INPUT__.disabled = false
+    }
+  }
+
   mounted() {
     let opts = this.__SLOT__.assignedNodes()
     this.state.options = []
@@ -173,6 +206,9 @@ export default class Dropdown {
       .join('')
 
     this._activeFn = $.bind(this.__PREVIEW__, 'click', ev => {
+      if (this.disabled) {
+        return
+      }
       this.state.optionShow = !this.state.optionShow
       this.__OPTIONS__.classList.toggle('active', this.state.optionShow)
     })
@@ -212,7 +248,8 @@ export default class Dropdown {
         this.__INPUT__.placeholder = val || ''
         break
 
-      default:
+      case 'disabled':
+        this.disabled = val !== null
         break
     }
   }
