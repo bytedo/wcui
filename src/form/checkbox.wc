@@ -47,6 +47,44 @@ export default class CheckboxGroup {
     this._updateChildrenStat()
   }
 
+  get readOnly() {
+    return this.props.readonly
+  }
+
+  set readOnly(val) {
+    var type = typeof val
+
+    if (val === this.props.readonly) {
+      return
+    }
+    if ((type === 'boolean' && val) || type !== 'boolean') {
+      this.props.readonly = true
+      this.setAttribute('readonly', '')
+    } else {
+      this.props.readonly = false
+      this.removeAttribute('readonly')
+    }
+  }
+
+  get disabled() {
+    return this.props.disabled
+  }
+
+  set disabled(val) {
+    var type = typeof val
+
+    if (val === this.props.disabled) {
+      return
+    }
+    if ((type === 'boolean' && val) || type !== 'boolean') {
+      this.props.disabled = true
+      this.setAttribute('disabled', '')
+    } else {
+      this.props.disabled = false
+      this.removeAttribute('disabled')
+    }
+  }
+
   mounted() {
     this._pickedFn = $.bind(this, 'child-picked', ev => {
       var tmp = [...this.props.value]
