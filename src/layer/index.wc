@@ -95,7 +95,7 @@
 
     ::slotted(&__input) {
       flex: 1;
-      height: 32px;
+      height: 36px;
     }
 
     ::slotted(&__frame) {
@@ -589,6 +589,8 @@ export default class Layer {
   unmount() {
     $.clearOutside(this._handlMask)
     $.unbind(this.__TITLE__, 'click', this._handleClose)
+    $.unbind(this.__CTRL__, 'click', this._handleBtnClick)
+    this._handleSubmit && $.unbind(this.__INPUT__, 'submit', this._handleSubmit)
   }
 
   watch() {
@@ -733,11 +735,23 @@ Object.assign(_layer, {
       intercept
     })
   },
-  prompt(title = lang.TITLE, intercept) {
+  prompt(title = lang.TITLE, defaultValue = '', intercept) {
+    if (typeof defaultValue === 'function') {
+      intercept = defaultValue
+      defaultValue = ''
+    }
+
+    if (!intercept) {
+      intercept = function(val, done) {
+        if (val) {
+          done()
+        }
+      }
+    }
     return this({
       type: 'prompt',
       title,
-      content: `<wc-input autofocus class="layer__content__input"></wc-input>`,
+      content: `<wc-input autofocus class="layer__content__input" value="${defaultValue}"></wc-input>`,
       mask: true,
       intercept
     })

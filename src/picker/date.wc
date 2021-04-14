@@ -208,10 +208,10 @@
 }
 
 :host(:focus-within) {
-  @include focus1;
+  // @include focus1;
 }
 :host(:focus-within[readonly]) {
-  @include focus2;
+  // @include focus2;
 }
 :host([disabled]) {
   opacity: 0.6;
