@@ -269,7 +269,7 @@ export default class Radio {
         if (k === 'readonly') {
           k = 'readOnly'
         }
-        this[k] = true
+        this[k] = val !== null
         break
     }
   }

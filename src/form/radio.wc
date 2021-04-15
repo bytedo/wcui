@@ -104,13 +104,15 @@ export default class RadioGroup {
 
       case 'readonly':
       case 'disabled':
+        var k = name
+        if (k === 'readonly') {
+          k = 'readOnly'
+        }
+        console.log('变了', k, val, typeof val)
         Array.from(this.children).forEach(it => {
           if (it.tagName === 'WC-RADIO' && it.root) {
-            if (val === null) {
-              it.removeAttribute(name)
-            } else {
-              it.setAttribute(name, '')
-            }
+            it[k] = val !== null
+            console.log('-----', k, it[k], val !== null, '-----')
           }
         })
         break

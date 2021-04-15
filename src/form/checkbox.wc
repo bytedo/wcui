@@ -117,13 +117,13 @@ export default class CheckboxGroup {
 
       case 'readonly':
       case 'disabled':
+        var k = name
+        if (k === 'readonly') {
+          k = 'readOnly'
+        }
         Array.from(this.children).forEach(it => {
           if (it.tagName === 'WC-CHECKBOX' && it.root) {
-            if (val === null) {
-              it.removeAttribute(name)
-            } else {
-              it.setAttribute(name, '')
-            }
+            it[k] = val !== null
           }
         })
         break
