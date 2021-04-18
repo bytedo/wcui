@@ -11,10 +11,14 @@
     "url": "git+https://github.com/bytedo/wcui.git"
   },
   "main": "dist/",
-  "keywords": ["web-components", "wc", "components", "yutent"],
+  "keywords": [
+    "web-components",
+    "wc",
+    "components",
+    "yutent"
+  ],
   "author": "yutent",
   "license": "MIT",
-  "dependencies": {},
   "devDependencies": {
     "chalk": "^2.4.2",
     "chokidar": "^1.7.0",

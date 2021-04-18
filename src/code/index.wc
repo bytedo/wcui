@@ -159,7 +159,12 @@ import { colorHtml, colorCss } from './colorful'
 export default class Code {
   props = {
     dark: '',
-    lang: ''
+    lang: '',
+    code: ''
+  }
+
+  state = {
+    content: ''
   }
 
   __init__() {
@@ -176,17 +181,14 @@ export default class Code {
     this.__CP__ = header.children[2].lastElementChild
   }
 
-  get value() {
-    return this.props.content
+  get code() {
+    return this.state.content
   }
 
-  set value(txt) {
-    txt = txt
-      .replace(/&amp;/g, '&')
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
+  set code(txt) {
+    txt = txt.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
 
-    this.props.content = txt
+    this.state.content = txt
 
     switch (this.props.lang) {
       case 'html':
@@ -218,9 +220,10 @@ export default class Code {
     if (txt.startsWith('<xmp>') && txt.endsWith('</xmp>')) {
       txt = txt.slice(5, -6).trim()
     }
-
-    this.value = txt
-    this.textContent = ''
+    if (txt) {
+      this.value = txt
+      this.textContent = ''
+    }
 
     this._cpFN = $.bind(this.__CP__, 'click', ev => {
       try {
@@ -248,13 +251,15 @@ export default class Code {
   watch() {
     switch (name) {
       case 'lang':
-        this.props.lang = val.toLowerCase()
+        this.props.lang = (val || '').toLowerCase()
         this.__LANG__.textContent = this.props.lang
         break
 
-      case 'value':
-        this.value = val
-        this.removeAttribute('value')
+      case 'code':
+        if (val !== null) {
+          this.code = val
+          this.removeAttribute('code')
+        }
         break
     }
   }
