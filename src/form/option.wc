@@ -7,7 +7,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 32px;
+  height: 36px;
   transition: background 0.15s linear;
   color: var(--color-dark-1);
   cursor: pointer;
@@ -21,6 +21,19 @@
     padding: 0 8px;
     cursor: inherit;
   }
+}
+
+:host([size='large']) {
+  height: 52px;
+}
+:host([size='medium']) {
+  height: 44px;
+}
+:host([size='small']) {
+  height: 32px;
+}
+:host([size='mini']) {
+  height: 26px;
 }
 
 :host(:hover),

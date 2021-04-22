@@ -11,8 +11,7 @@
 <style lang="scss" scoped>
 :host {
   display: inline-flex;
-  min-width: 72px;
-  width: 128px;
+  min-width: 128px;
   height: 36px;
   border-radius: 3px;
   user-select: none;
@@ -85,6 +84,44 @@
   }
 }
 
+:host([size='large']) {
+  min-width: 234px;
+  height: 52px;
+  font-size: 18px;
+
+  .options-box {
+    top: 52px;
+  }
+}
+:host([size='medium']) {
+  min-width: 160px;
+  height: 44px;
+  .options-box {
+    top: 44px;
+  }
+}
+:host([size='small']) {
+  min-width: 96px;
+  height: 32px;
+  .options-box {
+    top: 32px;
+  }
+}
+:host([size='mini']) {
+  min-width: 72px;
+  height: 26px;
+  font-size: 12px;
+
+  .preview {
+    wc-icon {
+      --size: 10px;
+    }
+  }
+  .options-box {
+    top: 26px;
+  }
+}
+
 :host(:focus-within) {
   box-shadow: 0 0 0 2px var(--color-plain-a);
 }
@@ -110,6 +147,7 @@ export default class Dropdown {
   props = {
     value: '',
     placeholder: '',
+    size: '',
     disabled: false
   }
 
@@ -214,8 +252,22 @@ export default class Dropdown {
 
   watch() {
     switch (name) {
+      case 'value':
+        if (val !== null) {
+          this.value = val
+        }
+        break
+
       case 'placeholder':
         this.__INPUT__.placeholder = val || ''
+        break
+
+      case 'size':
+        if (val) {
+          Array.from(this.children).forEach(it => {
+            it.setAttribute('size', val)
+          })
+        }
         break
 
       case 'disabled':

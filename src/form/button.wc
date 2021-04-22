@@ -9,8 +9,7 @@
 :host {
   overflow: hidden;
   display: inline-flex;
-  min-width: 72px;
-  width: 128px;
+  min-width: 128px;
   height: 36px;
   border-radius: 3px;
   user-select: none;
@@ -51,7 +50,7 @@
 }
 
 :host([size='large']) {
-  width: 212px;
+  min-width: 212px;
   height: 52px;
   font-size: 18px;
 
@@ -73,7 +72,7 @@
   }
 }
 :host([size='medium']) {
-  width: 160px;
+  min-width: 160px;
   height: 44px;
 
   button {
@@ -85,7 +84,7 @@
   width: 44px;
 }
 :host([size='small']) {
-  width: 96px;
+  min-width: 96px;
   height: 32px;
 }
 :host([size='small'][circle]) {
@@ -93,7 +92,7 @@
   width: 32px;
 }
 :host([size='mini']) {
-  width: 72px;
+  min-width: 72px;
   height: 26px;
   font-size: 12px;
 
