@@ -23,9 +23,14 @@ export default class RadioGroup {
     /* render */
   }
 
-  _updateChildrenStat() {
+  _updateChildrenStat(checkAll) {
     Array.from(this.children).forEach(it => {
       if (it.tagName === 'WC-RADIO' && it.root) {
+        if (checkAll) {
+          it.disabled = this.disabled
+          it.readOnly = this.readOnly
+        }
+
         if (it.value === this.props.value) {
           it.checked = true
         } else {
@@ -64,6 +69,7 @@ export default class RadioGroup {
       this.props.readonly = false
       this.removeAttribute('readonly')
     }
+    this._updateChildrenStat(true)
   }
 
   get disabled() {
@@ -83,6 +89,7 @@ export default class RadioGroup {
       this.props.disabled = false
       this.removeAttribute('disabled')
     }
+    this._updateChildrenStat(true)
   }
 
   mounted() {
@@ -90,10 +97,21 @@ export default class RadioGroup {
       this.value = ev.detail
       this.dispatchEvent(new CustomEvent('input'))
     })
+
+    this.__observer = new MutationObserver(_ => {
+      console.log('-00000')
+      this._updateChildrenStat(true)
+    })
+
+    this.__observer.observe(this, {
+      childList: true,
+      subtree: true
+    })
   }
 
   unmount() {
     $.unbind(this, 'child-picked', this._pickedFn)
+    this.__observer.disconnect()
   }
 
   watch() {
@@ -108,11 +126,8 @@ export default class RadioGroup {
         if (k === 'readonly') {
           k = 'readOnly'
         }
-        Array.from(this.children).forEach(it => {
-          if (it.tagName === 'WC-RADIO' && it.root) {
-            it[k] = val !== null
-          }
-        })
+        console.log('---', k, val, Array.from(this.children))
+        this[k] = val !== null
         break
     }
   }
