@@ -15,10 +15,10 @@
 <style lang="scss">
 :host {
   display: flex;
+  border-radius: 3px;
 }
 
 .code-box {
-  overflow: hidden;
   display: flex;
   flex-direction: column;
   position: relative;
@@ -26,10 +26,10 @@
   max-height: 610px;
   margin: 10px 0;
   padding-bottom: 8px;
-  border-radius: 6px;
+  border-radius: 3px;
   background: #f7f8fb;
   color: var(--color-dark-1);
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
 
   .title {
     display: flex;
@@ -121,6 +121,9 @@
       .o {
         color: var(--color-orange-2);
       }
+      .pp {
+        color: #6a1ea8;
+      }
     }
   }
 }
@@ -154,7 +157,7 @@
 import '../scroll/index'
 import '../layer/index'
 import $ from '../utils'
-import { colorHtml, colorCss } from './colorful'
+import { colorHtml, colorCss, colorJs } from './colorful'
 
 export default class Code {
   props = {
@@ -186,7 +189,10 @@ export default class Code {
   }
 
   set code(txt) {
-    txt = txt.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+    txt = txt
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
 
     this.state.content = txt
 
@@ -199,6 +205,13 @@ export default class Code {
       case 'scss':
       case 'less':
         txt = colorCss(txt)
+        break
+
+      case 'js':
+      case 'ts':
+      case 'javascript':
+      case 'typescript':
+        txt = colorJs(txt)
         break
 
       default:
@@ -221,13 +234,13 @@ export default class Code {
       txt = txt.slice(5, -6).trim()
     }
     if (txt) {
-      this.value = txt
+      this.code = txt
       this.textContent = ''
     }
 
     this._cpFN = $.bind(this.__CP__, 'click', ev => {
       try {
-        navigator.clipboard.writeText(this.value)
+        navigator.clipboard.writeText(this.code)
         layer.toast('复制到粘贴板成功', 'success')
       } catch (err) {
         layer.toast('复制到粘贴板失败', 'error')
@@ -237,7 +250,7 @@ export default class Code {
     this._runFN = $.bind(this.__RUN__, 'click', ev => {
       this.dispatchEvent(
         new CustomEvent('run', {
-          detail: this.value
+          detail: this.code
         })
       )
     })

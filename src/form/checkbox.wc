@@ -23,9 +23,14 @@ export default class CheckboxGroup {
     /* render */
   }
 
-  _updateChildrenStat() {
+  _updateChildrenStat(checkAll) {
     Array.from(this.children).forEach(it => {
       if (it.tagName === 'WC-CHECKBOX' && it.root) {
+        if (checkAll) {
+          it.disabled = this.disabled
+          it.readOnly = this.readOnly
+        }
+
         if (this.value.includes(it.value)) {
           it.checked = true
         } else {
@@ -64,6 +69,7 @@ export default class CheckboxGroup {
       this.props.readonly = false
       this.removeAttribute('readonly')
     }
+    this._updateChildrenStat(true)
   }
 
   get disabled() {
@@ -83,6 +89,7 @@ export default class CheckboxGroup {
       this.props.disabled = false
       this.removeAttribute('disabled')
     }
+    this._updateChildrenStat(true)
   }
 
   mounted() {
@@ -101,10 +108,20 @@ export default class CheckboxGroup {
       this.value = tmp
       this.dispatchEvent(new CustomEvent('input'))
     })
+
+    this.__observer = new MutationObserver(_ => {
+      this._updateChildrenStat(true)
+    })
+
+    this.__observer.observe(this, {
+      childList: true,
+      subtree: true
+    })
   }
 
   unmount() {
     $.unbind(this, 'child-picked', this._pickedFn)
+    this.__observer.disconnect()
   }
 
   watch() {
@@ -121,11 +138,7 @@ export default class CheckboxGroup {
         if (k === 'readonly') {
           k = 'readOnly'
         }
-        Array.from(this.children).forEach(it => {
-          if (it.tagName === 'WC-CHECKBOX' && it.root) {
-            it[k] = val !== null
-          }
-        })
+        this[k] = val !== null
         break
     }
   }

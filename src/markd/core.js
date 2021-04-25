@@ -506,6 +506,7 @@ class Tool {
         }
       }
     }
+    // console.log(html)
     delete this.list
     delete this.__LINKS__
     return html

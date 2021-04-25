@@ -9,7 +9,12 @@ const TAG_START_EXP = /<([\w\-]+)([\w\W]*?)>/g
 const TAG_END_EXP = /<\/([\w\-]+)>/g
 const TAG_ATTR_EXP = /[@a-zA-Z\-.]+=(["'])[^"]+\1|[@a-zA-Z\-.]+=[a-zA-Z0-9]+|[@a-zA-Z\-.]+/g
 const TAG_CM_EXP = /<!--([\w\W]*?)-->/g
-// const TAGS = 'a,b,i'
+const KEYWOWRD1 = /\b(var|const|let|function|for|switch|with|if|else|export|import|async|await|break|continue|return|class|try|catch|throw|new|while|this|super|default|case|debugger|delete|do|goto|in|public|private|protected|package|typeof)\b/g
+const KEYWOWRD2 = /\b\s(=|-|\+|\/|\*|<|>|%)\s\b/g
+const KEYWOWRD3 = /(\+\=|-=|\/=|\*=|--|\+\+|==|===)/g
+const STR = /(['"`])(.*?)\1/g
+const NUM = /\b(\d+)\b/g
+const FN = /([\.\s])([a-zA-Z$][\da-zA-Z_]*)(\(.*?\))/g
 
 export function colorHtml(code) {
   code = code
@@ -53,4 +58,20 @@ export function colorCss(code) {
     .replace(/([,\{\}])/g, '<i class="gr">$1</i>')
     .replace(/&/g, '<i class="r">&</i>')
   return code
+}
+
+export function colorJs(code) {
+  code = code
+    .replace(FN, '$1[fn]$2[/fn]$3')
+    .replace(KEYWOWRD1, '[key]$1[/key]')
+    .replace(KEYWOWRD2, '[key] $1 [/key]')
+    .replace(KEYWOWRD3, '[key]$1[/key]')
+    .replace(STR, '[str]$1$2$1[/str]')
+    .replace(NUM, '[num]$1[/num]')
+
+  return code
+    .replace(/\[(\/?)key\]/g, (m, s) => (s ? '</i>' : '<i class="r">'))
+    .replace(/\[(\/?)str\]/g, (m, s) => (s ? '</i>' : '<i class="g">'))
+    .replace(/\[(\/?)num\]/g, (m, s) => (s ? '</i>' : '<i class="pp">'))
+    .replace(/\[(\/?)fn\]/g, (m, s) => (s ? '</i>' : '<i class="b">'))
 }
