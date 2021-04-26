@@ -343,8 +343,8 @@ export default class Input {
   props = {
     value: '',
     placeholder: '',
-    maxlength: null,
-    minlength: null,
+    maxlength: 0,
+    minlength: 0,
     clearable: false,
     autofocus: false,
     readonly: false,
@@ -608,7 +608,7 @@ export default class Input {
         break
 
       case 'value':
-        this.value = val
+        this.value = val || ''
         break
 
       case 'maxlength':

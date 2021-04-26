@@ -189,8 +189,9 @@ export default class Switch {
     switch (name) {
       case 'checked':
       case 'disabled':
-        this[name] = true
+        this[name] = val !== null
         break
+
       case 'active-text':
       case 'inactive-text':
         console.log('------------->>>')

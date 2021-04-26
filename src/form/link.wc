@@ -170,19 +170,19 @@
 }
 
 // -------
-:host([type='default']) {
+:host([type='help']) {
   color: var(--color-grey-2);
   &::after {
     border-color: var(--color-grey-1);
   }
 }
-:host([type='default']:not([disabled]):hover) {
+:host([type='help']:not([disabled]):hover) {
   color: var(--color-grey-1);
 }
-:host([type='default']:not([disabled]):active) {
+:host([type='help']:not([disabled]):active) {
   color: var(--color-grey-3);
 }
-:host([type='default']:not([disabled]):focus-within) {
+:host([type='help']:not([disabled]):focus-within) {
   box-shadow: 0 0 0 2px var(--color-grey-a);
 }
 </style>

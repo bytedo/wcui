@@ -424,7 +424,7 @@ export default class Number {
         if (k === 'readonly') {
           k = 'readOnly'
         }
-        this[k] = true
+        this[k] = val !== null
         break
     }
   }

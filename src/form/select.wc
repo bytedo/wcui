@@ -494,7 +494,7 @@ export default class Select {
         if (k === 'readonly') {
           k = 'readOnly'
         }
-        this[k] = true
+        this[k] = val !== null
         break
     }
   }

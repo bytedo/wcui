@@ -1,7 +1,7 @@
 <template>
   <div class="label">
     <textarea spellcheck="false"></textarea>
-    <div class="input-stat">0/100</div>
+    <div class="input-stat">0/∞</div>
   </div>
 </template>
 
@@ -139,8 +139,8 @@ export default class Textarea {
   props = {
     value: '',
     placeholder: '',
-    maxlength: null,
-    minlength: null,
+    maxlength: 0,
+    minlength: 0,
     autofocus: false,
     readonly: false,
     disabled: false,
@@ -268,17 +268,19 @@ export default class Textarea {
         break
 
       case 'value':
-        this.value = val
+        this.value = val || ''
         break
 
       case 'maxlength':
       case 'minlength':
         if (val === null) {
           this.__INPUT__.removeAttribute(name)
+          this.props[name] = 0
         } else {
           let n = +val
           if (n > 0) {
-            this.__INPUT__.setAttribute(name, +val)
+            this.__INPUT__.setAttribute(name, n)
+            this.props[name] = n
           }
         }
         break
@@ -293,7 +295,7 @@ export default class Textarea {
         if (k === 'readonly') {
           k = 'readOnly'
         }
-        this[k] = true
+        this[k] = val !== null
         break
     }
   }
