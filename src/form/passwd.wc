@@ -93,34 +93,6 @@ li {
   }
 }
 
-/* 额外样式 */
-:host([round]) {
-  border-radius: 26px;
-
-  .label input {
-    padding: 0 10px;
-    margin: 0 18px;
-  }
-
-  .label[prepend] input,
-  .label[append] input {
-    padding: 0 5px;
-  }
-  .label[prepend] input {
-    margin-left: 0;
-  }
-  .label[append] input {
-    margin-right: 0;
-  }
-
-  .prepend {
-    border-radius: 26px 0 0 26px;
-  }
-  .append {
-    border-radius: 0 26px 26px 0;
-  }
-}
-
 :host([size='large']) {
   min-width: 234px;
   .label {
@@ -182,6 +154,33 @@ li {
   .prepend,
   .append {
     height: 22px;
+  }
+}
+
+/* 额外样式 */
+:host([round]) {
+  border-radius: 26px;
+
+  .label input {
+    padding: 0 26px;
+  }
+
+  .label[prepend] input,
+  .label[append] input {
+    padding: 0 5px;
+  }
+  .label[prepend] input {
+    margin-left: 0;
+  }
+  .label[append] input {
+    margin-right: 0;
+  }
+
+  .prepend {
+    border-radius: 26px 0 0 26px;
+  }
+  .append {
+    border-radius: 0 26px 26px 0;
   }
 }
 
@@ -275,7 +274,6 @@ li {
 </style>
 
 <script>
-import '../scroll/index'
 import '../icon/index'
 import $ from '../utils'
 
@@ -283,8 +281,8 @@ export default class Passwd {
   props = {
     value: '',
     placeholder: '',
-    maxlength: null,
-    minlength: null,
+    maxlength: 0,
+    minlength: 0,
     autofocus: false,
     readonly: false,
     disabled: false,
@@ -438,13 +436,14 @@ export default class Passwd {
         break
 
       case 'maxlength':
-      case 'minlength':
         if (val === null) {
           this.__INPUT__.removeAttribute(name)
         } else {
           let n = +val
           if (n > 0) {
-            this.__INPUT__.setAttribute(name, +val)
+            this.__INPUT__.setAttribute(name, n)
+          } else {
+            this.removeAttribute(name)
           }
         }
         break

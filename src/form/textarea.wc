@@ -272,15 +272,21 @@ export default class Textarea {
         break
 
       case 'maxlength':
-      case 'minlength':
-        if (val === null) {
-          this.__INPUT__.removeAttribute(name)
-          this.props[name] = 0
-        } else {
-          let n = +val
-          if (n > 0) {
-            this.__INPUT__.setAttribute(name, n)
-            this.props[name] = n
+        {
+          let len = this.value.length
+          if (val === null) {
+            this.__INPUT__.removeAttribute(name)
+            this.props.maxlength = 0
+            this.__STAT__.textContent = `${len}/∞`
+          } else {
+            let n = +val
+            if (n > 0) {
+              this.__INPUT__.setAttribute(name, n)
+              this.props.maxlength = n
+              this.__STAT__.textContent = `${len}/${n}`
+            } else {
+              this.removeAttribute(name)
+            }
           }
         }
         break

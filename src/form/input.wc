@@ -612,13 +612,14 @@ export default class Input {
         break
 
       case 'maxlength':
-      case 'minlength':
         if (val === null) {
           this.__INPUT__.removeAttribute(name)
         } else {
           let n = +val
           if (n > 0) {
-            this.__INPUT__.setAttribute(name, +val)
+            this.__INPUT__.setAttribute(name, n)
+          } else {
+            this.removeAttribute(name)
           }
         }
         break
