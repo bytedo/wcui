@@ -42,7 +42,7 @@ li {
     min-width: 36px;
     width: 0;
     height: 100%;
-    padding: 0 8px;
+    padding: 0 4px 0 8px;
     border: 0;
     border-radius: inherit;
     color: inherit;
@@ -93,6 +93,22 @@ li {
   }
 }
 
+/* 额外样式 */
+:host([round]) {
+  border-radius: 26px;
+
+  .label input {
+    padding: 0 4px 0 18px;
+  }
+
+  .prepend {
+    border-radius: 26px 0 0 26px;
+  }
+  .append {
+    border-radius: 0 26px 26px 0;
+  }
+}
+
 :host([size='large']) {
   min-width: 234px;
   .label {
@@ -100,7 +116,7 @@ li {
     font-size: 18px;
 
     input {
-      padding: 0 16px;
+      padding: 0 8px 0 14px;
     }
   }
   .prepend,
@@ -114,13 +130,16 @@ li {
     margin: 0 20px 0 4px;
   }
 }
+:host([round][size='large']) .label input {
+  padding: 0 8px 0 26px;
+}
 :host([size='medium']) {
   min-width: 160px;
   .label {
     height: 44px;
 
     input {
-      padding: 0 10px;
+      padding: 0 6px 0 10px;
     }
   }
   .prepend,
@@ -128,19 +147,25 @@ li {
     height: 40px;
   }
 }
+:host([round][size='medium']) .label input {
+  padding: 0 6px 0 20px;
+}
 :host([size='small']) {
   min-width: 96px;
   .label {
     height: 32px;
 
     input {
-      padding: 0 6px;
+      padding: 0 4px 0 6px;
     }
   }
   .prepend,
   .append {
     height: 28px;
   }
+}
+:host([round][size='small']) .label input {
+  padding: 0 4px 0 16px;
 }
 :host([size='mini']) {
   min-width: 72px;
@@ -156,32 +181,8 @@ li {
     height: 22px;
   }
 }
-
-/* 额外样式 */
-:host([round]) {
-  border-radius: 26px;
-
-  .label input {
-    padding: 0 26px;
-  }
-
-  .label[prepend] input,
-  .label[append] input {
-    padding: 0 5px;
-  }
-  .label[prepend] input {
-    margin-left: 0;
-  }
-  .label[append] input {
-    margin-right: 0;
-  }
-
-  .prepend {
-    border-radius: 26px 0 0 26px;
-  }
-  .append {
-    border-radius: 0 26px 26px 0;
-  }
+:host([round][size='mini']) .label input {
+  padding: 0 4px 0 13px;
 }
 
 /* ----- 类型(颜色) ----- */
