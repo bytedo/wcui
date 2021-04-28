@@ -197,4 +197,4 @@ const SVG_PATH = {
 
 export default SVG_PATH
 // console.log(Object.keys(SVG_PATH).length)
-// console.log(Object.keys(SVG_PATH))
+// console.log(Object.keys(SVG_PATH).join(','))

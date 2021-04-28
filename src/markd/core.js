@@ -5,12 +5,16 @@
  */
 
 const HR_LIST = ['=', '-', '_', '*']
-const LIST_REG = /^(([\+\-\*])|(\d+\.))\s/
-const TODO_REG = /^\-\s\[(x|\s)\]\s/
-const ESCAPE_REG = /\\([-+*_`])/g
-const QLINK_REG = /^\[(\d+)\]: ([\S]+)\s*?((['"])[\s\S]*?\4)?\s*?$/
-const TAG_REG = /<([\w\-]+)([\w\W]*?)>/g
-const ATTR_REG = /^[\s\S]*?(style="[^"]*?")[\s\S]*?$/
+const LIST_RE = /^(([\+\-\*])|(\d+\.))\s/
+const TODO_RE = /^\-\s\[(x|\s)\]\s/
+const ESCAPE_RE = /\\([-+*_`])/g
+const QLINK_RE = /^\[(\d+)\]: ([\S]+)\s*?((['"])[\s\S]*?\4)?\s*?$/
+const TAG_RE = /<([\w\-]+)([\w\W]*?)>/g
+const ATTR_RE = /\s*?on[a-zA-Z]+="[^"]*?"\s*?/g
+const CODEBLOCK_RE = /```(.*?)([\w\W]*?)```/g
+const BLOCK_RE = /<([\w\-]+)([^>]*?)>([\w\W]*?)<\/\1>/g
+const IS_DOM_RE = /^<([\w\-]+)[^>]*?>.*?<\/\1>$/
+const STYLE_RE = /<style[^>]*?>([\w\W]*?)<\/style>/g
 
 const INLINE = {
   code: /`([^`]*?[^`\\\s])`/g,
@@ -36,7 +40,7 @@ const Helper = {
   // 是否列表, -1不是, 1为有序列表, 0为无序列表
   isList(str) {
     var v = str.trim()
-    if (LIST_REG.test(v)) {
+    if (LIST_RE.test(v)) {
       var n = +v[0]
       if (n === n) {
         return 1
@@ -49,7 +53,7 @@ const Helper = {
   // 是否任务列表
   isTodo(str) {
     var v = str.trim()
-    if (TODO_REG.test(v)) {
+    if (TODO_RE.test(v)) {
       return v[3] === 'x' ? 1 : 0
     }
     return -1
@@ -61,13 +65,17 @@ const Helper = {
     return str.replace(/^\s+/, '')
   },
   isQLink(str) {
-    if (QLINK_REG.test(str)) {
+    if (QLINK_RE.test(str)) {
       return { [RegExp.$1]: { l: RegExp.$2, t: RegExp.$3 } }
     }
     return false
   },
   isTable(str) {
     return /^\|.+?\|$/.test(str)
+  },
+  // 是否原生dom节点
+  isNativeDom(str) {
+    return IS_DOM_RE.test(str)
   }
 }
 
@@ -107,7 +115,7 @@ const Decoder = {
           return m
         }
       })
-      .replace(ESCAPE_REG, '$1') // 处理转义字符
+      .replace(ESCAPE_RE, '$1') // 处理转义字符
   },
   // 分割线
   hr() {
@@ -138,7 +146,7 @@ const Decoder = {
   task(str) {
     var todoChecked = Helper.isTodo(str)
     if (~todoChecked) {
-      var word = str.replace(TODO_REG, '').trim()
+      var word = str.replace(TODO_RE, '').trim()
       var stat = todoChecked === 1 ? 'checked' : ''
       var txt = todoChecked === 1 ? `<del>${word}</del>` : word
 
@@ -155,12 +163,22 @@ function fixed(str) {
     .replace(/\t/g, '  ')
     .replace(/\u00a0/g, ' ')
     .replace(/\u2424/g, '\n')
-    .replace(TAG_REG, (m, name, attr) => {
-      let tmp = attr.replace(/\n/g, '⨨☇') // 标签内的换行, 转为一组特殊字符, 方便后面还原
-      if (tmp !== attr) {
-        tmp = ' ' + tmp
-      }
-      return `<${name + tmp}>`
+    .replace(TAG_RE, (m, name, attr) => {
+      // 标签内的换行, 转为一组特殊字符, 方便后面还原
+      return `<${name + attr.replace(/\n/g, '⨨☇')}>`
+    })
+    .replace(BLOCK_RE, (m, tag, attr, txt) => {
+      return `<${tag + attr}>${txt.replace(/\n/g, '⨨⤶')}</${tag}>`
+    })
+    .replace(CODEBLOCK_RE, (m, lang, txt) => {
+      // 还原换行
+      let rollback = txt.replace(/⨨⤶/g, '\n').replace(/⨨☇/g, '\n')
+      return '```' + lang + rollback + '```'
+    })
+    .replace(BLOCK_RE, (m, tag, attr, txt) => {
+      return `<${tag + attr.replace(/(⨨☇)+/g, ' ')}>${txt
+        .replace(/⨨⤶/g, ' ')
+        .replace(/(⨨☇)+/g, ' ')}</${tag}>`
     })
 }
 
@@ -178,6 +196,8 @@ class Tool {
     var isCodeBlock = false // 是否代码块
     var isTable = false // 是否表格
     var emptyLineLength = 0 //连续空行的数量
+
+    // console.log(lines)
 
     for (let it of lines) {
       let tmp = it.trim()
@@ -206,20 +226,21 @@ class Tool {
         } else {
           var qlink
           if (isCodeBlock) {
-            it = it
-              .replace(/</g, '&lt;')
-              .replace(/>/g, '&gt;')
-              .replace(/⨨☇/g, '\n') // 代码块要还原回换行
+            it = it.replace(/</g, '&lt;').replace(/>/g, '&gt;')
           } else {
             it = it
-              .replace(/(⨨☇)+/g, ' ') // 非代码块直接转为空格, 并进行xss过滤
+              // 非代码块进行xss过滤
               .replace(INLINE.code, (m, txt) => {
                 return `\`${txt.replace(/</g, '&lt;').replace(/>/g, '&gt;')}\``
               })
               .replace(/<(\/?)script[^>]*?>/g, '&lt;$1script&gt;')
-              .replace(TAG_REG, (m, name, attr) => {
-                attr = attr.replace(ATTR_REG, '$1').trim()
-                return `<${name} ${attr}>`
+              .replace(TAG_RE, (m, name, attr = '') => {
+                // 过滤所有onXX=""事件属性
+                attr = attr.replace(ATTR_RE, ' ').trim()
+                if (attr) {
+                  attr = ' ' + attr
+                }
+                return `<${name}${attr}>`
               })
           }
           qlink = Helper.isQLink(it)
@@ -412,7 +433,7 @@ class Tool {
           // 左侧空格长度
           let tmp = Helper.ltrim(it)
           let ltrim = it.length - tmp.length
-          let word = tmp.replace(LIST_REG, '').trim()
+          let word = tmp.replace(LIST_RE, '').trim()
           let level = Math.floor(ltrim / 2)
           let tag = listChecked > 0 ? 'ol' : 'ul'
 
@@ -454,6 +475,11 @@ class Tool {
 
         // 无"> "前缀的引用, 继续拼到之前的, 并且不换行
         if (isBlockquote) {
+          html += it
+          continue
+        }
+
+        if (Helper.isNativeDom(it)) {
           html += it
           continue
         }
@@ -506,7 +532,14 @@ class Tool {
         }
       }
     }
-    // console.log(html)
+
+    // 修正内嵌样式
+    html = html.replace(STYLE_RE, (m, code) => {
+      return `<style>${code
+        .replace(/<br>/g, '')
+        .replace(/<p>/g, '')
+        .replace(/<\/p>/g, '')}</style>`
+    })
     delete this.list
     delete this.__LINKS__
     return html

@@ -34,16 +34,25 @@
       background: var(--color-teal-1);
       color: #fff;
     }
+
+    &.jump {
+      display: flex;
+    }
   }
 
   input {
     width: 48px;
     height: 36px;
     padding: 0 4px;
-    border: 2px solid var(--color-plain-2);
-    border-radius: 4px;
+    border: 1px solid var(--color-grey-2);
+    border-radius: 3px;
     text-align: center;
     outline: none;
+    transition: box-shadow 0.15s linear;
+
+    &:focus {
+      box-shadow: 0 0 0 2px var(--color-plain-a);
+    }
   }
 }
 
@@ -140,7 +149,7 @@ const LAYOUT_DICT = {
   curr: n => `<span class="curr item">${n}</span>`,
   info: (t, p) => `<span class="item">共 ${t}条, ${p}页</span>`,
   jump: n =>
-    `<section class="item"><input maxlength="6" value="${n}"><wc-button data-act="go" class="item">Go</wc-button></section>`
+    `<section class="item jump"><input maxlength="6" value="${n}"><wc-button data-act="go" class="item">Go</wc-button></section>`
 }
 
 //

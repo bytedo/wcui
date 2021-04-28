@@ -62,12 +62,13 @@ export function colorHtml(code) {
           }
         })
       }
-      return `[tag]&lt;${tag + attr}&gt;[/tag]`
+      return `[tag]&lt;${tag}[/tag]${attr}[tag]&gt;[/tag]`
     })
     .replace(TAG_END_EXP, (m, tag) => {
       return `[tag]&lt;/${tag}&gt;[/tag]`
     })
     .replace(TAG_CM_EXP, '[cm]&lt;!--$1--&gt;[cm]')
+
   return rebuild(code)
 }
 
