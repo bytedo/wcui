@@ -12,9 +12,11 @@
   width: 100%;
 
   .container {
-    overflow: hidden;
-    width: 100%;
-    height: 100%;
+    overflow: auto;
+    position: relative;
+    width: calc(100% + 18px);
+    height: calc(100% + 18px);
+    padding: 0 18px 18px 0;
   }
 }
 
@@ -121,22 +123,22 @@ export default class Scroll {
     this.__last__ = 0
   }
 
-  get scrollTop() {
-    return this.__BOX__.scrollTop
-  }
+  // get scrollTop() {
+  //   return this.__BOX__.scrollTop
+  // }
 
-  set scrollTop(n) {
-    n = +n
-    if (n === n) {
-      var { sh, oh, yh } = this.props
+  // set scrollTop(n) {
+  //   n = +n
+  //   if (n === n) {
+  //     var { sh, oh, yh } = this.props
 
-      this.__BOX__.scrollTop = n
-      var fixedY = (this.__BOX__.scrollTop / (sh - oh)) * (oh - yh)
-      this.props.thumbY = fixedY
+  //     this.__BOX__.scrollTop = n
+  //     var fixedY = (this.__BOX__.scrollTop / (sh - oh)) * (oh - yh)
+  //     this.props.thumbY = fixedY
 
-      this.__Y__.style.transform = `translateY(${fixedY}px)`
-    }
-  }
+  //     this.__Y__.style.transform = `translateY(${fixedY}px)`
+  //   }
+  // }
 
   get scrollLeft() {
     return this.__BOX__.scrollLeft
@@ -234,7 +236,7 @@ export default class Scroll {
   }
 
   mounted() {
-    // 初始化滚动条的位置和长度
+    /*    // 初始化滚动条的位置和长度
     this._initFn = $.bind(this.__BOX__, 'mouseenter', ev => {
       // 禁用状态, 不允许滚动
       if (this.disabled) {
@@ -272,6 +274,7 @@ export default class Scroll {
 
       this.__X__.style.width = xw + 'px'
       this.__Y__.style.height = yh + 'px'
+      this._active = true
     })
 
     this._inactiveFn = $.bind(this.__BOX__, 'mouseleave', ev => {
@@ -478,11 +481,11 @@ export default class Scroll {
       childList: true,
       subtree: true,
       characterData: true
-    })
+    }) */
   }
 
   unmount() {
-    this.__observer.disconnect()
+    // this.__observer.disconnect()
 
     $.unbind(this.__BOX__, 'mouseenter', this._initFn)
     $.unbind(this.__BOX__, 'mouseleave', this._inactiveFn)

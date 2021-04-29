@@ -1,5 +1,5 @@
 <template>
-  <div><slot /></div>
+  <slot />
 </template>
 
 <style lang="scss">
@@ -8,6 +8,21 @@
   line-height: 1.5;
   color: var(--color-dark-1);
   font-size: 14px;
+}
+slot::slotted(h2 a) {
+  text-decoration: underline;
+  color: var(--color-teal-2);
+}
+
+slot::slotted(h1, h2, h3, h4, h5, h6) {
+  color: var(--color-teal-2);
+  a {
+    &::before {
+      content: '∮ ';
+      color: var(--color-teal-1);
+      font-weight: normal;
+    }
+  }
 }
 
 a {
@@ -195,9 +210,8 @@ export default class Markd {
 
   __init__() {
     /* render */
-
-    var elem = this.root.children[1]
-    this.__BOX__ = elem
+    // var elem = this.root.children[1]
+    // this.__BOX__ = elem
   }
 
   __parse__() {
@@ -207,8 +221,8 @@ export default class Markd {
 
   set value(txt) {
     if (txt) {
-      this.__BOX__.innerHTML = markd(txt)
-      this.textContent = ''
+      this.innerHTML = markd(txt)
+      // this.textContent = ''
     }
   }
 
@@ -220,28 +234,29 @@ export default class Markd {
   mounted() {
     this.__parse__()
 
-    this._headClickFn = $.bind(this.__BOX__, 'click', ev => {
-      if (ev.target.className === 'md-head-link') {
-        var ot = ev.target.offsetTop
-        document.documentElement.scrollTop = ot
-      }
-    })
+    // this._headClickFn = $.bind(this.__BOX__, 'click', ev => {
+    //   if (ev.target.className === 'md-head-link') {
+    //     var ot = ev.target.offsetTop
+    //     console.log(ot)
+    //     document.documentElement.scrollTop = ot
+    //   }
+    // })
 
-    this.__observer = new MutationObserver(_ => {
-      this.__parse__()
-    })
+    // this.__observer = new MutationObserver(_ => {
+    //   this.__parse__()
+    // })
 
-    this.__observer.observe(this, {
-      childList: true,
-      subtree: true,
-      characterData: true
-    })
+    // this.__observer.observe(this, {
+    //   childList: true,
+    //   subtree: true,
+    //   characterData: true
+    // })
   }
 
   unmount() {
-    $.unbind(this.__BOX__, 'click', this._headClickFn)
-    this.__observer.disconnect()
-    this.clear()
+    // $.unbind(this.__BOX__, 'click', this._headClickFn)
+    // this.__observer.disconnect()
+    // this.clear()
   }
 }
 </script>

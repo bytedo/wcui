@@ -132,7 +132,7 @@ const Decoder = {
         if (level === 1) {
           return `<h1>${m2}</h1>`
         } else {
-          return `<h${level}><a href="#${hash}" class="md-head-link">${m2}</a></h${level}>`
+          return `<h${level}><a href="#${hash}" id="${hash}" class="md-head-link">${m2}</a></h${level}>`
         }
       })
     }
