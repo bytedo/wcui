@@ -9,22 +9,9 @@
   color: var(--color-dark-1);
   font-size: 14px;
 }
-slot::slotted(h2 a) {
-  text-decoration: underline;
-  color: var(--color-teal-2);
+slot {
+  display: block;
 }
-
-slot::slotted(h1, h2, h3, h4, h5, h6) {
-  color: var(--color-teal-2);
-  a {
-    &::before {
-      content: '∮ ';
-      color: var(--color-teal-1);
-      font-weight: normal;
-    }
-  }
-}
-
 a {
   text-decoration: underline;
   color: var(--color-teal-2);
