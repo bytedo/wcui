@@ -1,17 +1,25 @@
 <template>
-  <div class="container"><slot /></div>
-  <div class="is-horizontal"><span class="thumb"></span></div>
-  <div class="is-vertical"><span class="thumb"></span></div>
+  <div class="container">
+    <div class="wrapper"><slot /></div>
+    <div class="is-horizontal"><span class="thumb"></span></div>
+    <div class="is-vertical"><span class="thumb"></span></div>
+  </div>
 </template>
 
 <style lang="scss">
 :host {
-  overflow: hidden;
-  position: relative;
-  display: flex;
+  display: block;
   width: 100%;
+  height: 100%;
 
   .container {
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  .wrapper {
     overflow: auto;
     position: relative;
     width: calc(100% + 18px);
@@ -49,7 +57,7 @@
 .is-horizontal {
   flex-direction: column;
   left: 0;
-  bottom: 1px;
+  bottom: 0;
   width: 100%;
   height: 10px;
 
@@ -66,7 +74,7 @@
 /* 纵向 */
 .is-vertical {
   top: 0;
-  right: 1px;
+  right: 0;
   width: 10px;
   height: 100%;
 
@@ -89,11 +97,26 @@
 }
 
 :host([axis='x']) {
+  .wrapper {
+    overflow-y: hidden;
+  }
   .is-vertical {
     display: none;
   }
 }
 :host([axis='y']) {
+  .wrapper {
+    overflow-x: hidden;
+  }
+  .is-horizontal {
+    display: none;
+  }
+}
+:host([disabled]) {
+  .wrapper {
+    overflow: hidden;
+  }
+  .is-vertical,
   .is-horizontal {
     display: none;
   }
@@ -108,37 +131,47 @@ const IS_FF = !!window.sidebar
 /*  */
 export default class Scroll {
   props = {
-    thumbX: 0,
-    thumbY: 0,
-    disabled: false,
     axis: 'xy', // 滚动方向, 默认x轴和y轴都可以滚动
     delay: 1000, // 节流延迟
     distance: 1 // 触发距离阀值, 单位像素
   }
+
+  state = {
+    width: 0, // 滚动组件的真实宽度
+    height: 0, // 滚动组件的真实高度
+    scrollX: 0, // 滚动组件的滚动宽度
+    scrollY: 0, // 滚动组件的滚动高度
+    xBar: 0, // 横轴长度
+    yBar: 0, // 纵轴长度
+    thumbX: 0, //横向条滚动距离
+    thumbY: 0 // 纵向条滚动距离
+  }
+
   __init__() {
     /* render */
-    this.__BOX__ = this.root.children[1]
-    this.__X__ = this.root.children[2].children[0]
-    this.__Y__ = this.root.children[3].children[0]
+    var elem = this.root.children[1]
+    this.__BOX__ = elem.children[0]
+    this.__X__ = elem.children[1].children[0]
+    this.__Y__ = elem.children[2].children[0]
     this.__last__ = 0
   }
 
-  // get scrollTop() {
-  //   return this.__BOX__.scrollTop
-  // }
+  get scrollTop() {
+    return this.__BOX__.scrollTop
+  }
 
-  // set scrollTop(n) {
-  //   n = +n
-  //   if (n === n) {
-  //     var { sh, oh, yh } = this.props
+  set scrollTop(n) {
+    n = +n
+    if (n === n) {
+      // var { scrollY, height, yh } = this.props
 
-  //     this.__BOX__.scrollTop = n
-  //     var fixedY = (this.__BOX__.scrollTop / (sh - oh)) * (oh - yh)
-  //     this.props.thumbY = fixedY
+      this.__BOX__.scrollTop = n
+      // var fixedY = (this.__BOX__.scrollTop / (scrollY - height)) * (height - yh)
+      // this.props.thumbY = fixedY
 
-  //     this.__Y__.style.transform = `translateY(${fixedY}px)`
-  //   }
-  // }
+      // this.__Y__.style.transform = `translateY(${fixedY}px)`
+    }
+  }
 
   get scrollLeft() {
     return this.__BOX__.scrollLeft
@@ -147,13 +180,13 @@ export default class Scroll {
   set scrollLeft(n) {
     n = +n
     if (n === n) {
-      var { sw, ow, xw } = this.props
+      // var { scrollX, width, xw } = this.props
 
       this.__BOX__.scrollLeft = n
-      var fixedX = (this.__BOX__.scrollLeft / (sw - ow)) * (ow - xw)
-      this.props.thumbX = fixedX
+      // var fixedX = (this.__BOX__.scrollLeft / (scrollX - width)) * (width - xw)
+      // this.props.thumbX = fixedX
 
-      this.__X__.style.transform = `translateX(${fixedX}px)`
+      // this.__X__.style.transform = `translateX(${fixedX}px)`
     }
   }
 
@@ -165,54 +198,35 @@ export default class Scroll {
     return this.__BOX__.scrollWidth
   }
 
-  get disabled() {
-    return this.props.disabled
-  }
-
-  set disabled(val) {
-    var type = typeof val
-
-    if (val === this.props.disabled) {
-      return
-    }
-    if ((type === 'boolean' && val) || type !== 'boolean') {
-      this.props.disabled = true
-      this.setAttribute('disabled', '')
-    } else {
-      this.props.disabled = false
-      this.removeAttribute('disabled')
-    }
-  }
-
   _fetchScrollX(moveX) {
-    var { sw, ow, xw } = this.props
+    var { scrollX, width, xw } = this.props
 
     if (moveX < 0) {
       moveX = 0
-    } else if (moveX > ow - xw) {
-      moveX = ow - xw
+    } else if (moveX > width - xw) {
+      moveX = width - xw
     }
-    this.__BOX__.scrollLeft = (sw - ow) * (moveX / (ow - xw))
+    this.__BOX__.scrollLeft = (scrollX - width) * (moveX / (width - xw))
     this.__X__.style.transform = `translateX(${moveX}px)`
 
     return moveX
   }
 
   _fetchScrollY(moveY) {
-    var { sh, oh, yh } = this.props
+    var { scrollY, height, yh } = this.props
 
     if (moveY < 0) {
       moveY = 0
-    } else if (moveY > oh - yh) {
-      moveY = oh - yh
+    } else if (moveY > height - yh) {
+      moveY = height - yh
     }
-    this.__BOX__.scrollTop = (sh - oh) * (moveY / (oh - yh))
+    this.__BOX__.scrollTop = (scrollY - height) * (moveY / (height - yh))
     this.__Y__.style.transform = `translateY(${moveY}px)`
     return moveY
   }
 
   _fireReachEnd(action = 'reach-bottom') {
-    var { sh, oh, delay, disabled } = this.props
+    var { scrollY, height, delay, disabled } = this.props
     var top = this.__BOX__.scrollTop
     var now = Date.now()
 
@@ -221,7 +235,7 @@ export default class Scroll {
     }
     if (now - this.__last__ > delay) {
       if (action === 'reach-bottom') {
-        if (oh + top < sh) {
+        if (height + top < scrollY) {
           return
         }
       } else {
@@ -236,166 +250,113 @@ export default class Scroll {
   }
 
   mounted() {
-    /*    // 初始化滚动条的位置和长度
-    this._initFn = $.bind(this.__BOX__, 'mouseenter', ev => {
-      // 禁用状态, 不允许滚动
-      if (this.disabled) {
-        return
-      }
-      var ow = this.__BOX__.offsetWidth
-      var sw = this.__BOX__.scrollWidth
-      var oh = this.__BOX__.offsetHeight
-      var sh = this.__BOX__.scrollHeight
+    // 初始化滚动条的位置和长度
+    this._initFn = $.catch(this, 'ready', ev => {
+      // 需要减去因为隐藏原生滚动条修正的18像素
+      var width = this.__BOX__.clientWidth - 18
+      var height = this.__BOX__.clientHeight - 18
+      var scrollX = this.__BOX__.scrollWidth - 18
+      var scrollY = this.__BOX__.scrollHeight - 18
 
-      var yh = ((oh * oh) / sh) >> 0 // 滚动条的高度
-      var xw = ((ow * ow) / sw) >> 0 // 滚动条的宽度
+      var yBar = (height * (height / scrollY)) >> 0 // 滚动条的高度
+      var xBar = (width * (width / scrollX)) >> 0 // 滚动条的宽度
 
-      if (yh < 50) {
-        yh = 50
+      if (yBar < 50) {
+        yBar = 50
       }
-      if (xw < 50) {
-        xw = 50
+      if (xBar < 50) {
+        xBar = 50
       }
 
       // 100%或主体高度比滚动条还短时不显示
-      if (xw >= ow) {
-        xw = 0
+      if (xBar >= width) {
+        xBar = 0
       }
-      if (yh >= oh) {
-        yh = 0
+      if (yBar >= height) {
+        yBar = 0
       }
 
-      this.props.oh = oh
-      this.props.sh = sh
-      this.props.ow = ow
-      this.props.sw = sw
-      this.props.yh = yh
-      this.props.xw = xw
+      this.state.height = height
+      this.state.width = width
+      this.state.scrollY = scrollY
+      this.state.scrollX = scrollX
+      this.state.yBar = yBar
+      this.state.xBar = xBar
 
-      this.__X__.style.width = xw + 'px'
-      this.__Y__.style.height = yh + 'px'
-      this._active = true
-    })
-
-    this._inactiveFn = $.bind(this.__BOX__, 'mouseleave', ev => {
-      delete this._active
+      this.__X__.style.width = xBar + 'px'
+      this.__Y__.style.height = yBar + 'px'
     })
 
     // 鼠标滚动事件
-    this._wheelFn = $.bind(this.__BOX__, 'wheel', ev => {
+    this._wheelFn = $.bind(this.__BOX__, 'scroll', ev => {
       // 禁用状态, 不允许滚动
       if (this.disabled) {
         return
       }
-      var { sh, oh, yh, sw, ow, xw } = this.props
+      var { axis } = this.props
+      var {
+        xBar,
+        yBar,
+        thumbX,
+        thumbY,
+        scrollY,
+        scrollX,
+        width,
+        height
+      } = this.state
+      var currTop = this.__BOX__.scrollTop
+      var currLeft = this.__BOX__.scrollLeft
+      var now = Date.now()
 
       // x轴 y轴 都为0时, 不作任何处理
-      if (!xw && !yh) {
+      if (xBar === 0 && yBar === 0) {
         return
       }
 
-      //校正兼容苹果鼠标在 chrome和FF下滚动的精度
-      var deltaX
-      var deltaY
-      var now = Date.now()
-
-      if (!this.stamp || now - this.stamp > 800) {
-        this.stamp = now
-        this.times = 1
-      }
-
-      if (IS_FF) {
-        // 区分是触摸板还是普通鼠标
-        deltaX = ev.deltaMode ? 10 * ev.deltaX : ev.deltaX
-        deltaY = ev.deltaMode ? 10 * ev.deltaY : ev.deltaY
-      } else {
-        var delta = Math.abs(ev.wheelDelta)
-        // 精度高的(小于120), 一般是触摸板或苹果的鼠标
-        if (delta < 120) {
-          deltaX = ev.deltaX
-          deltaY = ev.deltaY
-        } else {
-          deltaX = ev.deltaX / (delta / 120)
-          deltaY = ev.deltaY / (delta / 120)
-        }
-      }
-
-      if (now - this.stamp < 20) {
-        this.times += 0.05
-        if (this.times > 3) {
-          this.times = 3
-        }
-      }
-
-      deltaX *= this.times
-      deltaY *= this.times
-
       //
-      if (this.props.axis !== 'x') {
-        this.__BOX__.scrollTop += deltaY
-
-        if (yh) {
+      if (axis === 'y' || axis === 'xy') {
+        if (yBar) {
           // 修正滚动条的位置
           // 滚动比例 y 滚动条的可移动距离
-          var fixedY = (this.__BOX__.scrollTop / (sh - oh)) * (oh - yh)
+          let fixedY = (currTop / (scrollY - height)) * (height - yBar)
 
           fixedY = fixedY >> 0
 
-          if (
-            (fixedY === 0 || oh - yh === fixedY) &&
-            fixedY === this.props.thumbY
-          ) {
+          if ((fixedY === 0 || height - yBar === fixedY) && fixedY === thumbY) {
             return
           }
 
-          ev.preventDefault()
-          ev.stopPropagation()
-
-          this.props.thumbY = fixedY
+          this.state.thumbY = fixedY
           this.__Y__.style.transform = `translateY(${fixedY}px)`
 
-          if (Math.abs(deltaY) > this.props.distance) {
-            this._fireReachEnd(deltaY > 0 ? 'reach-bottom' : 'reach-top')
+          if (Math.abs(fixedY - thumbY) > this.props.distance) {
+            this._fireReachEnd(fixedY > thumbY ? 'reach-bottom' : 'reach-top')
           }
         }
       }
 
-      if (this.props.axis !== 'y') {
-        this.__BOX__.scrollLeft += deltaX
-
-        if (xw) {
+      if (axis === 'x' || axis === 'xy') {
+        if (xBar) {
           // 修正滚动条的位置
           // 滚动比例 x 滚动条的可移动距离
-          var fixedX = (this.__BOX__.scrollLeft / (sw - ow)) * (ow - xw)
+          let fixedX = (currLeft / (scrollX - width)) * (width - xBar)
 
           fixedX = fixedX >> 0
 
-          if (
-            (fixedX === 0 || ow - xw === fixedX) &&
-            fixedX === this.props.thumbX
-          ) {
+          if ((fixedX === 0 || width - xBar === fixedX) && fixedX === thumbX) {
             return
           }
 
-          ev.preventDefault()
-          ev.stopPropagation()
-
-          this.props.thumbX = fixedX
+          this.state.thumbX = fixedX
           this.__X__.style.transform = `translateX(${fixedX}px)`
         }
       }
 
-      this._active = true
-
       this.stamp = now
-      this.dispatchEvent(
-        new CustomEvent('scroll', {
-          detail: { x: this.props.thumbX, y: this.props.thumbY }
-        })
-      )
+      this.dispatchEvent(new CustomEvent('scroll'))
     })
 
-    var startX,
+    /*     var startX,
       startY,
       moveX,
       moveY,
@@ -448,40 +409,14 @@ export default class Scroll {
       $.bind(document, 'mouseup', mouseupFn)
     })
 
-    $.catch(document, 'keydown', ev => {
-      if (this._active) {
-        var { oh, sh } = this.props
-        var exec = false
-        switch (ev.keyCode) {
-          case 33: // pageUp
-            exec = true
-            this.scrollTop -= oh
-            break
-          case 34: // pageDown
-            exec = true
-            this.scrollTop += oh
-            break
-          case 35: // End
-            exec = true
-            this.scrollTop = sh
-            break
-          case 36: // Home
-            exec = true
-            this.scrollTop = 0
-            break
-        }
-        if (exec) {
-          ev.preventDefault()
-        }
-      }
-    })
+    */
 
-    this.__observer = new MutationObserver(this._initFn)
-    this.__observer.observe(this, {
-      childList: true,
-      subtree: true,
-      characterData: true
-    }) */
+    // this.__observer = new MutationObserver(this._initFn)
+    // this.__observer.observe(this, {
+    //   childList: true,
+    //   subtree: true,
+    //   attributeFilter: ['style']
+    // })
   }
 
   unmount() {
@@ -495,14 +430,13 @@ export default class Scroll {
   watch() {
     switch (name) {
       case 'axis':
-        this.props.axis = val
+        this.props.axis = val || 'xy'
         break
-      case 'disabled':
-        this[name] = true
-        break
+
       case 'delay':
         this.props.delay = +val || 1000
         break
+
       case 'distance':
         this.props.distance = +val || 1
         break
