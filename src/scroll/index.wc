@@ -163,13 +163,7 @@ export default class Scroll {
   set scrollTop(n) {
     n = +n
     if (n === n) {
-      // var { scrollY, height, yh } = this.props
-
       this.__BOX__.scrollTop = n
-      // var fixedY = (this.__BOX__.scrollTop / (scrollY - height)) * (height - yh)
-      // this.props.thumbY = fixedY
-
-      // this.__Y__.style.transform = `translateY(${fixedY}px)`
     }
   }
 
@@ -180,13 +174,7 @@ export default class Scroll {
   set scrollLeft(n) {
     n = +n
     if (n === n) {
-      // var { scrollX, width, xw } = this.props
-
       this.__BOX__.scrollLeft = n
-      // var fixedX = (this.__BOX__.scrollLeft / (scrollX - width)) * (width - xw)
-      // this.props.thumbX = fixedX
-
-      // this.__X__.style.transform = `translateX(${fixedX}px)`
     }
   }
 
@@ -199,28 +187,29 @@ export default class Scroll {
   }
 
   _fetchScrollX(moveX) {
-    var { scrollX, width, xw } = this.props
+    var { scrollX, width, xBar } = this.state
 
     if (moveX < 0) {
       moveX = 0
-    } else if (moveX > width - xw) {
-      moveX = width - xw
+    } else if (moveX > width - xBar) {
+      moveX = width - xBar
     }
-    this.__BOX__.scrollLeft = (scrollX - width) * (moveX / (width - xw))
+    this.__BOX__.scrollLeft = moveX
     this.__X__.style.transform = `translateX(${moveX}px)`
 
     return moveX
   }
 
   _fetchScrollY(moveY) {
-    var { scrollY, height, yh } = this.props
+    var { scrollY, height, yBar } = this.state
 
     if (moveY < 0) {
       moveY = 0
-    } else if (moveY > height - yh) {
-      moveY = height - yh
+    } else if (moveY > height - yBar) {
+      moveY = height - yBar
     }
-    this.__BOX__.scrollTop = (scrollY - height) * (moveY / (height - yh))
+
+    this.__BOX__.scrollTop = moveY
     this.__Y__.style.transform = `translateY(${moveY}px)`
     return moveY
   }
@@ -288,9 +277,9 @@ export default class Scroll {
     })
 
     // 鼠标滚动事件
-    this._wheelFn = $.bind(this.__BOX__, 'scroll', ev => {
-      // 禁用状态, 不允许滚动
-      if (this.disabled) {
+    this._scrollFn = $.bind(this.__BOX__, 'scroll', ev => {
+      // 拖拽时忽略滚动事件
+      if (this._active) {
         return
       }
       var { axis } = this.props
@@ -306,7 +295,6 @@ export default class Scroll {
       } = this.state
       var currTop = this.__BOX__.scrollTop
       var currLeft = this.__BOX__.scrollLeft
-      var now = Date.now()
 
       // x轴 y轴 都为0时, 不作任何处理
       if (xBar === 0 && yBar === 0) {
@@ -352,22 +340,20 @@ export default class Scroll {
         }
       }
 
-      this.stamp = now
       this.dispatchEvent(new CustomEvent('scroll'))
     })
 
-    /*     var startX,
+    let startX,
       startY,
       moveX,
       moveY,
       mousemoveFn = ev => {
-        var { thumbY, thumbX } = this.props
+        let { thumbY, thumbX } = this.state
         if (startX !== null) {
           moveX = this._fetchScrollX(thumbX + ev.pageX - startX)
         }
 
         if (startY !== null) {
-          this._active = true
           moveY = this._fetchScrollY(thumbY + ev.pageY - startY)
         }
       },
@@ -377,39 +363,29 @@ export default class Scroll {
         }
         startX = null
         startY = null
-        this.props.thumbX = moveX
-        this.props.thumbY = moveY
+        this.state.thumbX = moveX || 0
+        this.state.thumbY = moveY || 0
+        delete this._active
         $.unbind(document, 'mousemove', mousemoveFn)
         $.unbind(document, 'mouseup', mouseupFn)
       }
 
     $.bind(this.__Y__, 'mousedown', ev => {
       startY = ev.pageY
-      if (!this.props.thumbY) {
-        this.props.thumbY = 0
-      }
-      // 禁用状态, 不允许滚动
-      if (this.disabled) {
-        return
-      }
+
+      this._active = true
+
       $.bind(document, 'mousemove', mousemoveFn)
       $.bind(document, 'mouseup', mouseupFn)
     })
 
     $.bind(this.__X__, 'mousedown', ev => {
       startX = ev.pageX
-      if (!this.props.thumbX) {
-        this.props.thumbX = 0
-      }
-      // 禁用状态, 不允许滚动
-      if (this.disabled) {
-        return
-      }
+      this._active = true
+
       $.bind(document, 'mousemove', mousemoveFn)
       $.bind(document, 'mouseup', mouseupFn)
     })
-
-    */
 
     // this.__observer = new MutationObserver(this._initFn)
     // this.__observer.observe(this, {
@@ -422,9 +398,8 @@ export default class Scroll {
   unmount() {
     // this.__observer.disconnect()
 
-    $.unbind(this.__BOX__, 'mouseenter', this._initFn)
-    $.unbind(this.__BOX__, 'mouseleave', this._inactiveFn)
-    $.unbind(this.__BOX__, 'wheel', this._wheelFn)
+    $.unbind(this, 'mouseenter', this._initFn)
+    $.unbind(this.__BOX__, 'scroll', this._scrollFn)
   }
 
   watch() {
