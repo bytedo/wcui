@@ -275,7 +275,7 @@ export default class Scroll {
     })
 
     // 鼠标滚动事件
-    this._scrollFn = $.bind(this.__BOX__, 'scroll', ev => {
+    this._scrollFn = $.catch(this.__BOX__, 'scroll', ev => {
       // 拖拽时忽略滚动事件
       if (this._active) {
         return
@@ -298,7 +298,6 @@ export default class Scroll {
       if (xBar === 0 && yBar === 0) {
         return
       }
-      console.log(currTop, currLeft)
 
       //
       if (axis === 'y' || axis === 'xy') {
@@ -309,15 +308,13 @@ export default class Scroll {
 
           fixedY = fixedY >> 0
 
-          if (fixedY === thumbY) {
-            return
-          }
+          if (fixedY !== thumbY) {
+            this.state.thumbY = fixedY
+            this.__Y__.style.transform = `translateY(${fixedY}px)`
 
-          this.state.thumbY = fixedY
-          this.__Y__.style.transform = `translateY(${fixedY}px)`
-
-          if (Math.abs(fixedY - thumbY) > this.props.distance) {
-            this._fireReachEnd(fixedY > thumbY ? 'reach-bottom' : 'reach-top')
+            if (Math.abs(fixedY - thumbY) > this.props.distance) {
+              this._fireReachEnd(fixedY > thumbY ? 'reach-bottom' : 'reach-top')
+            }
           }
         }
       }
@@ -330,12 +327,10 @@ export default class Scroll {
 
           fixedX = fixedX >> 0
 
-          if (fixedX === thumbX) {
-            return
+          if (fixedX !== thumbX) {
+            this.state.thumbX = fixedX
+            this.__X__.style.transform = `translateX(${fixedX}px)`
           }
-
-          this.state.thumbX = fixedX
-          this.__X__.style.transform = `translateX(${fixedX}px)`
         }
       }
 
