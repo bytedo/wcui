@@ -92,7 +92,7 @@ export default {
    */
   catch(dom, type, fn, phase) {
     function fn2(ev) {
-      ev.stopPropagation()
+      ev.stopPropagation && ev.stopPropagation()
       fn && fn(ev)
     }
     return this.bind(dom, type, fn2, phase)

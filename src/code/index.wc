@@ -1,12 +1,12 @@
 <template>
   <div class="code-box">
     <header class="title">
-      <span><i></i><i></i><i></i></span>
-      <span></span>
-      <span>
+      <section><i></i><i></i><i></i></section>
+      <section></section>
+      <section>
         <wc-icon title="运行" class="act run" is="live"></wc-icon>
         <wc-icon title="复制" class="act cp" is="doc"></wc-icon>
-      </span>
+      </section>
     </header>
     <wc-scroll axis="y" class="scoll"></wc-scroll>
   </div>
@@ -25,7 +25,6 @@
   width: 100%;
   max-height: 610px;
   margin: 10px 0;
-  padding-bottom: 8px;
   border-radius: 3px;
   background: #f7f8fb;
   color: var(--color-dark-1);
@@ -42,19 +41,25 @@
     font-size: 14px;
     user-select: none;
 
+    section {
+      display: flex;
+      align-items: center;
+    }
+
     i {
-      display: inline-block;
+      display: block;
       width: 12px;
       height: 12px;
       margin-right: 6px;
       border-radius: 50%;
       background: var(--color-red-1);
-    }
-    i:nth-child(2) {
-      background: var(--color-orange-1);
-    }
-    i:nth-child(3) {
-      background: var(--color-green-1);
+
+      &:nth-child(2) {
+        background: var(--color-orange-1);
+      }
+      &:nth-child(3) {
+        background: var(--color-green-1);
+      }
     }
 
     .act {
@@ -74,9 +79,8 @@
 
   .scoll {
     flex: 1;
-    padding: 5px 0;
+    padding: 5px 0 0;
     line-height: 20px;
-    font-family: Menlo, Monaco, Consolas, 'Courier New', monospace;
     font-size: 14px;
     color: var(--color-dark-1);
     cursor: text;
@@ -87,6 +91,7 @@
       position: relative;
       min-height: 20px;
       padding: 0 8px 0 45px;
+      font-family: Menlo, Monaco, Consolas, 'Courier New', monospace;
       white-space: pre-wrap;
       word-break: break-word;
 
@@ -131,7 +136,15 @@
 :host([exec]) {
   .title {
     .run {
-      display: inline-block;
+      display: block;
+    }
+  }
+}
+
+:host([hide-copy]) {
+  .title {
+    .cp {
+      display: none;
     }
   }
 }

@@ -194,7 +194,7 @@ export default class Scroll {
     } else if (moveX > width - xBar) {
       moveX = width - xBar
     }
-    this.__BOX__.scrollLeft = moveX
+    this.__BOX__.scrollLeft = (scrollX - width) * (moveX / (width - xBar))
     this.__X__.style.transform = `translateX(${moveX}px)`
 
     return moveX
@@ -209,19 +209,17 @@ export default class Scroll {
       moveY = height - yBar
     }
 
-    this.__BOX__.scrollTop = moveY
+    this.__BOX__.scrollTop = (scrollY - height) * (moveY / (height - yBar))
     this.__Y__.style.transform = `translateY(${moveY}px)`
     return moveY
   }
 
   _fireReachEnd(action = 'reach-bottom') {
-    var { scrollY, height, delay, disabled } = this.props
+    var { delay } = this.props
+    var { scrollY, height } = this.state
     var top = this.__BOX__.scrollTop
     var now = Date.now()
 
-    if (disabled) {
-      return
-    }
     if (now - this.__last__ > delay) {
       if (action === 'reach-bottom') {
         if (height + top < scrollY) {
@@ -349,11 +347,11 @@ export default class Scroll {
       moveY,
       mousemoveFn = ev => {
         let { thumbY, thumbX } = this.state
-        if (startX !== null) {
+        if (startX !== undefined) {
           moveX = this._fetchScrollX(thumbX + ev.pageX - startX)
         }
 
-        if (startY !== null) {
+        if (startY !== undefined) {
           moveY = this._fetchScrollY(thumbY + ev.pageY - startY)
         }
       },
@@ -361,8 +359,8 @@ export default class Scroll {
         if (Math.abs(ev.pageY - startY) > this.props.distance) {
           this._fireReachEnd(ev.pageY > startY ? 'reach-bottom' : 'reach-top')
         }
-        startX = null
-        startY = null
+        startX = undefined
+        startY = undefined
         this.state.thumbX = moveX || 0
         this.state.thumbY = moveY || 0
         delete this._active
@@ -370,7 +368,7 @@ export default class Scroll {
         $.unbind(document, 'mouseup', mouseupFn)
       }
 
-    $.bind(this.__Y__, 'mousedown', ev => {
+    this._yBarFn = $.bind(this.__Y__, 'mousedown', ev => {
       startY = ev.pageY
 
       this._active = true
@@ -379,7 +377,7 @@ export default class Scroll {
       $.bind(document, 'mouseup', mouseupFn)
     })
 
-    $.bind(this.__X__, 'mousedown', ev => {
+    this._xBarFn = $.bind(this.__X__, 'mousedown', ev => {
       startX = ev.pageX
       this._active = true
 
@@ -387,18 +385,20 @@ export default class Scroll {
       $.bind(document, 'mouseup', mouseupFn)
     })
 
-    // this.__observer = new MutationObserver(this._initFn)
-    // this.__observer.observe(this, {
-    //   childList: true,
-    //   subtree: true,
-    //   attributeFilter: ['style']
-    // })
+    this.__observer = new MutationObserver(this._initFn)
+    this.__observer.observe(this, {
+      childList: true,
+      subtree: true,
+      attributeFilter: ['style']
+    })
   }
 
   unmount() {
-    // this.__observer.disconnect()
+    this.__observer.disconnect()
 
-    $.unbind(this, 'mouseenter', this._initFn)
+    $.unbind(this.__X__, 'mousedown', this._xBarFn)
+    $.unbind(this.__Y__, 'mousedown', this._yBarFn)
+    $.unbind(this, 'ready', this._initFn)
     $.unbind(this.__BOX__, 'scroll', this._scrollFn)
   }
 
