@@ -391,8 +391,7 @@ export default class Scroll {
       subtree: true,
       attributeFilter: ['style']
     })
-
-    this._initFn(new Event('mounted'))
+    $.nextTick(_ => this._initFn(new Event('mounted')))
   }
 
   unmounted() {

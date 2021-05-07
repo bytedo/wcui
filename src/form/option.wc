@@ -119,7 +119,11 @@ export default class Option {
     switch (name) {
       case 'value':
       case 'label':
-        this[name] = val
+        if (val === null) {
+          this[name] = ''
+        } else {
+          this[name] = val
+        }
         break
 
       case 'disabled':

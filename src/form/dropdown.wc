@@ -241,6 +241,8 @@ export default class Dropdown {
       this.state.optionShow = false
       this.__OPTIONS__.classList.toggle('active', false)
     })
+
+    $.nextTick(_ => this._updateChildrenStat())
   }
 
   unmounted() {
