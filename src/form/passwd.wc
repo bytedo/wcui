@@ -412,7 +412,7 @@ export default class Passwd {
     })
   }
 
-  unmount() {
+  unmounted() {
     $.unbind(this.__INPUT__, 'keydown', this._handleSubmit)
     $.unbind(this.__EYE__, 'click', this._eyeFn)
   }

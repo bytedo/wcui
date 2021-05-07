@@ -125,14 +125,14 @@
 
 <script>
 import $ from '../utils'
-// 是否火狐浏览器
-const IS_FF = !!window.sidebar
+
+const AXIS_LIST = ['x', 'y', 'xy']
 
 /*  */
 export default class Scroll {
   props = {
     axis: 'xy', // 滚动方向, 默认x轴和y轴都可以滚动
-    delay: 1000, // 节流延迟
+    delay: 1000, // 节流防抖延迟
     distance: 1 // 触发距离阀值, 单位像素
   }
 
@@ -391,9 +391,11 @@ export default class Scroll {
       subtree: true,
       attributeFilter: ['style']
     })
+
+    this._initFn(new Event('mounted'))
   }
 
-  unmount() {
+  unmounted() {
     this.__observer.disconnect()
 
     $.unbind(this.__X__, 'mousedown', this._xBarFn)
@@ -405,7 +407,15 @@ export default class Scroll {
   watch() {
     switch (name) {
       case 'axis':
-        this.props.axis = val || 'xy'
+        if (val) {
+          if (AXIS_LIST.includes(val)) {
+            this.props.axis = val
+          } else {
+            this.removeAttribute(name)
+          }
+        } else {
+          this.props.axis = 'xy'
+        }
         break
 
       case 'delay':

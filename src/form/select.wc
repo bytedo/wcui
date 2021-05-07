@@ -499,7 +499,7 @@ export default class Select {
     }
   }
 
-  unmount() {
+  unmounted() {
     $.unbind(this.__INPUT__, 'keydown', this._handleKeydown)
     $.unbind(this.__INPUT__, 'click', this._activeFn)
     $.unbind(this.__OPTG__, 'click', this._handleSelect)

@@ -628,7 +628,7 @@ export default class DatePicker {
     })
   }
 
-  unmount() {
+  unmounted() {
     $.unbind(this.__INPUT__, 'click', this._activeFn)
     $.unbind(this.__DAYS__, 'click', this._pickFn)
     $.unbind(this.__CTRL__, 'click', this._ctrlFn)

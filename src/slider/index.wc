@@ -226,7 +226,7 @@ export default class Slider {
     })
   }
 
-  unmount() {
+  unmounted() {
     $.bind(this.__RANGE__, 'input', this._inputFn)
     delete this._inputFn
   }

@@ -265,7 +265,7 @@ export default class Checkbox {
     })
   }
 
-  unmount() {
+  unmounted() {
     $.unbind(this, 'click', this._handlClick)
     $.unbind(this, 'keydown', this._handlKeydown)
   }

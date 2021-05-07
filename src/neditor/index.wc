@@ -602,7 +602,7 @@ export default class Neditor {
     })
   }
 
-  unmount() {
+  unmounted() {
     $.unbind(this.__TOOLBAR__, 'click', this.__toolFn)
     $.unbind(this.__FONT__, 'click', this.__fontFn)
     $.unbind(this.__COLOR__, 'click', this.__colorFn)

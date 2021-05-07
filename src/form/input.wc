@@ -583,7 +583,7 @@ export default class Input {
     })
   }
 
-  unmount() {
+  unmounted() {
     $.unbind(this.__INPUT__, 'keydown', this._handleSubmit)
     $.unbind(this.__INPUT__, 'input', this._handleChange)
     $.unbind(this.__INPUT__, 'click', this._parseSuggestion)

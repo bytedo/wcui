@@ -181,7 +181,7 @@ export default class Switch {
     })
   }
 
-  unmount() {
+  unmounted() {
     $.unbind(this, 'click', this._handleClick)
   }
 

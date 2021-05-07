@@ -108,7 +108,7 @@ export default class RadioGroup {
     })
   }
 
-  unmount() {
+  unmounted() {
     $.unbind(this, 'child-picked', this._pickedFn)
     this.__observer.disconnect()
   }

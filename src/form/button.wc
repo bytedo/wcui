@@ -356,7 +356,7 @@ export default class Button {
     })
   }
 
-  unmount() {
+  unmounted() {
     $.unbind(this.__BTN__, 'click', this._handleClick)
   }
 

@@ -1005,7 +1005,7 @@ export default class Meditor {
     })
   }
 
-  unmount() {
+  unmounted() {
     $.unbind(this.__EDITOR__, 'input', this._inputFn)
     $.unbind(this.__EDITOR__, 'keydown', this._keydownFn)
     $.unbind(this.__EDITOR__, 'paste', this._pasteFn)

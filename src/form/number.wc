@@ -385,7 +385,7 @@ export default class Number {
     })
   }
 
-  unmount() {
+  unmounted() {
     $.unbind(this.__INPUT__, 'keydown', this._handleSubmit)
     $.unbind(this.__OUTER__, 'click', this._handleAction)
   }

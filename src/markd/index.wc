@@ -237,7 +237,7 @@ export default class Markd {
     })
   }
 
-  unmount() {
+  unmounted() {
     $.unbind(this.__BOX__, 'click', this._headClickFn)
     this.__observer.disconnect()
     this.clear()

@@ -243,7 +243,7 @@ export default class Dropdown {
     })
   }
 
-  unmount() {
+  unmounted() {
     this.state.options = []
     $.unbind(this.__PREVIEW__, 'click', this._activeFn)
     $.unbind(this.__OPTIONS__, 'click', this._pickedFn)

@@ -586,7 +586,7 @@ export default class Layer {
     }
   }
 
-  unmount() {
+  unmounted() {
     $.clearOutside(this._handlMask)
     $.unbind(this.__TITLE__, 'click', this._handleClose)
     $.unbind(this.__CTRL__, 'click', this._handleBtnClick)

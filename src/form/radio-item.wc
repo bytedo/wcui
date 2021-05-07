@@ -251,7 +251,7 @@ export default class Radio {
     })
   }
 
-  unmount() {
+  unmounted() {
     $.unbind(this, 'click', this._handleClick)
     $.unbind(this, 'keydown', this._handlKeydown)
   }

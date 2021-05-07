@@ -521,7 +521,7 @@ export default class Color {
     })
   }
 
-  unmount() {
+  unmounted() {
     $.unbind(this.__SCENE__, 'mousedown', this.handleDown)
     $.unbind(document, 'mousedown', this.handleUp)
     $.unbind(this.__HUE__, 'input', this.handleInput1)

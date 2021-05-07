@@ -247,7 +247,7 @@ export default class Textarea {
     })
   }
 
-  unmount() {
+  unmounted() {
     $.unbind(this.__INPUT__, 'keydown', this._handleSubmit)
     $.unbind(this.__INPUT__, 'input,change', this._statFn)
   }
