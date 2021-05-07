@@ -139,8 +139,8 @@ export default class Scroll {
   state = {
     width: 0, // 滚动组件的真实宽度
     height: 0, // 滚动组件的真实高度
-    scrollX: 0, // 滚动组件的滚动宽度
-    scrollY: 0, // 滚动组件的滚动高度
+    scrollWidth: 0, // 滚动组件的滚动宽度
+    scrollHeight: 0, // 滚动组件的滚动高度
     xBar: 0, // 横轴长度
     yBar: 0, // 纵轴长度
     thumbX: 0, //横向条滚动距离
@@ -187,21 +187,21 @@ export default class Scroll {
   }
 
   _fetchScrollX(moveX) {
-    var { scrollX, width, xBar } = this.state
+    var { scrollWidth, width, xBar } = this.state
 
     if (moveX < 0) {
       moveX = 0
     } else if (moveX > width - xBar) {
       moveX = width - xBar
     }
-    this.__BOX__.scrollLeft = (scrollX - width) * (moveX / (width - xBar))
+    this.__BOX__.scrollLeft = (scrollWidth - width) * (moveX / (width - xBar))
     this.__X__.style.transform = `translateX(${moveX}px)`
 
     return moveX
   }
 
   _fetchScrollY(moveY) {
-    var { scrollY, height, yBar } = this.state
+    var { scrollHeight, height, yBar } = this.state
 
     if (moveY < 0) {
       moveY = 0
@@ -209,20 +209,20 @@ export default class Scroll {
       moveY = height - yBar
     }
 
-    this.__BOX__.scrollTop = (scrollY - height) * (moveY / (height - yBar))
+    this.__BOX__.scrollTop = (scrollHeight - height) * (moveY / (height - yBar))
     this.__Y__.style.transform = `translateY(${moveY}px)`
     return moveY
   }
 
   _fireReachEnd(action = 'reach-bottom') {
     var { delay } = this.props
-    var { scrollY, height } = this.state
+    var { scrollHeight, height } = this.state
     var top = this.__BOX__.scrollTop
     var now = Date.now()
 
     if (now - this.__last__ > delay) {
       if (action === 'reach-bottom') {
-        if (height + top < scrollY) {
+        if (height + top < scrollHeight) {
           return
         }
       } else {
@@ -242,11 +242,11 @@ export default class Scroll {
       // 需要减去因为隐藏原生滚动条修正的18像素
       var width = this.__BOX__.clientWidth - 18
       var height = this.__BOX__.clientHeight - 18
-      var scrollX = this.__BOX__.scrollWidth - 18
-      var scrollY = this.__BOX__.scrollHeight - 18
+      var scrollWidth = this.__BOX__.scrollWidth - 18
+      var scrollHeight = this.__BOX__.scrollHeight - 18
 
-      var yBar = (height * (height / scrollY)) >> 0 // 滚动条的高度
-      var xBar = (width * (width / scrollX)) >> 0 // 滚动条的宽度
+      var yBar = (height * (height / scrollHeight)) >> 0 // 滚动条的高度
+      var xBar = (width * (width / scrollWidth)) >> 0 // 滚动条的宽度
 
       if (yBar < 50) {
         yBar = 50
@@ -265,8 +265,8 @@ export default class Scroll {
 
       this.state.height = height
       this.state.width = width
-      this.state.scrollY = scrollY
-      this.state.scrollX = scrollX
+      this.state.scrollHeight = scrollHeight
+      this.state.scrollWidth = scrollWidth
       this.state.yBar = yBar
       this.state.xBar = xBar
 
@@ -286,8 +286,8 @@ export default class Scroll {
         yBar,
         thumbX,
         thumbY,
-        scrollY,
-        scrollX,
+        scrollHeight,
+        scrollWidth,
         width,
         height
       } = this.state
@@ -298,13 +298,14 @@ export default class Scroll {
       if (xBar === 0 && yBar === 0) {
         return
       }
+      console.log(currTop, currLeft)
 
       //
       if (axis === 'y' || axis === 'xy') {
         if (yBar) {
           // 修正滚动条的位置
           // 滚动比例 y 滚动条的可移动距离
-          let fixedY = (currTop / (scrollY - height)) * (height - yBar)
+          let fixedY = (currTop / (scrollHeight - height)) * (height - yBar)
 
           fixedY = fixedY >> 0
 
@@ -325,7 +326,7 @@ export default class Scroll {
         if (xBar) {
           // 修正滚动条的位置
           // 滚动比例 x 滚动条的可移动距离
-          let fixedX = (currLeft / (scrollX - width)) * (width - xBar)
+          let fixedX = (currLeft / (scrollWidth - width)) * (width - xBar)
 
           fixedX = fixedX >> 0
 
