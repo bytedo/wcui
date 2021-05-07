@@ -37,10 +37,10 @@ function fixImport(str) {
 }
 
 function compileJs(entry, output) {
-  log('编译JS: %s', chalk.green(entry))
-  let buf = fs.cat(entry).toString()
-  let code = fixImport(buf)
+  var buf = fs.cat(entry).toString()
+  var code = fixImport(buf)
 
+  log('编译JS: %s', chalk.green(entry))
   fs.echo(code, output)
 }
 
@@ -58,7 +58,7 @@ function mkWCFile({ style, html, js }) {
 
   let name = ''
 
-  js = js.replace(/props = (\{\}|\{[\w\W]*?\n\s{2}?\})/, function(str) {
+  js = js.replace(/props = (\{\}|\{[\w\W]*?\n\s{2}?\})/, function (str) {
     var attr = str
       .split(/\n+/)
       .slice(1, -1)
@@ -77,7 +77,7 @@ function mkWCFile({ style, html, js }) {
   })
 
   js = fixImport(js)
-    .replace(/export default class ([a-zA-Z0-9]+)/, function(s, m) {
+    .replace(/export default class ([a-zA-Z0-9]+)/, function (s, m) {
       name = m
       return `${s} extends HTMLElement `
     })

@@ -308,7 +308,7 @@ export default class Scroll {
 
           fixedY = fixedY >> 0
 
-          if ((fixedY === 0 || height - yBar === fixedY) && fixedY === thumbY) {
+          if (fixedY === thumbY) {
             return
           }
 
@@ -329,7 +329,7 @@ export default class Scroll {
 
           fixedX = fixedX >> 0
 
-          if ((fixedX === 0 || width - xBar === fixedX) && fixedX === thumbX) {
+          if (fixedX === thumbX) {
             return
           }
 

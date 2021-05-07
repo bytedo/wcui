@@ -36,10 +36,12 @@ function fixImport(str) {
     )
 }
 
-const compileJs = (entry, output) => {
-  let t1 = Date.now()
-  let buf = fs.cat(entry).toString()
+function compileJs(entry, output) {
+  var t1 = Date.now()
+  var buf = fs.cat(entry).toString()
+
   buf = fixImport(buf)
+
   minify(buf, { sourceMap: false }).then(res => {
     log(
       '编译JS: %s, 耗时 %s ms',
@@ -65,19 +67,17 @@ function compileScss(code = '') {
 }
 
 function mkWCFile({ style, html, js }) {
+  let name = ''
   style = compileScss(style)
-
   html = html.replace(/[\n\r]+/g, ' ')
   html = html.replace(/\s+/g, ' ')
 
-  let name = ''
-
-  js = js.replace(/props = (\{\}|\{[\w\W]*?\n\s{2}?\})/, function(str) {
+  js = js.replace(/props = (\{\}|\{[\w\W]*?\n\s{2}?\})/, function (str) {
     var attr = str
       .split(/\n+/)
       .slice(1, -1)
       .map(it => {
-        var tmp = it.split(':')
+        let tmp = it.split(':')
         return tmp[0].trim().replace(/^['"]|['"]$/g, '')
       })
     return `
@@ -91,7 +91,7 @@ function mkWCFile({ style, html, js }) {
   })
 
   js = fixImport(js)
-    .replace(/export default class ([a-zA-Z0-9]+)/, function(s, m) {
+    .replace(/export default class ([a-zA-Z0-9]+)/, function (s, m) {
       name = m
       return `${s} extends HTMLElement `
     })
@@ -137,7 +137,7 @@ if(!customElements.get('wc-${parseName(name)}')){
 }
 
 const compileWC = (entry, output) => {
-  log('编译wc: %s', chalk.green(entry))
+  let t1 = Date.now()
   let code = fs.cat(entry).toString()
   let style = code.match(/<style[^>]*?>([\w\W]*?)<\/style>/)
   let html = code.match(/<template>([\w\W]*?)<\/template>/)
@@ -148,6 +148,11 @@ const compileWC = (entry, output) => {
   js = js ? js[1] : ''
 
   mkWCFile({ style, html, js }).then(txt => {
+    log(
+      '编译WC: %s, 耗时 %s ms',
+      chalk.green(entry),
+      chalk.yellow(Date.now() - t1)
+    )
     fs.echo(txt, output)
   })
 }
