@@ -209,9 +209,6 @@ export default class Markd {
     } else {
       this.__BOX__.innerHTML = ''
     }
-    this.dispatchEvent(
-      new CustomEvent('ready', { bubbles: true, cancelable: true })
-    )
   }
 
   clear() {

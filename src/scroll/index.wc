@@ -21,7 +21,6 @@
 
   .wrapper {
     overflow: auto;
-    position: relative;
     width: calc(100% + 18px);
     height: calc(100% + 18px);
     padding: 0 18px 18px 0;
@@ -32,6 +31,7 @@
 
 .is-horizontal,
 .is-vertical {
+  display: none;
   visibility: hidden;
   position: absolute;
   display: flex;
@@ -238,15 +238,24 @@ export default class Scroll {
 
   mounted() {
     // 初始化滚动条的位置和长度
-    this._initFn = $.catch(this, 'ready', ev => {
+    this._initFn = ev => {
       // 需要减去因为隐藏原生滚动条修正的18像素
-      var width = this.__BOX__.clientWidth - 18
-      var height = this.__BOX__.clientHeight - 18
+      var width = this.offsetWidth
+      var height = this.offsetHeight
       var scrollWidth = this.__BOX__.scrollWidth - 18
       var scrollHeight = this.__BOX__.scrollHeight - 18
-
       var yBar = (height * (height / scrollHeight)) >> 0 // 滚动条的高度
       var xBar = (width * (width / scrollWidth)) >> 0 // 滚动条的宽度
+
+      // 修复因为内容的margin导致滚动条取值不准确的bug
+      if (this.__BOX__.clientHeight - height !== 18) {
+        scrollHeight += 18 - (this.__BOX__.clientHeight - height)
+        yBar = (height * (height / scrollHeight)) >> 0
+      }
+      if (this.__BOX__.clientWidth - width !== 18) {
+        scrollWidth += 18 - (this.__BOX__.clientWidth - width)
+        xBar = (width * (width / scrollWidth)) >> 0
+      }
 
       if (yBar < 50) {
         yBar = 50
@@ -272,7 +281,7 @@ export default class Scroll {
 
       this.__X__.style.width = xBar + 'px'
       this.__Y__.style.height = yBar + 'px'
-    })
+    }
 
     // 鼠标滚动事件
     this._scrollFn = $.catch(this.__BOX__, 'scroll', ev => {
@@ -381,13 +390,8 @@ export default class Scroll {
       $.bind(document, 'mouseup', mouseupFn)
     })
 
-    this.__observer = new MutationObserver(this._initFn)
-    this.__observer.observe(this, {
-      childList: true,
-      subtree: true,
-      attributeFilter: ['style']
-    })
-    $.nextTick(_ => this._initFn(new Event('mounted')))
+    this.__observer = new ResizeObserver(this._initFn)
+    this.__observer.observe(this.__BOX__)
   }
 
   unmounted() {
