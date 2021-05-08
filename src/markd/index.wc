@@ -209,6 +209,7 @@ export default class Markd {
     } else {
       this.__BOX__.innerHTML = ''
     }
+    this.removeAttribute('md')
   }
 
   clear() {
@@ -240,6 +241,16 @@ export default class Markd {
     $.unbind(this.__BOX__, 'click', this._headClickFn)
     this.__observer.disconnect()
     this.clear()
+  }
+
+  watch() {
+    switch (name) {
+      case 'md':
+        if (val !== null) {
+          this.md = val
+        }
+        break
+    }
   }
 }
 </script>
