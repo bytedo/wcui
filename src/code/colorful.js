@@ -55,20 +55,20 @@ export function colorHtml(code) {
           if (~t.indexOf('=')) {
             t = t.split('=')
             let a = t.shift()
-            let b = t.join('=')
+            let b = t.join('=').replace(/(\n+)/g, '[/str]\n[str]')
             return `[attr]${a}[/attr]=[str]${b}[/str]`
           } else {
             return `[attr]${t}[/attr]`
           }
         })
       }
+
       return `[tag]&lt;${tag}[/tag]${attr}[tag]&gt;[/tag]`
     })
     .replace(TAG_END_EXP, (m, tag) => {
       return `[tag]&lt;/${tag}&gt;[/tag]`
     })
-    .replace(TAG_CM_EXP, '[cm]&lt;!--$1--&gt;[cm]')
-
+    .replace(TAG_CM_EXP, '[cm]&lt;!--$1--&gt;[/cm]')
   return rebuild(code)
 }
 

@@ -190,6 +190,7 @@ import '../form/checkbox'
 
 export default class Markd {
   props = {
+    md: '',
     toc: false
   }
 
@@ -218,7 +219,9 @@ export default class Markd {
   }
 
   mounted() {
-    this.__parse__()
+    if (this.textContent.trim()) {
+      this.__parse__()
+    }
 
     this._headClickFn = $.bind(this.__BOX__, 'click', ev => {
       if (ev.target.className === 'md-head-link') {
