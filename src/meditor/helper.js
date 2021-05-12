@@ -109,6 +109,8 @@ export const TOOL_TITLE = {
 
 export const IMAGE_EXP = /image\/(jpeg|gif|png|webp|bmp|vnd\.microsoft\.icon|svg\+xml)/
 
+const LI_EXP = /<(ul|ol)>(?:(?!<ul|<ol)[\s\S])*?<\/\1>/gi
+
 // html标签的属性正则
 function attrExp(field, flag = 'i') {
   return new RegExp(field + '\\s?=\\s?["\']?([^"\']*)["\']?', flag)
@@ -184,9 +186,9 @@ export function html2md(str) {
       str = str.replace(exp, cb)
     }
   }
-  let liExp = /<(ul|ol)>(?:(?!<ul|<ol)[\s\S])*?<\/\1>/gi
-  while (str.match(liExp)) {
-    str = str.replace(liExp, function(match) {
+
+  while (str.match(LI_EXP)) {
+    str = str.replace(LI_EXP, function(match) {
       match = match.replace(/<(ul|ol)>([\s\S]*?)<\/\1>/gi, function(
         m,
         t,
