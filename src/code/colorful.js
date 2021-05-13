@@ -17,6 +17,15 @@ const STR = /(['"`])(.*?)\1/g
 const NUM = /\b(\d+)\b/g
 const FN = /([\.\s])([a-zA-Z$][\da-zA-Z_]*)(\(.*?\))/g
 const CM = /(?=\s)([ ]*\/\/.*)|(^\/\/.*)/g
+const INLINE = {
+  code: /`([^`]*?[^`\\\s])`/g,
+  strong: [/__([\s\S]*?[^\s\\])__(?!_)/g, /\*\*([\s\S]*?[^\s\\])\*\*(?!\*)/g],
+  em: [/_([\s\S]*?[^\s\\])_(?!_)/g, /\*([\s\S]*?[^\s\\*])\*(?!\*)/g],
+  del: /~~([\s\S]*?[^\s\\~])~~/g,
+  qlink: /\[([^\]]*?)\]\[(\d*?)\]/g, // 引用链接
+  img: /\!\[([^\]]*?)\]\(([^)]*?)\)/g,
+  a: /\[([^\]]*?)\]\(([^)]*?)(\s+"([\s\S]*?)")*?\)/g
+}
 
 function parseJs(code) {
   return code
@@ -41,6 +50,26 @@ function rebuild(code) {
     .replace(/\[(\/?)num\]/g, (m, s) => (s ? '</i>' : '<i class="pp">'))
     .replace(/\[(\/?)fn\]/g, (m, s) => (s ? '</i>' : '<i class="b">'))
     .replace(/\[(\/?)cm\]/g, (m, s) => (s ? '</i>' : '<i class="gr">'))
+    .replace(/\[(\/?)bold\]/g, (m, s) => (s ? '</i>' : '<i class="bold">'))
+    .replace(/\[(\/?)link\]/g, (m, s) => (s ? '</i>' : '<i class="link">'))
+}
+
+export function colorMd(code) {
+  code = code
+    .replace(INLINE.strong[0], '[cm]__[/cm]<strong>$1</strong>[cm]__[/cm]')
+    .replace(INLINE.strong[1], '[cm]**[/cm]<strong>$1</strong>[cm]**[/cm]')
+    .replace(INLINE.em[0], '[cm]_[/cm]<em>$1</em>[cm]_[/cm]')
+    .replace(INLINE.em[1], '[cm]*[/cm]<em>$1</em>[cm]*[/cm]')
+    .replace(INLINE.del, '[cm]~~[/cm]<del>$1</del>[cm]~~[/cm]')
+    .replace(INLINE.qlink, '[[attr]$1[/attr]]([link]$2[/link])')
+    .replace(INLINE.img, '![[attr]$1[/attr]]([link]$2[/link])')
+    .replace(INLINE.a, (m1, txt, link, m2, attr = '') => {
+      if (attr) {
+        attr = ` "[tag]${attr}[/tag]"`
+      }
+      return `[[attr]${txt}[/attr]]([link]${link}[/link]${attr})`
+    })
+  return rebuild(code)
 }
 
 export function colorHtml(code) {

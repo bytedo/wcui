@@ -129,6 +129,14 @@
       .pp {
         color: #6a1ea8;
       }
+      .bold {
+        font-weight: bold;
+      }
+      .link {
+        font-style: italic;
+        text-decoration: underline;
+        color: var(--color-grey-2);
+      }
     }
   }
 }
@@ -170,7 +178,7 @@
 import '../scroll/index'
 import '../layer/index'
 import $ from '../utils'
-import { colorHtml, colorCss, colorJs } from './colorful'
+import { colorHtml, colorCss, colorJs, colorMd } from './colorful'
 
 export default class Code {
   props = {
@@ -218,6 +226,11 @@ export default class Code {
       case 'scss':
       case 'less':
         txt = colorCss(txt)
+        break
+
+      case 'md':
+      case 'markdown':
+        txt = colorMd(txt)
         break
 
       case 'js':

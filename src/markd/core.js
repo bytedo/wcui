@@ -6,8 +6,8 @@
 
 const HR_LIST = ['=', '-', '_', '*']
 const LIST_RE = /^(([\+\-\*])|(\d+\.))\s/
-const TODO_RE = /^\-\s\[(x|\s)\]\s/
-const ESCAPE_RE = /\\([-+*_`])/g
+const TODO_RE = /^[\+\-\*]\s\[(x|\s)\]\s/
+const ESCAPE_RE = /\\([-+*_`\]\[\(\)])/g
 const QLINK_RE = /^\[(\d+)\]: ([\S]+)\s*?((['"])[\s\S]*?\4)?\s*?$/
 const TAG_RE = /<([\w\-]+)([\w\W]*?)>/g
 const ATTR_RE = /\s*?on[a-zA-Z]+="[^"]*?"\s*?/g
@@ -66,6 +66,7 @@ const Helper = {
   },
   isQLink(str) {
     if (QLINK_RE.test(str)) {
+      // l: link,  t: title, $1: index
       return { [RegExp.$1]: { l: RegExp.$2, t: RegExp.$3 } }
     }
     return false
@@ -150,7 +151,7 @@ const Decoder = {
       var stat = todoChecked === 1 ? 'checked' : ''
       var txt = todoChecked === 1 ? `<del>${word}</del>` : word
 
-      return `<section><wc-checkbox-item readonly ${stat}>${txt}</wc-checkbox-item></section>`
+      return `<section><wc-checkbox readonly ${stat}>${txt}</wc-checkbox></section>`
     }
     return false
   }
