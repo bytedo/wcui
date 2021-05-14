@@ -64,12 +64,11 @@ fieldset.md-hr {
   border-top: 1px dashed var(--color-plain-3);
 
   legend {
-    padding: 0 5px;
     color: var(--color-grey-1);
     text-align: center;
     font-size: 12px;
     &::before {
-      content: '华丽丽的分割线';
+      content: attr(name);
     }
   }
 }

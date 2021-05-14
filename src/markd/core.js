@@ -32,8 +32,7 @@ const Helper = {
   isHr(str) {
     var s = str[0]
     if (HR_LIST.includes(s)) {
-      var reg = new RegExp('^\\' + escape(s) + '{3,}$')
-      return reg.test(str)
+      return str.slice(0, 3) === s.repeat(3) ? str.slice(3) : false
     }
     return false
   },
@@ -119,8 +118,8 @@ const Decoder = {
       .replace(ESCAPE_RE, '$1') // 处理转义字符
   },
   // 分割线
-  hr() {
-    return '<fieldset class="md-hr"><legend></legend></fieldset>'
+  hr(name = '') {
+    return `<fieldset class="md-hr"><legend name="${name}"></legend></fieldset>`
   },
   // 标题
   head(str) {
@@ -227,7 +226,10 @@ class Tool {
         } else {
           var qlink
           if (isCodeBlock) {
-            it = it.replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            it = it
+              .replace(/</g, '&lt;')
+              .replace(/>/g, '&gt;')
+              .replace('\\`\\`\\`', '```')
           } else {
             it = it
               // 非代码块进行xss过滤
@@ -243,8 +245,9 @@ class Tool {
                 }
                 return `<${name}${attr}>`
               })
+            // 不在代码块中, 才判断引用声明
+            qlink = Helper.isQLink(it)
           }
-          qlink = Helper.isQLink(it)
 
           if (qlink) {
             Object.assign(links, qlink)
@@ -338,8 +341,10 @@ class Tool {
         }
 
         // 无属性标签
-        if (Helper.isHr(it)) {
-          html += Decoder.hr()
+
+        let hrName = Helper.isHr(it)
+        if (typeof hrName === 'string') {
+          html += Decoder.hr(hrName)
           continue
         }
 
@@ -347,7 +352,8 @@ class Tool {
         it = Decoder.inline.call(this, it)
 
         // 标题只能是单行
-        var head = Decoder.head(it)
+
+        let head = Decoder.head(it)
         if (head) {
           isParagraph = false
           html += head
