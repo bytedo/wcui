@@ -423,8 +423,10 @@ export default class Meditor {
     }
     if (isToolbarShow) {
       this.__TOOLBAR__.classList.toggle('active', isToolbarShow)
-      this.__TOOLBAR__.lastElementChild.classList.toggle('active', preview)
-      this.__VIEW__.classList.toggle('active', preview)
+      if (toolbar === null || toolbar.includes('preview')) {
+        this.__TOOLBAR__.lastElementChild.classList.toggle('active', preview)
+        this.__VIEW__.classList.toggle('active', preview)
+      }
     }
   }
 
@@ -763,7 +765,7 @@ export default class Meditor {
   set value(val) {
     this.__EDITOR__.value = val
     if (this.state.preview) {
-      this.__VIEW__.value = val
+      this.__VIEW__.md = val
     }
   }
 
@@ -821,7 +823,7 @@ export default class Meditor {
       if (this.state.preview) {
         var txt = this.__EDITOR__.value.trim()
         if (txt) {
-          this.__VIEW__.value = txt
+          this.__VIEW__.md = txt
         } else {
           this.__VIEW__.clear()
         }

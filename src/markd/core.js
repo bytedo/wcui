@@ -177,7 +177,7 @@ function fixed(str) {
     })
     .replace(BLOCK_RE, (m, tag, attr, txt) => {
       return `<${tag + attr.replace(/(⨨☇)+/g, ' ')}>${txt
-        .replace(/⨨⤶/g, ' ')
+        .replace(/⨨⤶/g, '\n')
         .replace(/(⨨☇)+/g, ' ')}</${tag}>`
     })
 }
@@ -212,17 +212,6 @@ class Tool {
             list.push(tmp.replace(/^```([\w\#\-]*?)$/, '<wc-code lang="$1">'))
           }
           isCodeBlock = !isCodeBlock
-        } else if (Helper.isTable(tmp) && !isTable) {
-          var thead = tmp.split('|')
-          // 去头去尾
-          thead.shift()
-          thead.pop()
-          list.push(
-            `<table><thead><tr>${thead
-              .map(_ => `<th>${_}</th>`)
-              .join('')}</tr></thead><tbody>`
-          )
-          isTable = true
         } else {
           var qlink
           if (isCodeBlock) {
@@ -231,22 +220,38 @@ class Tool {
               .replace(/>/g, '&gt;')
               .replace('\\`\\`\\`', '```')
           } else {
-            it = it
-              // 非代码块进行xss过滤
-              .replace(INLINE.code, (m, txt) => {
-                return `\`${txt.replace(/</g, '&lt;').replace(/>/g, '&gt;')}\``
-              })
-              .replace(/<(\/?)script[^>]*?>/g, '&lt;$1script&gt;')
-              .replace(TAG_RE, (m, name, attr = '') => {
-                // 过滤所有onXX=""事件属性
-                attr = attr.replace(ATTR_RE, ' ').trim()
-                if (attr) {
-                  attr = ' ' + attr
-                }
-                return `<${name}${attr}>`
-              })
-            // 不在代码块中, 才判断引用声明
-            qlink = Helper.isQLink(it)
+            if (Helper.isTable(tmp) && !isTable) {
+              var thead = tmp.split('|')
+              // 去头去尾
+              thead.shift()
+              thead.pop()
+              list.push(
+                `<table><thead><tr>${thead
+                  .map(_ => `<th>${_}</th>`)
+                  .join('')}</tr></thead><tbody>`
+              )
+              isTable = true
+              continue
+            } else {
+              it = it
+                // 非代码块进行xss过滤
+                .replace(INLINE.code, (m, txt) => {
+                  return `\`${txt
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')}\``
+                })
+                .replace(/<(\/?)script[^>]*?>/g, '&lt;$1script&gt;')
+                .replace(TAG_RE, (m, name, attr = '') => {
+                  // 过滤所有onXX=""事件属性
+                  attr = attr.replace(ATTR_RE, ' ').trim()
+                  if (attr) {
+                    attr = ' ' + attr
+                  }
+                  return `<${name}${attr}>`
+                })
+              // 不在代码块中, 才判断引用声明
+              qlink = Helper.isQLink(it)
+            }
           }
 
           if (qlink) {
@@ -300,7 +305,7 @@ class Tool {
         }
 
         if (isTable) {
-          var tmp = it.split('|').map(_ => _.trim())
+          let tmp = it.split('|').map(_ => _.trim())
           tmp.shift()
           tmp.pop()
 
@@ -327,8 +332,9 @@ class Tool {
           continue
         }
 
-        // wc-code标签直接拼接
-        if (~it.indexOf('wc-code')) {
+        // wc-code标签直接拼接, 判断时多拼一个 < 和 >,
+        // 是为了避免在 wc-markd嵌入代码块示例时, 将其内容编译为html
+        if (~it.indexOf('<wc-code') || ~it.indexOf('wc-code>')) {
           html += it
           isCodeBlock = !isCodeBlock
           continue

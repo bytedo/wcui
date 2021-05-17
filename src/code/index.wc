@@ -8,7 +8,7 @@
         <wc-icon title="复制" class="act cp" is="doc"></wc-icon>
       </section>
     </header>
-    <wc-scroll axis="y" class="scoll"></wc-scroll>
+    <wc-scroll axis="y" class="scroll"></wc-scroll>
   </div>
 </template>
 
@@ -77,7 +77,7 @@
     }
   }
 
-  .scoll {
+  .scroll {
     flex: 1;
     padding: 5px 0 0;
     line-height: 20px;
@@ -163,10 +163,10 @@
     background: var(--color-dark-1);
     color: var(--color-plain-3);
 
-    .code {
+    .scroll {
       color: var(--color-plain-2);
 
-      p::before {
+      code::before {
         color: var(--color-grey-3);
       }
     }

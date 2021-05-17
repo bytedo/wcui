@@ -19,8 +19,9 @@ const FN = /([\.\s])([a-zA-Z$][\da-zA-Z_]*)(\(.*?\))/g
 const CM = /(?=\s)([ ]*\/\/.*)|(^\/\/.*)/g
 const INLINE = {
   code: /`([^`]*?[^`\\\s])`/g,
+  codeBlock: /^```(.*?)$/gm,
   strong: [/__([\s\S]*?[^\s\\])__(?!_)/g, /\*\*([\s\S]*?[^\s\\])\*\*(?!\*)/g],
-  em: [/_([\s\S]*?[^\s\\])_(?!_)/g, /\*([\s\S]*?[^\s\\*])\*(?!\*)/g],
+  em: [/_([\s\S]*?[^\s\\_])_(?!_)/g, /\*([\s\S]*?[^\s\\*])\*(?!\*)/g],
   del: /~~([\s\S]*?[^\s\\~])~~/g,
   qlinkVar: /^\[(\d+)\]: ([\S]+)\s*?((['"])[\s\S]*?\4)?\s*?$/gm, // 引用声明
   qlink: /\[([^\]]*?)\]\[(\d*?)\]/g, // 引用链接
@@ -29,7 +30,8 @@ const INLINE = {
   head: /^(#{1,6} )(.*)$/gm,
   quote: /^(>{1,} )(.*)$/gm,
   task: /^([\-\+\*]) \[( |x)\] (.*)$/gm,
-  list: /^([ \t]*?([\-\+\*]|\d+\.) )(.*)$/gm
+  list: /^([ \t]*?([\-\+\*]|\d+\.) )(.*)$/gm,
+  br: /^([\-\*_=]{3})(.*?)$/gm
 }
 
 function parseJs(code) {
@@ -62,12 +64,15 @@ function rebuild(code) {
 export function colorMd(code) {
   code = code
     .replace(INLINE.head, '[cm]$1[/cm][tag]<strong>$2</strong>[/tag]')
+    .replace(INLINE.br, '[cm]$1[/cm][tag]$2[/tag]')
     .replace(INLINE.quote, '[cm]$1[/cm]<em>$2</em>')
     .replace(
       INLINE.task,
       '[cm]$1 [[/cm][attr]$2[/attr][cm]][/cm] <strong>$3</strong>'
     )
     .replace(INLINE.list, '[cm]$1[/cm]<strong>$3</strong>')
+    .replace(INLINE.code, '[cm]`[/cm][tag]$1[/tag][cm]`[/cm]')
+    .replace(INLINE.codeBlock, '[cm]```[/cm][tag]$1[/tag]')
     .replace(INLINE.strong[0], '[cm]__[/cm]<strong>$1</strong>[cm]__[/cm]')
     .replace(INLINE.strong[1], '[cm]**[/cm]<strong>$1</strong>[cm]**[/cm]')
     .replace(INLINE.em[0], '[cm]_[/cm]<em>$1</em>[cm]_[/cm]')
