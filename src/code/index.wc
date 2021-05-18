@@ -118,7 +118,7 @@
         color: var(--color-blue-1);
       }
       .g {
-        color: var(--color-green-1);
+        color: var(--color-green-2);
       }
       .gr {
         color: var(--color-grey-2);
@@ -128,9 +128,6 @@
       }
       .pp {
         color: #6a1ea8;
-      }
-      .bold {
-        font-weight: bold;
       }
       .link {
         font-style: italic;

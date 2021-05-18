@@ -10,9 +10,11 @@ const TAG_END_EXP = /<\/([\w\-]+)>/g
 const TAG_ATTR_EXP = /[@a-zA-Z\-.]+=(["'])[^"]+\1|[@a-zA-Z\-.]+=[a-zA-Z0-9]+|[@a-zA-Z\-.]+/g
 const TAG_CM_EXP = /<!--([\w\W]*?)-->/g
 const SCRIPT_TAG = /(<script[^>]*?>)([\w\W]*?)(<\/script>)/g
-const KEYWOWRD1 = /\b(var|const|let|function|for|switch|with|if|else|export|import|async|await|break|continue|return|class|try|catch|throw|new|while|this|super|default|case|debugger|delete|do|goto|in|public|private|protected|package|typeof)\b/g
+const KEYWOWRD1 = /\b(var|const|let|function|for|switch|with|if|else|export|import|async|await|break|continue|return|class|try|catch|throw|new|while|this|super|default|case|debugger|delete|do|goto|in|public|private|protected|package|typeof|void)\b/g
 const KEYWOWRD2 = /\b\s(=|-|\+|\/|\*|<|>|%)\s\b/g
 const KEYWOWRD3 = /(\+\=|-=|\/=|\*=|--|\+\+|==|===)/g
+const BUILDIN1 = /\b(null|undefined|true|false|NaN|Infinity)\b/g
+const BUILDIN2 = /\b(Object|String|Array|Boolean|Number|Function|class)\b/g
 const STR = /(['"`])(.*?)\1/g
 const NUM = /\b(\d+)\b/g
 const FN = /([\.\s])([a-zA-Z$][\da-zA-Z_]*)(\(.*?\))/g
@@ -40,6 +42,8 @@ function parseJs(code) {
     .replace(KEYWOWRD1, '[key]$1[/key]')
     .replace(KEYWOWRD2, '[key] $1 [/key]')
     .replace(KEYWOWRD3, '[key]$1[/key]')
+    .replace(BUILDIN1, '[num]<em>$1</em>[/num]')
+    .replace(BUILDIN2, '[type]<strong><em>$1</em></strong>[/type]')
     .replace(NUM, '[num]$1[/num]')
     .replace(STR, (m, q, str) => {
       return `[str]${q}${str.replace(/\[\/?num\]/g, '')}${q}[/str]`
@@ -57,7 +61,7 @@ function rebuild(code) {
     .replace(/\[(\/?)num\]/g, (m, s) => (s ? '</i>' : '<i class="pp">'))
     .replace(/\[(\/?)fn\]/g, (m, s) => (s ? '</i>' : '<i class="b">'))
     .replace(/\[(\/?)cm\]/g, (m, s) => (s ? '</i>' : '<i class="gr">'))
-    .replace(/\[(\/?)bold\]/g, (m, s) => (s ? '</i>' : '<i class="bold">'))
+    .replace(/\[(\/?)type\]/g, (m, s) => (s ? '</i>' : '<i class="o">'))
     .replace(/\[(\/?)link\]/g, (m, s) => (s ? '</i>' : '<i class="link">'))
 }
 
