@@ -690,6 +690,7 @@ export default class Meditor {
       dom.focus()
     }
     this.value = dom.value
+    this.dispatchEvent(new CustomEvent('input'))
   }
   /**
    * [selection 获取选中的文本]
@@ -766,6 +767,7 @@ export default class Meditor {
     this.__EDITOR__.value = val
     if (this.state.preview) {
       this.__VIEW__.md = val
+      this.dispatchEvent(new CustomEvent('input'))
     }
   }
 
