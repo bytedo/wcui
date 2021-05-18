@@ -363,6 +363,7 @@ class Tool {
         if (head) {
           isParagraph = false
           html += head
+          // console.log(html)
           continue
         }
 
@@ -425,7 +426,10 @@ class Tool {
             qlist += `<li>${tmp3}</li>`
             html += tmp1 + qlist
           } else {
-            html += '<br>' + it
+            if (innerQuote === false) {
+              html += '<br>'
+            }
+            html += it
           }
 
           isParagraph = false
