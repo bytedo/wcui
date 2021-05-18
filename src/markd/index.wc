@@ -190,6 +190,7 @@ import '../form/checkbox'
 export default class Markd {
   props = {
     md: '',
+    'hide-copy': false,
     toc: false
   }
 
@@ -205,7 +206,7 @@ export default class Markd {
 
   set md(txt) {
     if (txt) {
-      this.__BOX__.innerHTML = markd(txt)
+      this.__BOX__.innerHTML = markd(txt, this.props['hide-copy'])
     } else {
       this.__BOX__.innerHTML = ''
     }
@@ -251,6 +252,10 @@ export default class Markd {
         if (val !== null) {
           this.md = val
         }
+        break
+
+      case 'hide-copy':
+        this.props[name] = val !== null
         break
     }
   }

@@ -189,7 +189,7 @@ class Tool {
   }
 
   // 初始化字符串, 处理多余换行等
-  static init(str) {
+  static init(str, hideCopy) {
     var links = {}
     var list = []
     var lines = str.split('\n')
@@ -206,10 +206,14 @@ class Tool {
       if (tmp) {
         emptyLineLength = 0
         if (tmp.startsWith('```')) {
+          let attr = hideCopy ? ' hide-copy' : ''
+
           if (isCodeBlock) {
             list.push('</wc-code>')
           } else {
-            list.push(tmp.replace(/^```([\w\#\-]*?)$/, '<wc-code lang="$1">'))
+            list.push(
+              tmp.replace(/^```([\w\#\-]*?)$/, `<wc-code lang="$1"${attr}>`)
+            )
           }
           isCodeBlock = !isCodeBlock
         } else {
@@ -563,6 +567,6 @@ class Tool {
   }
 }
 
-export default function(str) {
-  return Tool.init(fixed(str)).parse()
+export default function(str, hideCopy) {
+  return Tool.init(fixed(str), hideCopy).parse()
 }
