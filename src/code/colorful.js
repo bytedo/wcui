@@ -10,7 +10,7 @@ const TAG_END_EXP = /<\/([\w\-]+)>/g
 const TAG_ATTR_EXP = /[@a-zA-Z\-.]+=(["'])[^"]+\1|[@a-zA-Z\-.]+=[a-zA-Z0-9]+|[@a-zA-Z\-.]+/g
 const TAG_CM_EXP = /<!--([\w\W]*?)-->/g
 const SCRIPT_TAG = /(<script[^>]*?>)([\w\W]*?)(<\/script>)/g
-const KEYWOWRD1 = /\b(var|const|let|function|for|switch|with|if|else|export|import|async|await|break|continue|return|class|try|catch|throw|new|while|this|super|default|case|debugger|delete|do|goto|in|public|private|protected|package|typeof|void)\b/g
+const KEYWOWRD1 = /\b(var|const|let|function|for|switch|with|if|else|export|import|async|await|break|continue|return|class|try|catch|throw|new|while|this|super|default|case|debugger|delete|do|goto|in|static|get|set|public|private|protected|package|typeof|void)\b/g
 const KEYWOWRD2 = /\b\s(=|-|\+|\/|\*|<|>|%)\s\b/g
 const KEYWOWRD3 = /(\+\=|-=|\/=|\*=|--|\+\+|==|===)/g
 const BUILDIN1 = /\b(null|undefined|true|false|NaN|Infinity)\b/g
