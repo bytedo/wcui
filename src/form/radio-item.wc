@@ -17,7 +17,7 @@
     justify-content: center;
     align-items: center;
     min-width: 32px;
-    padding: 0 6px;
+    padding-right: 16px;
     line-height: 1;
     -moz-user-select: none;
     user-select: none;

@@ -18,7 +18,7 @@
     align-items: center;
     min-width: 32px;
     height: 32px;
-    padding: 0 5px;
+    padding-right: 16px;
     line-height: 1;
     -moz-user-select: none;
     user-select: none;
