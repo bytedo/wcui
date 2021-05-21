@@ -1,13 +1,14 @@
 <template>
   <div class="container">
     <div class="wrapper"><slot /></div>
-    <div class="is-horizontal"><span class="thumb"></span></div>
-    <div class="is-vertical"><span class="thumb"></span></div>
   </div>
+  <div class="is-horizontal"><span class="thumb"></span></div>
+  <div class="is-vertical"><span class="thumb"></span></div>
 </template>
 
 <style lang="scss">
 :host {
+  position: relative;
   display: block;
   width: 100%;
   height: 100%;
@@ -149,10 +150,9 @@ export default class Scroll {
 
   __init__() {
     /* render */
-    var elem = this.root.children[1]
-    this.__BOX__ = elem.children[0]
-    this.__X__ = elem.children[1].children[0]
-    this.__Y__ = elem.children[2].children[0]
+    this.__BOX__ = this.root.children[1].children[0]
+    this.__X__ = this.root.children[2].children[0]
+    this.__Y__ = this.root.children[3].children[0]
     this.__last__ = 0
   }
 
