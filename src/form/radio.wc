@@ -26,17 +26,21 @@ export default class RadioGroup {
 
   _updateChildrenStat(checkAll) {
     Array.from(this.children).forEach(it => {
-      if (it.tagName === 'WC-RADIO' && it.root) {
-        if (checkAll) {
-          it.disabled = this.disabled
-          it.readOnly = this.readOnly
-        }
+      if (it.tagName === 'WC-RADIO') {
+        if (it.root) {
+          if (checkAll) {
+            it.disabled = this.disabled
+            it.readOnly = this.readOnly
+          }
 
-        if (it.value === this.props.value) {
-          it.checked = true
-        } else {
-          it.checked = false
+          if (it.value === this.props.value) {
+            it.checked = true
+          } else {
+            it.checked = false
+          }
         }
+      } else {
+        it.remove()
       }
     })
   }

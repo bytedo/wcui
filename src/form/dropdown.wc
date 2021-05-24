@@ -167,13 +167,17 @@ export default class Dropdown {
 
   _updateChildrenStat() {
     Array.from(this.children).forEach(it => {
-      if (it.tagName === 'WC-OPTION' && it.root) {
-        if (it.value === this.props.value) {
-          it.setAttribute('active', '')
-          this.__INPUT__.value = it.label || it.textContent
-        } else {
-          it.removeAttribute('active')
+      if (it.tagName === 'WC-OPTION') {
+        if (it.root) {
+          if (it.value === this.props.value) {
+            it.setAttribute('active', '')
+            this.__INPUT__.value = it.label || it.textContent
+          } else {
+            it.removeAttribute('active')
+          }
         }
+      } else {
+        it.remove()
       }
     })
   }

@@ -26,17 +26,21 @@ export default class CheckboxGroup {
 
   _updateChildrenStat(checkAll) {
     Array.from(this.children).forEach(it => {
-      if (it.tagName === 'WC-CHECKBOX' && it.root) {
-        if (checkAll) {
-          it.disabled = this.disabled
-          it.readOnly = this.readOnly
-        }
+      if (it.tagName === 'WC-CHECKBOX') {
+        if (it.root) {
+          if (checkAll) {
+            it.disabled = this.disabled
+            it.readOnly = this.readOnly
+          }
 
-        if (this.value.includes(it.value)) {
-          it.checked = true
-        } else {
-          it.checked = false
+          if (this.value.includes(it.value)) {
+            it.checked = true
+          } else {
+            it.checked = false
+          }
         }
+      } else {
+        it.remove()
       }
     })
   }

@@ -27,6 +27,11 @@ const INLINE = {
   qlist: /((<blockquote class="md\-quote">)*?)([\+\-\*]|\d+\.) (.*)/ // 引用中的列表
 }
 
+const ATTR_BR_SYMBOL = '⨨☇'
+const NODE_BR_SYMBOL = '⨨⤶'
+const ATTR_BR_EXP = new RegExp(ATTR_BR_SYMBOL, 'g')
+const NODE_BR_EXP = new RegExp(NODE_BR_SYMBOL, 'g')
+
 const Helper = {
   // 是否分割线
   isHr(str) {
@@ -165,20 +170,20 @@ function fixed(str) {
     .replace(/\u2424/g, '\n')
     .replace(TAG_RE, (m, name, attr) => {
       // 标签内的换行, 转为一组特殊字符, 方便后面还原
-      return `<${name + attr.replace(/\n/g, '⨨☇')}>`
+      return `<${name + attr.replace(/\n/g, ATTR_BR_SYMBOL)}>`
     })
     .replace(BLOCK_RE, (m, tag, attr, txt) => {
-      return `<${tag + attr}>${txt.replace(/\n/g, '⨨⤶')}</${tag}>`
+      return `<${tag + attr}>${txt.replace(/\n/g, NODE_BR_SYMBOL)}</${tag}>`
     })
     .replace(CODEBLOCK_RE, (m, lang, txt) => {
       // 还原换行
-      let rollback = txt.replace(/⨨⤶/g, '\n').replace(/⨨☇/g, '\n')
+      let rollback = txt.replace(NODE_BR_EXP, '\n').replace(ATTR_BR_EXP, '\n')
       return '```' + lang + rollback + '```'
     })
     .replace(BLOCK_RE, (m, tag, attr, txt) => {
-      return `<${tag + attr.replace(/(⨨☇)+/g, ' ')}>${txt
-        .replace(/⨨⤶/g, '\n')
-        .replace(/(⨨☇)+/g, ' ')}</${tag}>`
+      return `<${tag + attr.replace(ATTR_BR_EXP, ' ')}>${txt
+        .replace(NODE_BR_EXP, '\n')
+        .replace(ATTR_BR_EXP, ' ')}</${tag}>`
     })
 }
 
