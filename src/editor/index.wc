@@ -37,7 +37,7 @@
   display: flex;
   min-width: 200px;
   min-height: 100px;
-  max-height: 360px;
+  max-height: 640px;
   border-radius: 2px;
 }
 
@@ -108,6 +108,7 @@ table {
   }
 }
 wc-scroll {
+  overflow: hidden;
   flex: 1;
 }
 .editor {
@@ -277,12 +278,16 @@ function renderToolbar(list) {
     .join('')
 }
 
-export default class Neditor {
+export default class Editor {
   props = {
-    toolbar: null,
+    toolbar: '',
     value: '',
     readonly: false,
     disabled: false
+  }
+
+  state = {
+    toolbar: null
   }
 
   __init__() {
@@ -298,26 +303,30 @@ export default class Neditor {
     this.__LINK_BTN__ = this.__LINK__.querySelector('wc-button')
   }
 
+  __stat__(name, val) {
+    var type = typeof val
+
+    if (val === this.props[name]) {
+      return
+    }
+
+    if ((type === name && val) || type !== 'boolean') {
+      this.props[name] = true
+      this.setAttribute(name, '')
+      this.__EDITOR__.removeAttribute('contenteditable')
+    } else {
+      this.props[name] = false
+      this.removeAttribute(name)
+      this.__EDITOR__.setAttribute('contenteditable', true)
+    }
+  }
+
   get readOnly() {
     return this.props.readonly
   }
 
   set readOnly(val) {
-    var type = typeof val
-
-    if (val === this.props.readonly) {
-      return
-    }
-
-    if ((type === 'boolean' && val) || type !== 'boolean') {
-      this.props.readonly = true
-      this.setAttribute('readonly', '')
-      this.__EDITOR__.removeAttribute('contenteditable')
-    } else {
-      this.props.readonly = false
-      this.removeAttribute('readonly')
-      this.__EDITOR__.setAttribute('contenteditable', true)
-    }
+    this.__stat__('readonly', val)
   }
 
   get disabled() {
@@ -325,21 +334,7 @@ export default class Neditor {
   }
 
   set disabled(val) {
-    var type = typeof val
-
-    if (val === this.props.disabled) {
-      return
-    }
-
-    if ((type === 'boolean' && val) || type !== 'boolean') {
-      this.props.disabled = true
-      this.setAttribute('disabled', '')
-      this.__EDITOR__.removeAttribute('contenteditable')
-    } else {
-      this.props.disabled = false
-      this.removeAttribute('disabled')
-      this.__EDITOR__.setAttribute('contenteditable', true)
-    }
+    this.__stat__('disabled', val)
   }
 
   get value() {
@@ -357,18 +352,9 @@ export default class Neditor {
   }
 
   _updateToolbar() {
-    var { toolbar } = this.props
-    var isToolbarShow = true
-    if (Array.isArray(toolbar)) {
-      if (toolbar.length) {
-        this.__TOOLBAR__.innerHTML = renderToolbar(toolbar)
-      } else {
-        isToolbarShow = false
-      }
-    } else {
-      this.__TOOLBAR__.innerHTML = renderToolbar()
-    }
-    this.__TOOLBAR__.style.display = isToolbarShow ? 'flex' : ''
+    var { toolbar } = this.state
+
+    this.__TOOLBAR__.innerHTML = renderToolbar(toolbar)
   }
 
   // 保存选中
@@ -588,11 +574,7 @@ export default class Neditor {
     })
 
     this.__observer = new MutationObserver(_ => {
-      this.dispatchEvent(
-        new CustomEvent('input', {
-          detail: this.value
-        })
-      )
+      this.dispatchEvent(new CustomEvent('input'))
     })
 
     this.__observer.observe(this.__EDITOR__, {
@@ -615,9 +597,11 @@ export default class Neditor {
   watch() {
     switch (name) {
       case 'toolbar':
-        if (val) {
+        if (val === null) {
+          this.state.toolbar = [...DEFAULT_TOOLS]
+        } else if (val) {
           val = val.split(',').map(it => it.trim())
-          this.props.toolbar = val
+          this.state.toolbar = val
         }
         break
 
@@ -631,7 +615,7 @@ export default class Neditor {
         if (k === 'readonly') {
           k = 'readOnly'
         }
-        this[k] = true
+        this[k] = val !== null
         break
 
       default:

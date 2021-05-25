@@ -390,16 +390,22 @@ export default class Scroll {
       $.bind(document, 'mouseup', mouseupFn)
     })
 
-    this.__observer = new ResizeObserver(this._initFn)
-    this.__observer.observe(this.__BOX__)
+    this.__observer1 = new ResizeObserver(this._initFn)
+    this.__observer2 = new MutationObserver(this._initFn)
+    this.__observer1.observe(this.__BOX__)
+    this.__observer2.observe(this, {
+      childList: true,
+      subtree: true,
+      characterData: true
+    })
   }
 
   unmounted() {
-    this.__observer.disconnect()
+    this.__observer1.disconnect()
+    this.__observer2.disconnect()
 
     $.unbind(this.__X__, 'mousedown', this._xBarFn)
     $.unbind(this.__Y__, 'mousedown', this._yBarFn)
-    $.unbind(this, 'ready', this._initFn)
     $.unbind(this.__BOX__, 'scroll', this._scrollFn)
   }
 
