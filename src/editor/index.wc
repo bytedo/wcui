@@ -39,6 +39,7 @@
   min-height: 100px;
   max-height: 640px;
   border-radius: 3px;
+  transition: box-shadow 0.15s linear;
 }
 
 table {
@@ -139,6 +140,17 @@ wc-scroll {
     cursor: not-allowed;
     opacity: 0.6;
   }
+}
+
+:host([readonly]) {
+  .neditor {
+    cursor: default;
+    opacity: 0.8;
+  }
+}
+
+:host(:focus-within) {
+  box-shadow: 0 0 0 2px var(--color-plain-a);
 }
 
 .font-layer,
