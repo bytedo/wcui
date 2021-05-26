@@ -240,12 +240,16 @@ export default class Scroll {
     // 初始化滚动条的位置和长度
     this._initFn = ev => {
       // 需要减去因为隐藏原生滚动条修正的18像素
-      var width = this.offsetWidth
-      var height = this.offsetHeight
-      var scrollWidth = this.__BOX__.scrollWidth - 18
-      var scrollHeight = this.__BOX__.scrollHeight - 18
-      var yBar = (height * (height / scrollHeight)) >> 0 // 滚动条的高度
-      var xBar = (width * (width / scrollWidth)) >> 0 // 滚动条的宽度
+      let width = this.offsetWidth
+      let height = this.offsetHeight
+      let scrollWidth = this.__BOX__.scrollWidth - 18
+      let scrollHeight = this.__BOX__.scrollHeight - 18
+      let yBar = (height * (height / scrollHeight)) >> 0 // 滚动条的高度
+      let xBar = (width * (width / scrollWidth)) >> 0 // 滚动条的宽度
+
+      // 修正由于未知原因,导致父容器产生滚动距离
+      // 导致的内容被遮挡的bug
+      this.__BOX__.parentNode.scrollTop = 0
 
       // 修复因为内容的margin导致滚动条取值不准确的bug
       if (this.__BOX__.clientHeight - height !== 18) {
