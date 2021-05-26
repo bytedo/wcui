@@ -38,10 +38,11 @@
   min-width: 200px;
   min-height: 100px;
   max-height: 640px;
-  border-radius: 2px;
+  border-radius: 3px;
 }
 
 table {
+  width: 100%;
   border-spacing: 0;
   border-collapse: collapse;
 
@@ -53,12 +54,24 @@ table {
   }
   th,
   td {
-    padding: 6px 12px;
-    border: 1px solid var(--color-plain-3);
+    padding: 6px 13px;
+    border: 1px solid var(--color-plain-2);
+    vertical-align: middle;
   }
   th {
     font-weight: bold;
   }
+  tr:nth-child(2n) {
+    background: #fcfdff;
+  }
+}
+
+ul,
+ol {
+  margin-left: 1em;
+}
+a {
+  color: var(--color-teal-1);
 }
 
 .neditor {
@@ -114,7 +127,6 @@ wc-scroll {
 .editor {
   height: 100%;
   padding: 5px 8px;
-  font-size: 14px;
   outline: none;
 
   img {
@@ -429,7 +441,7 @@ export default class Editor {
       }
 
       if (this.props.readonly || this.props.disabled) {
-        return ev.preventDefault()
+        return
       }
 
       while (target.tagName !== 'SPAN') {
@@ -508,7 +520,7 @@ export default class Editor {
     })
 
     // 超链接
-    this.__linkFn = $.bind(this.__LINK_BTN__, 'active', ev => {
+    this.__linkFn = $.bind(this.__LINK_BTN__, 'click', ev => {
       if (LINK_INPUT.value) {
         this.__LINK__.classList.remove('fadein')
         this.__EDITOR__.focus()

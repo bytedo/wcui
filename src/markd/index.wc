@@ -150,7 +150,7 @@ table {
   border-collapse: collapse;
 
   tr {
-    background-color: #fff;
+    background: #fff;
   }
   thead tr {
     background: var(--color-plain-1);
@@ -165,7 +165,7 @@ table {
     font-weight: bold;
   }
   tr:nth-child(2n) {
-    background-color: #fcfdff;
+    background: #fcfdff;
   }
 }
 
