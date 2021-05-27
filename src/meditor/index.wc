@@ -771,25 +771,33 @@ export default class Meditor {
     }
   }
 
+  _stat__(name, val) {
+    var type = typeof val
+    var k = name
+    if (k === 'readonly') {
+      k = 'readOnly'
+    }
+    if (val === this.props[name]) {
+      return
+    }
+
+    if ((type === 'boolean' && val) || type !== 'boolean') {
+      this.props[name] = true
+      this.__EDITOR__[k] = true
+      this.setAttribute(name, '')
+    } else {
+      this.props[name] = false
+      this.__EDITOR__[k] = false
+      this.removeAttribute(name)
+    }
+  }
+
   get readOnly() {
     return this.props.readonly
   }
 
   set readOnly(val) {
-    var type = typeof val
-
-    if (val === this.props.readonly) {
-      return
-    }
-    if ((type === 'boolean' && val) || type !== 'boolean') {
-      this.props.readonly = true
-      this.__EDITOR__.readOnly = true
-      this.setAttribute('readonly', '')
-    } else {
-      this.props.readonly = false
-      this.__EDITOR__.readOnly = false
-      this.removeAttribute('readonly')
-    }
+    this.__stat__('readonly', val)
   }
 
   get disabled() {
@@ -797,20 +805,7 @@ export default class Meditor {
   }
 
   set disabled(val) {
-    var type = typeof val
-
-    if (val === this.props.disabled) {
-      return
-    }
-    if ((type === 'boolean' && val) || type !== 'boolean') {
-      this.props.disabled = true
-      this.__EDITOR__.disabled = true
-      this.setAttribute('disabled', '')
-    } else {
-      this.props.disabled = false
-      this.__EDITOR__.disabled = false
-      this.removeAttribute('disabled')
-    }
+    this.__stat__('disabled', val)
   }
 
   mounted() {
@@ -1052,9 +1047,6 @@ export default class Meditor {
           k = 'readOnly'
         }
         this[k] = val !== null
-        break
-
-      default:
         break
     }
   }

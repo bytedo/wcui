@@ -128,8 +128,8 @@ export default {
     elem.classList.toggle('active', this.props.fullscreen)
   },
   preview(elem) {
-    this.props.preview = !this.props.preview
-    this.__VIEW__.classList.toggle('active', this.props.preview)
-    elem.classList.toggle('active', this.props.preview)
+    this.state.preview = !this.state.preview
+    this.__VIEW__.classList.toggle('active', this.state.preview)
+    elem.classList.toggle('active', this.state.preview)
   }
 }
