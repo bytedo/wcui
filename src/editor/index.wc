@@ -148,6 +148,14 @@ wc-scroll {
     opacity: 0.8;
   }
 }
+:host([readonly]),
+:host([disabled]) {
+  .toolbar {
+    span:hover {
+      background: none;
+    }
+  }
+}
 
 :host(:focus-within) {
   box-shadow: 0 0 0 2px var(--color-plain-a);
@@ -334,7 +342,7 @@ export default class Editor {
       return
     }
 
-    if ((type === name && val) || type !== 'boolean') {
+    if ((type === 'boolean' && val) || type !== 'boolean') {
       this.props[name] = true
       this.setAttribute(name, '')
       this.__EDITOR__.removeAttribute('contenteditable')
@@ -639,10 +647,8 @@ export default class Editor {
         if (k === 'readonly') {
           k = 'readOnly'
         }
+        console.log(k, val)
         this[k] = val !== null
-        break
-
-      default:
         break
     }
   }
