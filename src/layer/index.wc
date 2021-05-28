@@ -5,6 +5,7 @@
     <div class="layer__ctrl noselect"></div>
   </div>
 </template>
+
 <style lang="scss">
 :host {
   display: none;
@@ -114,32 +115,32 @@
       align-items: center;
       width: 300px;
       padding: 0 10px !important;
-      border-radius: 2px;
+      border-radius: 3px;
       font-weight: normal;
-
+      text-indent: 8px;
       --size: 16px;
-      --pad: 0 8px 0 0;
+      color: var(--color-dark-1);
     }
 
     ::slotted(&__toast.style-info) {
-      border: 1px solid var(--color-plain-3);
-      background: var(--color-plain-1);
-      color: var(--color-grey-3);
+      // border: 1px solid var(--color-plain-3);
+      background: var(--color-plain-a);
+      // color: var(--color-grey-3);
     }
     ::slotted(&__toast.style-success) {
-      border: 1px solid #b3e19d;
-      background: #f0f9eb;
-      color: var(--color-green-2);
+      // border: 1px solid #b3e19d;
+      background: var(--color-green-a);
+      // color: var(--color-green-3);
     }
     ::slotted(&__toast.style-warn) {
-      border: 1px solid #faebb4;
-      background: #fffbed;
-      color: var(--color-orange-3);
+      // border: 1px solid #faebb4;
+      background: var(--color-orange-a);
+      // color: var(--color-orange-3);
     }
     ::slotted(&__toast.style-error) {
-      border: 1px solid #f5c4c4;
-      background: #fef0f0;
-      color: var(--color-red-1);
+      // border: 1px solid #f5c4c4;
+      background: var(--color-red-a);
+      // color: var(--color-red-3);
     }
   }
 
@@ -251,14 +252,14 @@ const LANGUAGES = {
     TITLE: 'Dialog',
     BTNS: ['Cancel', 'OK']
   },
-  zh: {
+  cn: {
     TITLE: '提示',
     BTNS: ['取消', '确定']
   }
 }
-LANGUAGES['zh-CN'] = LANGUAGES.zh
+LANGUAGES['zh-CN'] = LANGUAGES.cn
 const lang =
-  LANGUAGES[window.__ENV_LANG__ || navigator.language] || LANGUAGES.en
+  LANGUAGES[window.__ENV_LANG__ || navigator.language] || LANGUAGES.cn
 
 let uniqueInstance = null // 缓存当前打开的alert/confirm/prompt类型的弹窗
 let toastInstance = null // 缓存toast的实例
@@ -574,7 +575,7 @@ export default class Layer {
       this.timer = setTimeout(() => {
         toastInstance = null
         this.close()
-      }, 3000)
+      }, 3000000)
     }
 
     if (this.props.type === 'notify') {
@@ -795,7 +796,7 @@ Object.assign(_layer, {
       content: `
       <div class="layer__content__toast style-${type}">
         <wc-icon is="${ico}"></wc-icon>
-        <span>${txt}</span>
+        <span class="toast-txt">${txt}</span>
       </div>`,
       type: 'toast'
     })

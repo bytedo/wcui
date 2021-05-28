@@ -18,7 +18,7 @@ const BUILDIN2 = /\b(Object|String|Array|Boolean|Number|Function|class)\b/g
 const STR = /(['"`])(.*?)\1/g
 const NUM = /\b(\d+)\b/g
 const FN = /([\.\s])([a-zA-Z$][\da-zA-Z_]*)(\(.*?\))/g
-const CM = /(?=\s)([ ]*\/\/.*)|(^\/\/.*)/g
+const CM = /(?=\s)?([ ]*\/\/.*)|(^\/\/.*)/g
 const INLINE = {
   code: /`([^`]*?[^`\\\s])`/g,
   codeBlock: /^```(.*?)$/gm,
@@ -46,9 +46,13 @@ function parseJs(code) {
     .replace(BUILDIN2, '[type]<strong><em>$1</em></strong>[/type]')
     .replace(NUM, '[num]$1[/num]')
     .replace(STR, (m, q, str) => {
-      return `[str]${q}${str.replace(/\[\/?num\]/g, '')}${q}[/str]`
+      str = str.replace(/\[(\w+)\](.*?)\[\/\1\]/g, '$2')
+      return `[str]${q}${str}${q}[/str]`
     })
-    .replace(CM, '[cm]$1[/cm]')
+    .replace(CM, (m, str) => {
+      str = str.replace(/\[(\w+)\](.*?)\[\/\1\]/g, '$2')
+      return `[cm]${str}[/cm]`
+    })
 }
 
 function rebuild(code) {
