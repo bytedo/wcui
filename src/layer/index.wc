@@ -575,7 +575,7 @@ export default class Layer {
       this.timer = setTimeout(() => {
         toastInstance = null
         this.close()
-      }, 3000000)
+      }, 3000)
     }
 
     if (this.props.type === 'notify') {
@@ -743,7 +743,7 @@ Object.assign(_layer, {
     }
 
     if (!intercept) {
-      intercept = function(val, done) {
+      intercept = function (val, done) {
         if (val) {
           done()
         }
