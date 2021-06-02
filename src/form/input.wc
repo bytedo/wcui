@@ -508,7 +508,7 @@ export default class Input {
 
         // 并发拦截 intercept
         if (lazy && now - this.stamp < lazy) {
-          this.dispatchEvent(new CustomEvent('intercept'))
+          // this.dispatchEvent(new CustomEvent('intercept'))
           return
         }
 
