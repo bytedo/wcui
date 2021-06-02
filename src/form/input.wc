@@ -488,7 +488,6 @@ export default class Input {
     this._handleSubmit = $.catch(this.__INPUT__, 'keydown', ev => {
       let { minlength, lazy } = this.props
       let val = this.value
-      let now = Date.now()
 
       if (this.disabled || this.readOnly) {
         return
@@ -500,13 +499,16 @@ export default class Input {
 
       // 回车触发submit事件
       if (ev.keyCode === 13) {
+        ev.preventDefault()
+        let now = Date.now()
         // 如果是输入建议存在,则第1次回车的时候, 不触发提交
         if (this.state.mvidx !== null) {
           return this._fetchSelect(this.state.mvidx, ev)
         }
 
-        // 并发拦截
+        // 并发拦截 intercept
         if (lazy && now - this.stamp < lazy) {
+          this.dispatchEvent(new CustomEvent('intercept'))
           return
         }
 
@@ -557,9 +559,9 @@ export default class Input {
           .join('')
         this.__LIST__.firstElementChild.firstElementChild.innerHTML = html
         this.__LIST__.classList.toggle('show', true)
-        this.__LIST__.style.cssText = `left:${x}px;top:${y +
-          height +
-          5}px;width:${width}px;`
+        this.__LIST__.style.cssText = `left:${x}px;top:${
+          y + height + 5
+        }px;width:${width}px;`
       } else {
         this.__LIST__.classList.toggle('show', false)
       }
