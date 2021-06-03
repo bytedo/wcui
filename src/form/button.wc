@@ -341,19 +341,24 @@ export default class Button {
     this.stamp = 0
 
     // 阻止事件冒泡, 避免用户自己绑定click事件不受这2个值的限制
-    this._handleClick = $.catch(this, 'click', ev => {
-      var { loading, disabled, lazy } = this.props
-      var now = Date.now()
+    this._handleClick = $.bind(
+      this,
+      'click',
+      ev => {
+        var { loading, disabled, lazy } = this.props
+        var now = Date.now()
 
-      if (loading || disabled) {
-        return ev.preventDefault()
-      }
-      // 并发拦截
-      if (lazy && now - this.stamp < lazy) {
-        return ev.preventDefault()
-      }
-      this.stamp = now
-    })
+        if (loading || disabled) {
+          return ev.stopPropagation()
+        }
+        // 并发拦截
+        if (lazy && now - this.stamp < lazy) {
+          return ev.stopPropagation()
+        }
+        this.stamp = now
+      },
+      true
+    )
   }
 
   unmounted() {
