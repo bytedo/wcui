@@ -559,9 +559,9 @@ export default class Input {
           .join('')
         this.__LIST__.firstElementChild.firstElementChild.innerHTML = html
         this.__LIST__.classList.toggle('show', true)
-        this.__LIST__.style.cssText = `left:${x}px;top:${
-          y + height + 5
-        }px;width:${width}px;`
+        this.__LIST__.style.cssText = `left:${x}px;top:${y +
+          height +
+          5}px;width:${width}px;`
       } else {
         this.__LIST__.classList.toggle('show', false)
       }
