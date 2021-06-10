@@ -715,7 +715,7 @@ function _layer(opt) {
 }
 
 Object.assign(_layer, {
-  alert(content, title = lang.TITLE, btns = false) {
+  alert(content, title = lang.TITLE, btns) {
     if (typeof title === 'object') {
       btns = title
       title = lang.TITLE
@@ -728,7 +728,7 @@ Object.assign(_layer, {
       btns
     })
   },
-  confirm(content, title = lang.TITLE, btns = false) {
+  confirm(content, title = lang.TITLE, btns) {
     if (typeof title === 'object') {
       btns = title
       title = lang.TITLE
