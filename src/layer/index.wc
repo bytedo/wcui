@@ -336,13 +336,13 @@ export default class Layer {
     switch (val) {
       case 'alert':
         while (btns.length > 1) {
-          btns.splice(0, 1)
+          btns.shift()
         }
         break
       case 'confirm':
       case 'prompt':
         while (btns.length > 2) {
-          btns.splice(0, 1)
+          btns.shift()
         }
         break
       case 'toast':
@@ -715,17 +715,22 @@ function _layer(opt) {
 }
 
 Object.assign(_layer, {
-  alert(content, title = lang.TITLE) {
+  alert(content, title = lang.TITLE, btns = false) {
+    if (typeof title === 'object') {
+      btns = title
+      title = lang.TITLE
+    }
     return this({
       type: 'alert',
       title,
       content,
-      mask: true
+      mask: true,
+      btns
     })
   },
-  confirm(content, title = lang.TITLE, intercept) {
-    if (typeof title === 'function') {
-      intercept = title
+  confirm(content, title = lang.TITLE, btns = false) {
+    if (typeof title === 'object') {
+      btns = title
       title = lang.TITLE
     }
     return this({
@@ -733,7 +738,7 @@ Object.assign(_layer, {
       title,
       content,
       mask: true,
-      intercept
+      btns
     })
   },
   prompt(title = lang.TITLE, defaultValue = '', intercept) {
