@@ -45,25 +45,25 @@ code, pre, samp {font-family: Menlo, Monaco, Consolas, 'Courier New', monospace;
   --color-teal-2: rgb(26, 188, 156);
   --color-teal-3: rgb(22, 160, 133);
   /* success */
-  --color-green-a: rgba(88, 214, 141, 0.35);
-  --color-green-1: rgb(88, 214, 141);
-  --color-green-2: rgb(46, 204, 113);
-  --color-green-3: rgb(39, 173, 96);
+  --color-green-a: rgba(70, 221, 126, 0.35);
+  --color-green-1: rgb(70, 221, 126);
+  --color-green-2: rgb(47, 208, 105);
+  --color-green-3: rgb(26, 196, 88);
   /* info */
   --color-blue-a: rgba(100, 181, 246, 0.35);
   --color-blue-1: rgb(100, 181, 246);
   --color-blue-2: rgb(66, 165, 245);
   --color-blue-3: rgb(33, 150, 243);
   /* danger */
-  --color-red-a: rgba(255, 107, 129, 0.35);
-  --color-red-1: rgb(255, 107, 129);
-  --color-red-2: rgb(255, 71, 87);
-  --color-red-3: rgb(230, 52, 67);
+  --color-red-a: rgba(252, 118, 97, 0.35);
+  --color-red-1: rgb(252, 118, 97);
+  --color-red-2: rgb(255, 95, 69);
+  --color-red-3: rgb(243, 62, 34);
   /* warning */
-  --color-orange-a: rgba(244, 211, 19, 0.35);
-  --color-orange-1: rgb(244, 211, 19);
-  --color-orange-2: rgb(241, 196, 15);
-  --color-orange-3: rgb(205, 167, 13);
+  --color-orange-a: rgba(255, 211, 66, 0.35);
+  --color-orange-1: rgb(255, 211, 66);
+  --color-orange-2: rgb(254, 196, 1);
+  --color-orange-3: rgb(245, 189, 7);
   /* default1 */
   --color-plain-a: rgba(150, 204, 248, 0.35);
   --color-plain-1: rgb(242, 245, 252);
