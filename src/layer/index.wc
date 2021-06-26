@@ -542,6 +542,9 @@ export default class Layer {
 
     if (this.props.background) {
       _style += `background: ${this.props.background};`
+      if (this.props.background === 'transparent') {
+        _style += 'box-shadow:none;'
+      }
     }
     if (this.props.radius || this.props.radius === 0) {
       _style += `border-radius: ${this.props.radius};`
